@@ -2,6 +2,7 @@
 #include "LayerExDraw.hpp"
 #include "TVPStorage.h"
 #include "TVPFont.h"
+#include "Platform.h"
 #include <vector>
 #include <stdio.h>
 
@@ -68,40 +69,61 @@ void
 GdiPlus::addPrivateFont(const tjs_char *fontFileName)
 {
 	ttstr filename = TVPGetPlacedPath(fontFileName);
+    tTJSBinaryStream* in = NULL;
 	if (filename.length()) {
-        tTJSBinaryStream* in = TVPCreateBinaryStreamForRead(filename, TJS_W(""));
-        if (in)
-        {
-            tjs_uint8* fileData = new tjs_uint8[in->GetSize()];
-            in->ReadBuffer(fileData, in->GetSize());
-			// 读取fontdata
-            BLFontDataCore bl_font_data;
-            blFontDataInit(&bl_font_data);
-            BLResult stat = blFontDataCreateFromData(&bl_font_data, fileData, in->GetSize(), NULL,
-                                                  NULL);
-            delete[] fileData;
-            delete in;
-			if (stat != BL_SUCCESS)
-			{
-                blFontDataDestroy(&bl_font_data);
-				TVPThrowExceptionMessage(TJS_W("blend2d cannot load:%1"), fontFileName);
-			}
-            bl_font_data_vec.push_back(bl_font_data);
-			// 加入face
-            for (int i = 0; i < blFontDataGetFaceCount(&bl_font_data); i++)
-            {
-                BLFontFace ffc;
-                stat = ffc.createFromData(bl_font_data, i);
-				if (stat != BL_SUCCESS)
-				{
-                    bl_font_face_vec.push_back(ffc);
-                    BLString name = ffc.familyName();
-                    bl_font_face_name.push_back(ttstr(name.data(), name.size()));
-				}
-            }
-            return;
-        }
+        in = TVPCreateBinaryStreamForRead(filename, TJS_W(""));
 	}
+    else
+    {
+        std::vector<ttstr> ret;
+        TVPGetAllFontList(ret);
+        for (auto ftN : ret)
+        {
+            if (ftN == ttstr(fontFileName))
+            {
+                in = TVPCreateFontStream(fontFileName);
+                if (in)
+                    break;
+            }
+        }
+
+        // 实在没有就强行换字体吧
+        if (!in)
+        {
+            in = GetResourceStream("DroidSansFallback.ttf");
+        }
+    }
+    if (in)
+    {
+        tjs_uint8* fileData = new tjs_uint8[in->GetSize()];
+        in->ReadBuffer(fileData, in->GetSize());
+        // 读取fontdata
+        BLFontDataCore bl_font_data;
+        blFontDataInit(&bl_font_data);
+        BLResult stat =
+            blFontDataCreateFromData(&bl_font_data, fileData, in->GetSize(), NULL, NULL);
+        //delete[] fileData;
+        delete in;
+        if (stat != BL_SUCCESS)
+        {
+            blFontDataDestroy(&bl_font_data);
+            TVPThrowExceptionMessage(TJS_W("blend2d cannot load:%1"), fontFileName);
+        }
+        bl_font_data_vec.push_back(bl_font_data);
+        // 加入face
+        for (int i = 0; i < blFontDataGetFaceCount(&bl_font_data); i++)
+        {
+            BLFontFace ffc;
+            stat = ffc.createFromData(bl_font_data, i);
+            if (stat == BL_SUCCESS)
+            {
+                bl_font_face_vec.push_back(ffc);
+                BLString name = ffc.familyName();
+                bl_font_face_name.push_back(ttstr(name.data(), name.size()));
+            }
+        }
+        return;
+    }
 	TVPThrowExceptionMessage(TJS_W("cannot open:%1"), fontFileName);
 }
 
@@ -171,6 +193,7 @@ FontInfo::FontInfo(const tjs_char *familyName, tjs_real emSize, tjs_int style) :
  */
 FontInfo::FontInfo(const FontInfo &orig)
 {
+    familyName = orig.familyName;
 	emSize = orig.emSize;
 	style = orig.style;
 }
@@ -208,6 +231,11 @@ FontInfo::setFamilyName(const tjs_char *familyName)
 	{
 		this->familyName = familyName;
 	}
+
+    if (getBLFont().empty())
+    {
+        GdiPlus::addPrivateFont(familyName);
+    }
 }
 
 void
@@ -322,6 +350,8 @@ BLFont FontInfo::getBLFont() const
             break;
         }
     }
+    if (_fontFace.empty() && bl_font_face_vec.size() > 0)
+        _fontFace = bl_font_face_vec.at(0);
     if (!_fontFace.empty())
     {
         _font.createFromFace(_fontFace, emSize);
@@ -1494,6 +1524,7 @@ LayerExDraw::LayerExDraw(DispatchT obj)
 {
     viewTransform.reset();
     transform.reset();
+    calcTransform.reset();
 }
 
 /**
@@ -1528,9 +1559,7 @@ LayerExDraw::reset()
         bitmap->createFromData(width, height, BL_FORMAT_PRGB32, buffer, pitch);
         context = new BLContext;
         context->setCompOp(BL_COMP_OP_SRC_OVER);
-        calcTransform = BLMatrix2D::makeTranslation(250, 0);
-        context->setTransform(calcTransform);
-        
+
         //cv::Mat rgba(height, width, CV_8UC4, buffer, pitch);
         //std::string title("orgImg");
         //cvName = std::to_string(cnt);
@@ -2226,9 +2255,8 @@ LayerExDraw::drawPathString(const FontInfo *font, const Appearance *app, tjs_rea
     BLGlyphBuffer gb;
     gb.setUtf16Text(reinterpret_cast<const uint16_t*>(text), TJS_strlen(text));
     blFont.shape(gb);
-    
-    BLMatrix2D matrix = BLMatrix2D::makeTranslation(x, y);
-    blFont.getGlyphRunOutlines(gb.glyphRun(), matrix, path);
+    blFont.getGlyphRunOutlines(gb.glyphRun(), BLMatrix2D::makeTranslation(x, y + font->getEmSize()),
+                               path);
     return _drawPath(app, &path);
 }
 
