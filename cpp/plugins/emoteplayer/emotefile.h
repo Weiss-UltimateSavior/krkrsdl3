@@ -75,6 +75,7 @@ public:
     double timeOffset = 0.0;
     int64_t mask = 0;
     int64_t bm = 0;
+    int64_t color = 0;
     std::string src;
     bool haszcc = false;
     std::array<double, 2> zcc_c = {0}; // 缩放曲线

@@ -51,7 +51,6 @@ elseif(LINUX)
     )
 elseif(WINDOWS)
     add_definitions(
-        -DPROTOBUF_USE_DLLS=1
         -D_KRKRSDL3_WINDOWS=1
         -D_KRKRSDL3_GL=1
         -D_KRKRSDL3_CMD=1

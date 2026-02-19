@@ -137,7 +137,7 @@ SeparateLayerAdaptor::SeparateLayerAdaptor(iTJSDispatch2* targetLayer)
     tTJSVariant kag(ResourceManager::_kagWindow);
     tTJSVariant layer(targetLayer);
     tTJSVariant* params[] = {&kag, &layer};
-    if ((TJS_FAILED(_this->Construct(2, params, this)) < 0))
+    if (TJS_FAILED(_this->Construct(2, params, this)))
         TVPThrowExceptionMessage(TVPSpecifyLayer);
     // 获取父类实例
     tTJSNI_BaseLayer* ths = NULL;
@@ -513,7 +513,7 @@ void EmotePlayer::progress(tjs_real mstime)
                 _allplaying = false;
             }
             // 对于motion限制最后时间并结束
-            if (_currentfile->isMotion && clockPassed > _currmotion->syncTime)
+            if (_currentfile->isMotion && _currmotion->loopTime < 0 && clockPassed > _currmotion->syncTime)
             {
                 clockPassed = _currmotion->syncTime;
                 _animating = false;

@@ -424,6 +424,8 @@ namespace emoteplayer
             uniform vec2 viewportSize;
             uniform sampler2D maskTexture;
             uniform float opa = 1.0;
+            uniform bool enableColor = false;
+            uniform vec4 uniformColor;
             void main()
             {
                 vec4 maskColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -436,6 +438,10 @@ namespace emoteplayer
                 if (enableMask && maskColor.a < 0.5) {
                     discard;
                 } else {
+                    if(enableColor)
+                    {
+                        color = vec4(uniformColor.xyz, uniformColor.a * color.a);
+                    }
                     color.a = color.a * opa;
                     FragColor = vec4(color.rgba);
                 }
@@ -541,6 +547,8 @@ namespace emoteplayer
             uniform mediump vec2 viewportSize;
             uniform sampler2D maskTexture;
             uniform mediump float opa;
+            uniform bool enableColor;
+            uniform mediump vec4 uniformColor;
             void main()
             {
                 mediump vec4 maskColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -553,6 +561,10 @@ namespace emoteplayer
                 if (enableMask && maskColor.a < 0.5) {
                     discard;
                 } else {
+                    if(enableColor)
+                    {
+                        color = vec4(uniformColor.xyz, uniformColor.a * color.a);
+                    }
                     color.a = color.a * opa;
                     FragColor = vec4(color.rgba);
                 }
@@ -905,11 +917,18 @@ namespace emoteplayer
             {
                 filePtr->parseNumber(bm, it->second);
             }
+            // color
+            it = _rootData.find("color");
+            if (it != _rootData.end())
+            {
+                filePtr->parseNumber(color, it->second);
+            }
             // opa
             it = _rootData.find("opa");
             if (it != _rootData.end())
             {
-                filePtr->parseReal(opa, it->second);
+                if (filePtr->parseReal(opa, it->second) && filePtr->isMotion)
+                    opa = opa / 255;
             }
             // mesh
             auto it = _rootData.find("mesh");
@@ -1233,7 +1252,9 @@ namespace emoteplayer
         // 参数化时可能改变
         currTick = tick;
         // 对于motion，增加终结机制, 即无法越过selfSyncTime
-        if (_filePtr->isMotion && currTick > _rootmotion->selfSyncTime)
+        if (_filePtr->isMotion && currTick > _rootmotion->selfSyncTime && frameList.size() > 1 &&
+            frameList.at(frameList.size() - 2)->type == 2 &&
+            frameList.at(frameList.size() - 1)->type == 0)
             currTick = _rootmotion->selfSyncTime;
         // 再来一个非时间戳节点, 采用时间永驻机制
         if (_filePtr->isMotion && frameList.size() == 2 && frameList.at(0)->type == 2 &&
@@ -1463,6 +1484,7 @@ namespace emoteplayer
                     emoteRender emt = renderMethod.back();
                     renderMethod.pop_back();
                     emt.type = 3;
+                    emt.opa *= currOpa;
 
                     // 更新矩阵
                     emt.matTrans = emt.matTrans * model;
@@ -1481,6 +1503,7 @@ namespace emoteplayer
                     // 构造渲染方法结构
                     emoteRender emt;
                     emt.type = 3;
+                    emt.opa = currOpa;
 
                     // 如果父类没有网格变形，则进行矩阵解耦并外加合并
                     if (renderMethod.size() > 1 && renderMethod.back().type == 2)
@@ -1673,7 +1696,7 @@ namespace emoteplayer
             SDL_Log("render:%s failed!!!", label.c_str());
             return;
         }
-        
+
         //static tjs_uint8* enoughData = new tjs_uint8[lim.width * lim.height * 4];
         //static GLfloat* enoughDepthData = new GLfloat[lim.width * lim.height];
         //if (frame != nullptr && strcmp(frame->src.c_str(), "src/tex/0066") == 0)
@@ -1695,6 +1718,8 @@ namespace emoteplayer
         //}
 
         // bm
+        bool enableColor = false;
+        float uniformColor[4] = {0};
         switch (currbm)
         {
             case 0:
@@ -1718,6 +1743,20 @@ namespace emoteplayer
             case 4:
             {
                 glBlendFuncSeparate(GL_DST_COLOR, GL_ONE, GL_ZERO, GL_ONE);
+                glBlendEquation(GL_FUNC_ADD);
+                break;
+            }
+            case 21:
+            {
+                enableColor = true;
+                if (frame)
+                {
+                    uniformColor[0] = (frame->color & 0xFF) / 255;
+                    uniformColor[1] = ((frame->color >> 8) & 0xFF) / 255;
+                    uniformColor[2] = ((frame->color >> 16) & 0xFF) / 255;
+                    uniformColor[3] = ((frame->color >> 24) & 0xFF) / 255;
+                }
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glBlendEquation(GL_FUNC_ADD);
                 break;
             }
@@ -1763,6 +1802,7 @@ namespace emoteplayer
             glBindTexture(GL_TEXTURE_2D, selftexture);
             glUniform1i(glGetUniformLocation(emotenodeprogram, "texture1"), 0);
             glUniform1i(glGetUniformLocation(emotenodeprogram, "enableMask"), true);
+            glUniform1i(glGetUniformLocation(emotenodeprogram, "enableColor"), false);
             glUniform2f(glGetUniformLocation(emotenodeprogram, "viewportSize"), lim.width, lim.height);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, exTex);
@@ -1775,6 +1815,9 @@ namespace emoteplayer
             glBindTexture(GL_TEXTURE_2D, selftexture);
             glUniform1i(glGetUniformLocation(emotenodeprogram, "texture1"), 0);
             glUniform1i(glGetUniformLocation(emotenodeprogram, "enableMask"), false);
+            glUniform1i(glGetUniformLocation(emotenodeprogram, "enableColor"), enableColor);
+            glUniform4f(glGetUniformLocation(emotenodeprogram, "uniformColor"), uniformColor[0],
+                        uniformColor[1], uniformColor[2], uniformColor[3]);
             glDrawArrays(GL_PATCHES, 0, 16);
         }
         
@@ -1965,60 +2008,44 @@ namespace emoteplayer
                 renderMethod.at(0).hasStencil = false;
                 renderMethod.at(0).layerNode.clear();
             }
-            ch->progress(tick, renderMethod, lim);
+            if (loopTime < 0)
+                ch->progress(tick, renderMethod, lim);
+            else if (loopTime == 0)
+                ch->progress(std::fmod(tick, lastTime), renderMethod, lim);
+            else
+                ch->progress(std::fmod(tick, loopTime), renderMethod, lim);
         }
     }
     void emotemotion::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint exTex)
     {
-        std::vector<emotenode*> result, resultEx;
-        if (_filePtr->isMotion)
+        std::vector<emotenode*> result;
+        // 先展开所有的motion情形
+        std::vector<emotenode*> stack(nodeList.begin(), nodeList.end());
+        while (!stack.empty())
         {
-            // motion则是先处理非motion节点，然后再处理motion节点
-            for (auto node_idx = nodeList.rbegin(); node_idx != nodeList.rend(); ++node_idx)
-            {
-                if ((*node_idx)->emot == nullptr)
-                    result.push_back(*node_idx);
-                else
-                    resultEx.push_back(*node_idx);
-            }
-        }
-        else
-        {
-            // 先展开所有的motion情形
-            std::vector<emotenode*> stack(nodeList.begin(), nodeList.end());
-            while (!stack.empty())
-            {
-                emotenode* current = stack.back();
-                stack.pop_back();
+            emotenode* current = stack.back();
+            stack.pop_back();
 
-                if (current->emot == nullptr)
+            if (current->emot == nullptr)
+            {
+                result.push_back(current);
+            }
+            else
+            {
+                for (auto it = current->emot->nodeList.begin();
+                        it != current->emot->nodeList.end(); ++it)
                 {
-                    result.push_back(current);
-                }
-                else
-                {
-                    for (auto it = current->emot->nodeList.begin();
-                         it != current->emot->nodeList.end(); ++it)
-                    {
-                        stack.push_back(*it);
-                    }
+                    stack.push_back(*it);
                 }
             }
-
-            // 再根据lastZ进行校准
-            std::stable_sort(result.begin(), result.end(), [](emotenode* a, emotenode* b)
-                             { return a->getCurrentRenderZ() < b->getCurrentRenderZ(); });
         }
+
+        // 再根据lastZ进行校准
+        std::stable_sort(result.begin(), result.end(), [](emotenode* a, emotenode* b)
+                            { return a->getCurrentRenderZ() < b->getCurrentRenderZ(); });
 
         // 遍历绘制节点
         for (auto currNode : result)
-        {
-            if (currNode != nullptr)
-            {
-                currNode->draw(targetFbo, lim, exFbo, exTex);
-            }
-        }
-        for (auto currNode : resultEx)
         {
             if (currNode != nullptr)
             {
