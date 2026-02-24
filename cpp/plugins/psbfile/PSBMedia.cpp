@@ -1,5 +1,3 @@
-#pragma once
-
 #include "PSBMedia.h"
 #include "UtilStreams.h"
 #include "PSBFile.h"

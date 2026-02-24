@@ -18,8 +18,8 @@ extern "C"
 
 NS_KRMOVIE_BEGIN
 
-// AV sync options
-enum AVSync
+    // AV sync options
+    enum AVSync
 {
     SYNC_DISCON = 0,
     SYNC_RESAMPLE
@@ -31,41 +31,41 @@ public:
     CVideoPlayerAudio(CDVDClock* pClock, CDVDMessageQueue& parent);
     virtual ~CVideoPlayerAudio();
 
-    bool OpenStream(CDVDStreamInfo& hints);
-    void CloseStream(bool bWaitForBuffers);
+    bool OpenStream(CDVDStreamInfo& hints) override;
+    void CloseStream(bool bWaitForBuffers) override;
 
-    void SetSpeed(int speed);
-    void Flush(bool sync);
+    void SetSpeed(int speed) override;
+    void Flush(bool sync) override;
 
-    // waits until all available data has been rendered
-    bool AcceptsData();
-    bool HasData() const { return m_messageQueue.GetDataSize() > 0; }
-    int GetLevel() { return m_messageQueue.GetLevel(); }
-    bool IsInited() const { return m_messageQueue.IsInited(); }
-    void SendMessage(CDVDMsg* pMsg, int priority = 0) { m_messageQueue.Put(pMsg, priority); }
-    void FlushMessages() { m_messageQueue.Flush(); }
-    float GetDynamicRangeAmplification() const { return 0.0f; }
+           // waits until all available data has been rendered
+    bool AcceptsData() override;
+    bool HasData() const  override{ return m_messageQueue.GetDataSize() > 0; }
+    int GetLevel()  override{ return m_messageQueue.GetLevel(); }
+    bool IsInited() const  override{ return m_messageQueue.IsInited(); }
+    void SendMessage(CDVDMsg* pMsg, int priority = 0) override{ m_messageQueue.Put(pMsg, priority); }
+    void FlushMessages()  override{ m_messageQueue.Flush(); }
+    float GetDynamicRangeAmplification() const override { return 0.0f; }
 
-    std::string GetPlayerInfo();
-    int GetAudioBitrate();
-    int GetAudioChannels();
+    std::string GetPlayerInfo() override;
+    int GetAudioBitrate() override;
+    int GetAudioChannels() override;
 
-    // holds stream information for current playing stream
+           // holds stream information for current playing stream
     CDVDStreamInfo m_streaminfo;
 
-    double GetCurrentPts()
+    double GetCurrentPts() override
     {
         std::unique_lock<std::recursive_mutex> lock(m_info_section);
         return m_info.pts;
     }
 
-    bool IsStalled() const { return m_stalled; }
+    bool IsStalled() const override { return m_stalled; }
     bool IsPassthrough() override;
-    iTVPSoundBuffer* GetSoundBuffer() { return m_soundDevice; }
+    iTVPSoundBuffer* GetSoundBuffer() override { return m_soundDevice; }
 
 protected:
-    virtual void OnExit();
-    virtual void Execute();
+    virtual void OnExit() override;
+    virtual void Execute() override;
 
     void UpdatePlayerInfo();
     void OpenStream(CDVDStreamInfo& hints, CDVDAudioCodec* codec);
@@ -90,7 +90,7 @@ protected:
 
     bool ProcessDecoderOutput(DVDAudioFrame& audioframe);
 
-    // SYNC_DISCON, SYNC_SKIPDUP, SYNC_RESAMPLE
+           // SYNC_DISCON, SYNC_SKIPDUP, SYNC_RESAMPLE
     int m_synctype;
     int m_setsynctype;
     int m_prevsynctype; // so we can print to the log

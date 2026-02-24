@@ -18,7 +18,6 @@
 #include "tvpgl.h"
 #include <float.h>
 
-#define __cdecl
 #define TVP_REVRGB(v) ((v & 0xFF00FF00) | ((v >> 16) & 0xFF) | ((v & 0xFF) << 16))
 
 extern void TVPGL_C_Init();

@@ -291,7 +291,7 @@ TJS_END_NATIVE_METHOD_DECL(/*func. name*/getTime)
 //----------------------------------------------------------------------
 TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/getTimezoneOffset) // static
 {
-	if(result) result->CopyRef(tTJSVariant((tjs_int)(TJS_timezone/60)));
+        if(result) result->CopyRef(tTJSVariant((tjs_int)(TJS_timezone()/60)));
 
 	return TJS_S_OK;
 }

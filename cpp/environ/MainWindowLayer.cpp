@@ -136,7 +136,6 @@ public:
     }
 
     virtual ~TVPWindowLayer() {
-        SDL_Log("Window diy id:%x", this);
         if (_lastWindowLayer == this)
             _lastWindowLayer = _prevWindow;
         if (_nextWindow)
@@ -174,7 +173,6 @@ public:
 
     bool Init()
     {
-        SDL_Log("New Window id:%x", this);
         {
             if (pSprite == NULL)
             {
@@ -195,32 +193,32 @@ public:
         {
             std::lock_guard<std::mutex> lock(sdlCallbackMtx);
             sdl_mouseDownCallback.insert(std::pair<SDL_Sprite*, callbackOnMouseDownEvent>(pSprite, [](tTVPMouseButton mouseId, int x, int y) {
-                        if(_currentWindowLayer != NULL)
-                            _currentWindowLayer->onMouseDownEvent(mouseId, x,
-                                                                  y);
-                }));
+                if(_currentWindowLayer != NULL)
+                    _currentWindowLayer->onMouseDownEvent(mouseId, x,
+                                                          y);
+            }));
             sdl_mouseUpCallback.insert(std::pair<SDL_Sprite*, callbackOnMouseUpEvent>(pSprite, [](tTVPMouseButton mouseId, int x, int y) {
-                        if(_currentWindowLayer != NULL)
-                            _currentWindowLayer->onMouseUpEvent(mouseId, x, y);
-                }));
+                if(_currentWindowLayer != NULL)
+                    _currentWindowLayer->onMouseUpEvent(mouseId, x, y);
+            }));
             sdl_mouseMoveCallback.insert(std::pair<SDL_Sprite*, callbackOnMouseMoveEvent>(pSprite, [](int x, int y) {
-                        if(_currentWindowLayer != NULL)
-                            _currentWindowLayer->onMouseMoveEvent(x, y);
-                }));
+                if(_currentWindowLayer != NULL)
+                    _currentWindowLayer->onMouseMoveEvent(x, y);
+            }));
             sdl_mouseScrollCallback.insert(std::pair<SDL_Sprite*, callbackOnMouseScroll>(pSprite, [](int dx, int dy, int x, int y) {
-                        if(_currentWindowLayer != NULL)
-                            _currentWindowLayer->onMouseScroll(dx, dy, x, y);
-                }));
+                if(_currentWindowLayer != NULL)
+                    _currentWindowLayer->onMouseScroll(dx, dy, x, y);
+            }));
             sdl_keyDownCallback.insert(std::pair<SDL_Sprite*, callbackOnKeyDownUpEvent>(pSprite, [](int vk)
-                {
-                    if (_currentWindowLayer != NULL)
-                        _currentWindowLayer->onKeyDownEvent(vk);
-                }));
+                                                                                        {
+                                                                                            if (_currentWindowLayer != NULL)
+                                                                                                _currentWindowLayer->onKeyDownEvent(vk);
+                                                                                        }));
             sdl_keyUpCallback.insert(std::pair<SDL_Sprite*, callbackOnKeyDownUpEvent>(pSprite, [](int vk)
-                {
-                    if (_currentWindowLayer != NULL)
-                        _currentWindowLayer->onKeyUpEvent(vk);
-                }));
+                                                                                      {
+                                                                                          if (_currentWindowLayer != NULL)
+                                                                                              _currentWindowLayer->onKeyUpEvent(vk);
+                                                                                      }));
         }
 
         return true;
@@ -234,40 +232,40 @@ public:
 
     void onMouseDownEvent(tTVPMouseButton mouseId ,int x, int y) {
         switch (mouseId) {
-        case mbRight:
-            _mouseBtn = mbRight;
-            onMouseDown(x, y);
-            break;
-        case mbMiddle:
-            _mouseBtn = mbMiddle;
-            onMouseDown(x, y);
-            break;
-        case mbLeft:
-            _mouseBtn = mbLeft;
-            onMouseDown(x, y);
-            break;
-        default:
-            break;
+            case mbRight:
+                _mouseBtn = mbRight;
+                onMouseDown(x, y);
+                break;
+            case mbMiddle:
+                _mouseBtn = mbMiddle;
+                onMouseDown(x, y);
+                break;
+            case mbLeft:
+                _mouseBtn = mbLeft;
+                onMouseDown(x, y);
+                break;
+            default:
+                break;
         }
     }
 
     void onMouseUpEvent(tTVPMouseButton mouseId, int x, int y) {
         switch (mouseId) {
-        case mbRight:
-            _mouseBtn = mbRight;
-            onMouseUp(x, y);
-            break;
-        case mbMiddle:
-            _mouseBtn = mbMiddle;
-            onMouseUp(x, y);
-            break;
-        case mbLeft:
-            _mouseBtn = mbLeft;
-            OnMouseClick(x, y);
-            onMouseUp(x, y);
-            break;
-        default:
-            break;
+            case mbRight:
+                _mouseBtn = mbRight;
+                onMouseUp(x, y);
+                break;
+            case mbMiddle:
+                _mouseBtn = mbMiddle;
+                onMouseUp(x, y);
+                break;
+            case mbLeft:
+                _mouseBtn = mbLeft;
+                OnMouseClick(x, y);
+                onMouseUp(x, y);
+                break;
+            default:
+                break;
         }
     }
 
@@ -279,8 +277,8 @@ public:
 
     void onMouseScroll(int dx, int dy, int x, int y) {
         TJSNativeInstance->OnMouseWheel(TVPGetCurrentShiftKeyState(),
-            dy > 0 ? -120 : 120, x,
-            y);
+                                        dy > 0 ? -120 : 120, x,
+                                        y);
     }
 
     void onMouseDown(int x, int y) {
@@ -302,11 +300,11 @@ public:
 
     void onMouseMove(int x, int y) {
         _LastMouseX = x,
-        _LastMouseY = y;
+            _LastMouseY = y;
         TVPPostInputEvent(new tTVPOnMouseMoveInputEvent(
-            TJSNativeInstance, _LastMouseX, _LastMouseY,
-            TVPGetCurrentShiftKeyState()),
-            TVP_EPT_DISCARDABLE);
+                              TJSNativeInstance, _LastMouseX, _LastMouseY,
+                              TVPGetCurrentShiftKeyState()),
+                          TVP_EPT_DISCARDABLE);
         int pos = (_LastMouseY << 16) + _LastMouseX;
         TVPPushEnvironNoise(&pos, sizeof(pos));
     }
@@ -350,23 +348,23 @@ public:
     tjs_int _textInputPosY;
 
     virtual void SetAttentionPoint(tjs_int left, tjs_int top,
-        const struct tTVPFont* font) override {
+                                   const struct tTVPFont* font) override {
         _textInputPosY = top;
     }
 
     virtual void SetImeMode(tTVPImeMode mode) override {
         switch (mode) {
-        case ::imDisable:
-        case ::imClose:
-            break;
-        case ::imOpen:
-        default:
-            break;
+            case ::imDisable:
+            case ::imClose:
+                break;
+            case ::imOpen:
+            default:
+                break;
         }
     }
 
     virtual void ZoomRectangle(tjs_int& left, tjs_int& top, tjs_int& right,
-        tjs_int& bottom) override {
+                               tjs_int& bottom) override {
         left = tjs_int64(left) * ActualZoomNumer / ActualZoomDenom;
         top = tjs_int64(top) * ActualZoomNumer / ActualZoomDenom;
         right = tjs_int64(right) * ActualZoomNumer / ActualZoomDenom;
@@ -517,7 +515,7 @@ public:
             {
                 SetSize(tex->GetWidth(), tex->GetHeight());
             }
-            
+
             tjs_uint8* picData = nullptr;
             tjs_int pic_pitch;
             bool isNeedFree = tex->GetTextureData(&picData, pic_pitch);
@@ -567,15 +565,15 @@ public:
         if (!code || code >= 0x200)
             return;
 
-         bool isPressed = _scancode[code] & 1;
+        bool isPressed = _scancode[code] & 1;
         _scancode[code] &= 0x10;
 
-         if (isPressed && TJSNativeInstance && code)
-         {
-             TVPPostInputEvent(
-                 new tTVPOnKeyUpInputEvent(TJSNativeInstance, code,
-                                                             TVPGetCurrentShiftKeyState()));
-         }
+        if (isPressed && TJSNativeInstance && code)
+        {
+            TVPPostInputEvent(
+                new tTVPOnKeyUpInputEvent(TJSNativeInstance, code,
+                                          TVPGetCurrentShiftKeyState()));
+        }
     }
 
     void onKeyDownEvent(int vk)
@@ -599,9 +597,9 @@ public:
     }
 
     virtual void OnKeyPress(tjs_uint16 vk, int repeat, bool prevkeystate,
-        bool convertkey) override
+                            bool convertkey) override
     {
-        
+
     }
 
     tTVPImeMode LastSetImeMode = ::imDisable;
@@ -656,8 +654,8 @@ public:
             return false;
         }
 
-        // the default event handler will invalidate this object when
-        // an onCloseQuery event reaches the handler.
+               // the default event handler will invalidate this object when
+               // an onCloseQuery event reaches the handler.
         if (TJSNativeInstance && (modal_result_ == 0 || modal_result_ == mrCancel /* mrCancel=when close button is pushed in modal window */)) {
             iTJSDispatch2* obj = TJSNativeInstance->GetOwnerNoAddRef();
             if (obj) {
@@ -678,7 +676,7 @@ public:
                 else {
                     CanCloseWork = true;
                     TVPPostEvent(obj, obj, eventname, 0, TVP_EPT_IMMEDIATE, 1,
-                        arg);
+                                 arg);
                     // this event happens immediately
                     // and does not return until done
                     return CanCloseWork; // CanCloseWork is set by the
@@ -709,15 +707,15 @@ public:
                 CloseAction action = caFree;
                 OnClose(action);
                 switch (action) {
-                case caNone:
-                    break;
-                case caHide:
-                    break;
-                case caMinimize:
-                    break;
-                case caFree:
-                default:
-                    break;
+                    case caNone:
+                        break;
+                    case caHide:
+                        break;
+                    case caMinimize:
+                        break;
+                    case caFree:
+                    default:
+                        break;
                 }
             }
         }
@@ -802,7 +800,7 @@ public:
         //	TranslateWindowToDrawArea(x, y);
         //	ReleaseMouseCapture();
         MouseVelocityTracker.addMovement(TVPGetRoughTickCount32(), (float)x,
-            (float)y);
+                                         (float)y);
     }
 
     virtual void ResetTouchVelocity(tjs_int id) override {

@@ -79,7 +79,7 @@ bool CDVDAudioCodecFFmpeg::Open(CDVDStreamInfo& hints)
 void CDVDAudioCodecFFmpeg::Dispose()
 {
     av_frame_free(&m_pFrame);
-    avcodec_close(m_pCodecContext);
+    avcodec_free_context(&m_pCodecContext);
 }
 
 bool CDVDAudioCodecFFmpeg::AddData(const DemuxPacket& packet)

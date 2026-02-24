@@ -71,14 +71,16 @@ bool tTJSNI_PsbFile::load(const ttstr& filePath)
         if (uncompress(_uncompress_buffer, &uncompressedSize, _compress_buffer, readSize - 8) !=
             Z_OK)
         {
-            delete[] _uncompress_buffer, _compress_buffer;
+            delete[] _uncompress_buffer;
+            delete[] _compress_buffer;
             return false;
         }
         // compress data
         tTVPMemoryStream* _stream = new tTVPMemoryStream(nullptr, uncompressedSize);
         memcpy(_stream->GetInternalBuffer(), _uncompress_buffer, uncompressedSize);
         // clear data
-        delete[] _uncompress_buffer, _compress_buffer;
+        delete[] _uncompress_buffer;
+        delete[] _compress_buffer;
         delete filePtr;
         filePtr = _stream;
     }

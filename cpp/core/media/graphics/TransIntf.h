@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TVP2 ( T Visual Presenter 2 )  A script authoring tool
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TVP2 ( T Visual Presenter 2 )  A script authoring tool
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+     See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // Transition handler mamagement & default transition handlers
@@ -21,28 +21,28 @@
 //---------------------------------------------------------------------------
 class tTVPSimpleOptionProvider : public iTVPSimpleOptionProvider
 {
-	tjs_uint RefCount;
-	tTJSVariantClosure Object;
-	ttstr String;
+    tjs_uint RefCount;
+    tTJSVariantClosure Object;
+    ttstr String;
 
 public:
-	tTVPSimpleOptionProvider(tTJSVariantClosure object);
-	~tTVPSimpleOptionProvider();
+    tTVPSimpleOptionProvider(tTJSVariantClosure object);
+    ~tTVPSimpleOptionProvider();
 
-	tjs_error TJS_INTF_METHOD AddRef();
-	tjs_error TJS_INTF_METHOD Release();
+    tjs_error AddRef();
+    tjs_error Release();
 
-	tjs_error TJS_INTF_METHOD GetAsNumber(
-			/*in*/const tjs_char *name, /*out*/tjs_int64 *value);
-	tjs_error TJS_INTF_METHOD GetAsString(
-			/*in*/const tjs_char *name, /*out*/const tjs_char **out);
+    tjs_error GetAsNumber(
+        /*in*/const tjs_char *name, /*out*/tjs_int64 *value);
+    tjs_error GetAsString(
+        /*in*/const tjs_char *name, /*out*/const tjs_char **out);
 
-	tjs_error TJS_INTF_METHOD GetValue(
-			/*in*/const tjs_char *name, /*out*/tTJSVariant *dest);
+    tjs_error GetValue(
+        /*in*/const tjs_char *name, /*out*/tTJSVariant *dest);
 
-	tjs_error TJS_INTF_METHOD Reserved2() { return TJS_E_NOTIMPL; }
+    tjs_error Reserved2() { return TJS_E_NOTIMPL; }
 
-	tjs_error TJS_INTF_METHOD GetDispatchObject(iTJSDispatch2 **dsp);
+    tjs_error GetDispatchObject(iTJSDispatch2 **dsp);
 };
 //---------------------------------------------------------------------------
 
@@ -54,12 +54,12 @@ public:
 class tTVPSimpleImageProvider : public iTVPSimpleImageProvider
 {
 public:
-	tjs_error TJS_INTF_METHOD LoadImage(
-			/*in*/const tjs_char *name, /*in*/tjs_int bpp,
-			/*in*/tjs_uint32 key, 
-			/*in*/tjs_uint w,
-			/*in*/tjs_uint h,
-			/*out*/iTVPScanLineProvider ** scpro);
+    tjs_error LoadImage(
+        /*in*/const tjs_char *name, /*in*/tjs_int bpp,
+        /*in*/tjs_uint32 key,
+        /*in*/tjs_uint w,
+        /*in*/tjs_uint h,
+        /*out*/iTVPScanLineProvider ** scpro);
 };
 //---------------------------------------------------------------------------
 extern tTVPSimpleImageProvider TVPSimpleImageProvider;
@@ -72,30 +72,30 @@ extern tTVPSimpleImageProvider TVPSimpleImageProvider;
 // provides layer scanline
 class tTVPScanLineProviderForBaseBitmap : public iTVPScanLineProvider
 {
-	tjs_uint RefCount;
-	bool Own;
-	iTVPBaseBitmap *Bitmap;
+    tjs_uint RefCount;
+    bool Own;
+    iTVPBaseBitmap *Bitmap;
 
 public:
-	tTVPScanLineProviderForBaseBitmap(iTVPBaseBitmap *bmp, bool own = false);
-	~tTVPScanLineProviderForBaseBitmap();
+    tTVPScanLineProviderForBaseBitmap(iTVPBaseBitmap *bmp, bool own = false);
+    ~tTVPScanLineProviderForBaseBitmap();
 
-	void Attach(iTVPBaseBitmap *bmp); // attach bitmap
+    void Attach(iTVPBaseBitmap *bmp); // attach bitmap
 
 
-	tjs_error TJS_INTF_METHOD AddRef();
-	tjs_error TJS_INTF_METHOD Release();
+    tjs_error AddRef() override;
+    tjs_error Release() override;
 
-	tjs_error TJS_INTF_METHOD GetWidth(/*in*/tjs_int *width);
-	tjs_error TJS_INTF_METHOD GetHeight(/*in*/tjs_int *height);
-	tjs_error TJS_INTF_METHOD GetPixelFormat(/*out*/tjs_int *bpp);
-	tjs_error TJS_INTF_METHOD GetPitchBytes(/*out*/tjs_int *pitch);
-	tjs_error TJS_INTF_METHOD GetScanLine(/*in*/tjs_int line,
-			/*out*/const void ** scanline);
-	tjs_error TJS_INTF_METHOD GetScanLineForWrite(/*in*/tjs_int line,
-			/*out*/void ** scanline);
-	virtual iTVPTexture2D * GetTexture() override;
-	virtual iTVPTexture2D * GetTextureForRender() override;
+    tjs_error GetWidth(/*in*/tjs_int *width) override;
+    tjs_error GetHeight(/*in*/tjs_int *height) override;
+    tjs_error GetPixelFormat(/*out*/tjs_int *bpp) override;
+    tjs_error GetPitchBytes(/*out*/tjs_int *pitch) override;
+    tjs_error GetScanLine(/*in*/tjs_int line,
+                          /*out*/const void ** scanline) override;
+    tjs_error GetScanLineForWrite(/*in*/tjs_int line,
+                                  /*out*/void ** scanline) override;
+    virtual iTVPTexture2D * GetTexture() override;
+    virtual iTVPTexture2D * GetTextureForRender() override;
 };
 //---------------------------------------------------------------------------
 
@@ -116,47 +116,47 @@ iTVPTransHandlerProvider * TVPFindTransHandlerProvider(const ttstr &name);
 //---------------------------------------------------------------------------
 enum tTVPScrollTransFrom
 {
-	sttLeft, sttTop, sttRight, sttBottom
+    sttLeft, sttTop, sttRight, sttBottom
 };
 enum tTVPScrollTransStay
 {
-	ststNoStay, ststStayDest, ststStaySrc
+    ststNoStay, ststStayDest, ststStaySrc
 };
 /*]*/
 //---------------------------------------------------------------------------
 
 class tTVPCrossFadeTransHandlerProvider : public iTVPTransHandlerProvider
 {
-	tjs_int RefCount;
+    tjs_int RefCount;
 public:
-	tTVPCrossFadeTransHandlerProvider();
-	virtual ~tTVPCrossFadeTransHandlerProvider();;
+    tTVPCrossFadeTransHandlerProvider();
+    virtual ~tTVPCrossFadeTransHandlerProvider();;
 
-	tjs_error TJS_INTF_METHOD AddRef();
+    tjs_error AddRef();
 
-	tjs_error TJS_INTF_METHOD Release();
+    tjs_error Release();
 
-	tjs_error TJS_INTF_METHOD GetName(
-		/*out*/const tjs_char ** name);
+    tjs_error GetName(
+        /*out*/const tjs_char ** name);
 
-	tjs_error TJS_INTF_METHOD StartTransition(
-		/*in*/iTVPSimpleOptionProvider *options, // option provider
-		/*in*/iTVPSimpleImageProvider *imagepro, // image provider
-		/*in*/tTVPLayerType layertype, // destination layer type
-		/*in*/tjs_uint src1w, tjs_uint src1h, // source 1 size
-		/*in*/tjs_uint src2w, tjs_uint src2h, // source 2 size
-		/*out*/tTVPTransType *type, // transition type
-		/*out*/tTVPTransUpdateType * updatetype, // update typwe
-		/*out*/iTVPBaseTransHandler ** handler // transition handler
-		);
+    tjs_error StartTransition(
+        /*in*/iTVPSimpleOptionProvider *options, // option provider
+        /*in*/iTVPSimpleImageProvider *imagepro, // image provider
+        /*in*/tTVPLayerType layertype, // destination layer type
+        /*in*/tjs_uint src1w, tjs_uint src1h, // source 1 size
+        /*in*/tjs_uint src2w, tjs_uint src2h, // source 2 size
+        /*out*/tTVPTransType *type, // transition type
+        /*out*/tTVPTransUpdateType * updatetype, // update typwe
+        /*out*/iTVPBaseTransHandler ** handler // transition handler
+        );
 
 
-	virtual iTVPBaseTransHandler * GetTransitionObject(
-		/*in*/iTVPSimpleOptionProvider *options, // option provider
-		/*in*/iTVPSimpleImageProvider *imagepro, // image provider
-		/*in*/tTVPLayerType layertype,
-		/*in*/tjs_uint src1w, tjs_uint src1h, // source 1 size
-		/*in*/tjs_uint src2w, tjs_uint src2h); // source 2 size
+    virtual iTVPBaseTransHandler * GetTransitionObject(
+        /*in*/iTVPSimpleOptionProvider *options, // option provider
+        /*in*/iTVPSimpleImageProvider *imagepro, // image provider
+        /*in*/tTVPLayerType layertype,
+        /*in*/tjs_uint src1w, tjs_uint src1h, // source 1 size
+        /*in*/tjs_uint src2w, tjs_uint src2h); // source 2 size
 };
 
 #endif

@@ -10,16 +10,16 @@ extern "C"
 
 NS_KRMOVIE_BEGIN
 
-class CDVDAudioCodecFFmpeg : public CDVDAudioCodec
+    class CDVDAudioCodecFFmpeg : public CDVDAudioCodec
 {
 public:
     CDVDAudioCodecFFmpeg();
     virtual ~CDVDAudioCodecFFmpeg();
-    virtual bool Open(CDVDStreamInfo& hints);
-    virtual void Dispose();
+    virtual bool Open(CDVDStreamInfo& hints) override;
+    virtual void Dispose() override;
     virtual bool AddData(const DemuxPacket& packet) override;
     virtual void GetData(DVDAudioFrame& frame) override;
-    virtual void Reset();
+    virtual void Reset() override;
 
 protected:
     int GetData(uint8_t** dst);

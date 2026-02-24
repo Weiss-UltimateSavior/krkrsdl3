@@ -1,6 +1,6 @@
 # 介绍
 
-基于[krkr2](https://github.com/2468785842/krkr2)/[krkrz](https://github.com/krkrz/krkrz/)/[kirikiroid2](https://github.com/zeas2/Kirikiroid2)等开发出的krkr视觉小说引擎(支持windows/linux/android)，使用SDL统一硬件管理、bgfx统一图形渲染(未来计划)、blend2d统一绘图。
+基于[krkr2](https://github.com/2468785842/krkr2)/[krkrz](https://github.com/krkrz/krkrz/)/[kirikiroid2](https://github.com/zeas2/Kirikiroid2)等开发出的krkr视觉小说引擎(支持windows/linux/android)，使用SDL3统一跨平台管理、blend2d统一绘图。
 
 # 目录结构说明
 
@@ -36,12 +36,12 @@
 # 依赖库说明
 
 - oniguruma:用于tjs2语言内核的正则表达式匹配
-- zlib/libarchive:归档压缩包格式
+- zlib:基础压缩算法
 - ffmpeg:音视频解码
 - libpng/libwebp/libjpeg-turbo:图片解码
 - miniaudio/libvorbis/opusfile:音频解码
 - freetype:字体
-- sdl3/bgfx/blend2d:跨平台核心
+- sdl3/blend2d:跨平台核心
 
 使用说明：对于api稳定的库默认采用最新版本，对于api有较大改动的库采用能兼容的最高版本。
 

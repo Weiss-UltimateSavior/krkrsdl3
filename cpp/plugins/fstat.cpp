@@ -600,17 +600,17 @@ private:
             tTJSVariant vname = file;
             dict->PropSet(TJS_MEMBERENSURE, TJS_W("name"), nullptr, &vname, dict);
 
-            // 文件大小
+                   // 文件大小
             int64_t size = entry.is_regular_file() ? entry.file_size() : 0;
             tTJSVariant vsize = size;
             dict->PropSet(TJS_MEMBERENSURE, TJS_W("size"), nullptr, &vsize, dict);
 
-            // 文件属性（权限 & 类型）
+                   // 文件属性（权限 & 类型）
             int32_t attrib = static_cast<int32_t>(entry.status().permissions());
             tTJSVariant vattr = attrib;
             dict->PropSet(TJS_MEMBERENSURE, TJS_W("attrib"), nullptr, &vattr, dict);
 
-            // 文件时间
+                   // 文件时间
             auto ftime = entry.last_write_time(); // mtime
             auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
                 ftime - decltype(ftime)::clock::now() + std::chrono::system_clock::now());
@@ -619,14 +619,14 @@ private:
             tTJSVariant vmtime = mtime;
             dict->PropSet(TJS_MEMBERENSURE, TJS_W("mtime"), nullptr, &vmtime, dict);
 
-            // Unix 没有直接的创建时间，ctime 用 st_ctime
-            // 或文件系统支持的创建时间
+                   // Unix 没有直接的创建时间，ctime 用 st_ctime
+                   // 或文件系统支持的创建时间
             tTJSVariant vctime = static_cast<tjs_int64>(mtime);
             dict->PropSet(TJS_MEMBERENSURE, TJS_W("ctime"), nullptr, &vctime, dict);
 
-            // atime
-            // 如果系统支持 nanoseconds: use std::filesystem::last_access_time
-            // (C++23) 或 stat
+                   // atime
+                   // 如果系统支持 nanoseconds: use std::filesystem::last_access_time
+                   // (C++23) 或 stat
             tTJSVariant vatime = mtime; // 可以用 mtime 代替
             dict->PropSet(TJS_MEMBERENSURE, TJS_W("atime"), nullptr, &vatime, dict);
 
@@ -659,7 +659,7 @@ public:
                 TJS_W("'/' must be specified at the end of given directory name."));
         }
 
-        // OSネイティブな表現に変換
+               // OSネイティブな表現に変換
         dir = TVPNormalizeStorageName(dir);
         TVPGetLocalName(dir);
 
@@ -745,14 +745,14 @@ public:
             }
             std::filesystem::permissions(filepath, std::filesystem::perms::all);
 
-            // 设置只读属性
+                   // 设置只读属性
             if (attr & 0x01)
             {
                 std::filesystem::permissions(filepath,
-                    std::filesystem::perms::owner_read |
-                    std::filesystem::perms::group_read |
-                    std::filesystem::perms::others_read,
-                    std::filesystem::perm_options::remove);
+                                             std::filesystem::perms::owner_read |
+                                                 std::filesystem::perms::group_read |
+                                                 std::filesystem::perms::others_read,
+                                             std::filesystem::perm_options::remove);
             }
 
         }
@@ -783,10 +783,10 @@ public:
             }
 
             std::filesystem::permissions(filepath,
-                std::filesystem::perms::owner_all |
-                std::filesystem::perms::group_all |
-                std::filesystem::perms::others_all,
-                std::filesystem::perm_options::replace);
+                                         std::filesystem::perms::owner_all |
+                                             std::filesystem::perms::group_all |
+                                             std::filesystem::perms::others_all,
+                                         std::filesystem::perm_options::replace);
         }
         catch (const std::filesystem::filesystem_error&)
         {
@@ -813,7 +813,7 @@ public:
 
             if (!std::filesystem::exists(filepath))
             {
-                return 0xFFFFFFFF;
+                return 0xFFFF;
             }
 
             if (std::filesystem::is_directory(filepath))
@@ -856,7 +856,7 @@ public:
         std::string initialdir;
         std::string rootDir;
 
-        // title
+               // title
         iTJSDispatch2* dsp = param[0]->AsObjectThisNoAddRef();
         if (TJS_SUCCEEDED(dsp->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("caption"), 0, &val, dsp)))
         {
@@ -883,7 +883,7 @@ public:
             }
         }
 
-        // show dialog box
+               // show dialog box
         std::string retDir = TVPShowDirectorySelector(title, initialdir, rootDir);
 
         if (!retDir.empty())
@@ -1058,8 +1058,8 @@ public:
         if (TJS_PARAM_EXIST(1))
             searchpath = *param[1];
         if (const std::string& tmp =
-                _searchPath(filename.AsNarrowStdString(),
-                                   searchpath.length() ? searchpath.AsNarrowStdString() : "");
+            _searchPath(filename.AsNarrowStdString(),
+                        searchpath.length() ? searchpath.AsNarrowStdString() : "");
             tmp.length() > 0)
         {
             if (result)
@@ -1149,13 +1149,13 @@ static void PostRegistCallback()
 }
 
 #define RELEASE(name) \
-    name->Release(); \
+name->Release(); \
     name = NULL
 
-/**
- * 開放処理前
- */
-static void PreUnregistCallback()
+    /**
+     * 開放処理前
+     */
+    static void PreUnregistCallback()
 {
     RELEASE(dateClass);
     RELEASE(dateSetTime);

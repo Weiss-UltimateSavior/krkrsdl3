@@ -2,7 +2,6 @@
     "dependencies": [
         "oniguruma",
         "zlib",
-        "libarchive",
         "ffmpeg",
         "libpng",
         "libwebp",
@@ -25,7 +24,6 @@
             "platform": "android"
         },
         "glm",
-        "bgfx",
         "blend2d",
 
         {

@@ -55,7 +55,7 @@ public:
                 queued++;
             }
         }
-        
+
         // remain
         int tmp = totalBufferSize;
         totalBufferSize = newSize - dataVar;
@@ -98,7 +98,7 @@ public:
         }
     }
 
-    virtual bool Init()
+    virtual bool Init() override
     {
         if (spec.format == SDL_AUDIO_UNKNOWN)
         {
@@ -124,7 +124,7 @@ public:
     virtual ~tTVPSoundBufferSDL()
     {
         Stop();
-        
+
         if (_stream)
         {
             SDL_UnbindAudioStream(_stream);
@@ -215,7 +215,7 @@ public:
     virtual tjs_uint GetCurrentPlaySamples() override
     {
         return SDL_GetAudioStreamQueued(_stream) / _frame_size;
-    }    
+    }
     virtual int GetRemainBuffers() override
     {
         std::lock_guard<std::mutex> lk(_buffer_mtx);
@@ -225,9 +225,9 @@ public:
     virtual tjs_uint GetLatencySamples() override { return 0; }
     virtual float GetLatencySeconds() override { return 0; }
 
-    virtual void SetPosition(float x, float y, float z)
+    virtual void SetPosition(float x, float y, float z)  override
     {
-        // not implemented
+      // not implemented
     }
 };
 

@@ -446,7 +446,7 @@ static void getPoints(ncbPropAccessor& info, const tjs_char* n, std::vector<Poin
 /**
  * 矩形情報の生成
  */
-static RectF getRect(const tTJSVariant &var);
+static RectF getRect(tTJSVariant &var);
 
 /**
  * 矩形の配列を取得
@@ -769,10 +769,10 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                             break;
                     }
 
-                    tTJSVariant dstRect;
-                    if (info.checkVariant(TJS_W("dstRect"), dstRect))
+                    tTJSVariant dstRectVar;
+                    if (info.checkVariant(TJS_W("dstRect"), dstRectVar))
                     {
-                        RectF dstRect = getRect(&dstRect);
+                        RectF dstRect = getRect(dstRectVar);
                         if (dstRect.x != 0 || dstRect.y != 0 ||
                             dstRect.w != image.width() || dstRect.h != image.height())
                         {
@@ -991,6 +991,8 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
                         bla.append(1.0f);
                         bla.append(3.0f);
                         break;
+                    default:
+                        break;
                 }
                 pen->strokeOptions.dashArray = bla;
             }
@@ -1062,7 +1064,7 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
             pen->strokeOptions.join = (LineJoin)(tjs_int)var;
         }
 
-        // SetMiterLimit
+               // SetMiterLimit
         if (info.checkVariant(TJS_W("miterLimit"), var)) {
             pen->strokeOptions.miterLimit = (tjs_real)(tjs_real)var;
         }
@@ -1286,7 +1288,7 @@ void Path::drawClosedCurve2(tTJSVariant points, tjs_real tension)
  */
 void Path::drawCurve(tTJSVariant points)
 {
-    drawCurve3(points, 0.5f, 0, -1);
+    drawCurve3(points, 0, 0, -1);
 }
 
 /**
@@ -1791,7 +1793,7 @@ LayerExDraw::draw(BLImage *ctx, const BLPen *pen, const BLMatrix2D *matrix, cons
         context->strokePath(pen->endCap);
     }
 
-    // 结束
+           // 结束
     context->end();
 }
 
@@ -2787,9 +2789,9 @@ struct AutoProp_ ## name { \
         static type ProxyGet(Class *inst) { type var; inst->methodname(var); return var; } }; \
     Property(TJS_W(# name), &AutoProp_ ## name::ProxyGet, (int)0, Proxy)
 
-    // ------------------------------------------------------
-    // 型コンバータ登録
-    // ------------------------------------------------------
+           // ------------------------------------------------------
+           // 型コンバータ登録
+           // ------------------------------------------------------
 
     NCB_TYPECONV_CAST_INTEGER(Status);
 NCB_TYPECONV_CAST_INTEGER(MatrixOrder);
@@ -2882,7 +2884,7 @@ private:
     T dst;
 };
 
-static RectF getRect(const tTJSVariant& var)
+static RectF getRect(tTJSVariant& var)
 {
     RectFConvertor<RectF> conv;
     RectF ret;
@@ -3043,11 +3045,11 @@ NCB_SET_CONVERTOR(type*, GdipTypeConvertor<type>);\
     Property(TJS_W(#name), AutoProp_ ## name::ProxyGet, AutoProp_ ## name::ProxySet, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 
 
-    // ------------------------------------------------------- Matrix
+           // ------------------------------------------------------- Matrix
 
     template <class T>
     struct MatrixConvertor : public GdipTypeConvertor<T> {
-        void operator ()(T*& dst, const tTJSVariant& src) {
+    void operator ()(T*& dst, const tTJSVariant& src) {
         typename MatrixConvertor::WrapperT* obj;
         if (src.Type() == tvtObject) {
             if ((obj = MatrixConvertor::AdaptorT::GetNativeInstance(src.AsObjectNoAddRef()))) {
@@ -3183,7 +3185,7 @@ NCB_GDIP_METHOD(Translate);
  */
 template <class T>
 struct ImageConvertor : public GdipTypeConvertor<T> {
-        void operator ()(T*& dst, const tTJSVariant& src) {
+    void operator ()(T*& dst, const tTJSVariant& src) {
         if (src.Type() == tvtObject) {
             typename ImageConvertor::WrapperT* obj;
             if ((obj = ImageConvertor::AdaptorT::GetNativeInstance(src.AsObjectNoAddRef()))) {

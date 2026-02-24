@@ -3892,7 +3892,7 @@ bool tTJSNI_BaseLayer::GetBltMethodFromOperationModeAndDrawFace(
                 break;
             }
             break;
-        case dfAuto:
+        default:
             break;
     }
 
@@ -6773,11 +6773,11 @@ tTVPBaseTexture *tTJSNI_BaseLayer::Complete(const tTVPRect &rect) {
             Bitmap(bmp), LayerType(layertype) {};
 
         tTVPBaseTexture *GetDrawTargetBitmap(const tTVPRect &rect,
-                                             tTVPRect &cliprect) {
+                                             tTVPRect &cliprect) override {
             cliprect = rect;
             return Bitmap;
         }
-        tTVPLayerType GetTargetLayerType() { return LayerType; }
+        tTVPLayerType GetTargetLayerType()  override { return LayerType; }
         virtual void DrawCompleted(const tTVPRect &destrect,
                                    tTVPBaseTexture *bmp,
                                    const tTVPRect &cliprect, tTVPLayerType type,

@@ -111,7 +111,7 @@ tTJSVariantString * TJSOctetToListString(const tTJSVariantOctet *oct)
 	tjs_int stringlen = oct->GetLength() * 3 -1;
 	tTJSVariantString * str = TJSAllocVariantStringBuffer(stringlen);
 
-	tjs_char *buf = const_cast<tjs_char*>(str->operator const tjs_char*());
+	tjs_char *buf = const_cast<tjs_char*>(str ? *str : NULL);
 	static const tjs_char hex[] = TJS_W("0123456789ABCDEF");
 	const tjs_uint8 *data = oct->GetData();
 	tjs_uint n = oct->GetLength();
@@ -1114,7 +1114,7 @@ void tTJSVariant::operator +=(const tTJSVariant &rhs)
 			{
 				// sever dependency
 				tTJSVariantString *orgstr = String;
-				String = TJSAllocVariantString(String->operator const tjs_char*());
+				String = TJSAllocVariantString(String ? *String : NULL);
 				orgstr->Release();
 			}
 
@@ -1128,7 +1128,7 @@ void tTJSVariant::operator +=(const tTJSVariant &rhs)
 		tTJSVariantString *s1, *s2;
 		s1 = AsString();
 		s2 = rhs.AsString();
-		val.String = TJSAllocVariantString(*s1, *s2);
+        val.String = TJSAllocVariantString(s1 ? *s1 : NULL, s2 ? *s2 : NULL);
 		if(s1) s1->Release();
 		if(s2) s2->Release();   
 		*this=val;

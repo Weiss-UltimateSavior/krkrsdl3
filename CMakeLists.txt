@@ -110,9 +110,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 # 依赖库
-find_package(lz4 CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE lz4::lz4)
-
 find_package(FFMPEG REQUIRED)
 target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
 target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
@@ -132,9 +129,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
 
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm-header-only)
-
-find_package(LibArchive REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE LibArchive::LibArchive)
 
 find_package(JPEG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
@@ -180,36 +174,7 @@ find_package(blend2d CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE blend2d::blend2d)
 
 if(ANDROID)
-    # iconv
-    find_library(ICONV_LIBRARY iconv)
-    if(ICONV_LIBRARY)
-        set(Iconv_LIBRARY ${ICONV_LIBRARY})
-        set(Iconv_IS_BUILT_IN TRUE)
-        set(HAVE_ICONV 1)
-        target_link_libraries(${PROJECT_NAME} PRIVATE iconv)
-    else()
-        set(Iconv_IS_BUILT_IN TRUE)
-        set(HAVE_ICONV 1)
-    endif()
-    # camera2ndk/mediandk
-    find_library(CAMERA2NDK_LIB camera2ndk)
-    find_library(MEDIANDK_LIB mediandk)
-    if(CAMERA2NDK_LIB)
-        set(FFMPEG_DEPENDENCY_camera2ndk_RELEASE ${CAMERA2NDK_LIB})
-        set(FFMPEG_DEPENDENCY_camera2ndk_DEBUG ${CAMERA2NDK_LIB})
-        target_link_libraries(${PROJECT_NAME} PRIVATE camera2ndk)
-    else()
-        set(FFMPEG_DEPENDENCY_camera2ndk_RELEASE "")
-        set(FFMPEG_DEPENDENCY_camera2ndk_DEBUG "")
-    endif()
-    if(MEDIANDK_LIB)
-        set(FFMPEG_DEPENDENCY_mediandk_RELEASE ${MEDIANDK_LIB})
-        set(FFMPEG_DEPENDENCY_mediandk_DEBUG ${MEDIANDK_LIB})
-        target_link_libraries(${PROJECT_NAME} PRIVATE mediandk)
-    else()
-        set(FFMPEG_DEPENDENCY_mediandk_RELEASE "")
-        set(FFMPEG_DEPENDENCY_mediandk_DEBUG "")
-    endif()
+    
     # egl
     target_link_libraries(${PROJECT_NAME} PRIVATE EGL GLESv3)
 elseif(LINUX)

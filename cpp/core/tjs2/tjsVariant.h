@@ -750,7 +750,7 @@ public:
 	{
 		// returns String
 		if(vt!=tvtString) TJSThrowVariantConvertError(*this, tvtString);
-		return *String;
+                return String ? *String : NULL;
 	}
 
 	TJS_METHOD_DEF(tjs_uint32 *, GetHint, ())
@@ -797,7 +797,7 @@ public:
 		{
 		case tvtVoid:    return 0;
 		case tvtObject:  TJSThrowVariantConvertError(*this, tvtInteger);
-		case tvtString:  return String->ToInteger();
+		case tvtString:  return String ? String->ToInteger() : 0;
 		case tvtInteger: return Integer;
 		case tvtReal:    TJSSetFPUE(); return (tTVInteger)Real;
 		case tvtOctet:   TJSThrowVariantConvertError(*this, tvtInteger);
@@ -855,7 +855,7 @@ public:
 		{
 		case tvtVoid:    return 0;
 		case tvtObject:  TJSThrowVariantConvertError(*this, tvtReal);
-		case tvtString:  return String->ToReal();
+		case tvtString:  return String ? String->ToReal() : 0;
 		case tvtInteger: return (tTVReal)Integer;
 		case tvtReal:    return Real;
 		case tvtOctet:   TJSThrowVariantConvertError(*this, tvtReal);
@@ -1115,7 +1115,7 @@ public:
 			tTJSVariantString *s1, *s2;
 			s1 = AsString();
 			s2 = rhs.AsString();
-			val.String = TJSAllocVariantString(*s1, *s2);
+			val.String = TJSAllocVariantString(s1 ? *s1 : NULL, s2 ? *s2 : NULL);
 			if(s1) s1->Release();
 			if(s2) s2->Release();
 			return val;

@@ -19,9 +19,9 @@ namespace PSB {
     public:
         PSBMedia() : refCount(1) {}
 
-        virtual void AddRef() { refCount++; };
+        virtual void AddRef() override { refCount++; };
 
-        virtual void Release()
+        virtual void Release()  override
         {
             if (refCount == 1)
             {
@@ -34,7 +34,7 @@ namespace PSB {
         };
 
         // returns media name like "file", "http" etc.
-        virtual void GetName(ttstr& name)
+        virtual void GetName(ttstr& name) override
         {
             name = TJS_W("psb");
         }

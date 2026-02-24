@@ -14,7 +14,7 @@ tjs_error krkr_str_ord(tTJSVariant* result, tjs_int numparams, tTJSVariant** par
 		if (type.Type() == tvtString)
 		{
 			const tTJSVariantString* vs = type.AsStringNoAddRef();
-			wchar_t dat = (wchar_t)vs->ShortString[0];
+			tjs_char dat = (tjs_char)vs->ShortString[0];
 			int tmp = static_cast<int>(dat);
 			*result = (tjs_int)tmp;
 		}

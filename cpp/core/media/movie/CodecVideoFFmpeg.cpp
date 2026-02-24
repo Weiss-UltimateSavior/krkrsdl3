@@ -159,7 +159,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo& hints)
             if (avcodec_open2(m_pCodecContext, pCodec, nullptr) >= 0)
                 break;
         }
-        avcodec_close(m_pCodecContext);
+        avcodec_free_context(&m_pCodecContext);
         av_free(m_pCodecContext);
         return false;
     }
@@ -167,7 +167,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo& hints)
     m_pFrame = av_frame_alloc();
     if (!m_pFrame)
     {
-        avcodec_close(m_pCodecContext);
+        avcodec_free_context(&m_pCodecContext);
         av_free(m_pCodecContext);
         return false;
     }
@@ -179,7 +179,7 @@ bool CDVDVideoCodecFFmpeg::Open(CDVDStreamInfo& hints)
 void CDVDVideoCodecFFmpeg::Dispose()
 {
     av_frame_free(&m_pFrame);
-    avcodec_close(m_pCodecContext);
+    avcodec_free_context(&m_pCodecContext);
     av_free(m_pCodecContext);
 }
 
@@ -298,7 +298,7 @@ bool CDVDVideoCodecFFmpeg::GetPicture(DVDVideoPicture* pDvdVideoPicture)
     }
     m_dropCtrl.Process(framePTS, m_pCodecContext->skip_frame > AVDISCARD_DEFAULT);
 
-    if (m_pFrame->key_frame)
+    if (m_pFrame->flags & AV_FRAME_FLAG_KEY)
     {
         m_started = true;
         m_iLastKeyframe = m_pCodecContext->has_b_frames + 2;
@@ -360,8 +360,8 @@ bool CDVDVideoCodecFFmpeg::SetPictureParams(DVDVideoPicture* pDvdVideoPicture)
     pDvdVideoPicture->pts = DVD_NOPTS_VALUE;
     pDvdVideoPicture->iRepeatPicture = 0.5 * m_pFrame->repeat_pict;
     pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
-    pDvdVideoPicture->iFlags |= m_pFrame->interlaced_frame ? DVP_FLAG_INTERLACED : 0;
-    pDvdVideoPicture->iFlags |= m_pFrame->top_field_first ? DVP_FLAG_TOP_FIELD_FIRST : 0;
+    pDvdVideoPicture->iFlags |= (m_pFrame->flags & AV_FRAME_FLAG_INTERLACED) ? DVP_FLAG_INTERLACED : 0;
+    pDvdVideoPicture->iFlags |= (m_pFrame->flags & AV_FRAME_FLAG_TOP_FIELD_FIRST) ? DVP_FLAG_TOP_FIELD_FIRST : 0;
 
     pDvdVideoPicture->chroma_position = m_pCodecContext->chroma_sample_location;
     pDvdVideoPicture->color_primaries = m_pCodecContext->color_primaries;

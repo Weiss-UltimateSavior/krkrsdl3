@@ -542,7 +542,7 @@ void TVPSaveAsPNG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
 		/* ----- 書き出しの終了、後始末 */
 		png_write_end( png_ptr, info_ptr );
 		png_destroy_write_struct( &png_ptr, &info_ptr );
-		delete buff;
+                delete[] buff;
 	} catch(...) {
 		throw;
 	}

@@ -64,12 +64,10 @@ static void GetStringProperty(tTJSVariant *result, const tTJSVariant *str,
 		{
 			// get string length
 			const tTJSVariantString * s = str->AsStringNoAddRef();
-#ifdef __CODEGUARD__
 			if(!s)
-				*result = tTVInteger(0); // tTJSVariantString::GetLength can return zero if 'this' is NULL
+				*result = tTVInteger(0);
 			else
-#endif
-			*result = tTVInteger(s->GetLength());
+				*result = tTVInteger(s->GetLength());
 			return;
 		}
 		else if(name[0] >= TJS_W('0') && name[0] <= TJS_W('9'))
@@ -77,7 +75,7 @@ static void GetStringProperty(tTJSVariant *result, const tTJSVariant *str,
 			const tTJSVariantString * valstr = str->AsStringNoAddRef();
 			const tjs_char *s = str->GetString();
 			tjs_int n = TJS_atoi(name);
-			tjs_int len = valstr->GetLength();
+			tjs_int len = valstr ? valstr->GetLength() : 0;
 			if(n == len) { *result = tTJSVariant(TJS_W("")); return; }
 			if(n<0 || n>len)
 				TJS_eTJSError(TJSRangeError);
@@ -95,7 +93,7 @@ static void GetStringProperty(tTJSVariant *result, const tTJSVariant *str,
 		const tTJSVariantString * valstr = str->AsStringNoAddRef();
 		const tjs_char *s = str->GetString();
 		tjs_int n = (tjs_int)member.AsInteger();
-		tjs_int len = valstr->GetLength();
+		tjs_int len = valstr ? valstr->GetLength() : 0;
 		if(n == len) { *result = tTJSVariant(TJS_W("")); return; }
 		if(n<0 || n>len)
 			TJS_eTJSError(TJSRangeError);
@@ -1619,10 +1617,20 @@ void tTJSInterCodeContext::GetPropertyIndirect(tTJSVariant *ra,
 
 		try
 		{
-			// TODO: verify here needs hint holding
-			hr = clo.PropGet(flags, *str, NULL, TJS_GET_VM_REG_ADDR(ra, code[1]),
-				clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
-			if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, *str);
+                    // TODO: verify here needs hint holding
+                    if(str)
+                    {
+                        hr = clo.PropGet(flags, *str, NULL, TJS_GET_VM_REG_ADDR(ra, code[1]),
+                                         clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
+                        if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, *str);
+                    }
+                    else
+                    {
+                        hr = clo.PropGet(flags, NULL, NULL, TJS_GET_VM_REG_ADDR(ra, code[1]),
+                                         clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
+                        if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, NULL);
+                    }
+
 		}
 		catch(...)
 		{
@@ -1682,10 +1690,22 @@ void tTJSInterCodeContext::SetPropertyIndirect(tTJSVariant *ra,
 				str, TJS_GET_VM_REG_ADDR(ra, code[3]),
 					clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
 			if(hr == TJS_E_NOTIMPL)
-				hr = clo.PropSet(flags,
+			{
+				if(str)
+                    {
+hr = clo.PropSet(flags,
 					*str, NULL, TJS_GET_VM_REG_ADDR(ra, code[3]),
 						clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
 			if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, *str);
+					}
+					else{
+						hr = clo.PropSet(flags,
+					NULL, NULL, TJS_GET_VM_REG_ADDR(ra, code[3]),
+						clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
+			if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, NULL);
+					}
+			}
+				
 		}
 		catch(...)
 		{
@@ -1766,11 +1786,22 @@ void tTJSInterCodeContext::OperatePropertyIndirect(tTJSVariant *ra,
 		tjs_error hr;
 		try
 		{
-			hr = clo.Operation(ope, *str, NULL,
+			if(str)
+			{
+hr = clo.Operation(ope, *str, NULL,
 				code[1]?TJS_GET_VM_REG_ADDR(ra, code[1]):NULL,
 				TJS_GET_VM_REG_ADDR(ra, code[4]),
 					clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
 			if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, *str);
+			}
+			else
+			{
+				hr = clo.Operation(ope, NULL, NULL,
+				code[1]?TJS_GET_VM_REG_ADDR(ra, code[1]):NULL,
+				TJS_GET_VM_REG_ADDR(ra, code[4]),
+					clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
+			if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, NULL);
+			}
 		}
 		catch(...)
 		{
@@ -1874,10 +1905,19 @@ void tTJSInterCodeContext::OperatePropertyIndirect0(tTJSVariant *ra,
 		tjs_error hr;
 		try
 		{
-			hr = clo.Operation(ope, *str, NULL,
+			if(str)
+			{
+hr = clo.Operation(ope, *str, NULL,
 				code[1]?TJS_GET_VM_REG_ADDR(ra, code[1]):NULL, NULL,
 					clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
 			if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, *str);
+			}
+			else{
+				hr = clo.Operation(ope, NULL, NULL,
+				code[1]?TJS_GET_VM_REG_ADDR(ra, code[1]):NULL, NULL,
+					clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
+			if(TJS_FAILED(hr)) TJSThrowFrom_tjs_error(hr, NULL);
+			}
 		}
 		catch(...)
 		{
@@ -1980,7 +2020,11 @@ void tTJSInterCodeContext::DeleteMemberIndirect(tTJSVariant *ra,
 
 	try
 	{
+		if(str)
 		hr = clo.DeleteMember(0, *str, NULL,
+			clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
+			else
+			hr = clo.DeleteMember(0, NULL, NULL,
 			clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
 		if(code[1])
 		{
@@ -2091,7 +2135,13 @@ void tTJSInterCodeContext::TypeOfMemberIndirect(tTJSVariant *ra,
 		try
 		{
 			// TODO: verify here needs hint holding
-			hr = clo.PropGet(flags, *str, NULL, TJS_GET_VM_REG_ADDR(ra, code[1]),
+			if(str)
+			{
+hr = clo.PropGet(flags, *str, NULL, TJS_GET_VM_REG_ADDR(ra, code[1]),
+				clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
+			}
+			else
+			hr = clo.PropGet(flags, NULL, NULL, TJS_GET_VM_REG_ADDR(ra, code[1]),
 				clo.ObjThis?clo.ObjThis:ra[-1].AsObjectNoAddRef());
 			if(hr == TJS_S_OK)
 			{

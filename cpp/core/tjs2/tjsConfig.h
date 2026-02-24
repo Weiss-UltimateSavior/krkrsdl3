@@ -51,14 +51,13 @@ void TJS_strcpy(tjs_char* d, const tjs_char* s);
 size_t TJS_strlen(const tjs_char* d);
 tjs_int64 TJS_atoll(const tjs_char* s);
 tjs_int TJS_sprintf(tjs_char* s, const tjs_char* format, ...);
+tjs_int TJS_timezone();
 
 #define TJS_strncpy_s(d, dl, s, sl)		TJS_strncpy(d, s, sl)
 #if defined(_MSC_VER)
 #define TJS_cdecl __cdecl
-#define TJS_timezone _timezone
 #else
 #define TJS_cdecl
-#define TJS_timezone timezone
 #endif
 
 #define TJS_narrowtowidelen(X) TJS_mbstowcs(NULL, (X),0) // narrow->wide (if) converted length

@@ -126,7 +126,7 @@ template <>           struct MC::tMethodHasResult<void> { enum { HasResult = fal
 #define METHODCALLER_IMPL(res, cls, cnst) \
 	template <class FncT         res ## _DEF /**/          cls ## _DEF /**/ FOREACH_COMMA /**/ FOREACH_COMMA_EXT(MCIMPL_TMPL_ARGS_EXT) >                 \
 		struct MC::tMethodCallerImpl<res ## _REF, cnst ## _REF cls ## _REF2, MC::tMethodArgs < FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT) >, FncT > {       \
-			typedef              res ## _REF              (cls ## _REF           *MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;    \
+			typedef              res ## _REF              (cls ## _REF           MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;    \
 			static inline bool Invoke(FncT io, MethodType const &mptr /**/ cls ## _COMMA /**/ cnst ## _REF /**/ cls ## _INST(inst)) {                    \
 				/**/ return      res ## _RESULT(io)      ((cls ## _CALL(inst,mptr)        )(   FOREACH_COMMA_EXT(MCIMPL_READ_ARGS_EXT))) res ## _CLOSE(io); } \
 		}
@@ -140,11 +140,11 @@ template <>           struct MC::tMethodHasResult<void> { enum { HasResult = fal
 #define METHODRESOLVER_SPECIALIZATION(cls, cnst) \
 	template <         typename ResultT /**/               cls ## _DEF /**/ FOREACH_COMMA /**/ FOREACH_COMMA_EXT(MCIMPL_TMPL_ARGS_EXT) >                     \
 		struct MC::tMethodResolver< ResultT,      cnst ## _REF cls ## _REF2, MC::tMethodArgs < FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT) > > {                 \
-			typedef             ResultT                   (cls ## _REF           *MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;        \
+			typedef             ResultT                   (cls ## _REF           MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;        \
 			typedef MethodType Type; };                                                                                                                      \
 	template <         typename ResultT /**/               cls ## _DEF /**/ FOREACH_COMMA /**/ FOREACH_COMMA_EXT(MCIMPL_TMPL_ARGS_EXT) >                     \
-	struct MC::tMethodTraits<   ResultT                   (cls ## _REF           *          )( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF> {      \
-			typedef             ResultT                   (cls ## _REF           *MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;        \
+	struct MC::tMethodTraits<   ResultT                   (cls ## _REF                     )( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF> {      \
+			typedef             ResultT                   (cls ## _REF           MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;        \
 			typedef             ResultT                                                                                                  ResultType;         \
 			typedef                                        cls ## _REF2                                                                  ClassType;          \
 			typedef                           cnst ## _REF cls ## _REF2                                                                  ClassWithConstType; \
@@ -166,14 +166,14 @@ template <>           struct MC::tMethodHasResult<void> { enum { HasResult = fal
 #define MCIMPL_NONVOID_CLOSE(io) /*        */, tTypeTag<ResultT>())
 
 #define MCIMPL_STATIC_DEF
-#define MCIMPL_STATIC_REF
+#define MCIMPL_STATIC_REF /*               */*
 #define MCIMPL_STATIC_REF2 /*              */void
 #define MCIMPL_STATIC_BOOL /*              */true
 #define MCIMPL_STATIC_COMMA
 #define MCIMPL_STATIC_INST(inst)
 #define MCIMPL_STATIC_CALL(inst, method) /**/*method
 #define MCIMPL_CLASS_DEF /*                */,class ClassT
-#define MCIMPL_CLASS_REF /*                */ClassT::
+#define MCIMPL_CLASS_REF /*                */ClassT::*
 #define MCIMPL_CLASS_REF2 /*               */ClassT
 #define MCIMPL_CLASS_BOOL /*               */false
 #define MCIMPL_CLASS_COMMA /*              */,

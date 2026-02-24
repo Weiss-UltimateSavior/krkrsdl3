@@ -110,7 +110,7 @@ int _yyerror(const tjs_char * msg, void *pm, tjs_int pos)
 }
 
 //---------------------------------------------------------------------------
-int __yyerror(char * msg, void * pm)
+int __yyerror(const char * msg, void * pm)
 {
 	// yyerror ( for bison )
 	ttstr str(msg);
@@ -1766,8 +1766,8 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 			}
 			else
 			{
-				tTJSVariantString *str = cnode->GetValue().AsString();
-				if(Namespace.Find(str->operator const tjs_char *()) == -1)
+                                tTJSVariantString *str = cnode->GetValue().AsString();
+				if(Namespace.Find(str ? *str : NULL) == -1)
 					hasnonlocalsymbol = true;
 				else
 					hasnonlocalsymbol = false;
@@ -2036,8 +2036,8 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 		}
 		else
 		{
-			tTJSVariantString *str = node->GetValue().AsString();
-			n = Namespace.Find(str->operator const tjs_char *());
+                        tTJSVariantString *str = node->GetValue().AsString();
+			n = Namespace.Find(str ? *str : NULL);
 			str->Release();
 		}
 
@@ -2111,8 +2111,8 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 
 				case stDelete: // deletion
 				  {
-					tTJSVariantString *str = node->GetValue().AsString();
-					Namespace.Remove(*str);
+                                        tTJSVariantString *str = node->GetValue().AsString();
+					Namespace.Remove(str ? *str : NULL);
 					str->Release();
 					if(restype & TJS_RT_NEEDED)
 					{
@@ -2132,9 +2132,9 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 			else
 			{
 				// read
-				tTJSVariantString *str = node->GetValue().AsString();
+                                tTJSVariantString *str = node->GetValue().AsString();
 //				Namespace.Add(str->operator tjs_char *());
-				tjs_int n = Namespace.Find(str->operator const tjs_char *());
+				tjs_int n = Namespace.Find(str ? *str : NULL);
 				str->Release();
 				return -n-VariableReserveCount-1;
 			}

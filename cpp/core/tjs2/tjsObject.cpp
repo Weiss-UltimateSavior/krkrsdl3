@@ -641,7 +641,7 @@ tTJSCustomObject::tTJSSymbolData * tTJSCustomObject::Add(tTJSVariantString * nam
 	}
 
 	tTJSSymbolData *data;
-	data = Find((const tjs_char *)(*name), name->GetHint());
+	data = Find(*name, name->GetHint());
 	if(data)
 	{
 		// the element is already alive
@@ -652,7 +652,7 @@ tTJSCustomObject::tTJSSymbolData * tTJSCustomObject::Add(tTJSVariantString * nam
 	if(*(name->GetHint()))
 		hash = *(name->GetHint());  // hint must be hash because of previous calling of "Find"
 	else
-		hash = tTJSHashFunc<tjs_char *>::Make((const tjs_char *)(*name));
+		hash = tTJSHashFunc<tjs_char *>::Make(*name);
 
 	tTJSSymbolData *lv1 = Symbols + (hash & HashMask);
 
@@ -702,7 +702,7 @@ tTJSCustomObject::tTJSSymbolData * tTJSCustomObject::AddTo(tTJSVariantString *na
 	// at this point, the member must not exist in destination hash space
 
 	tjs_uint32 hash;
-	hash = tTJSHashFunc<tjs_char *>::Make((const tjs_char *)(*name));
+	hash = tTJSHashFunc<tjs_char *>::Make(*name);
 
 	tTJSSymbolData *lv1 = newdata + (hash & newhashmask);
 	tTJSSymbolData *data;
@@ -1585,11 +1585,11 @@ tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 	tTJSSymbolData * data;
 	if(CallMissing)
 	{
-		data = Find((const tjs_char *)(*membername), membername->GetHint());
+		data = Find(*membername, membername->GetHint());
 		if(!data)
 		{
 			// call 'missing' method
-			if(CallSetMissing((const tjs_char *)(*membername), *param))
+			if(CallSetMissing(*membername, *param))
 				return TJS_S_OK;
 		}
 	}
@@ -1597,7 +1597,7 @@ tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 	if(flag & TJS_MEMBERENSURE)
 		data = Add(membername); // create a member when TJS_MEMBERENSURE is specified
 	else
-		data = Find((const tjs_char *)(*membername), membername->GetHint());
+		data = Find(*membername, membername->GetHint());
 
 	if(!data) return TJS_E_MEMBERNOTFOUND; // not found
 
@@ -1628,7 +1628,7 @@ tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 					hr != TJS_E_INVALIDOBJECT)
 					return hr;
 			}
-			data = Find((const tjs_char *)(*membername), membername->GetHint());
+			data = Find(*membername, membername->GetHint());
 		}
 	}
 

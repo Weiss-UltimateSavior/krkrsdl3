@@ -117,7 +117,7 @@ enum tTVPHitType { htMask, htProvince };
 #define TVP_Is_clPalIdx(n) ((tjs_uint32)(((n) & 0xff000000) == TVP_clPalIdx))
 #define TVP_get_clPalIdx(n) ((tjs_uint32)((n) & 0xff))
 #define TVP_Is_clAlphaMat(n)                                                   \
-    ((tjs_uint32)(((n) & 0xff000000) == TVP_clAlphaMat))
+((tjs_uint32)(((n) & 0xff000000) == TVP_clAlphaMat))
 #define TVP_get_clAlphaMat(n) ((tjs_uint32)((n) & 0xffffff))
 //---------------------------------------------------------------------------
 /*]*/
@@ -130,13 +130,13 @@ enum tTVPHitType { htMask, htProvince };
 #define TVP_CACHE_UNITE_LIMIT 60
 #define TVP_EXPOSED_UNITE_LIMIT 30
 #define TVP_DIRECT_UNITE_LIMIT 10
-//---------------------------------------------------------------------------
+    //---------------------------------------------------------------------------
 
 
-//---------------------------------------------------------------------------
-// TVPToActualColor :  convert color identifier to actual color
-//---------------------------------------------------------------------------
-extern tjs_uint32 TVPToActualColor(tjs_uint32 col);
+    //---------------------------------------------------------------------------
+    // TVPToActualColor :  convert color identifier to actual color
+    //---------------------------------------------------------------------------
+    extern tjs_uint32 TVPToActualColor(tjs_uint32 col);
 // implement in each platform
 extern tjs_uint32 TVPFromActualColor(tjs_uint32 col);
 // implement in each platform
@@ -167,13 +167,13 @@ protected:
     iTJSDispatch2 *Owner;
     tTJSVariantClosure ActionOwner;
 
-    //---------------------------------------------- object lifetime stuff --
+           //---------------------------------------------- object lifetime stuff --
 public:
     tTJSNI_BaseLayer(void);
     ~tTJSNI_BaseLayer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
+                        iTJSDispatch2 *tjs_obj) override;
+    void Invalidate() override;
 
     iTJSDispatch2 *GetOwnerNoAddRef() const { return Owner; }
 
@@ -185,9 +185,9 @@ private:
     bool CompactEventHookInit;
     void RegisterCompactEventHook();
     void TJS_INTF_METHOD
-    OnCompact(tjs_int level); // method from tTVPCompactEventCallbackIntf
+    OnCompact(tjs_int level) override; // method from tTVPCompactEventCallbackIntf
 
-    //----------------------------------------------- interface to manager --
+           //----------------------------------------------- interface to manager --
 private:
     tTVPLayerManager *Manager;
 
@@ -195,7 +195,7 @@ public:
     tTVPLayerManager *GetManager() const { return Manager; }
     class iTVPLayerTreeOwner *GetLayerTreeOwner() const;
 
-    //---------------------------------------------------- tree management --
+           //---------------------------------------------------- tree management --
 private:
     tTJSNI_BaseLayer *Parent;
     tObjectList<tTJSNI_BaseLayer> Children;
@@ -270,7 +270,7 @@ public:
         return OrderIndex;
     }
 
-    // SetOrderIndex are below
+           // SetOrderIndex are below
 
     tjs_uint GetOverallOrderIndex();
 
@@ -328,7 +328,7 @@ public:
     void DumpStructure(int level = 0); // dump layer structure to dms
 
 
-    //--------------------------------------------- layer type management --
+           //--------------------------------------------- layer type management --
 protected:
     tTVPLayerType Type; // user set Type
     tTVPLayerType DisplayType; // actual Type
@@ -350,7 +350,7 @@ public:
 
     void ConvertLayerType(tTVPDrawFace fromtype);
 
-    //-------------------------------------------- geographical management --
+           //-------------------------------------------- geographical management --
 protected:
     tTVPRect Rect;
     bool ExposedRegionValid;
@@ -402,7 +402,7 @@ public:
     void FromPrimaryCoordinates(tjs_int &x, tjs_int &y) const;
     void FromPrimaryCoordinates(tjs_real &x, tjs_real &y) const;
 
-    //-------------------------------------------- image buffer management --
+           //-------------------------------------------- image buffer management --
     tTVPBaseTexture *MainImage;
 
 protected:
@@ -436,7 +436,7 @@ public:
 #define TVP_REVRGB(v)                                                          \
     ((v & 0xFF00FF00) | ((v >> 16) & 0xFF) | ((v & 0xFF) << 16))
 #endif
-    void SetNeutralColor(tjs_uint32 color) { NeutralColor = TVP_REVRGB(color); }
+        void SetNeutralColor(tjs_uint32 color) { NeutralColor = TVP_REVRGB(color); }
     tjs_uint32 GetNeutralColor() const { return TVP_REVRGB(NeutralColor); }
 
     void SetHasImage(bool b);
@@ -498,7 +498,7 @@ public:
     void *GetProvinceImagePixelBufferForWrite();
     tjs_int GetProvinceImagePixelBufferPitch() const;
 
-    //---------------------------------- input event / hit test management --
+           //---------------------------------- input event / hit test management --
 private:
     tTVPHitType HitType;
     tjs_int HitThreshold;
@@ -688,7 +688,7 @@ public:
                       tjs_uint32 shift); // default keyboard behavior
     void DefaultKeyPress(tjs_char key); // default keyboard behavior
 
-    //--------------------------------------------------- cache management --
+           //--------------------------------------------------- cache management --
 private:
     tTVPBaseTexture *CacheBitmap;
     // tTVPComplexRect CachedRegion;
@@ -713,7 +713,7 @@ public:
     void SetCached(bool b);
     bool GetCached() const { return Cached; }
 
-    //--------------------------------------------- drawing function stuff --
+           //--------------------------------------------- drawing function stuff --
 protected:
     tTVPDrawFace DrawFace; // (actual) current drawing layer face
     tTVPDrawFace Face; // (outward) current drawing layer face
@@ -854,7 +854,7 @@ public:
     void SetImageModified(bool b) { ImageModified = b; }
 
 
-    //------------------------------------------- interface to font object --
+           //------------------------------------------- interface to font object --
 
 private:
     tTVPFont Font;
@@ -902,7 +902,7 @@ public:
     iTJSDispatch2 *GetFontObjectNoAddRef();
 
 
-    //------------------------------------------------ updating management --
+           //------------------------------------------------ updating management --
 protected:
     tjs_int UpdateOfsX, UpdateOfsY;
     tTVPRect
@@ -950,7 +950,7 @@ public:
     void SetCallOnPaint(bool b) { CallOnPaint = b; }
     bool GetCallOnPaint() const { return CallOnPaint; }
 
-    // void InternalDrawNoCache_GPU(tTVPDrawable *target, const tTVPRect &rect);
+           // void InternalDrawNoCache_GPU(tTVPDrawable *target, const tTVPRect &rect);
     void InternalDrawNoCache_CPU(tTVPDrawable *target, const tTVPRect &rect);
     virtual void Draw_GPU(tTVPDrawable *target, int x, int y, const tTVPRect &r,
                           bool visiblecheck = true);
@@ -981,10 +981,10 @@ private:
     void Draw(tTVPDrawable *target, const tTVPRect &r,
               bool visiblecheck = true);
 
-    // these 3 below are methods from tTVPDrawable
+           // these 3 below are methods from tTVPDrawable
     tTVPBaseTexture *GetDrawTargetBitmap(const tTVPRect &rect,
-                                         tTVPRect &cliprect);
-    tTVPLayerType GetTargetLayerType();
+                                         tTVPRect &cliprect) override;
+    tTVPLayerType GetTargetLayerType() override;
     void DrawCompleted(const tTVPRect &destrect, tTVPBaseTexture *bmp,
                        const tTVPRect &cliprect, tTVPLayerType type,
                        tjs_int opacity) override;
@@ -1002,7 +1002,7 @@ private:
     tTVPBaseTexture *Complete(); // complete entire area of the layer
 
 
-    //---------------------------------------------- transition management --
+           //---------------------------------------------- transition management --
 private:
     iTVPDivisibleTransHandler *DivisibleTransHandler;
     iTVPGiveUpdateTransHandler *GiveUpdateTransHandler;
@@ -1067,7 +1067,7 @@ private:
 
         tTVPBaseTexture *GetDrawTargetBitmap(const tTVPRect &rect,
                                              tTVPRect &cliprect) override;
-        tTVPLayerType GetTargetLayerType();
+        tTVPLayerType GetTargetLayerType() override;
         void DrawCompleted(const tTVPRect &destrect, tTVPBaseTexture *bmp,
                            const tTVPRect &cliprect, tTVPLayerType type,
                            tjs_int opacity) override;
@@ -1076,7 +1076,7 @@ private:
 
     struct tTransIdleCallback : public tTVPContinuousEventCallbackIntf {
         tTJSNI_BaseLayer *Owner;
-        void TJS_INTF_METHOD OnContinuousCallback(tjs_uint64 tick) {
+        void OnContinuousCallback(tjs_uint64 tick) {
             Owner->InvokeTransition(tick);
         }
         // from tTVPIdleEventCallbackIntf
@@ -1095,9 +1095,9 @@ class tTJSNI_Layer : public tTJSNI_BaseLayer {
 public:
     tTJSNI_Layer(void);
     ~tTJSNI_Layer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
+                        iTJSDispatch2 *tjs_obj);
+    void Invalidate();
     static tTJSNI_Layer *FromVariant(const tTJSVariant &var);
     static tTJSNI_Layer *FromObject(iTJSDispatch2 *obj);
 };
@@ -1109,15 +1109,15 @@ public:
 class tTJSNC_Layer : public tTJSNativeClass
 {
 public:
-	tTJSNC_Layer();
-	static tjs_uint32 ClassID;
+    tTJSNC_Layer();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
-	/*
-		implement this in each platform.
-		this must return a proper instance of tTJSNI_Layer.
-	*/
+    tTJSNativeInstance* CreateNativeInstance();
+    /*
+            implement this in each platform.
+            this must return a proper instance of tTJSNI_Layer.
+    */
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_Layer();

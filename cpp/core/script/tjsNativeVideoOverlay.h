@@ -38,9 +38,9 @@ class tTJSNI_BaseVideoOverlay : public tTJSNativeInstance {
 
 public:
     tTJSNI_BaseVideoOverlay();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
+                        iTJSDispatch2 *tjs_obj);
+    void Invalidate();
 
 protected:
     iTJSDispatch2 *Owner;
@@ -83,10 +83,10 @@ class tTJSNI_VideoOverlay : public tTJSNI_BaseVideoOverlay {
     tTVPRect Rect;
     bool Visible;
 
-    //	HWND OwnerWindow;
+           //	HWND OwnerWindow;
 
-    // HWND UtilWindow; // window which receives messages from video overlay
-    // object
+           // HWND UtilWindow; // window which receives messages from video overlay
+           // object
     NativeEventQueue<tTJSNI_VideoOverlay> EventQueue;
 
     tTVPLocalTempStorageHolder *LocalTempStorageHolder;
@@ -104,23 +104,23 @@ class tTJSNI_VideoOverlay : public tTJSNI_BaseVideoOverlay {
     int SegLoopStartFrame; //!< セグメントループ開始フレーム
     int SegLoopEndFrame; //!< セグメントループ終了フレーム
 
-    //! イベントが設定された時、現在フレームの方が進んでいたかどうか。
-    //! イベントが設定されているフレームより前に現在フレームが移動した時、このフラグは解除される。
+           //! イベントが設定された時、現在フレームの方が進んでいたかどうか。
+           //! イベントが設定されているフレームより前に現在フレームが移動した時、このフラグは解除される。
     bool IsEventPast;
     int EventFrame; //!< イベントを発生させるフレーム
 
 public:
     tTJSNI_VideoOverlay();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
+                        iTJSDispatch2 *tjs_obj)override;
+    void Invalidate() override;
 
 
 public:
     void Open(const ttstr &name);
     void Close();
     void Shutdown();
-    void Disconnect(); // tTJSNI_BaseVideoOverlay::Disconnect override
+    void Disconnect()override; // tTJSNI_BaseVideoOverlay::Disconnect override
 
     void Play();
     void Stop();
@@ -157,7 +157,7 @@ public:
     tjs_int GetHeight() const { return Rect.get_height(); }
 
     void SetVisible(bool b);
-    bool GetVisible() const { return Visible; }
+    bool GetVisible() const override { return Visible; }
 
     void SetTimePosition(tjs_uint64 p);
     tjs_uint64 GetTimePosition();
@@ -261,11 +261,11 @@ public:
 class tTJSNC_VideoOverlay : public tTJSNativeClass
 {
 public:
-	tTJSNC_VideoOverlay();
-	static tjs_uint32 ClassID;
+    tTJSNC_VideoOverlay();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_VideoOverlay();

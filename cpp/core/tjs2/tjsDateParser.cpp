@@ -96,7 +96,7 @@ tTJSDateParser::tTJSDateParser(const tjs_char *in)
 	if(!TimeZoneSet && !TimeZoneOffsetSet)
 	{
 		TimeZoneSet = true;
-		TimeZone = -TJS_timezone;
+            TimeZone = -TJS_timezone();
 	}
 
 	// Adjust AM/PM
@@ -116,7 +116,7 @@ tTJSDateParser::tTJSDateParser(const tjs_char *in)
 	if(tmv == -1) TJS_eTJSError(TJSInvalidValueForTimestamp);
 
 	// adjust time zone
-	tmv -= TJS_timezone;
+        tmv -= TJS_timezone();
 	tjs_int tz = 0;
 	if(TimeZoneSet) tz += TimeZone;
 	if(TimeZoneOffsetSet) tz += TimeZoneOffset;
