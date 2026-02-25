@@ -135,7 +135,7 @@ private:
     }
 
 
-    void TJS_INTF_METHOD OnCompact(tjs_int level) {
+    void OnCompact(tjs_int level) {
         // OnCompact method from tTVPCompactEventCallbackIntf
         // called when the application is idle, deactivated, minimized, or
         // etc...
@@ -390,7 +390,7 @@ tTJSNI_BaseLayer::tTJSNI_BaseLayer() {
 //---------------------------------------------------------------------------
 tTJSNI_BaseLayer::~tTJSNI_BaseLayer() { tTVPTempBitmapHolder::Release(); }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseLayer::Construct(tjs_int numparams,
+tjs_error tTJSNI_BaseLayer::Construct(tjs_int numparams,
                                                       tTJSVariant **param,
                                                       iTJSDispatch2 *tjs_obj) {
     if(numparams < 2)
@@ -455,7 +455,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseLayer::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseLayer::Invalidate() {
+void tTJSNI_BaseLayer::Invalidate() {
     Shutdown = true;
 
     // stop transition
@@ -528,7 +528,7 @@ void tTJSNI_BaseLayer::RegisterCompactEventHook() {
     }
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseLayer::OnCompact(tjs_int level) {
+void tTJSNI_BaseLayer::OnCompact(tjs_int level) {
     // method from tTVPCompactEventCallbackIntf
     if(level >= TVP_COMPACT_LEVEL_DEACTIVATE)
         CompactCache();
@@ -7360,13 +7360,13 @@ tTJSNI_Layer::tTJSNI_Layer(void) {}
 //---------------------------------------------------------------------------
 tTJSNI_Layer::~tTJSNI_Layer() {}
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_Layer::Construct(tjs_int numparams,
+tjs_error tTJSNI_Layer::Construct(tjs_int numparams,
                                                   tTJSVariant **param,
                                                   iTJSDispatch2 *tjs_obj) {
     return tTJSNI_BaseLayer::Construct(numparams, param, tjs_obj);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Layer::Invalidate() {
+void tTJSNI_Layer::Invalidate() {
     tTJSNI_BaseLayer::Invalidate();
 }
 //---------------------------------------------------------------------------

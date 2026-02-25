@@ -280,7 +280,7 @@ void TVPClearScnearioCache()
 //---------------------------------------------------------------------------
 struct tTVPClearScenarioCacheCallback : public tTVPCompactEventCallbackIntf
 {
-	virtual void TJS_INTF_METHOD OnCompact(tjs_int level)
+	virtual void OnCompact(tjs_int level)
 	{
 		if (level >= TVP_COMPACT_LEVEL_DEACTIVATE)
 		{
@@ -402,8 +402,7 @@ tTJSNI_KAGParser::tTJSNI_KAGParser()
 	dictclass->Release();
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSNI_KAGParser::Construct(tjs_int numparams, tTJSVariant** param,
+tjs_error tTJSNI_KAGParser::Construct(tjs_int numparams, tTJSVariant** param,
 	iTJSDispatch2* tjs_obj)
 {
 	tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
@@ -414,7 +413,7 @@ tTJSNI_KAGParser::Construct(tjs_int numparams, tTJSVariant** param,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_KAGParser::Invalidate()
+void tTJSNI_KAGParser::Invalidate()
 {
 	// invalidate this object
 
@@ -2329,7 +2328,7 @@ iTJSDispatch2* tTJSNI_KAGParser::GetMacroTopNoAddRef() const
 
 
 
-static iTJSNativeInstance* TJS_INTF_METHOD Create_NI_KAGParser() {
+static iTJSNativeInstance* Create_NI_KAGParser() {
 	return new tTJSNI_KAGParser();
 }
 

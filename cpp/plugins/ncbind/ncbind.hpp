@@ -59,7 +59,7 @@ struct ncbTypedefs {
 	// インスタンスに変換して渡すコールバック 
 	template <class T> 
 	struct CallbackWithInstance {
-		typedef tjs_error (TJS_INTF_METHOD    *Type)(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, T *nativeInstance);
+		typedef tjs_error (   *Type)(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, T *nativeInstance);
 	};
 
 	template <typename A, typename B> struct TypeEqual       { enum { NotEqual, Result = false }; };
@@ -134,12 +134,12 @@ struct ncbInstanceAdaptor : public tTJSNativeInstance {
 	/*destructor*/ ~ncbInstanceAdaptor() { _deleteInstance(); }
 
 	// TJS2 オブジェクトが作成されるときに呼ばれる 
-	//tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj); 
+	//tjs_error Construct(tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj); 
 	// …のだが，TJS_BEGIN_NATIVE_CONSTRUCTOR マクロから呼ばれるので 
 	// 上記マクロを使用せずに独自実装しているここでは使用しない(⇒ncbNativeClassConstructor) 
 
 	/// オブジェクトが無効化されるときに呼ばれる 
-	void TJS_INTF_METHOD Invalidate() { _deleteInstance(); }
+	void Invalidate() { _deleteInstance(); }
 
 private:
 	/// 実インスタンスへのポインタ 
@@ -234,7 +234,7 @@ public:
 	}
 
 	/// 空の Adaptor を生成する (tTJSNativeClassForPlugin型の関数) 
-	static iTJSNativeInstance* TJS_INTF_METHOD CreateEmptyAdaptor() {
+	static iTJSNativeInstance* CreateEmptyAdaptor() {
 		return static_cast<iTJSNativeInstance*>(new AdaptorT());
 	}
 };
@@ -785,14 +785,14 @@ struct ncbPropAccessor {
 	// FuncCallを任意個数のtTJSVariantを引数で受けるようなメソッドを展開 
 #undef  FOREACH
 #define FOREACH \
-	tjs_error TJS_INTF_METHOD FuncCall(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, FOREACH_COMMA_EXT(FCALL_PRM_EXT) ) { \
+	tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, FOREACH_COMMA_EXT(FCALL_PRM_EXT) ) { \
 		tTJSVariant *params[FOREACH_COUNT]; FOREACH_SPACE_EXT(FCALL_SET_EXT) \
 		return _obj->FuncCall(flag, membername, hint, result, FOREACH_COUNT, params, _obj); \
 	}
 #include FOREACH_INCLUDE
 #undef  FOREACH
 #define FOREACH \
-	tjs_error TJS_INTF_METHOD FuncCall(iTJSDispatch2 *obj, tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, FOREACH_COMMA_EXT(FCALL_PRM_EXT) ) { \
+	tjs_error FuncCall(iTJSDispatch2 *obj, tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, FOREACH_COMMA_EXT(FCALL_PRM_EXT) ) { \
 		tTJSVariant *params[FOREACH_COUNT]; FOREACH_SPACE_EXT(FCALL_SET_EXT) \
 		return _obj->FuncCall(flag, membername, hint, result, FOREACH_COUNT, params, obj); \
 	}
@@ -800,10 +800,10 @@ struct ncbPropAccessor {
 #undef  FCALL_PRM_EXT
 #undef  FCALL_SET_EXT
 	// 引数なしの場合だけ特殊 
-	tjs_error TJS_INTF_METHOD FuncCall(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result) {
+	tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result) {
 		return _obj->FuncCall(flag, membername, hint, result, 0, NULL, _obj);
 	}
-	tjs_error TJS_INTF_METHOD FuncCall(iTJSDispatch2 *obj, tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result) {
+	tjs_error FuncCall(iTJSDispatch2 *obj, tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result) {
 		return _obj->FuncCall(flag, membername, hint, result, 0, NULL, obj);
 	}
 protected:
@@ -882,7 +882,7 @@ struct ncbNativeClassMethodBase : public tTJSDispatch {
 	~ncbNativeClassMethodBase() {}
 
 	/// IsInstanceOf 実装 
-	tjs_error TJS_INTF_METHOD IsInstanceOf(
+	tjs_error IsInstanceOf(
 		tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, 
 		const tjs_char *classname, iTJSDispatch2 *objthis)
 	{
@@ -1347,7 +1347,7 @@ struct ncbNativeClassMethod : public ncbNativeClassMethodBase {
 	} 
 
 	/// FuncCall実装 
-	tjs_error  TJS_INTF_METHOD FuncCall(
+	tjs_error  FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 	{
@@ -1385,7 +1385,7 @@ struct ncbNativeClassConstructor : public ncbNativeClassMethodBase {
 	}
 
 	/// FuncCall実装 
-	tjs_error  TJS_INTF_METHOD FuncCall(
+	tjs_error  FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 	{
@@ -1411,7 +1411,7 @@ protected:
 template <class ClassT>
 struct ncbNativeClassFactory : public ncbNativeClassMethodBase {
 	typedef ncbNativeClassFactory ThisClassT;
-	typedef tjs_error (TJS_INTF_METHOD *MethodT)(ClassT **result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+	typedef tjs_error (*MethodT)(ClassT **result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
 
 	/// constructor 
 	ncbNativeClassFactory(MethodT m) : ncbNativeClassMethodBase(nitMethod), _method(m) {
@@ -1419,7 +1419,7 @@ struct ncbNativeClassFactory : public ncbNativeClassMethodBase {
 	}
 
 	/// FuncCall実装 
-	tjs_error  TJS_INTF_METHOD FuncCall(
+	tjs_error  FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 	{
@@ -1464,7 +1464,7 @@ struct ncbNativeClassProperty : public ncbNativeClassMethodBase {
 	ncbNativeClassProperty(GetterT get, SetterT set) : ncbNativeClassMethodBase(nitProperty), _getter(get), _setter(set) {}
 
 	/// PropGet 実装 
-	tjs_error TJS_INTF_METHOD PropGet(
+	tjs_error PropGet(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 		tTJSVariant *result, iTJSDispatch2 *objthis)
 	{
@@ -1480,7 +1480,7 @@ struct ncbNativeClassProperty : public ncbNativeClassMethodBase {
 	}
 
 	/// PropSet 実装 
-	tjs_error TJS_INTF_METHOD PropSet(
+	tjs_error PropSet(
 		tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, 
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 	{
@@ -1517,8 +1517,8 @@ template <typename T> struct ncbRawCallbackMethod;
 // ネイティブインスタンスのポインタのみあらかじめ取得するコールバック 
 template <class T>
 struct ncbRawCallbackMethod<
-/*        */tjs_error (TJS_INTF_METHOD *         )(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, T *nativeInstance) > : public ncbNativeClassMethodBase {
-	typedef tjs_error (TJS_INTF_METHOD *CallbackT)(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, T *nativeInstance);
+/*        */tjs_error (*         )(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, T *nativeInstance) > : public ncbNativeClassMethodBase {
+	typedef tjs_error (*CallbackT)(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, T *nativeInstance);
 	typedef T                                NativeClassT;
 	typedef ncbRawCallbackMethod             ThisClassT;
 	typedef ncbInstanceAdaptor<NativeClassT> AdaptorT;
@@ -1533,7 +1533,7 @@ struct ncbRawCallbackMethod<
 	}
 
 	/// FuncCall実装 
-	tjs_error  TJS_INTF_METHOD FuncCall(
+	tjs_error  FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 	{
@@ -1582,7 +1582,7 @@ struct ncbRawCallbackMethod<tTJSNativeClassMethodCallback> : public ncbIMethodOb
 	void      Release()     const { delete this; }
 
 	/// PropertyからFuncCallが直接呼ばれるのでラップ 
-	tjs_error  TJS_INTF_METHOD FuncCall(
+	tjs_error  FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 	{
@@ -1609,7 +1609,7 @@ template <>
 struct ncbRawCallbackPropertySelector<int> {
 	typedef struct AccessDenied {
 		AccessDenied(int, ncbNativeClassMethodBase::FlagsT) {}
-		tjs_error  TJS_INTF_METHOD FuncCall(
+		tjs_error  FuncCall(
 			tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 			tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 		{
@@ -1633,7 +1633,7 @@ struct ncbRawCallbackProperty : public ncbNativeClassMethodBase {
 		  _getter(get, f), _setter(set, f), _flag(f) {} 
 
 	/// PropGet 実装 
-	tjs_error TJS_INTF_METHOD PropGet(
+	tjs_error PropGet(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, 
 		tTJSVariant *result, iTJSDispatch2 *objthis)
 	{
@@ -1644,7 +1644,7 @@ struct ncbRawCallbackProperty : public ncbNativeClassMethodBase {
 	}
 
 	/// PropSet 実装 
-	tjs_error TJS_INTF_METHOD PropSet(
+	tjs_error PropSet(
 		tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, 
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 	{
@@ -1957,10 +1957,10 @@ private:
 	bool          _hasCtor;		//< コンストラクタを登録したか 
 
 	/// 空のメソッド(finalize Callback用) 
-	static tjs_error TJS_INTF_METHOD EmptyCallback(  tTJSVariant *, tjs_int, tTJSVariant **, iTJSDispatch2 *) { return TJS_S_OK; }
+	static tjs_error EmptyCallback(  tTJSVariant *, tjs_int, tTJSVariant **, iTJSDispatch2 *) { return TJS_S_OK; }
 
 	/// エラーを返すメソッド(empty Constructor用) 
-	static tjs_error TJS_INTF_METHOD NotImplCallback(tTJSVariant *, tjs_int, tTJSVariant **, iTJSDispatch2 *) { return TJS_E_NOTIMPL; }
+	static tjs_error NotImplCallback(tTJSVariant *, tjs_int, tTJSVariant **, iTJSDispatch2 *) { return TJS_E_NOTIMPL; }
 
 protected:
 	void _AddDummyConstructor() const {

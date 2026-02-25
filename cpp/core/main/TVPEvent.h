@@ -244,7 +244,7 @@ extern ttstr TVPActionName;
 class tTVPContinuousEventCallbackIntf // callback class for continuous event delivering
 {
 public:
-	virtual void TJS_INTF_METHOD OnContinuousCallback(tjs_uint64 tick) = 0;
+	virtual void OnContinuousCallback(tjs_uint64 tick) = 0;
 };
 /*]*/
 //---------------------------------------------------------------------------
@@ -285,7 +285,7 @@ extern bool TVPProcessContinuousHandlerEventFlag;
 class tTVPCompactEventCallbackIntf // callback class for compact event delivering
 {
 public:
-	virtual void TJS_INTF_METHOD OnCompact(tjs_int level) = 0;
+	virtual void OnCompact(tjs_int level) = 0;
 };
 /*]*/
 //---------------------------------------------------------------------------
@@ -333,10 +333,9 @@ protected:
 
 public:
 	tTJSNI_AsyncTrigger();
-	tjs_error TJS_INTF_METHOD
-		Construct(tjs_int numparams, tTJSVariant** param,
+	tjs_error Construct(tjs_int numparams, tTJSVariant** param,
 			iTJSDispatch2* tjs_obj);
-	void TJS_INTF_METHOD Invalidate();
+	void Invalidate();
 
 public:
 	tTJSVariantClosure GetActionOwnerNoAddRef() const { return ActionOwner; }

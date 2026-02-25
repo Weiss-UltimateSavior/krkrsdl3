@@ -11,9 +11,9 @@ class tTJSNI_BaseCDDASoundBuffer : public tTJSNI_SoundBuffer {
 
 public:
     tTJSNI_BaseCDDASoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
 protected:
 public:
@@ -51,9 +51,9 @@ class tTJSNI_CDDASoundBuffer : public tTJSNI_BaseCDDASoundBuffer {
 
 public:
     tTJSNI_CDDASoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
 #ifdef ENABLE_CDDA
     //-- playing stuff ----------------------------------------------------

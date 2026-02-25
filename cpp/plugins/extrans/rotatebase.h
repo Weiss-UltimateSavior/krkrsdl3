@@ -64,7 +64,7 @@ public:
 
 	virtual ~tTVPBaseRotateTransHandler();
 
-	tjs_error TJS_INTF_METHOD AddRef()
+	tjs_error AddRef()
 	{
 		// iTVPBaseTransHandler の AddRef
 		// 参照カウンタをインクリメント
@@ -72,7 +72,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD Release()
+	tjs_error Release()
 	{
 		// iTVPBaseTransHandler の Release
 		// 参照カウンタをデクリメントし、0 になるならば delete this
@@ -84,7 +84,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD SetOption(
+	tjs_error SetOption(
 			/*in*/iTVPSimpleOptionProvider *options // option provider
 		)
 	{
@@ -93,14 +93,14 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD StartProcess(tjs_uint64 tick);
+	tjs_error StartProcess(tjs_uint64 tick);
 
-	tjs_error TJS_INTF_METHOD EndProcess();
+	tjs_error EndProcess();
 
-	tjs_error TJS_INTF_METHOD Process(
+	tjs_error Process(
 			tTVPDivisibleData *data);
 
-	tjs_error TJS_INTF_METHOD MakeFinalImage(
+	tjs_error MakeFinalImage(
 			iTVPScanLineProvider ** dest,
 			iTVPScanLineProvider * src1,
 			iTVPScanLineProvider * src2)

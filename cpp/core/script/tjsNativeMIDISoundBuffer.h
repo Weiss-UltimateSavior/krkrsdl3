@@ -12,9 +12,9 @@ class tTJSNI_BaseMIDISoundBuffer : public tTJSNI_SoundBuffer {
 
 public:
     tTJSNI_BaseMIDISoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
 protected:
 public:
@@ -37,9 +37,9 @@ class tTJSNI_MIDISoundBuffer : public tTJSNI_BaseMIDISoundBuffer {
 
 public:
     tTJSNI_MIDISoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
 #ifdef TVP_ENABLE_MIDI
 private:

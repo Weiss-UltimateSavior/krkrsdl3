@@ -131,7 +131,7 @@ public:
 	tTVPRotateZoomTransHandlerProvider() { RefCount = 1; }
 	~tTVPRotateZoomTransHandlerProvider() {; }
 
-	tjs_error TJS_INTF_METHOD AddRef()
+	tjs_error AddRef()
 	{
 		// iTVPBaseTransHandler の AddRef
 		// 参照カウンタをインクリメント
@@ -139,7 +139,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD Release()
+	tjs_error Release()
 	{
 		// iTVPBaseTransHandler の Release
 		// 参照カウンタをデクリメントし、0 になるならば delete this
@@ -150,7 +150,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD GetName(
+	tjs_error GetName(
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
@@ -159,7 +159,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD StartTransition(
+	tjs_error StartTransition(
 			/*in*/iTVPSimpleOptionProvider *options, // option provider
 			/*in*/iTVPSimpleImageProvider *imagepro, // image provider
 			/*in*/tTVPLayerType layertype, // destination layer type
@@ -231,7 +231,7 @@ public:
 	tTVPRotateVanishTransHandlerProvider() { RefCount = 1; }
 	~tTVPRotateVanishTransHandlerProvider() {; }
 
-	tjs_error TJS_INTF_METHOD AddRef()
+	tjs_error AddRef()
 	{
 		// iTVPBaseTransHandler の AddRef
 		// 参照カウンタをインクリメント
@@ -239,7 +239,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD Release()
+	tjs_error Release()
 	{
 		// iTVPBaseTransHandler の Release
 		// 参照カウンタをデクリメントし、0 になるならば delete this
@@ -250,7 +250,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD GetName(
+	tjs_error GetName(
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
@@ -259,7 +259,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD StartTransition(
+	tjs_error StartTransition(
 			/*in*/iTVPSimpleOptionProvider *options, // option provider
 			/*in*/iTVPSimpleImageProvider *imagepro, // image provider
 			/*in*/tTVPLayerType layertype, // destination layer type
@@ -403,7 +403,7 @@ public:
 	tTVPRotateSwapTransHandlerProvider() { RefCount = 1; }
 	~tTVPRotateSwapTransHandlerProvider() {; }
 
-	tjs_error TJS_INTF_METHOD AddRef()
+	tjs_error AddRef()
 	{
 		// iTVPBaseTransHandler の AddRef
 		// 参照カウンタをインクリメント
@@ -411,7 +411,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD Release()
+	tjs_error Release()
 	{
 		// iTVPBaseTransHandler の Release
 		// 参照カウンタをデクリメントし、0 になるならば delete this
@@ -422,7 +422,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD GetName(
+	tjs_error GetName(
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
@@ -431,7 +431,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD StartTransition(
+	tjs_error StartTransition(
 			/*in*/iTVPSimpleOptionProvider *options, // option provider
 			/*in*/iTVPSimpleImageProvider *imagepro, // image provider
 			/*in*/tTVPLayerType layertype, // destination layer type

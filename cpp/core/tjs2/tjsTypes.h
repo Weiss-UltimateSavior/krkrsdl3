@@ -14,36 +14,7 @@
 
 #include <stdint.h>
 #include <stddef.h> // ptrdiff_t
-
-#ifdef HAVE_CONFIG_H
- #include "config.h"
-
- #ifndef HAVE_STRINGIZE
- # error "preprocessor stringize required."
- #endif
-
- #if SIZEOF_INT < 4
- # error "sizeof(int) must be larger than or equal to 4."
- #endif
-#endif /* end of HAVE_CONFIG_H */
-
-
-
-/* Functions that needs to be exported ( for non-class-member functions ) */
-/* This should only be applyed for function declaration in headers ( not body ) */
-#define TJS_EXP_FUNC_DEF(rettype, name, arg) extern rettype name arg
-
-
-/* Functions that needs to be exported ( for class-member functions ) */
-#define TJS_METHOD_DEF(rettype, name, arg) rettype name arg
-#define TJS_CONST_METHOD_DEF(rettype, name, arg) rettype name arg const
-#define TJS_STATIC_METHOD_DEF(rettype, name, arg) static rettype name arg
-#define TJS_STATIC_CONST_METHOD_DEF(rettype, name, arg) static rettype name arg const
-#define TJS_METHOD_RET_EMPTY
-#define TJS_METHOD_RET(type)
-
 #include <sys/types.h>
-#include <stdint.h>
 
 typedef int8_t tjs_int8;
 typedef uint8_t tjs_uint8;
@@ -57,7 +28,6 @@ typedef uint64_t tjs_uint64;
 
 typedef char16_t tjs_char;
 #define TJS_W(X) u##X
-#define TJS_N(X) X
 
 typedef char tjs_nchar;
 typedef double tjs_real;
@@ -78,12 +48,6 @@ typedef uintptr_t tjs_uintptr_t;
 	#define TJS_HOST_IS_BIG_ENDIAN 0
 	#define TJS_HOST_IS_LITTLE_ENDIAN 1
 #endif
-
-#define TJS_INTF_METHOD
-#define TJS_USERENTRY
-
-
-//#endif /* end of defined(_WIN32) && !defined(__GNUC__) */
 
 /*[*/
 

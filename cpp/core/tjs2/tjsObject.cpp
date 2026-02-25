@@ -107,7 +107,7 @@ tTJSDispatch::~tTJSDispatch()
 	}
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD  tTJSDispatch::AddRef(void)
+tjs_uint  tTJSDispatch::AddRef(void)
 {
 #ifdef TVP_IN_PLUGIN_STUB // TVP plug-in support
 	TVPPluginGlobalRefCount++;
@@ -115,7 +115,7 @@ tjs_uint TJS_INTF_METHOD  tTJSDispatch::AddRef(void)
 	return ++RefCount;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD  tTJSDispatch::Release(void)
+tjs_uint  tTJSDispatch::Release(void)
 {
 #ifdef TVP_IN_PLUGIN_STUB // TVP plug-in support
 	TVPPluginGlobalRefCount--;
@@ -138,8 +138,7 @@ tjs_uint TJS_INTF_METHOD  tTJSDispatch::Release(void)
 	return --RefCount;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::FuncCallByNum(
+tjs_error 	tTJSDispatch::FuncCallByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		tTJSVariant *result,
@@ -153,8 +152,7 @@ tjs_error TJS_INTF_METHOD
 	return FuncCall(flag, buf, NULL, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::PropGetByNum(
+tjs_error 	tTJSDispatch::PropGetByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		tTJSVariant *result,
@@ -166,8 +164,7 @@ tjs_error TJS_INTF_METHOD
 	return PropGet(flag, buf, NULL, result, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::PropSetByNum(
+tjs_error 	tTJSDispatch::PropSetByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		const tTJSVariant *param,
@@ -179,8 +176,7 @@ tjs_error TJS_INTF_METHOD
 	return PropSet(flag, buf, NULL, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::GetCountByNum(
+tjs_error 	tTJSDispatch::GetCountByNum(
 		tjs_int *result,
 		tjs_int num,
 		iTJSDispatch2 *objthis
@@ -191,8 +187,7 @@ tjs_error TJS_INTF_METHOD
 	return GetCount(result, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::DeleteMemberByNum(
+tjs_error 	tTJSDispatch::DeleteMemberByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		iTJSDispatch2 *objthis
@@ -203,8 +198,7 @@ tjs_error TJS_INTF_METHOD
 	return DeleteMember(flag, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::InvalidateByNum(
+tjs_error 	tTJSDispatch::InvalidateByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		iTJSDispatch2 *objthis
@@ -215,8 +209,7 @@ tjs_error TJS_INTF_METHOD
 	return Invalidate(flag, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::IsValidByNum(
+tjs_error 	tTJSDispatch::IsValidByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		iTJSDispatch2 *objthis
@@ -227,8 +220,7 @@ tjs_error TJS_INTF_METHOD
 	return IsValid(flag, buf, NULL, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::CreateNewByNum(
+tjs_error 	tTJSDispatch::CreateNewByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		iTJSDispatch2 **result,
@@ -242,8 +234,7 @@ tjs_error TJS_INTF_METHOD
 	return CreateNew(flag, buf, NULL, result, numparams, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::IsInstanceOfByNum(
+tjs_error 	tTJSDispatch::IsInstanceOfByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		const tjs_char *classname,
@@ -255,8 +246,7 @@ tjs_error TJS_INTF_METHOD
 	return IsInstanceOf(flag, buf, NULL, classname, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::OperationByNum(
+tjs_error 	tTJSDispatch::OperationByNum(
 		tjs_uint32 flag,
 		tjs_int num,
 		tTJSVariant *result,
@@ -269,8 +259,7 @@ tjs_error TJS_INTF_METHOD
 	return Operation(flag, buf, NULL, result, param, objthis);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDispatch::Operation(
+tjs_error 	tTJSDispatch::Operation(
 		tjs_uint32 flag,
 		const tjs_char *membername,
 		tjs_uint32 *hint,
@@ -321,8 +310,7 @@ public:
 	{
 	};
 
-	tjs_error TJS_INTF_METHOD
-	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+	tjs_error 	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	 tTJSVariant *result,
 		iTJSDispatch2 *objthis)
 	{
@@ -332,8 +320,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD
-	PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+	tjs_error 	PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	 const tTJSVariant *param,
 		iTJSDispatch2 *objthis)
 	{
@@ -342,8 +329,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD
-	PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
+	tjs_error 	PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 		const tTJSVariant *param, iTJSDispatch2 *objthis)
 	{
 		if(membername) return TJS_E_MEMBERNOTFOUND;
@@ -1314,8 +1300,7 @@ tjs_error TJSDefaultFuncCall(tjs_uint32 flag, tTJSVariant &targ, tTJSVariant *re
 	return TJS_E_INVALIDTYPE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -1390,8 +1375,7 @@ tjs_error TJSDefaultPropGet(tjs_uint32 flag, tTJSVariant &targ, tTJSVariant *res
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result,
 	iTJSDispatch2 *objthis)
 {
@@ -1474,8 +1458,7 @@ tjs_error TJSDefaultPropSet(tjs_uint32 flag, tTJSVariant &targ, const tTJSVarian
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -1555,8 +1538,7 @@ tTJSCustomObject::PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint3
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -1569,8 +1551,7 @@ tTJSCustomObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_uint
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
+tjs_error tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 	const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -1650,8 +1631,7 @@ tTJSCustomObject::PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback, iTJSDispatch2 *objthis)
+tjs_error tTJSCustomObject::EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback, iTJSDispatch2 *objthis)
 {
 	if(!GetValidity()) return TJS_E_INVALIDOBJECT;
 
@@ -1660,8 +1640,7 @@ tTJSCustomObject::EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback, iTJ
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::DeleteMember(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::DeleteMember(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -1695,8 +1674,7 @@ tjs_error TJSDefaultInvalidate(tjs_uint32 flag, tTJSVariant &targ, iTJSDispatch2
 	return TJS_S_FALSE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::Invalidate(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::Invalidate(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -1745,8 +1723,7 @@ tjs_error TJSDefaultIsValid(tjs_uint32 flag, tTJSVariant &targ, iTJSDispatch2 * 
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	iTJSDispatch2 *objthis)
 {
 	if(membername == NULL)
@@ -1792,8 +1769,7 @@ tjs_error TJSDefaultCreateNew(tjs_uint32 flag, tTJSVariant &targ,
 	return TJS_E_INVALIDTYPE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	iTJSDispatch2 **result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
 {
@@ -1826,8 +1802,7 @@ tTJSCustomObject::CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_ui
 }
 //---------------------------------------------------------------------------
 /*
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::GetSuperClass(tjs_uint32 flag, iTJSDispatch2 **result,
+tjs_error tTJSCustomObject::GetSuperClass(tjs_uint32 flag, iTJSDispatch2 **result,
 		iTJSDispatch2 *objthis)
 {
 	// TODO: GetSuperClass's reason for being
@@ -1883,8 +1858,7 @@ tjs_error TJSDefaultIsInstanceOf(tjs_uint32 flag, tTJSVariant &targ, const tjs_c
 	return TJS_S_FALSE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	const tjs_char *classname, iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -1981,8 +1955,7 @@ tjs_error TJSDefaultOperation(tjs_uint32 flag, tTJSVariant &targ,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSCustomObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	tTJSVariant *result, const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
 	if(!GetValidity())
@@ -2069,8 +2042,7 @@ tTJSCustomObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uin
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSCustomObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
+tjs_error tTJSCustomObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
 		iTJSNativeInstance **pointer)
 {
 	if(flag == TJS_NIS_GETINSTANCE)
@@ -2106,7 +2078,7 @@ tTJSCustomObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid,
 	return TJS_E_NOTIMPL;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD 
+tjs_error 
 tTJSCustomObject::ClassInstanceInfo(tjs_uint32 flag, tjs_uint num, tTJSVariant *value)
 {
 	switch(flag)

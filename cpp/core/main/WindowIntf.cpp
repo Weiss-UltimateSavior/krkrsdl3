@@ -139,8 +139,7 @@ tTJSNI_BaseWindow::~tTJSNI_BaseWindow()
 	TVPUnregisterWindowToList(static_cast<tTJSNI_Window*>(this));  // making sure...
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSNI_BaseWindow::Construct(tjs_int numparams, tTJSVariant **param,
+tjs_error tTJSNI_BaseWindow::Construct(tjs_int numparams, tTJSVariant **param,
 		iTJSDispatch2 *tjs_obj)
 {
 	Owner = tjs_obj; // no addref
@@ -172,8 +171,7 @@ tTJSNI_BaseWindow::Construct(tjs_int numparams, tTJSVariant **param,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD
-tTJSNI_BaseWindow::Invalidate()
+void tTJSNI_BaseWindow::Invalidate()
 {
 	// remove from list
 	TVPUnregisterWindowToList(static_cast<tTJSNI_Window*>(this));
@@ -585,12 +583,12 @@ void tTJSNI_BaseWindow::PostReleaseCaptureEvent()
 		new tTVPOnReleaseCaptureInputEvent(this));
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseWindow::RegisterLayerManager(iTVPLayerManager * manager)
+void tTJSNI_BaseWindow::RegisterLayerManager(iTVPLayerManager * manager)
 {
 	if( DrawDevice ) DrawDevice->AddLayerManager(manager);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseWindow::UnregisterLayerManager(iTVPLayerManager * manager)
+void tTJSNI_BaseWindow::UnregisterLayerManager(iTVPLayerManager * manager)
 {
 	if( DrawDevice ) DrawDevice->RemoveLayerManager(manager);
 }
@@ -651,7 +649,7 @@ void tTJSNI_BaseWindow::SetShowUpdateRect(bool b)
 	if( DrawDevice ) DrawDevice->SetShowUpdateRect(b);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseWindow::RequestUpdate()
+void tTJSNI_BaseWindow::RequestUpdate()
 {
 	// is called from primary layer
 
@@ -659,7 +657,7 @@ void TJS_INTF_METHOD tTJSNI_BaseWindow::RequestUpdate()
 	TVPPostWindowUpdate((tTJSNI_Window*)this);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseWindow::NotifySrcResize()
+void tTJSNI_BaseWindow::NotifySrcResize()
 {
 	// is called from primary layer
 	if(WindowUpdating)
@@ -784,7 +782,7 @@ tTJSNI_Window::tTJSNI_Window()
     Form = NULL;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_Window::Construct(tjs_int numparams,
+tjs_error tTJSNI_Window::Construct(tjs_int numparams,
                                                    tTJSVariant** param,
                                                    iTJSDispatch2* tjs_obj)
 {
@@ -808,7 +806,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_Window::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::Invalidate()
+void tTJSNI_Window::Invalidate()
 {
     tTJSNI_BaseWindow::Invalidate();
     if (Form)
@@ -950,7 +948,7 @@ void tTJSNI_Window::PostInputEvent(const ttstr& name, iTJSDispatch2* params)
 }
 
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::NotifySrcResize()
+void tTJSNI_Window::NotifySrcResize()
 {
     tTJSNI_BaseWindow::NotifySrcResize();
 
@@ -962,47 +960,47 @@ void TJS_INTF_METHOD tTJSNI_Window::NotifySrcResize()
         Form->SetPaintBoxSize(w, h);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetDefaultMouseCursor()
+void tTJSNI_Window::SetDefaultMouseCursor()
 {
     // set window mouse cursor to default
     if (Form)
         Form->SetDefaultMouseCursor();
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetMouseCursor(tjs_int handle)
+void tTJSNI_Window::SetMouseCursor(tjs_int handle)
 {
     // set window mouse cursor
     if (Form)
         Form->SetMouseCursor(handle);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::GetCursorPos(tjs_int& x, tjs_int& y)
+void tTJSNI_Window::GetCursorPos(tjs_int& x, tjs_int& y)
 {
     // get cursor pos in primary layer's coordinates
     if (Form)
         Form->GetCursorPos(x, y);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetCursorPos(tjs_int x, tjs_int y)
+void tTJSNI_Window::SetCursorPos(tjs_int x, tjs_int y)
 {
     // set cursor pos in primar layer's coordinates
     if (Form)
         Form->SetCursorPos(x, y);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::WindowReleaseCapture()
+void tTJSNI_Window::WindowReleaseCapture()
 {
     //::ReleaseCapture(); // Windows API
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetHintText(iTJSDispatch2* sender, const ttstr& text)
+void tTJSNI_Window::SetHintText(iTJSDispatch2* sender, const ttstr& text)
 {
     // set hint text to window
     if (Form)
         Form->SetHintText(sender, text);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetAttentionPoint(tTJSNI_BaseLayer* layer, tjs_int l, tjs_int t)
+void tTJSNI_Window::SetAttentionPoint(tTJSNI_BaseLayer* layer, tjs_int l, tjs_int t)
 {
     // set attention point to window
     if (Form)
@@ -1025,14 +1023,14 @@ void TJS_INTF_METHOD tTJSNI_Window::SetAttentionPoint(tTJSNI_BaseLayer* layer, t
     }
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::DisableAttentionPoint()
+void tTJSNI_Window::DisableAttentionPoint()
 {
     // disable attention point
     if (Form)
         Form->DisableAttentionPoint();
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetImeMode(tTVPImeMode mode)
+void tTJSNI_Window::SetImeMode(tTVPImeMode mode)
 {
     // set ime mode
     if (Form)
@@ -1055,7 +1053,7 @@ tTVPImeMode tTJSNI_Window::GetDefaultImeMode() const
     return ::imDisable;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::ResetImeMode()
+void tTJSNI_Window::ResetImeMode()
 {
     // set default ime mode ( default mode is imDisable; IME is disabled )
     if (Form)
@@ -1771,13 +1769,13 @@ void tTJSNI_Window::UpdateVSyncThread()
 {
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::StartBitmapCompletion(iTVPLayerManager* manager)
+void tTJSNI_Window::StartBitmapCompletion(iTVPLayerManager* manager)
 {
     if (DrawDevice)
         DrawDevice->StartBitmapCompletion(manager);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::NotifyBitmapCompleted(class iTVPLayerManager* manager,
+void tTJSNI_Window::NotifyBitmapCompleted(class iTVPLayerManager* manager,
                                                           tjs_int x,
                                                           tjs_int y,
                                                           tTVPBaseTexture* bmp,
@@ -1791,13 +1789,13 @@ void TJS_INTF_METHOD tTJSNI_Window::NotifyBitmapCompleted(class iTVPLayerManager
     }
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::EndBitmapCompletion(iTVPLayerManager* manager)
+void tTJSNI_Window::EndBitmapCompletion(iTVPLayerManager* manager)
 {
     if (DrawDevice)
         DrawDevice->EndBitmapCompletion(manager);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetMouseCursor(class iTVPLayerManager* manager, tjs_int cursor)
+void tTJSNI_Window::SetMouseCursor(class iTVPLayerManager* manager, tjs_int cursor)
 {
     if (DrawDevice)
     {
@@ -1808,7 +1806,7 @@ void TJS_INTF_METHOD tTJSNI_Window::SetMouseCursor(class iTVPLayerManager* manag
     }
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::GetCursorPos(class iTVPLayerManager* manager,
+void tTJSNI_Window::GetCursorPos(class iTVPLayerManager* manager,
                                                  tjs_int& x,
                                                  tjs_int& y)
 {
@@ -1816,7 +1814,7 @@ void TJS_INTF_METHOD tTJSNI_Window::GetCursorPos(class iTVPLayerManager* manager
         DrawDevice->GetCursorPos(manager, x, y);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetCursorPos(class iTVPLayerManager* manager,
+void tTJSNI_Window::SetCursorPos(class iTVPLayerManager* manager,
                                                  tjs_int x,
                                                  tjs_int y)
 {
@@ -1824,13 +1822,13 @@ void TJS_INTF_METHOD tTJSNI_Window::SetCursorPos(class iTVPLayerManager* manager
         DrawDevice->SetCursorPos(manager, x, y);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::ReleaseMouseCapture(class iTVPLayerManager* manager)
+void tTJSNI_Window::ReleaseMouseCapture(class iTVPLayerManager* manager)
 {
     if (DrawDevice)
         DrawDevice->WindowReleaseCapture(manager);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetHint(class iTVPLayerManager* manager,
+void tTJSNI_Window::SetHint(class iTVPLayerManager* manager,
                                             iTJSDispatch2* sender,
                                             const ttstr& hint)
 {
@@ -1838,19 +1836,19 @@ void TJS_INTF_METHOD tTJSNI_Window::SetHint(class iTVPLayerManager* manager,
         DrawDevice->SetHintText(manager, sender, hint);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::NotifyLayerResize(class iTVPLayerManager* manager)
+void tTJSNI_Window::NotifyLayerResize(class iTVPLayerManager* manager)
 {
     if (DrawDevice)
         DrawDevice->NotifyLayerResize(manager);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::NotifyLayerImageChange(class iTVPLayerManager* manager)
+void tTJSNI_Window::NotifyLayerImageChange(class iTVPLayerManager* manager)
 {
     if (DrawDevice)
         DrawDevice->NotifyLayerImageChange(manager);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetAttentionPoint(class iTVPLayerManager* manager,
+void tTJSNI_Window::SetAttentionPoint(class iTVPLayerManager* manager,
                                                       tTJSNI_BaseLayer* layer,
                                                       tjs_int x,
                                                       tjs_int y)
@@ -1859,20 +1857,20 @@ void TJS_INTF_METHOD tTJSNI_Window::SetAttentionPoint(class iTVPLayerManager* ma
         DrawDevice->SetAttentionPoint(manager, layer, x, y);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::DisableAttentionPoint(class iTVPLayerManager* manager)
+void tTJSNI_Window::DisableAttentionPoint(class iTVPLayerManager* manager)
 {
     if (DrawDevice)
         DrawDevice->DisableAttentionPoint(manager);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::SetImeMode(class iTVPLayerManager* manager,
+void tTJSNI_Window::SetImeMode(class iTVPLayerManager* manager,
                                                tjs_int mode) // mode == tTVPImeMode
 {
     if (DrawDevice)
         DrawDevice->SetImeMode(manager, (tTVPImeMode)mode);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Window::ResetImeMode(class iTVPLayerManager* manager)
+void tTJSNI_Window::ResetImeMode(class iTVPLayerManager* manager)
 {
     if (DrawDevice)
         DrawDevice->ResetImeMode(manager);

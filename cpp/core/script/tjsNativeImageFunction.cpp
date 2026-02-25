@@ -7,11 +7,11 @@
 
 tTJSNI_ImageFunction::tTJSNI_ImageFunction() {}
 
-tjs_error TJS_INTF_METHOD tTJSNI_ImageFunction::Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj) {
+tjs_error tTJSNI_ImageFunction::Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj) {
 	return TJS_S_OK;
 }
 
-void TJS_INTF_METHOD tTJSNI_ImageFunction::Invalidate() {}
+void tTJSNI_ImageFunction::Invalidate() {}
 
 tTVPBBBltMethod tTJSNC_ImageFunction::GetBltMethodFromOperationMode(tTVPBlendOperationMode mode, tTVPDrawFace face)
 {

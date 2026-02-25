@@ -457,7 +457,7 @@ public:
         if(Buffer) delete [] Buffer;
     }
 
-    tjs_uint TJS_INTF_METHOD Read(tTJSString & targ, tjs_uint size)
+    tjs_uint Read(tTJSString & targ, tjs_uint size)
     {
         if(DirectLoad)
         {
@@ -573,7 +573,7 @@ public:
         }
     }
 
-    void TJS_INTF_METHOD Destruct() { delete this; }
+    void Destruct() { delete this; }
 
 };
 //---------------------------------------------------------------------------
@@ -764,7 +764,7 @@ public:
         Stream->WriteBuffer(buf, 8);
     }
 
-    void TJS_INTF_METHOD Write(const ttstr & targ)
+    void Write(const ttstr & targ)
     {
         tjs_uint16 *buf;
         tjs_int len = targ.GetLen();
@@ -870,7 +870,7 @@ public:
         }
     }
 
-    void TJS_INTF_METHOD Destruct() { delete this; }
+    void Destruct() { delete this; }
 };
 
 //---------------------------------------------------------------------------

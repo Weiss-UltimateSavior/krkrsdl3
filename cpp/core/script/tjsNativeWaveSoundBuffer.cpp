@@ -29,7 +29,7 @@ tTJSNI_BaseSoundBuffer::tTJSNI_BaseSoundBuffer() {
     Status = ssUnload;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseSoundBuffer::Construct(
+tjs_error tTJSNI_BaseSoundBuffer::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     if(numparams < 1)
         return TJS_E_BADPARAMCOUNT;
@@ -44,7 +44,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseSoundBuffer::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseSoundBuffer::Invalidate() {
+void tTJSNI_BaseSoundBuffer::Invalidate() {
     CanDeliverEvents = false;
     TVPCancelSourceEvents(Owner);
     Owner = NULL;
@@ -242,7 +242,7 @@ void TVPRemoveSoundBuffer(tTJSNI_SoundBuffer *buf) {
 //---------------------------------------------------------------------------
 tTJSNI_SoundBuffer::tTJSNI_SoundBuffer() {}
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_SoundBuffer::Construct(
+tjs_error tTJSNI_SoundBuffer::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
     if(TJS_FAILED(hr))
@@ -253,7 +253,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_SoundBuffer::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_SoundBuffer::Invalidate() {
+void tTJSNI_SoundBuffer::Invalidate() {
     TVPRemoveSoundBuffer(this);
 
     inherited::Invalidate();
@@ -752,7 +752,7 @@ tTJSNI_BaseWaveSoundBuffer::tTJSNI_BaseWaveSoundBuffer()
     Filters = TJSCreateArrayObject();
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseWaveSoundBuffer::Construct(tjs_int numparams,
+tjs_error tTJSNI_BaseWaveSoundBuffer::Construct(tjs_int numparams,
                                                                 tTJSVariant** param,
                                                                 iTJSDispatch2* tjs_obj)
 {
@@ -763,7 +763,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseWaveSoundBuffer::Construct(tjs_int numparam
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseWaveSoundBuffer::Invalidate()
+void tTJSNI_BaseWaveSoundBuffer::Invalidate()
 {
     // invalidate wave flags object
     RecreateWaveLabelsObject();
@@ -978,7 +978,7 @@ tTJSNI_WaveFlags::~tTJSNI_WaveFlags()
 {
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_WaveFlags::Construct(tjs_int numparams,
+tjs_error tTJSNI_WaveFlags::Construct(tjs_int numparams,
                                                       tTJSVariant** param,
                                                       iTJSDispatch2* tjs_obj)
 {
@@ -997,7 +997,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_WaveFlags::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_WaveFlags::Invalidate()
+void tTJSNI_WaveFlags::Invalidate()
 {
     Buffer = NULL;
 
@@ -1844,7 +1844,7 @@ tTJSNI_WaveSoundBuffer::tTJSNI_WaveSoundBuffer()
     LastCheckedTick = 0;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_WaveSoundBuffer::Construct(tjs_int numparams,
+tjs_error tTJSNI_WaveSoundBuffer::Construct(tjs_int numparams,
                                                             tTJSVariant** param,
                                                             iTJSDispatch2* tjs_obj)
 {
@@ -1855,7 +1855,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_WaveSoundBuffer::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_WaveSoundBuffer::Invalidate()
+void tTJSNI_WaveSoundBuffer::Invalidate()
 {
     inherited::Invalidate();
 

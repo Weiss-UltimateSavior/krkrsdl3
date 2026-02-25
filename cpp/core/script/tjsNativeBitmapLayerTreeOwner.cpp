@@ -8,7 +8,7 @@ tTJSNI_BitmapLayerTreeOwner::tTJSNI_BitmapLayerTreeOwner() :
 tTJSNI_BitmapLayerTreeOwner::~tTJSNI_BitmapLayerTreeOwner() {}
 
 // tTJSNativeInstance
-tjs_error TJS_INTF_METHOD tTJSNI_BitmapLayerTreeOwner::Construct(
+tjs_error tTJSNI_BitmapLayerTreeOwner::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
 
     Owner = tjs_obj; // no addref
@@ -21,7 +21,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BitmapLayerTreeOwner::Construct(
 
     return TJS_S_OK;
 }
-void TJS_INTF_METHOD tTJSNI_BitmapLayerTreeOwner::Invalidate() {
+void tTJSNI_BitmapLayerTreeOwner::Invalidate() {
     // invalidate bitmap object
     BitmapNI = NULL;
     if(BitmapObject) {
@@ -40,9 +40,8 @@ iTJSDispatch2 *tTJSNI_BitmapLayerTreeOwner::GetBitmapObjectNoAddRef() {
 }
 
 // tTVPLayerTreeOwner
-void TJS_INTF_METHOD
-tTJSNI_BitmapLayerTreeOwner::StartBitmapCompletion(iTVPLayerManager *manager) {}
-void TJS_INTF_METHOD tTJSNI_BitmapLayerTreeOwner::NotifyBitmapCompleted(
+void tTJSNI_BitmapLayerTreeOwner::StartBitmapCompletion(iTVPLayerManager *manager) {}
+void tTJSNI_BitmapLayerTreeOwner::NotifyBitmapCompleted(
     class iTVPLayerManager *manager, tjs_int x, tjs_int y,
     tTVPBaseTexture *bitmapinfo, const tTVPRect &cliprect, tTVPLayerType type,
     tjs_int opacity) {
@@ -83,8 +82,7 @@ void TJS_INTF_METHOD tTJSNI_BitmapLayerTreeOwner::NotifyBitmapCompleted(
         }
     }
 }
-void TJS_INTF_METHOD
-tTJSNI_BitmapLayerTreeOwner::EndBitmapCompletion(iTVPLayerManager *manager) {}
+void tTJSNI_BitmapLayerTreeOwner::EndBitmapCompletion(iTVPLayerManager *manager) {}
 
 void tTJSNI_BitmapLayerTreeOwner::OnSetMouseCursor(tjs_int cursor) {
     if(Owner) {

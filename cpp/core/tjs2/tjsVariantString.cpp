@@ -234,7 +234,7 @@ void TJSDumpStringHeap(void)
 }
 #endif
 //---------------------------------------------------------------------------
-static int TJS_USERENTRY TJSStringHeapSortFunction(const void *a, const void *b)
+static int TJSStringHeapSortFunction(const void *a, const void *b)
 {
         return (int)(*(const tTJSVariantString **)b - *(const tTJSVariantString **)a);
 }
@@ -510,7 +510,7 @@ tTVReal tTJSVariantString::ToReal() const
 //---------------------------------------------------------------------------
 void tTJSVariantString::ToNumber(tTJSVariant &dest) const
 {
-        const tjs_char *ptr = this->operator const tjs_char *();
+        const tjs_char *ptr = *this;
         if(TJSParseNumber(dest, &ptr)) return;
 
         dest = 0;
@@ -699,7 +699,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
         TJSSetFPUE();
         tTJSVariantString *ret = TJSAllocVariantStringBuffer(TJS_VS_FS_OUT_INC_SIZE);
         tjs_uint allocsize = TJS_VS_FS_OUT_INC_SIZE;
-        tjs_char *o = const_cast<tjs_char*>(ret ? *ret : NULL);
+        tjs_char* o = const_cast<tjs_char*>(ret ? (const tjs_char*)(*ret) : NULL);
         tjs_uint s = 0;
 
         tjs_uint in = 0;
@@ -708,7 +708,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
                         if(s >= allocsize) \
                         { \
                                 ret->AppendBuffer(TJS_VS_FS_OUT_INC_SIZE); \
-                                o = const_cast<tjs_char*>(ret->operator const tjs_char*()); \
+                                o = const_cast<tjs_char*>(ret ? (const tjs_char*)(*ret) : NULL); \
                                 allocsize += TJS_VS_FS_OUT_INC_SIZE; \
                         }
 
@@ -889,14 +889,8 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
                         tjs_uint fmtlen = (tjs_uint)(f - fst);
                         if(fmtlen > 65) goto error;  // too long
                         TJS_strncpy(fmt, fst, fmtlen);
-// #ifdef WIN32
-// 			fmt[fmtlen++] = 'I';
-// 			fmt[fmtlen++] = '6';
-// 			fmt[fmtlen++] = '4';
-// #else
                         fmt[fmtlen++] = 'l';
                         fmt[fmtlen++] = 'l';
-//#endif
                         fmt[fmtlen++] = *f;
                         fmt[fmtlen++] = 0;
                         int ind[2];
@@ -952,11 +946,7 @@ tTJSVariantString * TJSFormatString(const tjs_char *format, tjs_uint numparams,
                         tjs_uint fmtlen = (tjs_uint)(f - fst);
                         if(fmtlen > 67) goto error;  // too long
                         TJS_strncpy(fmt, fst, fmtlen);
-// #ifdef WIN32
-// 			fmt[fmtlen++] = 'l';
-// #else
                         fmt[fmtlen++] = 'l';
-//#endif
                         fmt[fmtlen++] = *f;
                         fmt[fmtlen++] = 0;
                         int ind[2];

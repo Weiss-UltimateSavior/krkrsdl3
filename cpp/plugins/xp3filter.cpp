@@ -18,7 +18,7 @@
 
 #define NCB_MODULE_NAME TJS_W("xp3filter.dll")
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::OperationByNum( /* operation with member by index number */ tjs_uint32 flag, /* calling flag */ tjs_int num, /* index number */ tTJSVariant *result, /* result ( can be NULL ) */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::OperationByNum( /* operation with member by index number */ tjs_uint32 flag, /* calling flag */ tjs_int num, /* index number */ tTJSVariant *result, /* result ( can be NULL ) */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	num += m_curPos;
 	if (num < 0 || num >= m_length) return TJS_E_MEMBERNOTFOUND;
@@ -47,7 +47,7 @@ tjs_error TJS_INTF_METHOD CBinaryAccessor::OperationByNum( /* operation with mem
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::Operation( /* operation with member */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ tTJSVariant *result, /* result ( can be NULL ) */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::Operation( /* operation with member */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ tTJSVariant *result, /* result ( can be NULL ) */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	if (membername) {
 		static const ttstr str_ptr(TJS_W("ptr"));
@@ -81,25 +81,25 @@ tjs_error TJS_INTF_METHOD CBinaryAccessor::Operation( /* operation with member *
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::IsValid( /* get validation, returns TJS_S_TRUE (valid) or TJS_S_FALSE (invalid) */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::IsValid( /* get validation, returns TJS_S_TRUE (valid) or TJS_S_FALSE (invalid) */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	return m_buff ? TJS_S_TRUE : TJS_S_FALSE;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::Invalidate( /* invalidation */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::Invalidate( /* invalidation */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	m_buff = NULL;
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::GetCount( /* get member count */ tjs_int *result, /* variable that receives the result */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::GetCount( /* get member count */ tjs_int *result, /* variable that receives the result */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	if (membername) return TJS_E_MEMBERNOTFOUND;
 	*result = m_length;
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::PropSetByNum( /* property set by index number */ tjs_uint32 flag, /* calling flag */ tjs_int num, /* index number */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::PropSetByNum( /* property set by index number */ tjs_uint32 flag, /* calling flag */ tjs_int num, /* index number */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	num += m_curPos;
 	if (num < 0 || num >= m_length) return TJS_E_MEMBERNOTFOUND;
@@ -107,7 +107,7 @@ tjs_error TJS_INTF_METHOD CBinaryAccessor::PropSetByNum( /* property set by inde
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::PropSet( /* property set */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::PropSet( /* property set */ tjs_uint32 flag, /* calling flag */ const tjs_char *membername, /* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ const tTJSVariant *param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	if (!membername) return TJS_E_NOTIMPL;
 	if (!TJS_strcmp(membername, TJS_W("ptr"))) {
@@ -117,7 +117,7 @@ tjs_error TJS_INTF_METHOD CBinaryAccessor::PropSet( /* property set */ tjs_uint3
 	return TJS_E_NOTIMPL;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::PropGetByNum( /* property get by index number */ tjs_uint32 flag, /* calling flag */ tjs_int num, /* index number */ tTJSVariant *result, /* result */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::PropGetByNum( /* property get by index number */ tjs_uint32 flag, /* calling flag */ tjs_int num, /* index number */ tTJSVariant *result, /* result */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	num += m_curPos;
 	if (num < 0 || num >= m_length) return TJS_E_MEMBERNOTFOUND;
@@ -125,7 +125,7 @@ tjs_error TJS_INTF_METHOD CBinaryAccessor::PropGetByNum( /* property get by inde
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::PropGet( /* property get */ tjs_uint32 flag, /* calling flag */ const tjs_char * membername,/* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ tTJSVariant *result, /* result */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::PropGet( /* property get */ tjs_uint32 flag, /* calling flag */ const tjs_char * membername,/* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ tTJSVariant *result, /* result */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	if (!membername) return TJS_E_NOTIMPL;
 	if (!TJS_strcmp(membername, TJS_W("count"))) {
@@ -138,7 +138,7 @@ tjs_error TJS_INTF_METHOD CBinaryAccessor::PropGet( /* property get */ tjs_uint3
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD CBinaryAccessor::FuncCall( /* function invocation */ tjs_uint32 flag, /* calling flag */ const tjs_char * membername,/* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ tTJSVariant *result, /* result */ tjs_int numparams, /* number of parameters */ tTJSVariant **param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
+tjs_error CBinaryAccessor::FuncCall( /* function invocation */ tjs_uint32 flag, /* calling flag */ const tjs_char * membername,/* member name ( NULL for a default member ) */ tjs_uint32 *hint, /* hint for the member name (in/out) */ tTJSVariant *result, /* result */ tjs_int numparams, /* number of parameters */ tTJSVariant **param, /* parameters */ iTJSDispatch2 *objthis /* object as "this" */)
 {
 	if (hint) {
 		if (!*hint) {
@@ -241,8 +241,7 @@ public:
         if(TJSObjectHashMapEnabled()) TJSRemoveObjectHashRecord(this);
     }
 
-    tjs_error TJS_INTF_METHOD
-        IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+    tjs_error     IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
         const tjs_char *classname,
         iTJSDispatch2 *objthis)
     {
@@ -253,8 +252,7 @@ public:
 
         return inherited::IsInstanceOf(flag, membername, hint, classname, objthis);
     }
-    tjs_error  TJS_INTF_METHOD
-        FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+    tjs_error      FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
         tTJSVariant *result,
         tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis)
     {
@@ -276,8 +274,7 @@ class XP3ContentFilterRegister : public XP3FilterRegister {
 	typedef XP3FilterRegister inherited;
 public:
 	XP3ContentFilterRegister(XP3FilterDecoder *decoder) : XP3FilterRegister(decoder) {}
-	tjs_error  TJS_INTF_METHOD
-		FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+	tjs_error  FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 	{

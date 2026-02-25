@@ -111,12 +111,12 @@ class iTJSDispatch2
 */
 
 public:
-	virtual tjs_uint TJS_INTF_METHOD AddRef(void) = 0;
-	virtual tjs_uint TJS_INTF_METHOD Release(void) = 0;
+	virtual tjs_uint AddRef(void) = 0;
+	virtual tjs_uint Release(void) = 0;
 
 public:
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	FuncCall( // function invocation
 		tjs_uint32 flag,			// calling flag
 		const tjs_char * membername,// member name ( NULL for a default member )
@@ -127,7 +127,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	FuncCallByNum( // function invocation by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
@@ -137,7 +137,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	PropGet( // property get
 		tjs_uint32 flag,			// calling flag
 		const tjs_char * membername,// member name ( NULL for a default member )
@@ -146,7 +146,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	PropGetByNum( // property get by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
@@ -154,7 +154,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	PropSet( // property set
 		tjs_uint32 flag,			// calling flag
 		const tjs_char *membername,	// member name ( NULL for a default member )
@@ -163,7 +163,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	PropSetByNum( // property set by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
@@ -171,7 +171,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	GetCount( // get member count
 		tjs_int *result,         	// variable that receives the result
 		const tjs_char *membername,	// member name ( NULL for a default member )
@@ -179,14 +179,14 @@ public:
 		iTJSDispatch2 *objthis      // object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	GetCountByNum( // get member count by index number
 		tjs_int *result,			// variable that receives the result
 		tjs_int num,				// by index number
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	PropSetByVS( // property set by tTJSVariantString, for internal use
 		tjs_uint32 flag,			// calling flag
 		tTJSVariantString *membername, // member name ( NULL for a default member )
@@ -194,14 +194,14 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	EnumMembers( // enumerate members
 		tjs_uint32 flag,			// enumeration flag
 		tTJSVariantClosure *callback,	// callback function interface ( called on each member )
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	DeleteMember( // delete member
 		tjs_uint32 flag,			// calling flag
 		const tjs_char *membername,	// member name ( NULL for a default member )
@@ -209,14 +209,14 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	DeleteMemberByNum( // delete member by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	Invalidate( // invalidation
 		tjs_uint32 flag,			// calling flag
 		const tjs_char *membername,	// member name ( NULL for a default member )
@@ -224,14 +224,14 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	InvalidateByNum( // invalidation by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	IsValid( // get validation, returns TJS_S_TRUE (valid) or TJS_S_FALSE (invalid)
 		tjs_uint32 flag,			// calling flag
 		const tjs_char *membername,	// member name ( NULL for a default member )
@@ -239,14 +239,14 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	IsValidByNum( // get validation by index number, returns TJS_S_TRUE (valid) or TJS_S_FALSE (invalid)
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	CreateNew( // create new object
 		tjs_uint32 flag,			// calling flag
 		const tjs_char * membername,// member name ( NULL for a default member )
@@ -257,7 +257,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	CreateNewByNum( // create new object by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
@@ -267,11 +267,11 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	Reserved1(
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	IsInstanceOf( // class instance matching returns TJS_S_FALSE or TJS_S_TRUE
 		tjs_uint32 flag,			// calling flag
 		const tjs_char *membername,	// member name ( NULL for a default member )
@@ -280,7 +280,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	IsInstanceOfByNum( // class instance matching by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,					// index number
@@ -288,7 +288,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	Operation( // operation with member
 		tjs_uint32 flag,			// calling flag
 		const tjs_char *membername,	// member name ( NULL for a default member )
@@ -298,7 +298,7 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	OperationByNum( // operation with member by index number
 		tjs_uint32 flag,			// calling flag
 		tjs_int num,				// index number
@@ -307,25 +307,25 @@ public:
 		iTJSDispatch2 *objthis		// object as "this"
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	NativeInstanceSupport( // support for native instance
 		tjs_uint32 flag,			// calling flag
 		tjs_int32 classid,			// native class ID
 		iTJSNativeInstance **pointer// object pointer
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	ClassInstanceInfo( // support for class instance information
 		tjs_uint32 flag,			// calling flag
 		tjs_uint num,				// index number
 		tTJSVariant *value			// the name
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	Reserved2(
 		) = 0;
 
-	virtual tjs_error TJS_INTF_METHOD
+	virtual tjs_error
 	Reserved3(
 		) = 0;
 
@@ -335,12 +335,12 @@ public:
 class iTJSNativeInstance
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD Construct(tjs_int numparams,
+	virtual tjs_error Construct(tjs_int numparams,
 		tTJSVariant **param, iTJSDispatch2 *tjs_obj) = 0;
 		// TJS constructor
-	virtual void TJS_INTF_METHOD Invalidate() = 0;
+	virtual void Invalidate() = 0;
 		// called before destruction
-	virtual void TJS_INTF_METHOD Destruct() = 0;
+	virtual void Destruct() = 0;
 		// must destruct itself
 };
 /*]*/

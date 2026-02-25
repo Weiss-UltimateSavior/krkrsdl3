@@ -115,7 +115,7 @@ tTVPMemoryStream::~tTVPMemoryStream()
 	if (Block && !Reference) Free(Block);
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
+tjs_uint64 tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int whence)
 {
 	tjs_int64 newpos;
 	switch (whence)
@@ -146,7 +146,7 @@ tjs_uint64 TJS_INTF_METHOD tTVPMemoryStream::Seek(tjs_int64 offset, tjs_int when
 	return CurrentPos;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPMemoryStream::Read(void* buffer, tjs_uint read_size)
+tjs_uint tTVPMemoryStream::Read(void* buffer, tjs_uint read_size)
 {
 	if (CurrentPos + read_size >= Size)
 	{
@@ -160,7 +160,7 @@ tjs_uint TJS_INTF_METHOD tTVPMemoryStream::Read(void* buffer, tjs_uint read_size
 	return read_size;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPMemoryStream::Write(const void* buffer, tjs_uint write_size)
+tjs_uint tTVPMemoryStream::Write(const void* buffer, tjs_uint write_size)
 {
 	// writing may increase the internal buffer size.
 	if (Reference) TVPThrowExceptionMessage(TVPWriteError);
@@ -197,7 +197,7 @@ tjs_uint TJS_INTF_METHOD tTVPMemoryStream::Write(const void* buffer, tjs_uint wr
 	return write_size;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPMemoryStream::SetEndOfStorage()
+void tTVPMemoryStream::SetEndOfStorage()
 {
 	if (Reference) TVPThrowExceptionMessage(TVPWriteError);
 
@@ -300,7 +300,7 @@ tTVPPartialStream::~tTVPPartialStream()
 	if (Stream) delete Stream;
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPPartialStream::Seek(tjs_int64 offset, tjs_int whence)
+tjs_uint64 tTVPPartialStream::Seek(tjs_int64 offset, tjs_int whence)
 {
 	tjs_int64 newpos;
 	switch (whence)
@@ -335,7 +335,7 @@ tjs_uint64 TJS_INTF_METHOD tTVPPartialStream::Seek(tjs_int64 offset, tjs_int whe
 	return CurrentPos;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPPartialStream::Read(void* buffer, tjs_uint read_size)
+tjs_uint tTVPPartialStream::Read(void* buffer, tjs_uint read_size)
 {
 	if (CurrentPos + read_size >= Size)
 	{
@@ -349,12 +349,12 @@ tjs_uint TJS_INTF_METHOD tTVPPartialStream::Read(void* buffer, tjs_uint read_siz
 	return read;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPPartialStream::Write(const void* buffer, tjs_uint write_size)
+tjs_uint tTVPPartialStream::Write(const void* buffer, tjs_uint write_size)
 {
 	return 0;
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPPartialStream::GetSize()
+tjs_uint64 tTVPPartialStream::GetSize()
 {
 	return Size;
 }

@@ -14,9 +14,9 @@ class tTJSNI_BasicDrawDevice : public tTJSNativeInstance {
 public:
     tTJSNI_BasicDrawDevice();
     ~tTJSNI_BasicDrawDevice();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate(); 
+    void Invalidate(); 
 
 public:
     tTVPBasicDrawDevice *GetDevice() const { return Device; }

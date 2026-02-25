@@ -39,13 +39,13 @@ tTVPSimpleOptionProvider::~tTVPSimpleOptionProvider()
 	Object.Release();
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::AddRef()
+tjs_error tTVPSimpleOptionProvider::AddRef()
 {
 	RefCount++;
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::Release()
+tjs_error tTVPSimpleOptionProvider::Release()
 {
 	if(RefCount == 1)
 		delete this;
@@ -54,7 +54,7 @@ tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::Release()
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::GetAsNumber(
+tjs_error tTVPSimpleOptionProvider::GetAsNumber(
 		/*in*/const tjs_char *name, /*out*/tjs_int64 *value)
 {
 	try
@@ -75,7 +75,7 @@ tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::GetAsNumber(
 	}
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::GetAsString(
+tjs_error tTVPSimpleOptionProvider::GetAsString(
 		/*in*/const tjs_char *name, /*out*/const tjs_char **out)
 {
 	try
@@ -97,7 +97,7 @@ tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::GetAsString(
 	}
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::GetValue(
+tjs_error tTVPSimpleOptionProvider::GetValue(
 			/*in*/const tjs_char *name, /*out*/tTJSVariant *dest)
 {
 	try
@@ -113,7 +113,7 @@ tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::GetValue(
 	}
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::
+tjs_error tTVPSimpleOptionProvider::
 	GetDispatchObject(iTJSDispatch2 **dsp)
 {
 	try
@@ -136,7 +136,7 @@ tjs_error TJS_INTF_METHOD tTVPSimpleOptionProvider::
 //---------------------------------------------------------------------------
 // iTVPSimpleImageProvider implementation
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPSimpleImageProvider::LoadImage(
+tjs_error tTVPSimpleImageProvider::LoadImage(
 			/*in*/const tjs_char *name, /*in*/tjs_int bpp,
 			/*in*/tjs_uint32 key,
 			/*in*/tjs_uint w,
@@ -218,13 +218,13 @@ void tTVPScanLineProviderForBaseBitmap::Attach(iTVPBaseBitmap *bmp)
 	Bitmap = bmp;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPScanLineProviderForBaseBitmap::AddRef()
+tjs_error tTVPScanLineProviderForBaseBitmap::AddRef()
 {
 	RefCount ++;
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPScanLineProviderForBaseBitmap::Release()
+tjs_error tTVPScanLineProviderForBaseBitmap::Release()
 {
 	if(RefCount == 1)
 		delete this;
@@ -233,40 +233,35 @@ tjs_error TJS_INTF_METHOD tTVPScanLineProviderForBaseBitmap::Release()
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTVPScanLineProviderForBaseBitmap::GetWidth(/*in*/tjs_int *width)
+tjs_error 	tTVPScanLineProviderForBaseBitmap::GetWidth(/*in*/tjs_int *width)
 {
 	if(width) *width = Bitmap->GetWidth();
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTVPScanLineProviderForBaseBitmap::GetHeight(/*in*/tjs_int *height)
+tjs_error 	tTVPScanLineProviderForBaseBitmap::GetHeight(/*in*/tjs_int *height)
 {
 	if(height) *height = Bitmap->GetHeight();
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD tTVPScanLineProviderForBaseBitmap::GetPixelFormat(
+tjs_error tTVPScanLineProviderForBaseBitmap::GetPixelFormat(
     /*out*/ tjs_int *bpp) {
     *bpp = Bitmap->GetBPP();
     return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD
-tTVPScanLineProviderForBaseBitmap::GetPitchBytes(/*out*/ tjs_int *pitch) {
+tjs_error tTVPScanLineProviderForBaseBitmap::GetPitchBytes(/*out*/ tjs_int *pitch) {
     *pitch = Bitmap->GetPitchBytes();
     return TJS_S_OK;
 }
-tjs_error TJS_INTF_METHOD
-tTVPScanLineProviderForBaseBitmap::GetScanLine(/*in*/ tjs_int line,
+tjs_error tTVPScanLineProviderForBaseBitmap::GetScanLine(/*in*/ tjs_int line,
 	/*out*/ const void** scanline)
 {
     *scanline = Bitmap->GetScanLine(line);
     return TJS_S_OK;
 }
-tjs_error TJS_INTF_METHOD
-tTVPScanLineProviderForBaseBitmap::GetScanLineForWrite(
+tjs_error tTVPScanLineProviderForBaseBitmap::GetScanLineForWrite(
     /*in*/ tjs_int line,
 	/*out*/ void** scanline) {
     *scanline = Bitmap->GetScanLineForWrite(line);
@@ -419,20 +414,20 @@ public:
 		if(Options) Options->Release();
 	}
 
-	tjs_error TJS_INTF_METHOD AddRef()
+	tjs_error AddRef()
 	{
 		RefCount ++;
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD Release()
+	tjs_error Release()
 	{
 		if(RefCount == 1) delete this; else RefCount--;
 		return TJS_S_OK;
 	}
 
 
-	tjs_error TJS_INTF_METHOD SetOption(
+	tjs_error SetOption(
 			/*in*/iTVPSimpleOptionProvider *options // option provider
 		)
 	{
@@ -443,11 +438,11 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD StartProcess(tjs_uint64 tick);
-	tjs_error TJS_INTF_METHOD EndProcess();
-	tjs_error TJS_INTF_METHOD Process(
+	tjs_error StartProcess(tjs_uint64 tick);
+	tjs_error EndProcess();
+	tjs_error Process(
 			/*in,out*/tTVPDivisibleData *data);
-	tjs_error TJS_INTF_METHOD MakeFinalImage(
+	tjs_error MakeFinalImage(
 			/*in,out*/iTVPScanLineProvider ** dest,
 			/*in*/iTVPScanLineProvider * src1,
 			/*in*/iTVPScanLineProvider * src2);
@@ -466,19 +461,19 @@ tTVPCrossFadeTransHandlerProvider::~tTVPCrossFadeTransHandlerProvider()
 
 }
 
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandlerProvider::AddRef()
+tjs_error tTVPCrossFadeTransHandlerProvider::AddRef()
 {
 	RefCount++;
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandlerProvider::Release()
+tjs_error tTVPCrossFadeTransHandlerProvider::Release()
 {
 	if (RefCount == 1) delete this; else RefCount--;
 	return TJS_S_OK;
 }
 
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandlerProvider::GetName(/*out*/const tjs_char ** name)
+tjs_error tTVPCrossFadeTransHandlerProvider::GetName(/*out*/const tjs_char ** name)
 {
 	if (name)
 	{
@@ -489,7 +484,7 @@ tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandlerProvider::GetName(/*out*/cons
 	}
 }
 
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandlerProvider::StartTransition(/*in*/iTVPSimpleOptionProvider *options, /* option provider */ /*in*/iTVPSimpleImageProvider *imagepro, /* image provider */ /*in*/tTVPLayerType layertype, /* destination layer type */ /*in*/tjs_uint src1w, tjs_uint src1h, /* source 1 size */ /*in*/tjs_uint src2w, tjs_uint src2h, /* source 2 size */ /*out*/tTVPTransType *type, /* transition type */ /*out*/tTVPTransUpdateType * updatetype, /* update typwe */ /*out*/iTVPBaseTransHandler ** handler /* transition handler */)
+tjs_error tTVPCrossFadeTransHandlerProvider::StartTransition(/*in*/iTVPSimpleOptionProvider *options, /* option provider */ /*in*/iTVPSimpleImageProvider *imagepro, /* image provider */ /*in*/tTVPLayerType layertype, /* destination layer type */ /*in*/tjs_uint src1w, tjs_uint src1h, /* source 1 size */ /*in*/tjs_uint src2w, tjs_uint src2h, /* source 2 size */ /*out*/tTVPTransType *type, /* transition type */ /*out*/tTVPTransUpdateType * updatetype, /* update typwe */ /*out*/iTVPBaseTransHandler ** handler /* transition handler */)
 {
 	if (type) *type = ttExchange; // transition type : exchange
 	if (updatetype) *updatetype = tutDivisibleFade;
@@ -520,7 +515,7 @@ iTVPBaseTransHandler * tTVPCrossFadeTransHandlerProvider::GetTransitionObject(/*
 }
 
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandler::
+tjs_error tTVPCrossFadeTransHandler::
 	StartProcess(tjs_uint64 tick)
 {
 	// notifies starting of the update
@@ -570,7 +565,7 @@ tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandler::
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandler::EndProcess()
+tjs_error tTVPCrossFadeTransHandler::EndProcess()
 {
 	// notifies ending of the update
 #ifdef TVP_TRANS_SHOW_FPS
@@ -581,7 +576,7 @@ tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandler::EndProcess()
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandler::Process(
+tjs_error tTVPCrossFadeTransHandler::Process(
 		/*in,out*/tTVPDivisibleData *data)
 {
 	// process divided region of the entire layer bitmap
@@ -645,7 +640,7 @@ void tTVPCrossFadeTransHandler::Blend(tTVPDivisibleData *data)
 		tRenderTexRectArray(src_tex));
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPCrossFadeTransHandler::MakeFinalImage(
+tjs_error tTVPCrossFadeTransHandler::MakeFinalImage(
 		/*in,out*/iTVPScanLineProvider ** dest,
 		/*in*/iTVPScanLineProvider * src1,
 		/*in*/iTVPScanLineProvider * src2)
@@ -705,7 +700,7 @@ public:
 		Rule->Release();
 	}
 
-	tjs_error TJS_INTF_METHOD StartProcess(tjs_uint64 tick);
+	tjs_error StartProcess(tjs_uint64 tick);
 		// tTVPCrossFadeTransHandler::blend override
 	void Blend(tTVPDivisibleData *data);
 		// tTVPCrossFadeTransHandler::blend override
@@ -718,7 +713,7 @@ public:
 	tTVPUniversalTransHandlerProvider() : tTVPCrossFadeTransHandlerProvider() {}
 	virtual ~tTVPUniversalTransHandlerProvider() { };
 
-	tjs_error TJS_INTF_METHOD GetName(
+	tjs_error GetName(
 			/*out*/const tjs_char ** name)
 	{
 		if(name)
@@ -778,7 +773,7 @@ public:
 	}
 };
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPUniversalTransHandler::StartProcess(
+tjs_error tTVPUniversalTransHandler::StartProcess(
 	tjs_uint64 tick)
 {
 	tjs_error er;
@@ -859,7 +854,7 @@ public:
 	tTVPScrollTransHandlerProvider() : tTVPCrossFadeTransHandlerProvider() {}
 	virtual ~tTVPScrollTransHandlerProvider() { };
 
-	tjs_error TJS_INTF_METHOD GetName(
+	tjs_error GetName(
 			/*out*/const tjs_char ** name)
 	{
 		if(name)
@@ -869,7 +864,7 @@ public:
 
 	}
 
-	tjs_error TJS_INTF_METHOD StartTransition(
+	tjs_error StartTransition(
 			/*in*/iTVPSimpleOptionProvider *options, // option provider
 			/*in*/iTVPSimpleImageProvider *imagepro, // image provider
 			/*in*/tTVPLayerType layertype, // destination layer type

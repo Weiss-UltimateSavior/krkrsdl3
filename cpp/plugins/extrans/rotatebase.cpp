@@ -37,7 +37,7 @@ tTVPBaseRotateTransHandler::~tTVPBaseRotateTransHandler()
 	delete [] DrawData;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPBaseRotateTransHandler::StartProcess(tjs_uint64 tick)
+tjs_error tTVPBaseRotateTransHandler::StartProcess(tjs_uint64 tick)
 {
 	// トランジションの画面更新一回ごとに呼ばれる
 
@@ -72,7 +72,7 @@ tjs_error TJS_INTF_METHOD tTVPBaseRotateTransHandler::StartProcess(tjs_uint64 ti
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPBaseRotateTransHandler::EndProcess()
+tjs_error tTVPBaseRotateTransHandler::EndProcess()
 {
 	// トランジションの画面更新一回分が終わるごとに呼ばれる
 
@@ -81,7 +81,7 @@ tjs_error TJS_INTF_METHOD tTVPBaseRotateTransHandler::EndProcess()
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPBaseRotateTransHandler::Process(
+tjs_error tTVPBaseRotateTransHandler::Process(
 			tTVPDivisibleData *data)
 {
 	// トランジションの各領域ごとに呼ばれる

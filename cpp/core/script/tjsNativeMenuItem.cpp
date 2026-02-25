@@ -23,7 +23,7 @@ tTJSNI_MenuItem::tTJSNI_MenuItem()
     GroupIndex = 0;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_MenuItem::Construct(tjs_int numparams,
+tjs_error tTJSNI_MenuItem::Construct(tjs_int numparams,
                                                      tTJSVariant** param,
                                                      iTJSDispatch2* tjs_obj)
 {
@@ -52,7 +52,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_MenuItem::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_MenuItem::Invalidate()
+void tTJSNI_MenuItem::Invalidate()
 {
     // invalidate inherited
     inherited::Invalidate(); // this sets Owner = NULL
@@ -284,7 +284,7 @@ tTJSNI_BaseMenuItem::tTJSNI_BaseMenuItem()
     ActionOwner.Object = ActionOwner.ObjThis = NULL;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseMenuItem::Construct(tjs_int numparams,
+tjs_error tTJSNI_BaseMenuItem::Construct(tjs_int numparams,
                                                          tTJSVariant** param,
                                                          iTJSDispatch2* tjs_obj)
 {
@@ -317,7 +317,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseMenuItem::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseMenuItem::Invalidate()
+void tTJSNI_BaseMenuItem::Invalidate()
 {
     TVPCancelSourceEvents(Owner);
     TVPCancelInputEvents(this);
@@ -558,7 +558,7 @@ static void UpdateMenuList() {
 }
 
 class WindowMenuProperty : public tTJSDispatch {
-	tjs_error TJS_INTF_METHOD PropGet(tjs_uint32 flag, const tjs_char* membername, tjs_uint32* hint, tTJSVariant* result, iTJSDispatch2* objthis) {
+	tjs_error PropGet(tjs_uint32 flag, const tjs_char* membername, tjs_uint32* hint, tTJSVariant* result, iTJSDispatch2* objthis) {
 		tTJSVariant var;
 		if (TJS_FAILED(objthis->PropGet(0, TJS_W("HWND"), NULL, &var, objthis))) {
 			return TJS_E_INVALIDOBJECT;
@@ -573,7 +573,7 @@ class WindowMenuProperty : public tTJSDispatch {
 		*result = tTJSVariant(menu, menu);
 		return TJS_S_OK;
 	}
-	tjs_error TJS_INTF_METHOD PropSet(tjs_uint32 flag, const tjs_char* membername, tjs_uint32* hint, const tTJSVariant* param, iTJSDispatch2* objthis) {
+	tjs_error PropSet(tjs_uint32 flag, const tjs_char* membername, tjs_uint32* hint, const tTJSVariant* param, iTJSDispatch2* objthis) {
 		return TJS_E_ACCESSDENYED;
 	}
 } *gWindowMenuProperty;

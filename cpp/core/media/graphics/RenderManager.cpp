@@ -31,14 +31,6 @@ struct tTVPLayerBitmapMemoryRecord {
 };
 #pragma pack(pop)
 
-#ifdef WIN32
-// #define CHECK_MEM_OVERRUN
-#define MEM_COMMIT 0x1000
-#define MEM_DECOMMIT 0x4000
-#define PAGE_NOACCESS 0x01
-#define PAGE_READWRITE 0x04
-#endif
-
 static uint64_t _totalVMemSize = 0;
 
 //---------------------------------------------------------------------------

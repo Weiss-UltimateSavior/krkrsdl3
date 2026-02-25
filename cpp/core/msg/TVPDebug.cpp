@@ -277,7 +277,7 @@ void tTVPLogStreamHolder::Open(const tjs_nchar* mode)
 			{
 				// write BOM
 				// TODO: 32-bit unicode support
-				fwrite(TJS_N("\xff\xfe"), 1, 2, Stream); // indicate unicode text
+				fwrite("\xff\xfe", 1, 2, Stream); // indicate unicode text
 			}
 
 #ifdef TJS_TEXT_OUT_CRLF
@@ -312,12 +312,12 @@ void tTVPLogStreamHolder::Clear()
 	// clear log text
 	if (Stream) fclose(Stream);
 
-	Open(TJS_N("wb"));
+	Open("wb");
 }
 //---------------------------------------------------------------------------
 void tTVPLogStreamHolder::Log(const ttstr& text)
 {
-	if (!Stream) Open(TJS_N("ab"));
+	if (!Stream) Open("ab");
 
 	try
 	{

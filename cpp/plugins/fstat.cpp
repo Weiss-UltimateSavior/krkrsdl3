@@ -30,14 +30,14 @@ static iTJSDispatch2* dateClass = nullptr;   // Date のクラスオブジェク
 static iTJSDispatch2* dateSetTime = nullptr; // Date.setTime メソッド
 static iTJSDispatch2* dateGetTime = nullptr; // Date.getTime メソッド
 
-static const tjs_nchar* StoragesFstatPreScript = TJS_N(R"(
+static const tjs_nchar* StoragesFstatPreScript = R"(
 global.FILE_ATTRIBUTE_READONLY = 0x00000001,
 global.FILE_ATTRIBUTE_HIDDEN = 0x00000002,
 global.FILE_ATTRIBUTE_SYSTEM = 0x00000004,
 global.FILE_ATTRIBUTE_DIRECTORY = 0x00000010,
 global.FILE_ATTRIBUTE_ARCHIVE = 0x00000020,
 global.FILE_ATTRIBUTE_NORMAL = 0x00000080,
-global.FILE_ATTRIBUTE_TEMPORARY = 0x00000100;)");
+global.FILE_ATTRIBUTE_TEMPORARY = 0x00000100;)";
 
 static std::string _searchPath(const std::string& filename, const std::string& searchpath)
 {

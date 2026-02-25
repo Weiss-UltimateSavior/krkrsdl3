@@ -20,21 +20,36 @@ void TVPLoadPlugin(const ttstr& name);
 bool TVPUnloadPlugin(const ttstr& name);
 extern std::set<ttstr> TVPRegisteredPlugins;
 
-#ifdef WIN32
-TJS_EXP_FUNC_DEF(void, TVPThrowPluginUnboundFunctionError, (const char *funcname));
-TJS_EXP_FUNC_DEF(void, TVPThrowPluginUnboundFunctionError, (const tjs_char *funcname));
-#endif
-inline TJS_EXP_FUNC_DEF(void *, TVP_malloc, (size_t size)) { return malloc(size); }
-inline TJS_EXP_FUNC_DEF(void *, TVP_realloc, (void *pp, size_t size)) { return realloc(pp, size); }
-inline TJS_EXP_FUNC_DEF(void, TVP_free, (void *pp)) { return free(pp); }
-TJS_EXP_FUNC_DEF(tjs_int, TVPGetAutoLoadPluginCount, ());
+inline extern void* TVP_malloc(size_t size)
+{
+    return malloc(size);
+}
+inline extern void* TVP_realloc(void* pp, size_t size)
+{
+    return realloc(pp, size);
+}
+inline extern void TVP_free(void* pp)
+{
+    return free(pp);
+}
+extern tjs_int TVPGetAutoLoadPluginCount();
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(int, ZLIB_uncompress, (unsigned char *dest, unsigned long *destlen, const unsigned char *source, unsigned long sourcelen));
-TJS_EXP_FUNC_DEF(int, ZLIB_compress, (unsigned char *dest, unsigned long *destlen, const unsigned char *source, unsigned long sourcelen));
-TJS_EXP_FUNC_DEF(int, ZLIB_compress2, (unsigned char *dest, unsigned long *destlen, const unsigned char *source, unsigned long sourcelen, int level));
+extern int ZLIB_uncompress(unsigned char* dest,
+                           unsigned long* destlen,
+                           const unsigned char* source,
+                           unsigned long sourcelen);
+extern int ZLIB_compress(unsigned char* dest,
+                         unsigned long* destlen,
+                         const unsigned char* source,
+                         unsigned long sourcelen);
+extern int ZLIB_compress2(unsigned char* dest,
+                          unsigned long* destlen,
+                          const unsigned char* source,
+                          unsigned long sourcelen,
+                          int level);
 
 /*[*/
 
@@ -49,16 +64,15 @@ typedef struct TVP_md5_state_s { tjs_uint8 buffer[4*2+8+4*4+8+64]; } TVP_md5_sta
 
 /*]*/
 
-TJS_EXP_FUNC_DEF(void, TVP_md5_init, (TVP_md5_state_t *pms));
-TJS_EXP_FUNC_DEF(void, TVP_md5_append, (TVP_md5_state_t *pms, const tjs_uint8 *data, int nbytes));
-TJS_EXP_FUNC_DEF(void, TVP_md5_finish, (TVP_md5_state_t *pms, tjs_uint8 *digest));
+extern void TVP_md5_init(TVP_md5_state_t* pms);
+extern void TVP_md5_append(TVP_md5_state_t* pms, const tjs_uint8* data, int nbytes);
+extern void TVP_md5_finish(TVP_md5_state_t* pms, tjs_uint8* digest);
 
-//TJS_EXP_FUNC_DEF(HWND, TVPGetApplicationWindowHandle, ());
-TJS_EXP_FUNC_DEF(void, TVPProcessApplicationMessages, ());
-TJS_EXP_FUNC_DEF(void, TVPHandleApplicationMessage, ());
+extern void TVPProcessApplicationMessages();
+extern void TVPHandleApplicationMessage();
 
-TJS_EXP_FUNC_DEF(bool, TVPRegisterGlobalObject, (const tjs_char *name, iTJSDispatch2 * dsp));
-TJS_EXP_FUNC_DEF(bool, TVPRemoveGlobalObject, (const tjs_char *name));
+extern bool TVPRegisterGlobalObject(const tjs_char* name, iTJSDispatch2* dsp);
+extern bool TVPRemoveGlobalObject(const tjs_char* name);
 
 /*[*/
 //---------------------------------------------------------------------------
@@ -79,9 +93,9 @@ struct tTVPExceptionDesc
 	ttstr message; // the exception message (if exists. otherwise empty).
 };
 
-typedef void (TJS_USERENTRY *tTVPTryBlockFunction)(void * data);
-typedef bool (TJS_USERENTRY *tTVPCatchBlockFunction)(void * data, const tTVPExceptionDesc & desc);
-typedef void (TJS_USERENTRY *tTVPFinallyBlockFunction)(void *data);
+typedef void (*tTVPTryBlockFunction)(void * data);
+typedef bool (*tTVPCatchBlockFunction)(void * data, const tTVPExceptionDesc & desc);
+typedef void (*tTVPFinallyBlockFunction)(void *data);
 //---------------------------------------------------------------------------
 
 
@@ -89,12 +103,10 @@ typedef void (TJS_USERENTRY *tTVPFinallyBlockFunction)(void *data);
 
 /*]*/
 
-TJS_EXP_FUNC_DEF(void, TVPDoTryBlock, (tTVPTryBlockFunction tryblock, tTVPCatchBlockFunction catchblock, tTVPFinallyBlockFunction finallyblock, void *data));
-
-
-#ifdef WIN32
-TJS_EXP_FUNC_DEF(bool, TVPGetFileVersionOf, (const wchar_t* module_filename, tjs_int& major, tjs_int& minor, tjs_int& release, tjs_int& build));
-#endif
+extern void TVPDoTryBlock(tTVPTryBlockFunction tryblock,
+                          tTVPCatchBlockFunction catchblock,
+                          tTVPFinallyBlockFunction finallyblock,
+                          void* data);
 
 //---------------------------------------------------------------------------
 extern bool TVPPluginUnloadedAtSystemExit;

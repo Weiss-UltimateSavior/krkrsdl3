@@ -20,11 +20,9 @@
 class tTJSNI_BasePad : public tTJSNativeInstance
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD
-		Construct(tjs_int numparams, tTJSVariant** param,
+	virtual tjs_error Construct(tjs_int numparams, tTJSVariant** param,
 			iTJSDispatch2* dsp);
-	virtual void TJS_INTF_METHOD
-		Invalidate();
+	virtual void Invalidate();
 };
 //---------------------------------------------------------------------------
 
@@ -48,10 +46,9 @@ class tTJSNI_Pad : public tTJSNI_BasePad
 {
 	TTVPPadForm* Form;
 public:
-	virtual tjs_error TJS_INTF_METHOD
-		Construct(tjs_int numparams, tTJSVariant** param,
+	virtual tjs_error Construct(tjs_int numparams, tTJSVariant** param,
 			iTJSDispatch2* dsp);
-	virtual void TJS_INTF_METHOD Invalidate();
+	virtual void Invalidate();
 
 	// methods
 	virtual void OpenFromStorage(const ttstr& name);

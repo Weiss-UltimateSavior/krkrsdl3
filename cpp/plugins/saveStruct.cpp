@@ -92,7 +92,7 @@ protected:
 	bool first;
 public:
 	DictMemberDispCaller(tTVPStringStream *writer) : writer(writer) { first = true; };
-	virtual tjs_error TJS_INTF_METHOD FuncCall( // function invocation
+	virtual tjs_error FuncCall( // function invocation
 												tjs_uint32 flag,			// calling flag
 												const tjs_char * membername,// member name ( NULL for a default member )
 												tjs_uint32 *hint,			// hint for the member name (in/out)
@@ -226,7 +226,7 @@ public:
 	 * @param newline 改行コード 0:CRLF 1:LF
 	 * @return 実行結果
 	 */
-	static tjs_error TJS_INTF_METHOD save2(tTJSVariant *result,
+	static tjs_error save2(tTJSVariant *result,
 										   tjs_int numparams,
 										   tTJSVariant **param,
 										   iTJSDispatch2 *objthis) {
@@ -266,7 +266,7 @@ public:
 	 * @param newline 改行コード 0:CRLF 1:LF
 	 * @return 実行結果
 	 */
-	static tjs_error TJS_INTF_METHOD saveStruct2(tTJSVariant *result,
+	static tjs_error saveStruct2(tTJSVariant *result,
 												 tjs_int numparams,
 												 tTJSVariant **param,
 												 iTJSDispatch2 *objthis) {
@@ -291,7 +291,7 @@ public:
 	 * @param newline 改行コード 0:CRLF 1:LF
 	 * @return 実行結果
 	 */
-	static tjs_error TJS_INTF_METHOD toStructString(tTJSVariant *result,
+	static tjs_error toStructString(tTJSVariant *result,
 													tjs_int numparams,
 													tTJSVariant **param,
 													iTJSDispatch2 *objthis) {
@@ -326,7 +326,7 @@ public:
 	 * @param newline 改行コード 0:CRLF 1:LF
 	 * @return 実行結果
 	 */
-	static tjs_error TJS_INTF_METHOD saveStruct2(tTJSVariant *result,
+	static tjs_error saveStruct2(tTJSVariant *result,
 												 tjs_int numparams,
 												 tTJSVariant **param,
 												 iTJSDispatch2 *objthis) {
@@ -346,7 +346,7 @@ public:
 	 * @param newline 改行コード 0:CRLF 1:LF
 	 * @return 実行結果
 	 */
-	static tjs_error TJS_INTF_METHOD toStructString(tTJSVariant *result,
+	static tjs_error toStructString(tTJSVariant *result,
 													tjs_int numparams,
 													tTJSVariant **param,
 													iTJSDispatch2 *objthis) {

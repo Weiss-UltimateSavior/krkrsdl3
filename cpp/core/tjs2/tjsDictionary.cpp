@@ -237,8 +237,7 @@ iTJSDispatch2 *tTJSDictionaryClass::CreateBaseTJSObject()
 	return new tTJSDictionaryObject();
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSDictionaryClass::CreateNew(tjs_uint32 flag, const tjs_char * membername,
+tjs_error tTJSDictionaryClass::CreateNew(tjs_uint32 flag, const tjs_char * membername,
 	tjs_uint32 *hint,
 	iTJSDispatch2 **result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -300,7 +299,7 @@ tTJSDictionaryNI::~tTJSDictionaryNI()
 {
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::Construct(tjs_int numparams,
+tjs_error tTJSDictionaryNI::Construct(tjs_int numparams,
 	tTJSVariant **param, iTJSDispatch2 *tjsobj)
 {
 	// called from TJS constructor
@@ -310,7 +309,7 @@ tjs_error TJS_INTF_METHOD tTJSDictionaryNI::Construct(tjs_int numparams,
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSDictionaryNI::Invalidate() // Invalidate override
+void tTJSDictionaryNI::Invalidate() // Invalidate override
 {
 	// put here something on invalidation
 	Owner = NULL;
@@ -369,8 +368,7 @@ void tTJSDictionaryNI::Clear()
 	Owner->Clear();
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSDictionaryNI::tAssignCallback::FuncCall(tjs_uint32 flag,
+tjs_error tTJSDictionaryNI::tAssignCallback::FuncCall(tjs_uint32 flag,
 	const tjs_char * membername, tjs_uint32 *hint, tTJSVariant *result,
 	tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)
 {
@@ -420,7 +418,7 @@ void tTJSDictionaryNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
 	stream.Write(TJS_W("]"));
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tSaveStructCallback::FuncCall(
+tjs_error tTJSDictionaryNI::tSaveStructCallback::FuncCall(
 	tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -484,7 +482,7 @@ void tTJSDictionaryNI::SaveStructuredBinary(std::vector<iTJSDispatch2 *> &stack,
 	Owner->EnumMembers(TJS_IGNOREPROP, &clo, Owner);
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tSaveStructBinayCallback::FuncCall(
+tjs_error tTJSDictionaryNI::tSaveStructBinayCallback::FuncCall(
 	tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -514,7 +512,7 @@ tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tSaveStructBinayCallback::FuncCall(
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tSaveMemberCountCallback::FuncCall(
+tjs_error tTJSDictionaryNI::tSaveMemberCountCallback::FuncCall(
 	tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -573,7 +571,7 @@ void tTJSDictionaryNI::AssignStructure(iTJSDispatch2 * dsp,
 
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSDictionaryNI::tAssignStructCallback::FuncCall(
+tjs_error tTJSDictionaryNI::tAssignStructCallback::FuncCall(
 	tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -709,8 +707,7 @@ tTJSDictionaryObject::~tTJSDictionaryObject()
 {
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDictionaryObject::FuncCall(tjs_uint32 flag, const tjs_char * membername,
+tjs_error 	tTJSDictionaryObject::FuncCall(tjs_uint32 flag, const tjs_char * membername,
 		tjs_uint32 *hint,
 		tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 		iTJSDispatch2 *objthis)
@@ -722,8 +719,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDictionaryObject::PropGet(tjs_uint32 flag, const tjs_char * membername,
+tjs_error 	tTJSDictionaryObject::PropGet(tjs_uint32 flag, const tjs_char * membername,
 		tjs_uint32 *hint,
 		tTJSVariant *result, iTJSDispatch2 *objthis)
 {
@@ -737,8 +733,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSDictionaryObject::CreateNew(tjs_uint32 flag, const tjs_char * membername,
+tjs_error 	tTJSDictionaryObject::CreateNew(tjs_uint32 flag, const tjs_char * membername,
 		tjs_uint32 *hint,
 		iTJSDispatch2 **result, tjs_int numparams, tTJSVariant **param,
 			iTJSDispatch2 *objthis)
@@ -750,7 +745,7 @@ tjs_error TJS_INTF_METHOD
 	return hr;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD 
+tjs_error 
 	tTJSDictionaryObject::Operation(tjs_uint32 flag, const tjs_char *membername,
 		tjs_uint32 *hint,
 		tTJSVariant *result, const tTJSVariant *param, iTJSDispatch2 *objthis)

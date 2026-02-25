@@ -31,15 +31,15 @@ public:
 		tjs_uint32 flag);
 	~tTVPLocalFileStream();
 
-	tjs_uint64 TJS_INTF_METHOD Seek(tjs_int64 offset, tjs_int whence);
+	tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
 
-	tjs_uint TJS_INTF_METHOD Read(void* buffer, tjs_uint read_size);
-	tjs_uint TJS_INTF_METHOD Write(const void* buffer, tjs_uint write_size);
+	tjs_uint Read(void* buffer, tjs_uint read_size);
+	tjs_uint Write(const void* buffer, tjs_uint write_size);
 
-	void TJS_INTF_METHOD SetEndOfStorage();
+	void SetEndOfStorage();
 
-	tjs_uint64 TJS_INTF_METHOD GetSize();
-	const std::string TJS_INTF_METHOD GetFileName() { return FileName.AsStdString(); }
+	tjs_uint64 GetSize();
+	const std::string GetFileName() { return FileName.AsStdString(); }
 
         void* GetHandle() const { return Handle; }
 };

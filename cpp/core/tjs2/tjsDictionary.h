@@ -30,8 +30,7 @@ public:
 	~tTJSDictionaryClass();
 
 public:
-	tjs_error TJS_INTF_METHOD
-	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+	tjs_error 	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		 iTJSDispatch2 **result,
 			tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis);
 
@@ -58,11 +57,11 @@ public:
 	tTJSDictionaryNI();
 	~tTJSDictionaryNI();
 
-	tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+	tjs_error Construct(tjs_int numparams, tTJSVariant **param,
 		iTJSDispatch2 *obj);
 
 private:
-	void TJS_INTF_METHOD Invalidate(); // Invalidate override
+	void Invalidate(); // Invalidate override
 
 public:
 	bool IsValid() const { return Owner != NULL; } // check validation
@@ -75,8 +74,7 @@ private:
 	struct tAssignCallback : public tTJSDispatch
 	{
 		tTJSCustomObject * Owner;
-		tjs_error TJS_INTF_METHOD
-		FuncCall(tjs_uint32 flag, const tjs_char * membername,
+		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
 			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
 			tTJSVariant **param, iTJSDispatch2 *objthis);
 			// method from iTJSDispatch2, for enumeration callback
@@ -96,8 +94,7 @@ private:
 		const ttstr * IndentStr;
 		bool First;
 
-		tjs_error TJS_INTF_METHOD
-		FuncCall(tjs_uint32 flag, const tjs_char * membername,
+		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
 			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
 			tTJSVariant **param, iTJSDispatch2 *objthis);
 	};
@@ -107,8 +104,7 @@ private:
 		std::vector<iTJSDispatch2 *> * Stack;
 		tTJSBinaryStream *Stream;
 
-		tjs_error TJS_INTF_METHOD
-		FuncCall(tjs_uint32 flag, const tjs_char * membername,
+		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
 			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
 			tTJSVariant **param, iTJSDispatch2 *objthis);
 	};
@@ -118,8 +114,7 @@ private:
 		tjs_uint Count;
 		tSaveMemberCountCallback() : Count(0) {}
 
-		tjs_error TJS_INTF_METHOD
-		FuncCall(tjs_uint32 flag, const tjs_char * membername,
+		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
 			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
 			tTJSVariant **param, iTJSDispatch2 *objthis);
 	};
@@ -133,8 +128,7 @@ public:
 		std::vector<iTJSDispatch2 *> * Stack;
 		iTJSDispatch2 * Dest;
 
-		tjs_error TJS_INTF_METHOD
-		FuncCall(tjs_uint32 flag, const tjs_char * membername,
+		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
 			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
 			tTJSVariant **param, iTJSDispatch2 *objthis);
 	};
@@ -151,25 +145,21 @@ public:
 	~tTJSDictionaryObject();
 
 
-	tjs_error TJS_INTF_METHOD
-	FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+	tjs_error 	FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
 
 
-	tjs_error TJS_INTF_METHOD
-	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+	tjs_error 	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		iTJSDispatch2 *objthis);
 
-	tjs_error TJS_INTF_METHOD
-	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
+	tjs_error 	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		iTJSDispatch2 **result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
 
 
-	tjs_error TJS_INTF_METHOD
-	Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+	tjs_error 	Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		const tTJSVariant *param, iTJSDispatch2 *objthis);
 
@@ -188,8 +178,7 @@ extern tjs_int32 TJSGetDictionaryClassID();
 //---------------------------------------------------------------------------
 // TJSCreateDictionaryObject
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(iTJSDispatch2 *, TJSCreateDictionaryObject, (
-	iTJSDispatch2 **classout = NULL));
+extern iTJSDispatch2* TJSCreateDictionaryObject(iTJSDispatch2** classout = 0);
 //---------------------------------------------------------------------------
 
 

@@ -576,7 +576,7 @@ void TVPClearXP3SegmentCache() {
 }
 //---------------------------------------------------------------------------
 struct tTVPClearSegmentCacheCallback : public tTVPCompactEventCallbackIntf {
-    virtual void TJS_INTF_METHOD OnCompact(tjs_int level) {
+    virtual void OnCompact(tjs_int level) {
         if(level >= TVP_COMPACT_LEVEL_DEACTIVATE) {
             // clear the segment cache on application deactivate
             TVPClearXP3SegmentCache();
@@ -755,7 +755,7 @@ bool tTVPXP3ArchiveStream::OpenNextSegment() {
     return true;
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPXP3ArchiveStream::Seek(tjs_int64 offset,
+tjs_uint64 tTVPXP3ArchiveStream::Seek(tjs_int64 offset,
                                                       tjs_int whence) {
     tjs_int64 newpos;
     switch(whence) {
@@ -783,7 +783,7 @@ tjs_uint64 TJS_INTF_METHOD tTVPXP3ArchiveStream::Seek(tjs_int64 offset,
     return CurPos;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPXP3ArchiveStream::Read(void *buffer,
+tjs_uint tTVPXP3ArchiveStream::Read(void *buffer,
                                                     tjs_uint read_size) {
     EnsureSegment();
 
@@ -827,14 +827,14 @@ tjs_uint TJS_INTF_METHOD tTVPXP3ArchiveStream::Read(void *buffer,
     return write_size;
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPXP3ArchiveStream::Write(const void *buffer,
+tjs_uint tTVPXP3ArchiveStream::Write(const void *buffer,
                                                      tjs_uint write_size) {
     return 0;
 }
 //---------------------------------------------------------------------------
-const std::string TJS_INTF_METHOD tTVPXP3ArchiveStream::GetFileName() {
+const std::string tTVPXP3ArchiveStream::GetFileName() {
     return "";
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPXP3ArchiveStream::GetSize() { return OrgSize; }
+tjs_uint64 tTVPXP3ArchiveStream::GetSize() { return OrgSize; }
 //---------------------------------------------------------------------------

@@ -24,7 +24,7 @@ tTJSNI_BaseTimer::tTJSNI_BaseTimer() {
     Mode = atmNormal;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseTimer::Construct(tjs_int numparams,
+tjs_error tTJSNI_BaseTimer::Construct(tjs_int numparams,
                                                       tTJSVariant **param,
                                                       iTJSDispatch2 *tjs_obj) {
     if(numparams < 1)
@@ -43,7 +43,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseTimer::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseTimer::Invalidate() {
+void tTJSNI_BaseTimer::Invalidate() {
     TVPCancelSourceEvents(Owner);
     Owner = NULL;
 
@@ -428,7 +428,7 @@ tTJSNI_Timer::tTJSNI_Timer() {
     Enabled = false;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_Timer::Construct(tjs_int numparams,
+tjs_error tTJSNI_Timer::Construct(tjs_int numparams,
                                                   tTJSVariant **param,
                                                   iTJSDispatch2 *tjs_obj) {
     inherited::Construct(numparams, param, tjs_obj);
@@ -437,7 +437,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_Timer::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Timer::Invalidate() {
+void tTJSNI_Timer::Invalidate() {
     tTVPTimerThread::Remove(this);
     ZeroPendingCount();
     CancelEvents();

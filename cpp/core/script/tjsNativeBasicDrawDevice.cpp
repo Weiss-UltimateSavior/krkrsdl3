@@ -110,12 +110,12 @@ tTJSNI_BasicDrawDevice::~tTJSNI_BasicDrawDevice() {
         Device->Destruct(), Device = NULL;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BasicDrawDevice::Construct(
+tjs_error tTJSNI_BasicDrawDevice::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BasicDrawDevice::Invalidate() {
+void tTJSNI_BasicDrawDevice::Invalidate() {
     if(Device)
         Device->Destruct(), Device = NULL;
 }

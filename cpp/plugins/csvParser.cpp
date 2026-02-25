@@ -243,7 +243,7 @@ public:
 	 * @param param
 	 * @param tjs_obj this オブジェクト
 	 */
-	tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
+	tjs_error Construct(tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
 		if (numparams > 0) {
 			target = param[0]->AsObject();
 			if (numparams > 1) {
@@ -269,7 +269,7 @@ public:
 	/**
 	 * TJS invalidate
 	 */
-	void TJS_INTF_METHOD Invalidate() {
+	void Invalidate() {
 		clear();
 		if (target) {
 			target->Release();
@@ -362,7 +362,7 @@ public:
 
 };
 
-static iTJSNativeInstance * TJS_INTF_METHOD Create_NI_CSVParser()
+static iTJSNativeInstance * Create_NI_CSVParser()
 {
 	return new NI_CSVParser();
 }

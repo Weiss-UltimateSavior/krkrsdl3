@@ -184,8 +184,7 @@ private:
     bool Shutdown; // true when shutting down
     bool CompactEventHookInit;
     void RegisterCompactEventHook();
-    void TJS_INTF_METHOD
-    OnCompact(tjs_int level) override; // method from tTVPCompactEventCallbackIntf
+    void OnCompact(tjs_int level) override; // method from tTVPCompactEventCallbackIntf
 
            //----------------------------------------------- interface to manager --
 private:

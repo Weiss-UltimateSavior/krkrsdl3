@@ -13,7 +13,7 @@
 //--------------------------------------------------------------------------- 
 class tGetDirListFunction : public tTJSDispatch
 {
-	tjs_error TJS_INTF_METHOD FuncCall(
+	tjs_error FuncCall(
 		tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
 		tTJSVariant *result,
 		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis)

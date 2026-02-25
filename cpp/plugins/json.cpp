@@ -182,7 +182,7 @@ public:
 
     ~JSONTextReadStream(void) { delete Storage; }
 
-    virtual tjs_uint TJS_INTF_METHOD Read(tTJSString& targ, tjs_uint size)
+    virtual tjs_uint Read(tTJSString& targ, tjs_uint size)
     {
         tjs_uint readSize = 0;
         while (readSize < size)
@@ -206,7 +206,7 @@ public:
         return readSize;
     }
 
-    virtual void TJS_INTF_METHOD Destruct() { delete this; }
+    virtual void Destruct() { delete this; }
 };
 
 // -----------------------------------------------------------------
@@ -1036,7 +1036,7 @@ class tEvalJSON : public tTJSDispatch
 {
 protected:
 public:
-    tjs_error TJS_INTF_METHOD FuncCall(tjs_uint32 flag,
+    tjs_error FuncCall(tjs_uint32 flag,
                                        const tjs_char* membername,
                                        tjs_uint32* hint,
                                        tTJSVariant* result,
@@ -1064,7 +1064,7 @@ class tEvalJSONStorage : public tTJSDispatch
 {
 protected:
 public:
-    tjs_error TJS_INTF_METHOD FuncCall(tjs_uint32 flag,
+    tjs_error FuncCall(tjs_uint32 flag,
                                        const tjs_char* membername,
                                        tjs_uint32* hint,
                                        tTJSVariant* result,
@@ -1161,7 +1161,7 @@ protected:
 
 public:
     DictMemberDispCaller(IWriter* writer) : writer(writer) { first = true; };
-    virtual tjs_error TJS_INTF_METHOD FuncCall( // function invocation
+    virtual tjs_error FuncCall( // function invocation
         tjs_uint32 flag,                        // calling flag
         const tjs_char* membername,             // member name ( NULL for a default member )
         tjs_uint32* hint,                       // hint for the member name (in/out)
@@ -1301,7 +1301,7 @@ class tSaveJSON : public tTJSDispatch
 {
 protected:
 public:
-    tjs_error TJS_INTF_METHOD FuncCall(tjs_uint32 flag,
+    tjs_error FuncCall(tjs_uint32 flag,
                                        const tjs_char* membername,
                                        tjs_uint32* hint,
                                        tTJSVariant* result,
@@ -1325,7 +1325,7 @@ class tToJSONString : public tTJSDispatch
 {
 protected:
 public:
-    tjs_error TJS_INTF_METHOD FuncCall(tjs_uint32 flag,
+    tjs_error FuncCall(tjs_uint32 flag,
                                        const tjs_char* membername,
                                        tjs_uint32* hint,
                                        tTJSVariant* result,

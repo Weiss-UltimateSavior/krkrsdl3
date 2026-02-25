@@ -88,7 +88,7 @@ class TArchiveStream : public tTJSBinaryStream {
 public:
     TArchiveStream(tTVPArchive *owner, tjs_uint64 off, tjs_uint64 len);
     virtual ~TArchiveStream();
-    virtual tjs_uint64 TJS_INTF_METHOD Seek(tjs_int64 offset, tjs_int whence) {
+    virtual tjs_uint64 Seek(tjs_int64 offset, tjs_int whence) {
         switch(whence) {
             case TJS_BS_SEEK_SET:
                 CurrentPos = offset;
@@ -109,7 +109,7 @@ public:
         _instr->SetPosition(CurrentPos + StartPos);
         return CurrentPos;
     }
-    virtual tjs_uint TJS_INTF_METHOD Read(void *buffer, tjs_uint read_size) {
+    virtual tjs_uint Read(void *buffer, tjs_uint read_size) {
         if(CurrentPos + read_size >= (tjs_int64)DataLength) {
             read_size = (tjs_uint)(DataLength - CurrentPos);
         }
@@ -120,12 +120,12 @@ public:
 
         return read_size;
     }
-    virtual tjs_uint TJS_INTF_METHOD Write(const void *buffer,
+    virtual tjs_uint Write(const void *buffer,
                                            tjs_uint write_size) {
         return 0;
     }
-    virtual const std::string TJS_INTF_METHOD GetFileName() { return ""; }
-    virtual tjs_uint64 TJS_INTF_METHOD GetSize() { return DataLength; }
+    virtual const std::string GetFileName() { return ""; }
+    virtual tjs_uint64 GetSize() { return DataLength; }
 };
 
 //---------------------------------------------------------------------------

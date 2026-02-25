@@ -695,7 +695,7 @@ tjs_int tTJSInterCodeContext::PutData(const tTJSVariant &val)
 	return _DataAreaSize++;
 }
 //---------------------------------------------------------------------------
-int TJS_USERENTRY tTJSInterCodeContext::tSourcePos::
+int tTJSInterCodeContext::tSourcePos::
 	SortFunction(const void *a, const void *b)
 {
 	const tSourcePos *aa = (const tSourcePos*)a;
@@ -1767,7 +1767,7 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 			else
 			{
                                 tTJSVariantString *str = cnode->GetValue().AsString();
-				if(Namespace.Find(str ? *str : NULL) == -1)
+                            if (Namespace.Find(str ? (const tjs_char*)(*str) : NULL) == -1)
 					hasnonlocalsymbol = true;
 				else
 					hasnonlocalsymbol = false;
@@ -2037,7 +2037,7 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 		else
 		{
                         tTJSVariantString *str = node->GetValue().AsString();
-			n = Namespace.Find(str ? *str : NULL);
+                    n = Namespace.Find(str ? (const tjs_char*)(*str) : NULL);
 			str->Release();
 		}
 
@@ -2112,7 +2112,7 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 				case stDelete: // deletion
 				  {
                                         tTJSVariantString *str = node->GetValue().AsString();
-					Namespace.Remove(str ? *str : NULL);
+                                      Namespace.Remove(str ? (const tjs_char*)(*str) : NULL);
 					str->Release();
 					if(restype & TJS_RT_NEEDED)
 					{
@@ -2134,7 +2134,7 @@ tjs_int tTJSInterCodeContext::GenNodeCode(tjs_int & frame, tTJSExprNode *node,
 				// read
                                 tTJSVariantString *str = node->GetValue().AsString();
 //				Namespace.Add(str->operator tjs_char *());
-				tjs_int n = Namespace.Find(str ? *str : NULL);
+                                tjs_int n = Namespace.Find(str ? (const tjs_char*)(*str) : NULL);
 				str->Release();
 				return -n-VariableReserveCount-1;
 			}

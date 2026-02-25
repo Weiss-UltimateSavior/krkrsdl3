@@ -1758,7 +1758,7 @@ void TVPClearFontCache()
 //---------------------------------------------------------------------------
 struct tTVPClearFontCacheCallback : public tTVPCompactEventCallbackIntf
 {
-	virtual void TJS_INTF_METHOD OnCompact(tjs_int level)
+	virtual void OnCompact(tjs_int level)
 	{
 		if (level >= TVP_COMPACT_LEVEL_MINIMIZE)
 		{

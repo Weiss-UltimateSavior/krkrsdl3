@@ -14,7 +14,7 @@ struct FontEx
 	 * @param extract アーカイブからテンポラリ展開する
 	 * @return void:ファイルを開くのに失敗 0:フォント登録に失敗 数値:登録したフォントの数
 	 */
-	static tjs_error TJS_INTF_METHOD addFont(tTJSVariant *result,
+	static tjs_error addFont(tTJSVariant *result,
 											 tjs_int numparams,
 											 tTJSVariant **param,
 											 iTJSDispatch2 *objthis) {

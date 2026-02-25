@@ -14,7 +14,7 @@ tTJSNI_Font::tTJSNI_Font() { Layer = NULL; }
 //---------------------------------------------------------------------------
 tTJSNI_Font::~tTJSNI_Font() {}
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_Font::Construct(tjs_int numparams,
+tjs_error tTJSNI_Font::Construct(tjs_int numparams,
                                                  tTJSVariant **param,
                                                  iTJSDispatch2 *tjs_obj) {
     if(numparams >= 1) {
@@ -35,7 +35,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_Font::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Font::Invalidate() {
+void tTJSNI_Font::Invalidate() {
     Layer = NULL;
 
     inherited::Invalidate();

@@ -22,7 +22,7 @@ tTJSNI_BaseVideoOverlay::tTJSNI_BaseVideoOverlay() {
     CanDeliverEvents = true;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseVideoOverlay::Construct(
+tjs_error tTJSNI_BaseVideoOverlay::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
     if(TJS_FAILED(hr))
@@ -51,7 +51,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseVideoOverlay::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseVideoOverlay::Invalidate() {
+void tTJSNI_BaseVideoOverlay::Invalidate() {
     Owner = NULL;
     if(Window)
         Window->UnregisterVideoOverlayObject(this);
@@ -235,7 +235,7 @@ tTJSNI_VideoOverlay::tTJSNI_VideoOverlay() :
     BmpBits[0] = BmpBits[1] = NULL;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_VideoOverlay::Construct(
+tjs_error tTJSNI_VideoOverlay::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
     if(TJS_FAILED(hr))
@@ -244,7 +244,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_VideoOverlay::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_VideoOverlay::Invalidate() {
+void tTJSNI_VideoOverlay::Invalidate() {
     inherited::Invalidate();
 
     Close();

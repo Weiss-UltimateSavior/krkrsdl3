@@ -1187,7 +1187,7 @@ public:
 		Table->Release();
 	}
 
-	tjs_error TJS_INTF_METHOD AddRef()
+	tjs_error AddRef()
 	{
 		// iTVPBaseTransHandler の AddRef
 		// 参照カウンタをインクリメント
@@ -1195,7 +1195,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD Release()
+	tjs_error Release()
 	{
 		// iTVPBaseTransHandler の Release
 		// 参照カウンタをデクリメントし、0 になるならば delete this
@@ -1207,7 +1207,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD SetOption(
+	tjs_error SetOption(
 			/*in*/iTVPSimpleOptionProvider *options // option provider
 		)
 	{
@@ -1216,14 +1216,14 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD StartProcess(tjs_uint64 tick);
+	tjs_error StartProcess(tjs_uint64 tick);
 
-	tjs_error TJS_INTF_METHOD EndProcess();
+	tjs_error EndProcess();
 
-	tjs_error TJS_INTF_METHOD Process(
+	tjs_error Process(
 			tTVPDivisibleData *data);
 
-	tjs_error TJS_INTF_METHOD MakeFinalImage(
+	tjs_error MakeFinalImage(
 			iTVPScanLineProvider ** dest,
 			iTVPScanLineProvider * src1,
 			iTVPScanLineProvider * src2)
@@ -1233,7 +1233,7 @@ public:
 	}
 };
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPRippleTransHandler::StartProcess(tjs_uint64 tick)
+tjs_error tTVPRippleTransHandler::StartProcess(tjs_uint64 tick)
 {
 	// トランジションの画面更新一回ごとに呼ばれる
 
@@ -1283,7 +1283,7 @@ tjs_error TJS_INTF_METHOD tTVPRippleTransHandler::StartProcess(tjs_uint64 tick)
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPRippleTransHandler::EndProcess()
+tjs_error tTVPRippleTransHandler::EndProcess()
 {
 	// トランジションの画面更新一回分が終わるごとに呼ばれる
 
@@ -1292,7 +1292,7 @@ tjs_error TJS_INTF_METHOD tTVPRippleTransHandler::EndProcess()
 	return TJS_S_TRUE;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTVPRippleTransHandler::Process(
+tjs_error tTVPRippleTransHandler::Process(
 			tTVPDivisibleData *data)
 {
 	// トランジションの各領域ごとに呼ばれる
@@ -1528,7 +1528,7 @@ public:
 	tTVPRippleTransHandlerProvider() { RefCount = 1; }
 	~tTVPRippleTransHandlerProvider() {; }
 
-	tjs_error TJS_INTF_METHOD AddRef()
+	tjs_error AddRef()
 	{
 		// iTVPBaseTransHandler の AddRef
 		// 参照カウンタをインクリメント
@@ -1536,7 +1536,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD Release()
+	tjs_error Release()
 	{
 		// iTVPBaseTransHandler の Release
 		// 参照カウンタをデクリメントし、0 になるならば delete this
@@ -1547,7 +1547,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tjs_error TJS_INTF_METHOD GetName(
+	tjs_error GetName(
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
@@ -1556,7 +1556,7 @@ public:
 	}
 
 
-	tjs_error TJS_INTF_METHOD StartTransition(
+	tjs_error StartTransition(
 			/*in*/iTVPSimpleOptionProvider *options, // option provider
 			/*in*/iTVPSimpleImageProvider *imagepro, // image provider
 			/*in*/tTVPLayerType layertype, // destination layer type

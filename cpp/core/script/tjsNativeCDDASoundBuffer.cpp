@@ -260,7 +260,7 @@ tTJSNI_CDDASoundBuffer::tTJSNI_CDDASoundBuffer() {
 #endif
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_CDDASoundBuffer::Construct(
+tjs_error tTJSNI_CDDASoundBuffer::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
     if(TJS_FAILED(hr))
@@ -269,7 +269,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_CDDASoundBuffer::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_CDDASoundBuffer::Invalidate() {
+void tTJSNI_CDDASoundBuffer::Invalidate() {
     inherited::Invalidate();
 
 #ifdef ENABLE_CDDA
@@ -726,7 +726,7 @@ void tTJSNI_CDDASoundBuffer::SetVolume2(tjs_int v) {
 //---------------------------------------------------------------------------
 tTJSNI_BaseCDDASoundBuffer::tTJSNI_BaseCDDASoundBuffer() {}
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseCDDASoundBuffer::Construct(
+tjs_error tTJSNI_BaseCDDASoundBuffer::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
     if(TJS_FAILED(hr))
@@ -735,7 +735,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseCDDASoundBuffer::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseCDDASoundBuffer::Invalidate() {
+void tTJSNI_BaseCDDASoundBuffer::Invalidate() {
 
     inherited::Invalidate();
 }

@@ -26,9 +26,9 @@ class tTJSNI_BaseSoundBuffer : public tTJSNativeInstance {
 
 public:
     tTJSNI_BaseSoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
 protected:
     iTJSDispatch2 *Owner; // owner object
@@ -83,9 +83,9 @@ class tTJSNI_SoundBuffer : public tTJSNI_BaseSoundBuffer {
 
 public:
     tTJSNI_SoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
 public:
 protected:
@@ -124,10 +124,10 @@ protected:
     iTJSDispatch2* Filters;                 // wave filters array (TJS2 array object)
 public:
     tTJSNI_BaseWaveSoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams,
+    tjs_error Construct(tjs_int numparams,
                                         tTJSVariant** param,
                                         iTJSDispatch2* tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
 protected:
     void InvokeLabelEvent(const ttstr& name);
@@ -156,10 +156,10 @@ class tTJSNI_WaveSoundBuffer : public tTJSNI_BaseWaveSoundBuffer
 
 public:
     tTJSNI_WaveSoundBuffer();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams,
+    tjs_error Construct(tjs_int numparams,
                                         tTJSVariant** param,
                                         iTJSDispatch2* tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
     //-- buffer management ------------------------------------------------
 private:
@@ -378,10 +378,10 @@ class tTJSNI_WaveFlags : public tTJSNativeInstance
 public:
     tTJSNI_WaveFlags();
     ~tTJSNI_WaveFlags();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams,
+    tjs_error Construct(tjs_int numparams,
                                         tTJSVariant** param,
                                         iTJSDispatch2* tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
     tTJSNI_WaveSoundBuffer* GetBuffer() const { return Buffer; }
 };

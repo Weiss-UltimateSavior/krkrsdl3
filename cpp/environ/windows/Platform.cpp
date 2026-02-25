@@ -29,8 +29,8 @@ public:
 	tTVPFileMedia() { RefCount = 1; }
 	~tTVPFileMedia() { ; }
 
-	void TJS_INTF_METHOD AddRef() { RefCount++; }
-	void TJS_INTF_METHOD Release()
+	void AddRef() { RefCount++; }
+	void Release()
 	{
 		if (RefCount == 1)
 			delete this;
@@ -38,20 +38,20 @@ public:
 			RefCount--;
 	}
 
-	void TJS_INTF_METHOD GetName(ttstr& name) { name = TJS_W("file"); }
+	void GetName(ttstr& name) { name = TJS_W("file"); }
 
-	void TJS_INTF_METHOD NormalizeDomainName(ttstr& name);
-	void TJS_INTF_METHOD NormalizePathName(ttstr& name);
-	bool TJS_INTF_METHOD CheckExistentStorage(const ttstr& name);
-	tTJSBinaryStream* TJS_INTF_METHOD Open(const ttstr& name, tjs_uint32 flags);
-	void TJS_INTF_METHOD GetListAt(const ttstr& name, iTVPStorageLister* lister);
-	void TJS_INTF_METHOD GetLocallyAccessibleName(ttstr& name);
+	void NormalizeDomainName(ttstr& name);
+	void NormalizePathName(ttstr& name);
+	bool CheckExistentStorage(const ttstr& name);
+	tTJSBinaryStream* Open(const ttstr& name, tjs_uint32 flags);
+	void GetListAt(const ttstr& name, iTVPStorageLister* lister);
+	void GetLocallyAccessibleName(ttstr& name);
 
 public:
-	void TJS_INTF_METHOD GetLocalName(ttstr& name);
+	void GetLocalName(ttstr& name);
 };
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPFileMedia::NormalizeDomainName(ttstr& name)
+void tTVPFileMedia::NormalizeDomainName(ttstr& name)
 {
 	// normalize domain name
 	// make all characters small
@@ -64,7 +64,7 @@ void TJS_INTF_METHOD tTVPFileMedia::NormalizeDomainName(ttstr& name)
 	}
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPFileMedia::NormalizePathName(ttstr& name)
+void tTVPFileMedia::NormalizePathName(ttstr& name)
 {
 	// normalize path name
 	// make all characters small
@@ -77,7 +77,7 @@ void TJS_INTF_METHOD tTVPFileMedia::NormalizePathName(ttstr& name)
 	}
 }
 //---------------------------------------------------------------------------
-bool TJS_INTF_METHOD tTVPFileMedia::CheckExistentStorage(const ttstr& name)
+bool tTVPFileMedia::CheckExistentStorage(const ttstr& name)
 {
 	if (name.IsEmpty()) return false;
 
@@ -87,7 +87,7 @@ bool TJS_INTF_METHOD tTVPFileMedia::CheckExistentStorage(const ttstr& name)
 	return TVPCheckExistentLocalFile(_name);
 }
 //---------------------------------------------------------------------------
-tTJSBinaryStream* TJS_INTF_METHOD tTVPFileMedia::Open(const ttstr& name, tjs_uint32 flags)
+tTJSBinaryStream* tTVPFileMedia::Open(const ttstr& name, tjs_uint32 flags)
 {
 	// open storage named "name".
 	// currently only local/network(by OS) storage systems are supported.
@@ -102,7 +102,7 @@ tTJSBinaryStream* TJS_INTF_METHOD tTVPFileMedia::Open(const ttstr& name, tjs_uin
 }
 
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPFileMedia::GetListAt(const ttstr& _name, iTVPStorageLister* lister)
+void tTVPFileMedia::GetListAt(const ttstr& _name, iTVPStorageLister* lister)
 {
 	ttstr name(_name);
 	GetLocalName(name);
@@ -125,13 +125,12 @@ static int _utf8_strcasecmp(const char* a, const char* b) {
 }
 
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPFileMedia::GetLocallyAccessibleName(ttstr& name)
+void tTVPFileMedia::GetLocallyAccessibleName(ttstr& name)
 {
 	ttstr newname;
 
 	const tjs_char* ptr = name.c_str();
 
-#ifdef WIN32
 	if (TJS_strncmp(ptr, TJS_W("./"), 2))
 	{
 		// differs from "./",
@@ -172,49 +171,10 @@ void TJS_INTF_METHOD tTVPFileMedia::GetLocallyAccessibleName(ttstr& name)
 		if (*pp == TJS_W('/')) *pp = TJS_W('\\');
 		pp++;
 	}
-#else // posix
-	if (!TJS_strncmp(ptr, TJS_W("./"), 2)) {
-		ptr += 2;  // skip "./"
-		newname.Clear();
-	}
-	while (*ptr) {
-		const tjs_char* ptr_end = ptr;
-		while (*ptr_end && *ptr_end != TJS_W('/')) ++ptr_end;
-		if (ptr_end == ptr) break;
-		const tjs_char* ptr_cur = ptr;
-		tTJSNarrowStringHolder walker(ttstr(ptr, ptr_end - ptr).c_str());
-		while (*ptr_end && *ptr_end == TJS_W('/')) ++ptr_end;
-		ptr = ptr_end;
-
-		DIR* dirp;
-		struct dirent* direntp;
-		newname += "/";
-		if ((dirp = opendir(tTJSNarrowStringHolder(newname.c_str())))) {
-			bool found = false;
-			while ((direntp = readdir(dirp)) != NULL) {
-				if (!_utf8_strcasecmp(walker, direntp->d_name)) {
-					newname += direntp->d_name;
-					found = true;
-					break;
-				}
-			}
-			closedir(dirp);
-			if (!found) {
-				newname += ptr_cur;
-				break;
-			}
-		}
-		else {
-			newname += ptr_cur;
-			break;
-		}
-	}
-
-#endif
 	name = newname;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPFileMedia::GetLocalName(ttstr& name)
+void tTVPFileMedia::GetLocalName(ttstr& name)
 {
 	ttstr tmp = name;
 	GetLocallyAccessibleName(tmp);

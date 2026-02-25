@@ -657,7 +657,7 @@ void TVPLoadBMP(void* formatdata, void *callbackdata, tTVPGraphicSizeCallback si
 	// check the magic
 	tjs_uint8 magic[2];
 	src->ReadBuffer(magic, 2);
-	if(magic[0] != TJS_N('B') || magic[1] != TJS_N('M'))
+	if(magic[0] != 'B' || magic[1] != 'M')
 		TVPThrowExceptionMessage(TVPImageLoadError, (const tjs_char*)TVPNotWindowsBmp );
 
 	// read the BITMAPFILEHEADER
@@ -903,7 +903,7 @@ void TVPLoadHeaderBMP( void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** 
 	// check the magic
 	tjs_uint8 magic[2];
 	src->ReadBuffer(magic, 2);
-	if(magic[0] != TJS_N('B') || magic[1] != TJS_N('M'))
+	if(magic[0] != 'B' || magic[1] != 'M')
 		TVPThrowExceptionMessage(TVPImageLoadError, (const tjs_char*)TVPNotWindowsBmp );
 
 	// read the BITMAPFILEHEADER
@@ -1524,7 +1524,7 @@ static tTVPAtExit
 //---------------------------------------------------------------------------
 struct tTVPClearGraphicCacheCallback : public tTVPCompactEventCallbackIntf
 {
-	virtual void TJS_INTF_METHOD OnCompact(tjs_int level)
+	virtual void OnCompact(tjs_int level)
 	{
 		if(level >= TVP_COMPACT_LEVEL_MINIMIZE)
 		{

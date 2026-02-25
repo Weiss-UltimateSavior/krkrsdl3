@@ -16,7 +16,7 @@ tTJSNI_Bitmap::~tTJSNI_Bitmap() { TVPTempBitmapHolderRelease(); }
 //----------------------------------------------------------------------
 // string, [uint] ファイル名、カラーキーの順で指定
 // uint, uint, [bpp] 幅、高さ、bppの順で指定
-tjs_error TJS_INTF_METHOD tTJSNI_Bitmap::Construct(tjs_int numparams,
+tjs_error tTJSNI_Bitmap::Construct(tjs_int numparams,
                                                    tTJSVariant **param,
                                                    iTJSDispatch2 *tjs_obj) {
     Owner = tjs_obj;
@@ -44,7 +44,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_Bitmap::Construct(tjs_int numparams,
     return TJS_S_OK;
 }
 //----------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_Bitmap::Invalidate() {
+void tTJSNI_Bitmap::Invalidate() {
     if(Bitmap)
         delete Bitmap, Bitmap = NULL;
 }

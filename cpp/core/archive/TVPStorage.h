@@ -26,44 +26,44 @@ extern tjs_char TVPArchiveDelimiter; //  = '>';
 class iTVPStorageLister // callback class for GetListAt
 {
 public:
-    virtual void TJS_INTF_METHOD Add(const ttstr &file) = 0;
+    virtual void Add(const ttstr &file) = 0;
 };
 //---------------------------------------------------------------------------
 class iTVPStorageMedia {
 public:
     virtual ~iTVPStorageMedia() {} // add by ZeaS
-    virtual void TJS_INTF_METHOD AddRef() = 0;
-    virtual void TJS_INTF_METHOD Release() = 0;
+    virtual void AddRef() = 0;
+    virtual void Release() = 0;
 
-    virtual void TJS_INTF_METHOD GetName(ttstr &name) = 0;
+    virtual void GetName(ttstr &name) = 0;
     // returns media name like "file", "http" etc.
 
-    //	virtual bool TJS_INTF_METHOD IsCaseSensitive() = 0;
+    //	virtual bool IsCaseSensitive() = 0;
     // returns whether this media is case sensitive or not
 
-    virtual void TJS_INTF_METHOD NormalizeDomainName(ttstr &name) = 0;
+    virtual void NormalizeDomainName(ttstr &name) = 0;
     // normalize domain name according with the media's rule
 
-    virtual void TJS_INTF_METHOD NormalizePathName(ttstr &name) = 0;
+    virtual void NormalizePathName(ttstr &name) = 0;
     // normalize path name according with the media's rule
 
     // "name" below is normalized but does not contain media, eg.
     // not "media://domain/path" but "domain/path"
 
-    virtual bool TJS_INTF_METHOD CheckExistentStorage(const ttstr &name) = 0;
+    virtual bool CheckExistentStorage(const ttstr &name) = 0;
     // check file existence
 
-    virtual tTJSBinaryStream *TJS_INTF_METHOD Open(const ttstr &name,
+    virtual tTJSBinaryStream *Open(const ttstr &name,
                                                    tjs_uint32 flags) = 0;
     // open a storage and return a tTJSBinaryStream instance.
     // name does not contain in-archive storage name but
     // is normalized.
 
-    virtual void TJS_INTF_METHOD GetListAt(const ttstr &name,
+    virtual void GetListAt(const ttstr &name,
                                            iTVPStorageLister *lister) = 0;
     // list files at given place
 
-    virtual void TJS_INTF_METHOD GetLocallyAccessibleName(ttstr &name) = 0;
+    virtual void GetLocallyAccessibleName(ttstr &name) = 0;
     // basically the same as above,
     // check wether given name is easily accessible from local OS filesystem.
     // if true, returns local OS native name. otherwise returns an empty string.
@@ -76,18 +76,17 @@ protected:
     tjs_int refCount;
     tTVPStorageMedia() : refCount(1) {}
 
-    virtual void TJS_INTF_METHOD AddRef() override { refCount++; }
-    virtual void TJS_INTF_METHOD Release() override {
+    virtual void AddRef() override { refCount++; }
+    virtual void Release() override {
         if(refCount == 1) {
             delete this;
         } else {
             refCount--;
         }
     }
-    virtual void TJS_INTF_METHOD NormalizeDomainName(ttstr &name) override {}
-    virtual void TJS_INTF_METHOD NormalizePathName(ttstr &name) override {}
-    virtual void TJS_INTF_METHOD
-    GetLocallyAccessibleName(ttstr &name) override {}
+    virtual void NormalizeDomainName(ttstr &name) override {}
+    virtual void NormalizePathName(ttstr &name) override {}
+    virtual void GetLocallyAccessibleName(ttstr &name) override {}
 };
 
 struct tTVPLocalFileInfo {

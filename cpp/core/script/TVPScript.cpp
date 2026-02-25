@@ -58,7 +58,7 @@
 //---------------------------------------------------------------------------
 static const tjs_nchar * TVPInitTJSScript =
 	// note that this script is stored as narrow string
-TJS_N("const\
+"const\
 \
 /* constants */\
  /* tTVPBorderStyle */ bsNone=0,  bsSingle=1,  bsSizeable=2,  bsDialog=3,  bsToolWindow=4,  bsSizeToolWin=5,\
@@ -362,7 +362,7 @@ psexcl		:%[type:ltPsExclusion		],\
 ],\
 /* draw thread num */\
  dtnAuto=0\
-;");
+;";
 //---------------------------------------------------------------------------
 
 
@@ -380,7 +380,7 @@ ttstr TVPStartupScriptName(TJS_W("startup.tjs"));
 //---------------------------------------------------------------------------
 class tTVPTJSGCCallback : public tTVPCompactEventCallbackIntf
 {
-	void TJS_INTF_METHOD OnCompact(tjs_int level)
+	void OnCompact(tjs_int level)
 	{
 		// OnCompact method from tTVPCompactEventCallbackIntf
 		// called when the application is idle, deactivated, minimized, or etc...

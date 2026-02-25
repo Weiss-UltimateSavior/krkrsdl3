@@ -3558,8 +3558,7 @@ return obj;
 /**
  * Image はラッピングする必要があるので rawcallback で対応
  */
-static tjs_error TJS_INTF_METHOD
-GetRecordImage(tTJSVariant* result, tjs_int numparams,
+static tjs_error GetRecordImage(tTJSVariant* result, tjs_int numparams,
                tTJSVariant** param, iTJSDispatch2* objthis)
 {
     LayerExDraw* obj = ncbInstanceAdaptor<LayerExDraw>::GetNativeInstance(objthis, true);

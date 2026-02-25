@@ -17,9 +17,9 @@ class tTJSNI_Font : public tTJSNativeInstance {
 public:
     tTJSNI_Font();
     ~tTJSNI_Font();
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
     tTJSNI_BaseLayer *GetLayer() const { return Layer; }
 

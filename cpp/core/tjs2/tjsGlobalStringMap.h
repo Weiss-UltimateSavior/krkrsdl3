@@ -20,7 +20,7 @@ namespace TJS
 //---------------------------------------------------------------------------
 extern void TJSAddRefGlobalStringMap();
 extern void TJSReleaseGlobalStringMap();
-TJS_EXP_FUNC_DEF(ttstr, TJSMapGlobalStringMap, (const ttstr & string));
+extern ttstr TJSMapGlobalStringMap(const ttstr& string);
 //---------------------------------------------------------------------------
 } // namespace TJS
 

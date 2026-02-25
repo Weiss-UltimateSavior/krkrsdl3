@@ -58,12 +58,12 @@ tjs_char * tTJSString::InternalIndepend()
 	// and returns independent internal buffer
 
 	tTJSVariantString *newstr =
-		TJSAllocVariantString(Ptr ? *Ptr : NULL);
+            TJSAllocVariantString(Ptr ? (const tjs_char*)(*Ptr) : NULL);
 
 	Ptr->Release();
 	Ptr = newstr;
 
-	return const_cast<tjs_char *>( newstr ? *newstr : NULL);
+	return const_cast<tjs_char *>( newstr ? (const tjs_char*)(*newstr) : NULL);
 }
 //---------------------------------------------------------------------------
 tjs_int64 tTJSString::AsInteger() const

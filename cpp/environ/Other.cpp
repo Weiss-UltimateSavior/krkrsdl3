@@ -134,7 +134,7 @@ tTVPLocalFileStream::~tTVPLocalFileStream()
     TVPPushEnvironNoise(&tick, sizeof(tick));
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPLocalFileStream::Seek(tjs_int64 offset, tjs_int whence)
+tjs_uint64 tTVPLocalFileStream::Seek(tjs_int64 offset, tjs_int whence)
 {
     if (MemBuffer) {
         return MemBuffer->Seek(offset, whence);
@@ -157,7 +157,7 @@ tjs_uint64 TJS_INTF_METHOD tTVPLocalFileStream::Seek(tjs_int64 offset, tjs_int w
     return static_cast<tjs_uint64>(SDL_SeekIO((SDL_IOStream*)Handle, offset, sdl_whence));
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPLocalFileStream::Read(void* buffer, tjs_uint read_size)
+tjs_uint tTVPLocalFileStream::Read(void* buffer, tjs_uint read_size)
 {
     if (MemBuffer) {
         return MemBuffer->Read(buffer, read_size);
@@ -165,7 +165,7 @@ tjs_uint TJS_INTF_METHOD tTVPLocalFileStream::Read(void* buffer, tjs_uint read_s
     return static_cast<tjs_uint>(SDL_ReadIO((SDL_IOStream*)Handle, buffer, read_size));
 }
 //---------------------------------------------------------------------------
-tjs_uint TJS_INTF_METHOD tTVPLocalFileStream::Write(const void* buffer, tjs_uint write_size)
+tjs_uint tTVPLocalFileStream::Write(const void* buffer, tjs_uint write_size)
 {
     if (MemBuffer) {
         return MemBuffer->Write(buffer, write_size);
@@ -173,7 +173,7 @@ tjs_uint TJS_INTF_METHOD tTVPLocalFileStream::Write(const void* buffer, tjs_uint
     return static_cast<tjs_uint>(SDL_WriteIO((SDL_IOStream*)Handle, buffer, write_size));
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLocalFileStream::SetEndOfStorage()
+void tTVPLocalFileStream::SetEndOfStorage()
 {
     if (MemBuffer) {
         return MemBuffer->SetEndOfStorage();
@@ -182,7 +182,7 @@ void TJS_INTF_METHOD tTVPLocalFileStream::SetEndOfStorage()
     SDL_SeekIO((SDL_IOStream*)Handle, 0, SDL_IO_SEEK_END);
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTVPLocalFileStream::GetSize()
+tjs_uint64 tTVPLocalFileStream::GetSize()
 {
     if (MemBuffer) {
         return MemBuffer->GetSize();

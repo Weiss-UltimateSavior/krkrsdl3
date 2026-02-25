@@ -47,9 +47,9 @@ extern void TJSDumpStringHeap(void);
 //---------------------------------------------------------------------------
 // base memory allocation functions for long string
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(tjs_char *, TJSVS_malloc, (tjs_uint len));
-TJS_EXP_FUNC_DEF(tjs_char *, TJSVS_realloc, (tjs_char *buf, tjs_uint len));
-TJS_EXP_FUNC_DEF(void, TJSVS_free, (tjs_char *buf));
+extern tjs_char* TJSVS_malloc(tjs_uint len);
+extern tjs_char* TJSVS_realloc(tjs_char* buf, tjs_uint len);
+extern void TJSVS_free(tjs_char* buf);
 //---------------------------------------------------------------------------
 
 
@@ -79,14 +79,14 @@ class tTJSVariantString : public tTJSVariantString_S
 {
 public:
 
-	TJS_METHOD_DEF(void, AddRef, ())
+	void AddRef()
 	{
 		RefCount++;
 	}
 
-	TJS_METHOD_DEF(void, Release, ());
+	void Release();
 
-	TJS_METHOD_DEF(void, SetString, (const tjs_char *ref, tjs_int maxlen = -1))
+	void SetString(const tjs_char* ref, tjs_int maxlen = -1)
 	{
 		if(LongString) TJSVS_free(LongString), LongString = NULL;
 		tjs_int len;
@@ -107,7 +107,7 @@ public:
 		}
 	}
 
-	TJS_METHOD_DEF(void, SetString, (const tjs_nchar *ref))
+	void SetString(const tjs_nchar* ref)
 	{
 		if(LongString) TJSVS_free(LongString), LongString = NULL;
 		tjs_int len = (tjs_int)TJS_narrowtowidelen(ref);
@@ -125,7 +125,7 @@ public:
 		}
 	}
 
-	TJS_METHOD_DEF(void, AllocBuffer, (tjs_uint len))
+	void AllocBuffer(tjs_uint len)
 	{
 		/* note that you must call FixLength if you allocate larger than the
 			actual string size */
@@ -144,14 +144,14 @@ public:
 		}
 	}
 
-	TJS_METHOD_DEF(void, ResetString, (const tjs_char *ref))
+	void ResetString(const tjs_char* ref)
 	{
 		if(LongString) TJSVS_free(LongString), LongString = NULL;
 		SetString(ref);
 	}
 
 
-	TJS_METHOD_DEF(void, AppendBuffer, (tjs_uint applen))
+	void AppendBuffer(tjs_uint applen)
 	{
 		/* note that you must call FixLength if you allocate larger than the
 			actual string size */
@@ -183,13 +183,13 @@ public:
 
 	}
 
-	TJS_METHOD_DEF(void, Append, (const tjs_char *str))
+	void Append(const tjs_char* str)
 	{
 		// assume this != NULL
 		Append(str, (tjs_int)TJS_strlen(str));
 	}
 
-	TJS_METHOD_DEF(void, Append, (const tjs_char *str, tjs_int applen))
+	void Append(const tjs_char* str, tjs_int applen)
 	{
 		// assume this != NULL
 		tjs_int orglen = Length;
@@ -218,19 +218,19 @@ public:
 		}
 	}
 
-	TJS_CONST_METHOD_DEF(TJS_METHOD_RET(const tjs_char *), operator const tjs_char *, ());
+	operator const tjs_char*() const;
 
-	TJS_CONST_METHOD_DEF(tjs_int, GetLength, ());
+	tjs_int GetLength() const;
 
-	TJS_METHOD_DEF(tTJSVariantString *, FixLength, ());
+	tTJSVariantString* FixLength();
 
-	TJS_METHOD_DEF(tjs_uint32 *, GetHint, ()) { return &Hint; }
+	tjs_uint32* GetHint() { return &Hint; }
 
-	TJS_CONST_METHOD_DEF(tTVInteger, ToInteger, ());
-	TJS_CONST_METHOD_DEF(tTVReal, ToReal, ());
-	TJS_CONST_METHOD_DEF(void, ToNumber, (tTJSVariant &dest));
+	tTVInteger ToInteger() const;
+        tTVReal ToReal() const;
+        void ToNumber(tTJSVariant& dest) const;
 
-	TJS_CONST_METHOD_DEF(tjs_int, GetRefCount, ())
+	tjs_int GetRefCount() const
 	{
 		return RefCount;
 	}
@@ -263,19 +263,18 @@ public:
 
 
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAllocVariantString, (const tjs_char *ref1,
-	const tjs_char *ref2));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAllocVariantString, (const tjs_char *ref, tjs_int n));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAllocVariantString, (const tjs_char *ref));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAllocVariantString, (const tjs_nchar *ref));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAllocVariantString, (const tjs_uint8 **src));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAllocVariantStringBuffer, (tjs_uint len));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAppendVariantString, (tTJSVariantString *str,
-	const tjs_char *app));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSAppendVariantString, (tTJSVariantString *str,
-	const tTJSVariantString *app));
-TJS_EXP_FUNC_DEF(tTJSVariantString *, TJSFormatString, (const tjs_char *format, tjs_uint numparams,
-	tTJSVariant **params));
+extern tTJSVariantString* TJSAllocVariantString(const tjs_char* ref1, const tjs_char* ref2);
+extern tTJSVariantString* TJSAllocVariantString(const tjs_char* ref, tjs_int n);
+extern tTJSVariantString* TJSAllocVariantString(const tjs_char* ref);
+extern tTJSVariantString* TJSAllocVariantString(const tjs_nchar* ref);
+extern tTJSVariantString* TJSAllocVariantString(const tjs_uint8** src);
+extern tTJSVariantString* TJSAllocVariantStringBuffer(tjs_uint len);
+extern tTJSVariantString* TJSAppendVariantString(tTJSVariantString* str, const tjs_char* app);
+extern tTJSVariantString* TJSAppendVariantString(tTJSVariantString* str,
+                                                 const tTJSVariantString* app);
+extern tTJSVariantString* TJSFormatString(const tjs_char* format,
+                                          tjs_uint numparams,
+                                          tTJSVariant** params);
 
 //---------------------------------------------------------------------------
 } // namespace TJS

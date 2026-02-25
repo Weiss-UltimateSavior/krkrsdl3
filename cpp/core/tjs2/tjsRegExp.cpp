@@ -16,11 +16,6 @@
 
 #include <functional>
 
-#ifdef WIN32
-//在window的正则表达式匹配中"\\w"会变成"\\x0100-\\xFFFF"，所以要进行补救
-std::wstring replace(std::wstring str, const std::wstring& from, const std::wstring& to);
-#endif
-
 namespace TJS
 {
 

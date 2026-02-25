@@ -79,7 +79,7 @@ public:
 	* 吉里吉里が暇なときに常に呼ばれる
 	* 塗り直し処理
 	*/
-	virtual void TJS_INTF_METHOD OnContinuousCallback(tjs_uint64 tick);
+	virtual void OnContinuousCallback(tjs_uint64 tick);
 };
 
 /**
@@ -265,8 +265,7 @@ void layerExMovie::onEnded() {
 	}
 }
 
-void TJS_INTF_METHOD
-layerExMovie::OnContinuousCallback(tjs_uint64 tick)
+void layerExMovie::OnContinuousCallback(tjs_uint64 tick)
 {
 	if (VideoOverlay) {
 		// 更新 

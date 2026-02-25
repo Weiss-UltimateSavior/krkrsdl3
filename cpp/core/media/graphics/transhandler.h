@@ -87,13 +87,13 @@ class iTVPTexture2D;
 class iTVPScanLineProvider
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD AddRef() = 0;
-	virtual tjs_error TJS_INTF_METHOD Release() = 0;
+	virtual tjs_error AddRef() = 0;
+	virtual tjs_error Release() = 0;
 		// call "Release" when done with this object
 
-	virtual tjs_error TJS_INTF_METHOD GetWidth(/*out*/tjs_int *width) = 0;
+	virtual tjs_error GetWidth(/*out*/tjs_int *width) = 0;
 		// return image width
-	virtual tjs_error TJS_INTF_METHOD GetHeight(/*out*/tjs_int *height) = 0;
+	virtual tjs_error GetHeight(/*out*/tjs_int *height) = 0;
 		// return image height
 
     virtual tjs_error GetPixelFormat(/*out*/ tjs_int *bpp) = 0;
@@ -121,26 +121,26 @@ public:
 class iTVPSimpleOptionProvider
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD AddRef() = 0;
-	virtual tjs_error TJS_INTF_METHOD Release() = 0;
+	virtual tjs_error AddRef() = 0;
+	virtual tjs_error Release() = 0;
 		// call this when done with this object
 
-	virtual tjs_error TJS_INTF_METHOD GetAsNumber(
+	virtual tjs_error GetAsNumber(
 			/*in*/const tjs_char *name, /*out*/tjs_int64 *value) = 0;
 		// retrieve option as a number.
-	virtual tjs_error TJS_INTF_METHOD GetAsString(
+	virtual tjs_error GetAsString(
 			/*in*/const tjs_char *name, /*out*/const tjs_char **out) = 0;
 		// retrieve option as a string.
 		// note that you must use the returned string as an one time string
 		// pointer; you cannot hold its pointer and/or use it later.
 
-	virtual tjs_error TJS_INTF_METHOD GetValue(
+	virtual tjs_error GetValue(
 			/*in*/const tjs_char *name, /*out*/tTJSVariant *dest) = 0;
 		// retrieve option as a tTJSVariant.
 
-	virtual tjs_error TJS_INTF_METHOD Reserved2() = 0;
+	virtual tjs_error Reserved2() = 0;
 
-	virtual tjs_error TJS_INTF_METHOD GetDispatchObject(iTJSDispatch2 **dsp)
+	virtual tjs_error GetDispatchObject(iTJSDispatch2 **dsp)
 		 = 0;
 		// retrieve internal dispatch object ( if exists )
 };
@@ -154,7 +154,7 @@ public:
 class iTVPSimpleImageProvider
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD LoadImage(
+	virtual tjs_error LoadImage(
 			/*in*/const tjs_char *name, /*in*/tjs_int bpp,
 			/*in*/tjs_uint32 key, 
 			/*in*/tjs_uint w,
@@ -181,7 +181,7 @@ public:
 class iTVPLayerUpdater
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD UpdateRect(tjs_int left,
+	virtual tjs_error UpdateRect(tjs_int left,
 		tjs_int top, tjs_int right, tjs_int bottom);
 		// notify that the layer image had been changed.
 };
@@ -229,10 +229,10 @@ struct tTVPDivisibleData
 class iTVPBaseTransHandler
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD AddRef() = 0;
-	virtual tjs_error TJS_INTF_METHOD Release() = 0;
+	virtual tjs_error AddRef() = 0;
+	virtual tjs_error Release() = 0;
 
-	virtual tjs_error TJS_INTF_METHOD SetOption(
+	virtual tjs_error SetOption(
 			/*in*/iTVPSimpleOptionProvider *options // option provider
 		) = 0;
 		// Set option for current processing transition
@@ -247,20 +247,20 @@ public:
 class iTVPDivisibleTransHandler : public iTVPBaseTransHandler
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD StartProcess(
+	virtual tjs_error StartProcess(
 			/*in*/tjs_uint64 tick) = 0;
 		// called before one processing time unit.
 		// expected return values are:
 		// TJS_S_TRUE: continue processing
 		// TJS_S_FALSE: break processing
 
-	virtual tjs_error TJS_INTF_METHOD EndProcess() = 0;
+	virtual tjs_error EndProcess() = 0;
 		// called after one processing time unit.
 		// expected return values are:
 		// TJS_S_TRUE: continue processing
 		// TJS_S_FALSE: break processing
 
-	virtual tjs_error TJS_INTF_METHOD Process(
+	virtual tjs_error Process(
 			/*in,out*/tTVPDivisibleData *data) = 0;
 		// called during StartProcess and EndProcess per an update rectangle.
 		// the handler processes given rectangle and put result image to
@@ -269,7 +269,7 @@ public:
 		// the "Dest" pointer to Src1 or Src2. Also DestLeft and DestTop can
 		// be changed to point destination image part.
 
-	virtual tjs_error TJS_INTF_METHOD MakeFinalImage(
+	virtual tjs_error MakeFinalImage(
 			/*in,out*/iTVPScanLineProvider ** dest, // destination
 			/*in*/iTVPScanLineProvider * src1, // source 1
 			/*in*/iTVPScanLineProvider * src2 // source 2
@@ -289,7 +289,7 @@ public:
 class iTVPGiveUpdateTransHandler : public iTVPBaseTransHandler
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD Process(
+	virtual tjs_error Process(
 			/*in*/tjs_uint64 tick, // tick count provided by the system in ms
 			/*in*/iTVPLayerUpdater * updater, // layer updater object
 			/*in*/iTVPScanLineProvider * dest, // destination
@@ -312,14 +312,14 @@ class iTVPTransHandlerProvider
 {
 public:
 	virtual ~iTVPTransHandlerProvider() {} // add by ZeaS
-	virtual tjs_error TJS_INTF_METHOD AddRef() = 0;
-	virtual tjs_error TJS_INTF_METHOD Release() = 0;
+	virtual tjs_error AddRef() = 0;
+	virtual tjs_error Release() = 0;
 
-	virtual tjs_error TJS_INTF_METHOD GetName(
+	virtual tjs_error GetName(
 			/*out*/const tjs_char ** name) = 0;
 		// return this transition name
 
-	virtual tjs_error TJS_INTF_METHOD StartTransition(
+	virtual tjs_error StartTransition(
 			/*in*/iTVPSimpleOptionProvider *options, // option provider
 			/*in*/iTVPSimpleImageProvider *imagepro, // image provider
 			/*in*/tTVPLayerType layertype, // destination layer type

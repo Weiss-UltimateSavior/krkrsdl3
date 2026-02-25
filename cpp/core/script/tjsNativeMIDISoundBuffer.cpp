@@ -8,7 +8,7 @@
 //---------------------------------------------------------------------------
 tTJSNI_BaseMIDISoundBuffer::tTJSNI_BaseMIDISoundBuffer() {}
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_BaseMIDISoundBuffer::Construct(
+tjs_error tTJSNI_BaseMIDISoundBuffer::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
     if(TJS_FAILED(hr))
@@ -17,7 +17,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_BaseMIDISoundBuffer::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_BaseMIDISoundBuffer::Invalidate() {
+void tTJSNI_BaseMIDISoundBuffer::Invalidate() {
 
     inherited::Invalidate();
 }
@@ -599,7 +599,7 @@ tTJSNI_MIDISoundBuffer::tTJSNI_MIDISoundBuffer() {
 #endif
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD tTJSNI_MIDISoundBuffer::Construct(
+tjs_error tTJSNI_MIDISoundBuffer::Construct(
     tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *tjs_obj) {
     tjs_error hr = inherited::Construct(numparams, param, tjs_obj);
     if(TJS_FAILED(hr))
@@ -618,7 +618,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_MIDISoundBuffer::Construct(
     return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_MIDISoundBuffer::Invalidate() {
+void tTJSNI_MIDISoundBuffer::Invalidate() {
     inherited::Invalidate();
 #ifdef TVP_ENABLE_MIDI
 

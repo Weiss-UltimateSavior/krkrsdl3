@@ -638,12 +638,12 @@ tTJSBinaryStream * (*TJSCreateBinaryStreamForWrite)(const tTJSString &name,
 // tTJSBinaryStream
 //---------------------------------------------------------------------------
 
-void TJS_INTF_METHOD tTJSBinaryStream::SetEndOfStorage()
+void tTJSBinaryStream::SetEndOfStorage()
 {
 	TJS_eTJSError(TJSWriteError);
 }
 //---------------------------------------------------------------------------
-tjs_uint64 TJS_INTF_METHOD tTJSBinaryStream::GetSize()
+tjs_uint64 tTJSBinaryStream::GetSize()
 {
 	tjs_uint64 orgpos = GetPosition();
 	tjs_uint64 size = Seek(0, TJS_BS_SEEK_END);

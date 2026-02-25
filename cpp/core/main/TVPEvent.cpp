@@ -1174,8 +1174,7 @@ tTJSNI_AsyncTrigger::tTJSNI_AsyncTrigger()
 	ActionName = TVPActionName;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-		tTJSNI_AsyncTrigger::Construct(tjs_int numparams, tTJSVariant **param,
+tjs_error tTJSNI_AsyncTrigger::Construct(tjs_int numparams, tTJSVariant **param,
 			iTJSDispatch2 *tjs_obj)
 {
 	if(numparams < 1) return TJS_E_BADPARAMCOUNT;
@@ -1192,7 +1191,7 @@ tjs_error TJS_INTF_METHOD
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_AsyncTrigger::Invalidate()
+void tTJSNI_AsyncTrigger::Invalidate()
 {
 	TVPCancelSourceEvents(Owner);
 	Owner = NULL;

@@ -176,14 +176,13 @@ tTJSNI_PhaseVocoder::~tTJSNI_PhaseVocoder()
 	if(FormatConvertBuffer) delete [] FormatConvertBuffer, FormatConvertBuffer = NULL, FormatConvertBufferSize = 0;
 }
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-	tTJSNI_PhaseVocoder::Construct(tjs_int numparams, tTJSVariant **param,
+tjs_error 	tTJSNI_PhaseVocoder::Construct(tjs_int numparams, tTJSVariant **param,
 		iTJSDispatch2 *tjs_obj)
 {
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTJSNI_PhaseVocoder::Invalidate()
+void tTJSNI_PhaseVocoder::Invalidate()
 {
 }
 //---------------------------------------------------------------------------

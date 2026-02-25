@@ -3,7 +3,7 @@
 #include "TVPMsg.h"
 
 tTJSNI_Rect::tTJSNI_Rect() : Rect(0, 0, 0, 0) {}
-tjs_error TJS_INTF_METHOD tTJSNI_Rect::Construct(tjs_int numparams,
+tjs_error tTJSNI_Rect::Construct(tjs_int numparams,
                                                  tTJSVariant **param,
                                                  iTJSDispatch2 *tjs_obj) {
     if(numparams > 0) {
@@ -31,7 +31,7 @@ tjs_error TJS_INTF_METHOD tTJSNI_Rect::Construct(tjs_int numparams,
     }
     return TJS_S_OK;
 }
-void TJS_INTF_METHOD tTJSNI_Rect::Invalidate() {}
+void tTJSNI_Rect::Invalidate() {}
 
 //---------------------------------------------------------------------------
 iTJSDispatch2 *TVPCreateRectObject(tjs_int left, tjs_int top, tjs_int right,

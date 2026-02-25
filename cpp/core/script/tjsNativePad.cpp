@@ -13,15 +13,13 @@
 #include "tjsNativePad.h"
 
 //---------------------------------------------------------------------------
-tjs_error TJS_INTF_METHOD
-tTJSNI_BasePad::Construct(tjs_int numparams, tTJSVariant** param,
+tjs_error tTJSNI_BasePad::Construct(tjs_int numparams, tTJSVariant** param,
 	iTJSDispatch2* dsp)
 {
 	return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD
-tTJSNI_BasePad::Invalidate()
+void tTJSNI_BasePad::Invalidate()
 {
 }
 //---------------------------------------------------------------------------

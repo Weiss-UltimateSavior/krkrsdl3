@@ -17,22 +17,20 @@ public:
     ~tTJSNI_BitmapLayerTreeOwner();
 
     // tTJSNativeInstance
-    tjs_error TJS_INTF_METHOD Construct(tjs_int numparams, tTJSVariant **param,
+    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
                                         iTJSDispatch2 *tjs_obj);
-    void TJS_INTF_METHOD Invalidate();
+    void Invalidate();
 
     iTJSDispatch2 *GetBitmapObjectNoAddRef();
 
     // tTVPLayerTreeOwner
-    iTJSDispatch2 *TJS_INTF_METHOD GetOwnerNoAddRef() const { return Owner; }
+    iTJSDispatch2 *GetOwnerNoAddRef() const { return Owner; }
 
-    virtual void TJS_INTF_METHOD
-    StartBitmapCompletion(iTVPLayerManager *manager);
-    virtual void TJS_INTF_METHOD
-    NotifyBitmapCompleted(class iTVPLayerManager *manager, tjs_int x, tjs_int y,
+    virtual void StartBitmapCompletion(iTVPLayerManager *manager);
+    virtual void NotifyBitmapCompleted(class iTVPLayerManager *manager, tjs_int x, tjs_int y,
                           tTVPBaseTexture *bmp, const tTVPRect &cliprect,
                           tTVPLayerType type, tjs_int opacity);
-    virtual void TJS_INTF_METHOD EndBitmapCompletion(iTVPLayerManager *manager);
+    virtual void EndBitmapCompletion(iTVPLayerManager *manager);
 
     virtual void OnSetMouseCursor(tjs_int cursor);
     virtual void OnGetCursorPos(tjs_int &x, tjs_int &y);

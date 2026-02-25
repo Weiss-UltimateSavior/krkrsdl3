@@ -54,12 +54,12 @@ tTVPLayerManager::~tTVPLayerManager()
 	if(DrawBuffer) delete DrawBuffer;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLayerManager::AddRef()
+void tTVPLayerManager::AddRef()
 {
 	RefCount ++;
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLayerManager::Release()
+void tTVPLayerManager::Release()
 {
 	if(RefCount == 1)
 		delete this;
@@ -193,7 +193,7 @@ void tTVPLayerManager::DetachPrimary()
 	}
 }
 //---------------------------------------------------------------------------
-bool TJS_INTF_METHOD tTVPLayerManager::GetPrimaryLayerSize(tjs_int &w, tjs_int &h) const
+bool tTVPLayerManager::GetPrimaryLayerSize(tjs_int &w, tjs_int &h) const
 {
 	if(IsPrimaryLayerAttached())
 	{
@@ -645,7 +645,7 @@ void tTVPLayerManager::LeaveMouseFromTree(tTJSNI_BaseLayer *root)
 	}
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLayerManager::ReleaseCapture()
+void tTVPLayerManager::ReleaseCapture()
 {
 	// release capture state
 	ReleaseCaptureCalled = true;
@@ -1098,7 +1098,7 @@ void tTVPLayerManager::AddUpdateRegion(const tTVPRect &rect)
 	NotifyWindowInvalidation();
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLayerManager::UpdateToDrawDevice()
+void tTVPLayerManager::UpdateToDrawDevice()
 {
 	// drawdevice -> layer
 	if(!Primary) return;
@@ -1111,7 +1111,7 @@ void tTVPLayerManager::NotifyUpdateRegionFixed()
 //	Window->NotifyUpdateRegionFixed(UpdateRegion);
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLayerManager::RequestInvalidation(const tTVPRect &r)
+void tTVPLayerManager::RequestInvalidation(const tTVPRect &r)
 {
 	// called by the owner window to notify window surface is invalidated by
 	// the system or user.
@@ -1126,7 +1126,7 @@ void TJS_INTF_METHOD tTVPLayerManager::RequestInvalidation(const tTVPRect &r)
 	}
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLayerManager::RecheckInputState()
+void tTVPLayerManager::RecheckInputState()
 {
 	// To re-check current layer under current mouse position
 	// and update hint, cursor type and process layer enter/leave.
@@ -1134,7 +1134,7 @@ void TJS_INTF_METHOD tTVPLayerManager::RecheckInputState()
 	ForceMouseRecheck();
 }
 //---------------------------------------------------------------------------
-void TJS_INTF_METHOD tTVPLayerManager::DumpLayerStructure()
+void tTVPLayerManager::DumpLayerStructure()
 {
 	if(Primary) Primary->DumpStructure();
 }

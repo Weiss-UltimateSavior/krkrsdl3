@@ -70,8 +70,7 @@ GetLayerBufferAndSize(iTJSDispatch2 *lay, long &w, long &h, WrtRefT &ptr, long &
  * Layer.copyRightBlueToLeftAlpha
  * レイヤ右半分の Blue CHANNEL を左半分の Alpha CHANNEL に複製する
  */
-static tjs_error TJS_INTF_METHOD
-copyRightBlueToLeftAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
+static tjs_error copyRightBlueToLeftAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
 {
 	// 書き込み先
 	WrtRefT dbuf = 0;
@@ -104,8 +103,7 @@ copyRightBlueToLeftAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **p
  * Layer.copyBottomBlueToTopAlpha
  * レイヤ右半分の Blue CHANNEL を左半分の Alpha CHANNELに複製する
  */
-static tjs_error TJS_INTF_METHOD
-copyBottomBlueToTopAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
+static tjs_error copyBottomBlueToTopAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
 {
 	// 書き込み先
 	WrtRefT dbuf = 0;
@@ -134,8 +132,7 @@ copyBottomBlueToTopAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **p
 	return TJS_S_OK;
 }
 
-static tjs_error TJS_INTF_METHOD
-fillAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
+static tjs_error fillAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
 {
 	// 書き込み先
 	WrtRefT dbuf = 0;
@@ -156,8 +153,7 @@ fillAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispa
 	return TJS_S_OK;
 }
 
-static tjs_error TJS_INTF_METHOD
-copyAlphaToProvince(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
+static tjs_error copyAlphaToProvince(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
 {
 	iTJSDispatch2 *layerClass = getLayerClass();
 
@@ -215,8 +211,7 @@ copyAlphaToProvince(tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	return TJS_S_OK;
 }
 
-static tjs_error TJS_INTF_METHOD
-clipAlphaRect(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *dst)
+static tjs_error clipAlphaRect(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *dst)
 {
 	iTJSDispatch2 *layerClass = getLayerClass();
 
@@ -321,9 +316,8 @@ none:
 }
 
 
-static tjs_error TJS_INTF_METHOD
 #define DWORD unsigned short
-fillByProvince(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
+static tjs_error fillByProvince(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *lay)
 {
 	iTJSDispatch2 *layerClass = getLayerClass();
 	

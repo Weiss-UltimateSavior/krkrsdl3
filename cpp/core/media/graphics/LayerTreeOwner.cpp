@@ -68,12 +68,12 @@ void tTVPLayerTreeOwner::GetPrimaryLayerSize( tjs_int &w, tjs_int &h ) const {
 	}
 }
 
-void TJS_INTF_METHOD tTVPLayerTreeOwner::RegisterLayerManager( class iTVPLayerManager* manager ) {
+void tTVPLayerTreeOwner::RegisterLayerManager( class iTVPLayerManager* manager ) {
 	// Managers に manager を push する。AddRefするのを忘れないこと。
 	Managers.push_back(manager);
 	manager->AddRef();
 }
-void TJS_INTF_METHOD tTVPLayerTreeOwner::UnregisterLayerManager( class iTVPLayerManager* manager ) {
+void tTVPLayerTreeOwner::UnregisterLayerManager( class iTVPLayerManager* manager ) {
 	// Managers から manager を削除する。Releaseする。
 	std::vector<iTVPLayerManager *>::iterator i = std::find(Managers.begin(), Managers.end(), manager);
 	if(i == Managers.end())
@@ -82,14 +82,14 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::UnregisterLayerManager( class iTVPLayer
 	Managers.erase(i);
 }
 
-void TJS_INTF_METHOD tTVPLayerTreeOwner::SetMouseCursor(class iTVPLayerManager* manager, tjs_int cursor) {
+void tTVPLayerTreeOwner::SetMouseCursor(class iTVPLayerManager* manager, tjs_int cursor) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {
 		OnSetMouseCursor( cursor );
 	}
 }
-void TJS_INTF_METHOD tTVPLayerTreeOwner::GetCursorPos(class iTVPLayerManager* manager, tjs_int &x, tjs_int &y) {
+void tTVPLayerTreeOwner::GetCursorPos(class iTVPLayerManager* manager, tjs_int &x, tjs_int &y) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	OnGetCursorPos(x, y);
@@ -98,7 +98,7 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::GetCursorPos(class iTVPLayerManager* ma
 		 x = y = 0;
 	}
 }
-void TJS_INTF_METHOD tTVPLayerTreeOwner::SetCursorPos(class iTVPLayerManager* manager, tjs_int x, tjs_int y) {
+void tTVPLayerTreeOwner::SetCursorPos(class iTVPLayerManager* manager, tjs_int x, tjs_int y) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {
@@ -106,7 +106,7 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::SetCursorPos(class iTVPLayerManager* ma
 			OnSetCursorPos(x, y);
 	}
 }
-void TJS_INTF_METHOD tTVPLayerTreeOwner::ReleaseMouseCapture(class iTVPLayerManager* manager) {
+void tTVPLayerTreeOwner::ReleaseMouseCapture(class iTVPLayerManager* manager) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {
@@ -114,7 +114,7 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::ReleaseMouseCapture(class iTVPLayerMana
 	}
 }
 
-void TJS_INTF_METHOD tTVPLayerTreeOwner::SetHint(class iTVPLayerManager* manager, iTJSDispatch2* sender, const ttstr &hint) {
+void tTVPLayerTreeOwner::SetHint(class iTVPLayerManager* manager, iTJSDispatch2* sender, const ttstr &hint) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {
@@ -122,7 +122,7 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::SetHint(class iTVPLayerManager* manager
 	}
 }
 
-void TJS_INTF_METHOD tTVPLayerTreeOwner::NotifyLayerResize(class iTVPLayerManager* manager) {
+void tTVPLayerTreeOwner::NotifyLayerResize(class iTVPLayerManager* manager) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(primary_manager == manager) {
 		tjs_int w, h;
@@ -131,7 +131,7 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::NotifyLayerResize(class iTVPLayerManage
 		DestRect.set_size( w, h );
 	}
 }
-void TJS_INTF_METHOD tTVPLayerTreeOwner::NotifyLayerImageChange(class iTVPLayerManager* manager) {
+void tTVPLayerTreeOwner::NotifyLayerImageChange(class iTVPLayerManager* manager) {
 	// change layer image
 	for(std::vector<iTVPLayerManager *>::iterator i = Managers.begin(); i != Managers.end(); i++) {
 		(*i)->UpdateToDrawDevice();
@@ -142,7 +142,7 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::NotifyLayerImageChange(class iTVPLayerM
 		OnChangeLayerImage();
 }
 
-void TJS_INTF_METHOD tTVPLayerTreeOwner::SetAttentionPoint(class iTVPLayerManager* manager, tTJSNI_BaseLayer *layer, tjs_int x, tjs_int y) {
+void tTVPLayerTreeOwner::SetAttentionPoint(class iTVPLayerManager* manager, tTJSNI_BaseLayer *layer, tjs_int x, tjs_int y) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {
@@ -150,7 +150,7 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::SetAttentionPoint(class iTVPLayerManage
 			OnSetAttentionPoint( layer, x, y);
 	}
 }
-void TJS_INTF_METHOD tTVPLayerTreeOwner::DisableAttentionPoint(class iTVPLayerManager* manager) {
+void tTVPLayerTreeOwner::DisableAttentionPoint(class iTVPLayerManager* manager) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {
@@ -158,14 +158,14 @@ void TJS_INTF_METHOD tTVPLayerTreeOwner::DisableAttentionPoint(class iTVPLayerMa
 	}
 }
 
-void TJS_INTF_METHOD tTVPLayerTreeOwner::SetImeMode( class iTVPLayerManager* manager, tjs_int mode ) {
+void tTVPLayerTreeOwner::SetImeMode( class iTVPLayerManager* manager, tjs_int mode ) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {
 		OnSetImeMode(mode);
 	}
 }
-void TJS_INTF_METHOD tTVPLayerTreeOwner::ResetImeMode( class iTVPLayerManager* manager ) {
+void tTVPLayerTreeOwner::ResetImeMode( class iTVPLayerManager* manager ) {
 	iTVPLayerManager * primary_manager = GetLayerManagerAt(PrimaryLayerManagerIndex);
 	if(!primary_manager) return;
 	if(primary_manager == manager) {

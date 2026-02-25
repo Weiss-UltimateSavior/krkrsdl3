@@ -17,7 +17,7 @@ typedef tjs_int fixdot;
 
 struct layerExAreaAverage
 {
-    static tjs_error TJS_INTF_METHOD stretchCopyAA(tTJSVariant* result,
+    static tjs_error stretchCopyAA(tTJSVariant* result,
                                                    tjs_int numparams,
                                                    tTJSVariant** param,
                                                    iTJSDispatch2* objthis)

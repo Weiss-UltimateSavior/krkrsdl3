@@ -96,14 +96,14 @@ public:
     tTVPMemoryStream(const void *block, tjs_uint size);
     ~tTVPMemoryStream();
 
-    tjs_uint64 TJS_INTF_METHOD Seek(tjs_int64 offset, tjs_int whence);
+    tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
 
-    tjs_uint TJS_INTF_METHOD Read(void *buffer, tjs_uint read_size);
-    tjs_uint TJS_INTF_METHOD Write(const void *buffer, tjs_uint write_size);
-    void TJS_INTF_METHOD SetEndOfStorage();
+    tjs_uint Read(void *buffer, tjs_uint read_size);
+    tjs_uint Write(const void *buffer, tjs_uint write_size);
+    void SetEndOfStorage();
 
-    const std::string TJS_INTF_METHOD GetFileName() { return ""; }
-    tjs_uint64 TJS_INTF_METHOD GetSize() { return Size; }
+    const std::string GetFileName() { return ""; }
+    tjs_uint64 GetSize() { return Size; }
 
     // non-tTJSBinaryStream based methods
     void *GetInternalBuffer() const { return Block; }
@@ -141,13 +141,13 @@ public:
                       tjs_uint64 size);
     ~tTVPPartialStream();
 
-    tjs_uint64 TJS_INTF_METHOD Seek(tjs_int64 offset, tjs_int whence);
-    tjs_uint TJS_INTF_METHOD Read(void *buffer, tjs_uint read_size);
-    tjs_uint TJS_INTF_METHOD Write(const void *buffer, tjs_uint write_size);
+    tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
+    tjs_uint Read(void *buffer, tjs_uint read_size);
+    tjs_uint Write(const void *buffer, tjs_uint write_size);
 
     // void SetEndOfStorage(); // use default behavior
 
-    tjs_uint64 TJS_INTF_METHOD GetSize();
+    tjs_uint64 GetSize();
 };
 //---------------------------------------------------------------------------
 

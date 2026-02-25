@@ -367,7 +367,7 @@ static void AxisParamCalculateAxisAreaAvg( TParam& param, int srcstart, int srce
 }
 
 
-void TJS_USERENTRY ResamplerFunc( void* p );
+void ResamplerFunc( void* p );
 
 class Resampler {
 	AxisParam<> paramx_;
@@ -597,7 +597,7 @@ public:
 	}
 };
 
-void TJS_USERENTRY ResamplerFunc( void* p ) {
+void ResamplerFunc( void* p ) {
 	Resampler::ThreadParameter* param = (Resampler::ThreadParameter*)p;
 	const int width = param->width_;
 #ifdef _DEBUG

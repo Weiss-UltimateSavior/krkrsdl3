@@ -26,9 +26,9 @@ enum tTVPClipboardFormat
 //---------------------------------------------------------------------------
 // implement these in each platform
 //---------------------------------------------------------------------------
-TJS_EXP_FUNC_DEF(bool, TVPClipboardHasFormat, (tTVPClipboardFormat format));
-TJS_EXP_FUNC_DEF(void, TVPClipboardSetText, (const ttstr& text));
-TJS_EXP_FUNC_DEF(bool, TVPClipboardGetText, (ttstr& text));
+extern bool TVPClipboardHasFormat(tTVPClipboardFormat format);
+extern void TVPClipboardSetText(const ttstr& text);
+extern bool TVPClipboardGetText(ttstr& text);
 
 
 //---------------------------------------------------------------------------
@@ -37,11 +37,9 @@ TJS_EXP_FUNC_DEF(bool, TVPClipboardGetText, (ttstr& text));
 class tTJSNI_BaseClipboard : public tTJSNativeInstance
 {
 public:
-	virtual tjs_error TJS_INTF_METHOD
-		Construct(tjs_int numparams, tTJSVariant** param,
+	virtual tjs_error Construct(tjs_int numparams, tTJSVariant** param,
 			iTJSDispatch2* dsp);
-	virtual void TJS_INTF_METHOD
-		Invalidate();
+	virtual void Invalidate();
 };
 //---------------------------------------------------------------------------
 

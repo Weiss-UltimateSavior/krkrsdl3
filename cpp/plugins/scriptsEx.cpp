@@ -64,8 +64,7 @@ int bitap_fuzzy_bitwise_search(const CHAR* text,
     }
     return -1; // not found
 }
-static bool TJS_USERENTRY
-_CatchFuncCall(void* data, const tTVPExceptionDesc& desc)
+static bool _CatchFuncCall(void* data, const tTVPExceptionDesc& desc)
 {
     throw desc;
 }
@@ -102,8 +101,7 @@ struct t_iTJSDispatch2_PropGet
         ;
     }
 };
-static void TJS_USERENTRY
-_Try_iTJSDispatch2_PropGet(void* data)
+static void _Try_iTJSDispatch2_PropGet(void* data)
 {
     t_iTJSDispatch2_PropGet* arg = (t_iTJSDispatch2_PropGet*)data;
     arg->_ret =
@@ -120,8 +118,7 @@ tjs_error Try_iTJSDispatch2_PropGet(iTJSDispatch2* _this,
     TVPDoTryBlock(_Try_iTJSDispatch2_PropGet, _CatchFuncCall, nullptr, &arg);
     return arg._ret;
 }
-static void TJS_USERENTRY
-_Try_iTJSDispatch2_AddRef(void* data)
+static void _Try_iTJSDispatch2_AddRef(void* data)
 {
     t_iTJSDispatch2_AddRef* arg = (t_iTJSDispatch2_AddRef*)data;
     arg->_ret = arg->_this->AddRef(
@@ -157,8 +154,7 @@ struct t_iTJSDispatch2_PropGetByNum
         ;
     }
 };
-static void TJS_USERENTRY
-_Try_iTJSDispatch2_PropGetByNum(void* data)
+static void _Try_iTJSDispatch2_PropGetByNum(void* data)
 {
     t_iTJSDispatch2_PropGetByNum* arg = (t_iTJSDispatch2_PropGetByNum*)data;
     arg->_ret = arg->_this->PropGetByNum(arg->flag, arg->num, arg->result, arg->objthis);
@@ -196,8 +192,7 @@ tjs_error Try_iTJSDispatch2_PropGetByNum(
     TVPDoTryBlock(_Try_iTJSDispatch2_PropGetByNum, _CatchFuncCall, nullptr, &arg);
     return arg._ret;
 }
-static void TJS_USERENTRY
-_Try_iTJSDispatch2_PropSet(void* data)
+static void _Try_iTJSDispatch2_PropSet(void* data)
 {
     t_iTJSDispatch2_PropSet* arg = (t_iTJSDispatch2_PropSet*)data;
     arg->_ret =
@@ -237,8 +232,7 @@ struct t_iTJSDispatch2_PropSetByNum
         ;
     }
 };
-static void TJS_USERENTRY
-_Try_iTJSDispatch2_PropSetByNum(void* data)
+static void _Try_iTJSDispatch2_PropSetByNum(void* data)
 {
     t_iTJSDispatch2_PropSetByNum* arg = (t_iTJSDispatch2_PropSetByNum*)data;
     arg->_ret = arg->_this->PropSetByNum(arg->flag, arg->num, arg->param, arg->objthis);
@@ -266,14 +260,14 @@ public:
     /**
      * メンバ名一覧の取得
      */
-    static tjs_error TJS_INTF_METHOD getKeys(tTJSVariant* result,
+    static tjs_error getKeys(tTJSVariant* result,
                                              tjs_int numparams,
                                              tTJSVariant** param,
                                              iTJSDispatch2* objthis);
     /**
      * メンバの個数の取得
      */
-    static tjs_error TJS_INTF_METHOD getCount(tTJSVariant* result,
+    static tjs_error getCount(tTJSVariant* result,
                                               tjs_int numparams,
                                               tTJSVariant** param,
                                               iTJSDispatch2* objthis);
@@ -297,14 +291,14 @@ public:
 
     //----------------------------------------------------------------------
     // 全配列・辞書巡回
-    static tjs_error TJS_INTF_METHOD foreach (tTJSVariant* result,
+    static tjs_error foreach (tTJSVariant* result,
                                               tjs_int numparams,
                                               tTJSVariant * *param,
                                               iTJSDispatch2 * objthis);
 
     //----------------------------------------------------------------------
     // hash値取得
-    static tjs_error TJS_INTF_METHOD getMD5HashString(tTJSVariant* result,
+    static tjs_error getMD5HashString(tTJSVariant* result,
                                                       tjs_int numparams,
                                                       tTJSVariant** param,
                                                       iTJSDispatch2* objthis);
@@ -315,25 +309,25 @@ public:
 
     //----------------------------------------------------------------------
     // フラグ指定つきプロパティ操作
-    static tjs_error TJS_INTF_METHOD propSet(tTJSVariant* result,
+    static tjs_error propSet(tTJSVariant* result,
                                              tjs_int numparams,
                                              tTJSVariant** param,
                                              iTJSDispatch2* objthis);
-    static tjs_error TJS_INTF_METHOD propGet(tTJSVariant* result,
+    static tjs_error propGet(tTJSVariant* result,
                                              tjs_int numparams,
                                              tTJSVariant** param,
                                              iTJSDispatch2* objthis);
 
     //----------------------------------------------------------------------
     // (const)つき辞書／配列を安全に評価
-    static tjs_error TJS_INTF_METHOD safeEvalStorage(tTJSVariant* result,
+    static tjs_error safeEvalStorage(tTJSVariant* result,
                                                      tjs_int numparams,
                                                      tTJSVariant** param,
                                                      iTJSDispatch2* objthis);
 
     //----------------------------------------------------------------------
     // あいまい文字列検索（bitapアルゴリズムによる）
-    static tjs_error TJS_INTF_METHOD stringFuzzySearch(tTJSVariant* result,
+    static tjs_error stringFuzzySearch(tTJSVariant* result,
                                                        tjs_int numparams,
                                                        tTJSVariant** param,
                                                        iTJSDispatch2* objthis);
@@ -352,7 +346,7 @@ class DictMemberGetCaller : public tTJSDispatch /** EnumMembers 用 */
 {
 public:
     DictMemberGetCaller(iTJSDispatch2* array) : array(array) {};
-    virtual tjs_error TJS_INTF_METHOD FuncCall( // function invocation
+    virtual tjs_error FuncCall( // function invocation
         tjs_uint32 flag,                        // calling flag
         const tjs_char* membername,             // member name ( NULL for a default member )
         tjs_uint32* hint,                       // hint for the member name (in/out)
@@ -412,7 +406,7 @@ public:
 
     DictMemberCompareCaller(tTJSVariantClosure& _target) : target(_target), match(true) {}
 
-    virtual tjs_error TJS_INTF_METHOD FuncCall( // function invocation
+    virtual tjs_error FuncCall( // function invocation
         tjs_uint32 flag,                        // calling flag
         const tjs_char* membername,             // member name ( NULL for a default member )
         tjs_uint32* hint,                       // hint for the member name (in/out)
@@ -463,7 +457,7 @@ public:
     {
     }
 
-    virtual tjs_error TJS_INTF_METHOD FuncCall( // function invocation
+    virtual tjs_error FuncCall( // function invocation
         tjs_uint32 flag,                        // calling flag
         const tjs_char* membername,             // member name ( NULL for a default member )
         tjs_uint32* hint,                       // hint for the member name (in/out)
@@ -516,7 +510,7 @@ public:
     {
     }
 
-    virtual tjs_error TJS_INTF_METHOD FuncCall( // function invocation
+    virtual tjs_error FuncCall( // function invocation
         tjs_uint32 flag,                        // calling flag
         const tjs_char* membername,             // member name ( NULL for a default member )
         tjs_uint32* hint,                       // hint for the member name (in/out)
@@ -569,7 +563,7 @@ void ScriptsAdd::_getKeys(tTJSVariant* result, tTJSVariant& obj)
 /**
  * メンバ名一覧の取得
  */
-tjs_error TJS_INTF_METHOD ScriptsAdd::getKeys(tTJSVariant* result,
+tjs_error ScriptsAdd::getKeys(tTJSVariant* result,
                                               tjs_int numparams,
                                               tTJSVariant** param,
                                               iTJSDispatch2* objthis)
@@ -583,7 +577,7 @@ tjs_error TJS_INTF_METHOD ScriptsAdd::getKeys(tTJSVariant* result,
 /**
  * メンバの個数の取得
  */
-tjs_error TJS_INTF_METHOD ScriptsAdd::getCount(tTJSVariant* result,
+tjs_error ScriptsAdd::getCount(tTJSVariant* result,
                                                tjs_int numparams,
                                                tTJSVariant** param,
                                                iTJSDispatch2* objthis)
@@ -754,7 +748,7 @@ bool ScriptsAdd::equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
 
 //----------------------------------------------------------------------
 // 全配列・辞書巡回
-tjs_error TJS_INTF_METHOD ScriptsAdd::foreach (tTJSVariant* result,
+tjs_error ScriptsAdd::foreach (tTJSVariant* result,
                                                tjs_int numparams,
                                                tTJSVariant * *param,
                                                iTJSDispatch2 * objthis)
@@ -833,7 +827,7 @@ tjs_error TJS_INTF_METHOD ScriptsAdd::foreach (tTJSVariant* result,
  * @param octet 対象オクテット
  * @return ハッシュ値（32文字の16進数ハッシュ文字列（小文字））
  */
-tjs_error TJS_INTF_METHOD ScriptsAdd::getMD5HashString(tTJSVariant* result,
+tjs_error ScriptsAdd::getMD5HashString(tTJSVariant* result,
                                                        tjs_int numparams,
                                                        tTJSVariant** param,
                                                        iTJSDispatch2* objthis)
@@ -869,7 +863,7 @@ class DictMemberCloneCaller : public tTJSDispatch
 {
 public:
     DictMemberCloneCaller(iTJSDispatch2* dict) : dict(dict) {};
-    virtual tjs_error TJS_INTF_METHOD FuncCall( // function invocation
+    virtual tjs_error FuncCall( // function invocation
         tjs_uint32 flag,                        // calling flag
         const tjs_char* membername,             // member name ( NULL for a default member )
         tjs_uint32* hint,                       // hint for the member name (in/out)
@@ -951,7 +945,7 @@ tTJSVariant ScriptsAdd::clone(tTJSVariant obj)
 
 //----------------------------------------------------------------------
 // フラグ指定つきプロパティ操作
-tjs_error TJS_INTF_METHOD ScriptsAdd::propSet(tTJSVariant* result,
+tjs_error ScriptsAdd::propSet(tTJSVariant* result,
                                               tjs_int numparams,
                                               tTJSVariant** param,
                                               iTJSDispatch2* objthis)
@@ -967,7 +961,7 @@ tjs_error TJS_INTF_METHOD ScriptsAdd::propSet(tTJSVariant* result,
                 : Try_iTJSDispatch2_PropSetByNum(clo.Object, flag, param[1]->operator tjs_int(),
                                                  param[2], clo.ObjThis));
 }
-tjs_error TJS_INTF_METHOD ScriptsAdd::propGet(tTJSVariant* result,
+tjs_error ScriptsAdd::propGet(tTJSVariant* result,
                                               tjs_int numparams,
                                               tTJSVariant** param,
                                               iTJSDispatch2* objthis)
@@ -987,7 +981,7 @@ tjs_error TJS_INTF_METHOD ScriptsAdd::propGet(tTJSVariant* result,
 
 //----------------------------------------------------------------------
 // (const)つき辞書／配列を安全に評価
-tjs_error TJS_INTF_METHOD ScriptsAdd::safeEvalStorage(tTJSVariant* result,
+tjs_error ScriptsAdd::safeEvalStorage(tTJSVariant* result,
                                                       tjs_int numparams,
                                                       tTJSVariant** param,
                                                       iTJSDispatch2* objthis)
@@ -1049,7 +1043,7 @@ tjs_error TJS_INTF_METHOD ScriptsAdd::safeEvalStorage(tTJSVariant* result,
 }
 //----------------------------------------------------------------------
 // あいまい文字列検索（bitapアルゴリズムによる）
-tjs_error TJS_INTF_METHOD ScriptsAdd::stringFuzzySearch(tTJSVariant* result,
+tjs_error ScriptsAdd::stringFuzzySearch(tTJSVariant* result,
                                                         tjs_int numparams,
                                                         tTJSVariant** param,
                                                         iTJSDispatch2* objthis)

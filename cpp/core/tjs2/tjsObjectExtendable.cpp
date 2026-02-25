@@ -30,8 +30,7 @@ void tTJSExtendableObject::ExtendsClass( iTJSDispatch2* global, const ttstr& cla
 	SetSuper( val.AsObjectNoAddRef() );
 }
 
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::FuncCall(tjs_uint32 flag, const tjs_char * membername,
+tjs_error tTJSExtendableObject::FuncCall(tjs_uint32 flag, const tjs_char * membername,
 	tjs_uint32 *hint,
 	tTJSVariant *result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -42,8 +41,7 @@ tTJSExtendableObject::FuncCall(tjs_uint32 flag, const tjs_char * membername,
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::CreateNew(tjs_uint32 flag, const tjs_char * membername,
+tjs_error tTJSExtendableObject::CreateNew(tjs_uint32 flag, const tjs_char * membername,
 	tjs_uint32 *hint,
 	iTJSDispatch2 **result, tjs_int numparams, tTJSVariant **param,
 	iTJSDispatch2 *objthis)
@@ -55,8 +53,7 @@ tTJSExtendableObject::CreateNew(tjs_uint32 flag, const tjs_char * membername,
 	return hr;
 }
 
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::PropGet( tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, tTJSVariant *result, iTJSDispatch2 *objthis )
+tjs_error tTJSExtendableObject::PropGet( tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint, tTJSVariant *result, iTJSDispatch2 *objthis )
 {
 	tjs_error hr = inherited::PropGet( flag, membername, hint, result, objthis );
 	if( hr == TJS_E_MEMBERNOTFOUND && SuperClass != NULL && membername != NULL ) {
@@ -64,8 +61,7 @@ tTJSExtendableObject::PropGet( tjs_uint32 flag, const tjs_char * membername, tjs
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::PropSet( tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, const tTJSVariant *param, iTJSDispatch2 *objthis )
+tjs_error tTJSExtendableObject::PropSet( tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, const tTJSVariant *param, iTJSDispatch2 *objthis )
 {
 	tjs_error hr = inherited::PropSet( flag, membername, hint, param, objthis );
 	if( hr == TJS_E_MEMBERNOTFOUND && SuperClass != NULL && membername != NULL ) {
@@ -73,8 +69,7 @@ tTJSExtendableObject::PropSet( tjs_uint32 flag, const tjs_char *membername, tjs_
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, const tjs_char *classname, iTJSDispatch2 *objthis)
+tjs_error tTJSExtendableObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, const tjs_char *classname, iTJSDispatch2 *objthis)
 {
 	tjs_error hr = inherited::IsInstanceOf(flag, membername, hint, classname, objthis);
 	if( hr == TJS_E_MEMBERNOTFOUND && SuperClass != NULL && membername != NULL ) {
@@ -82,8 +77,7 @@ tTJSExtendableObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, 
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_uint32 *hint, iTJSDispatch2 *objthis)
+tjs_error tTJSExtendableObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_uint32 *hint, iTJSDispatch2 *objthis)
 {
 	tjs_error hr = inherited::GetCount(result, membername, hint, objthis);
 	if( hr == TJS_E_MEMBERNOTFOUND && SuperClass != NULL && membername != NULL ) {
@@ -91,8 +85,7 @@ tTJSExtendableObject::GetCount(tjs_int *result, const tjs_char *membername, tjs_
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::DeleteMember(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, iTJSDispatch2 *objthis)
+tjs_error tTJSExtendableObject::DeleteMember(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, iTJSDispatch2 *objthis)
 {
 	tjs_error hr = inherited::DeleteMember( flag, membername, hint, objthis);
 	if( hr == TJS_E_MEMBERNOTFOUND && SuperClass != NULL && membername != NULL ) {
@@ -100,8 +93,7 @@ tTJSExtendableObject::DeleteMember(tjs_uint32 flag, const tjs_char *membername, 
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::Invalidate(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, iTJSDispatch2 *objthis)
+tjs_error tTJSExtendableObject::Invalidate(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, iTJSDispatch2 *objthis)
 {
 	tjs_error hr = inherited::Invalidate( flag, membername, hint, objthis);
 	if( hr == TJS_E_MEMBERNOTFOUND && SuperClass != NULL && membername != NULL ) {
@@ -112,8 +104,7 @@ tTJSExtendableObject::Invalidate(tjs_uint32 flag, const tjs_char *membername, tj
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,iTJSDispatch2 *objthis)
+tjs_error tTJSExtendableObject::IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,iTJSDispatch2 *objthis)
 {
 	tjs_error hr = inherited::IsValid( flag, membername, hint, objthis);
 	if( hr == TJS_E_MEMBERNOTFOUND && SuperClass != NULL && membername != NULL ) {
@@ -122,8 +113,7 @@ tTJSExtendableObject::IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_u
 	return hr;
 }
 
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
+tjs_error tTJSExtendableObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
 	tTJSVariant *result, const tTJSVariant *param, iTJSDispatch2 *objthis)
 {
 	tjs_error hr = inherited::Operation( flag, membername, hint, result, param, objthis);
@@ -133,15 +123,14 @@ tTJSExtendableObject::Operation(tjs_uint32 flag, const tjs_char *membername, tjs
 	return hr;
 }
 
-tjs_error TJS_INTF_METHOD
-tTJSExtendableObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid, iTJSNativeInstance **pointer) {
+tjs_error tTJSExtendableObject::NativeInstanceSupport(tjs_uint32 flag, tjs_int32 classid, iTJSNativeInstance **pointer) {
 	tjs_error hr = inherited::NativeInstanceSupport( flag, classid, pointer );
 	if( hr != TJS_S_OK && SuperClass != NULL && flag == TJS_NIS_GETINSTANCE ) {
 		hr = SuperClass->NativeInstanceSupport( flag, classid, pointer );
 	}
 	return hr;
 }
-tjs_error TJS_INTF_METHOD tTJSExtendableObject::ClassInstanceInfo(tjs_uint32 flag, tjs_uint num, tTJSVariant *value) {
+tjs_error tTJSExtendableObject::ClassInstanceInfo(tjs_uint32 flag, tjs_uint num, tTJSVariant *value) {
 	if( flag == TJS_CII_SET_SUPRECLASS ) {
 		SetSuper( value->AsObjectNoAddRef() );
 		return TJS_S_OK;

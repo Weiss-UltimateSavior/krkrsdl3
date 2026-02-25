@@ -726,7 +726,7 @@ static void TVPClearAutoPathCache() {
 }
 //---------------------------------------------------------------------------
 struct tTVPClearAutoPathCacheCallback : public tTVPCompactEventCallbackIntf {
-    virtual void TJS_INTF_METHOD OnCompact(tjs_int level) {
+    virtual void OnCompact(tjs_int level) {
         if(level >= TVP_COMPACT_LEVEL_DEACTIVATE) {
             // clear the auto search path cache on application deactivate
             tTJSCriticalSectionHolder cs_holder(TVPCreateStreamCS);
@@ -838,7 +838,7 @@ static tjs_uint TVPRebuildAutoPathTable() {
             class tLister : public iTVPStorageLister {
             public:
                 std::vector<ttstr> list;
-                void TJS_INTF_METHOD Add(const ttstr &file) {
+                void Add(const ttstr &file) {
                     list.push_back(file);
                 }
             } lister;
