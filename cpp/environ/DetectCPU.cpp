@@ -61,8 +61,8 @@ static void TVPGetCPUTypeForOne()
 static ttstr TVPDumpCPUInfo(tjs_int cpu_num)
 {
 	// dump detected cpu type
-	ttstr features(TJS_W("(info) CPU #") + ttstr(cpu_num) +
-		TJS_W(" : "));
+	ttstr features(TJS_N("(info) CPU #") + ttstr(cpu_num) +
+		TJS_N(" : "));
 
 	tjs_uint32 vendor = TVPCPUFeatures & TVP_CPU_VENDOR_MASK;
 

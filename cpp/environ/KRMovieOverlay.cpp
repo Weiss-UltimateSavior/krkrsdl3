@@ -28,7 +28,7 @@ VideoPresentOverlay::~VideoPresentOverlay()
 {
     if (pSprite != NULL)
     {
-        if (pSprite->texture != NULL)
+        if (pSprite->texture != 0)
         {
             krkrsdl3::SDL_GL_DepartTexture(pSprite);
             krkrsdl3::SDL_GL_DestroyTexture(pSprite);
@@ -80,7 +80,7 @@ void VideoPresentOverlay::OnContinuousCallback(tjs_uint64 tick)
     if (pic.rgba == NULL)
         return;
     {
-        if(pSprite->texture == NULL) {
+        if(pSprite->texture == 0) {
             pSprite->width = pic.width;
             pSprite->height = pic.height;
             krkrsdl3::SDL_GL_CreateTexture(*pSprite);

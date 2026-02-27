@@ -73,7 +73,6 @@ public:
             Ptr->AddRef();
     }
     tTJSString(const tjs_char* str) { Ptr = TJSAllocVariantString(str); }
-    tTJSString(const tjs_nchar* str) { Ptr = TJSAllocVariantString(str); }
     tTJSString(const tTJSStringBufferLength len)
     { Ptr = TJSAllocVariantStringBuffer(len.n); }
     tTJSString(tjs_char rch)
@@ -95,7 +94,6 @@ public:
     tTJSString(tjs_int n);                       // from int
     tTJSString(tjs_int64 n); // from int64
 
-    tTJSString(const std::basic_string<tjs_char> &str) { Ptr = TJSAllocVariantString(str.c_str()); }
     tTJSString(const std::string &str) { Ptr = TJSAllocVariantString(str.c_str()); }
 
            //--------------------------------------------------------- destructor --
@@ -113,15 +111,7 @@ public:
     {
         if(!Ptr) return std::string("");
         // this constant string value must match std::string in type
-        tTJSNarrowStringHolder holder(Ptr->operator const tjs_char*());
-        return std::string(holder.operator const char *());
-    }
-    const std::string AsNarrowStdString() const
-    {
-        if(!Ptr) return std::string("");
-        // this constant string value must match std::string in type
-        tTJSNarrowStringHolder holder(Ptr->operator const tjs_char*());
-        return std::string(holder.operator const char *());
+        return std::string(*Ptr);
     }
 
     tTJSVariantString* AsVariantStringNoAddRef() const
@@ -154,13 +144,6 @@ public:
         {
             Ptr = TJSAllocVariantString(rhs);
         }
-        return *this;
-    }
-
-    tTJSString& operator=(const tjs_nchar* rhs)
-    {
-        if(Ptr) Ptr->Release();
-        Ptr = TJSAllocVariantString(rhs);
         return *this;
     }
 
@@ -362,9 +345,6 @@ public:
         return Ptr->GetHint();
     }
 
-    tjs_int GetNarrowStrLen() const;
-    void ToNarrowStr(tjs_nchar* dest, tjs_int destmaxlen) const;
-
            //------------------------------------------------------------- others --
     bool IsEmpty() const { return Ptr == NULL; }
 
@@ -397,6 +377,11 @@ public:
     {
         if(!Ptr) return 0;
         return Ptr->GetLength();
+    }
+    tjs_int GetCharLen() const
+    {
+        if (!Ptr) return 0;
+        return Ptr->GetCharLength();
     }
 
     tjs_int length() const { return GetLen(); }

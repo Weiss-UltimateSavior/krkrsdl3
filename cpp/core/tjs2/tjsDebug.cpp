@@ -251,13 +251,13 @@ public:
 			// warn running code on deleting-in-progress object
 			ttstr warn(TJSWarning);
 			tjs_char tmp[64];
-			TJS_snprintf(tmp, sizeof(tmp)/sizeof(tjs_char), TJS_W("0x%p"), object);
+			TJS_snprintf(tmp, sizeof(tmp)/sizeof(tjs_char), TJS_N("0x%p"), object);
 
 			ttstr info(TJSWarnRunningCodeOnDeletingObject);
-			info.Replace(TJS_W("%1"), tmp);
-			info.Replace(TJS_W("%2"), rec->Type);
-			info.Replace(TJS_W("%3"), rec->Where);
-			info.Replace(TJS_W("%4"), TJSGetStackTraceString(1));
+			info.Replace(TJS_N("%1"), tmp);
+			info.Replace(TJS_N("%2"), rec->Type);
+			info.Replace(TJS_N("%3"), rec->Where);
+			info.Replace(TJS_N("%4"), TJSGetStackTraceString(1));
 
 			output->Print((warn + info).c_str());
 		}
@@ -267,7 +267,7 @@ public:
 	{
 		{
 			ttstr msg = (const tjs_char *)TJSNObjectsWasNotFreed;
-			msg.Replace(TJS_W("%1"), ttstr((tjs_int)Hash.GetCount()));
+			msg.Replace(TJS_N("%1"), ttstr((tjs_int)Hash.GetCount()));
 			output->Print(msg.c_str());
 		}
 
@@ -276,16 +276,16 @@ public:
 		for(i = Hash.GetFirst(); !i.IsNull(); i++)
 		{
 			tjs_char addr[65];
-			TJS_snprintf(addr, sizeof(addr)/sizeof(tjs_char), TJS_W("0x%p"), i.GetKey());
+			TJS_snprintf(addr, sizeof(addr)/sizeof(tjs_char), TJS_N("0x%p"), i.GetKey());
 			ttstr info = (const tjs_char *)TJSObjectWasNotFreed;
-			info.Replace(TJS_W("%1"), addr);
-			info.Replace(TJS_W("%2"), i.GetValue().Type);
-			info.Replace(TJS_W("%3"), i.GetValue().History);
+			info.Replace(TJS_N("%1"), addr);
+			info.Replace(TJS_N("%2"), i.GetValue().Type);
+			info.Replace(TJS_N("%3"), i.GetValue().History);
 			output->Print(info.c_str());
 		}
 
 		// group by the history and object type
-		output->Print(TJS_W("---"));
+		output->Print(TJS_N("---"));
 		output->Print((const tjs_char *)TJSGroupByObjectTypeAndHistory);
 		std::vector<tTJSObjectHashMapRecord> items;
 		for(i = Hash.GetFirst(); !i.IsNull(); i++)
@@ -305,11 +305,11 @@ public:
 					(i == items.end() || history != i->History || type != i->Type))
 				{
 					tjs_char tmp[64];
-					TJS_snprintf(tmp, sizeof(tmp)/sizeof(tjs_char), TJS_W("%6d"), (int)count);
+					TJS_snprintf(tmp, sizeof(tmp)/sizeof(tjs_char), TJS_N("%6d"), (int)count);
 					ttstr info = (const tjs_char *)TJSObjectCountingMessageGroupByObjectTypeAndHistory;
-					info.Replace(TJS_W("%1"), tmp);
-					info.Replace(TJS_W("%2"), type);
-					info.Replace(TJS_W("%3"), history);
+					info.Replace(TJS_N("%1"), tmp);
+					info.Replace(TJS_N("%2"), type);
+					info.Replace(TJS_N("%3"), history);
 					output->Print(info.c_str());
 
 					if(i == items.end()) break;
@@ -324,7 +324,7 @@ public:
 		}
 
 		// group by object type
-		output->Print(TJS_W("---"));
+		output->Print(TJS_N("---"));
 		output->Print((const tjs_char *)TJSGroupByObjectType);
 		std::stable_sort(items.begin(), items.end(),
 			tTJSObjectHashMapRecordComparator_Type());
@@ -340,10 +340,10 @@ public:
 					(i == items.end() || type != i->Type))
 				{
 					tjs_char tmp[64];
-					TJS_snprintf(tmp, sizeof(tmp)/sizeof(tjs_char), TJS_W("%6d"), (int)count);
+					TJS_snprintf(tmp, sizeof(tmp)/sizeof(tjs_char), TJS_N("%6d"), (int)count);
 					ttstr info = (const tjs_char *)TJSObjectCountingMessageTJSGroupByObjectType;
-					info.Replace(TJS_W("%1"), tmp);
-					info.Replace(TJS_W("%2"), type);
+					info.Replace(TJS_N("%1"), tmp);
+					info.Replace(TJS_N("%2"), type);
 					output->Print(info.c_str());
 
 					if(i == items.end()) break;
@@ -449,7 +449,7 @@ void TJSAddObjectHashRecord(void * object)
 	if(where.IsEmpty())
 		where = TJSMapGlobalStringMap((const tjs_char *)TJSCallHistoryIsFromOutOfTJS2Script);
 	rec.Where = where;
-	static ttstr InitialType(TJS_W("unknown type"));
+	static ttstr InitialType(TJS_N("unknown type"));
 	rec.Type = InitialType;
 
 	if(TJSObjectHashMap)
@@ -664,7 +664,7 @@ public:
 	ttstr GetTraceString(tjs_int limit, const tjs_char * delimiter)
 	{
 		// get stack trace string
-		if(delimiter == NULL) delimiter = TJS_W(" <-- ");
+		if(delimiter == NULL) delimiter = TJS_N(" <-- ");
 
 		ttstr ret;
 		tjs_int top = (tjs_int)(Stack.size() - 1);

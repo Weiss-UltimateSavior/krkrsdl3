@@ -36,28 +36,6 @@ int dpparse (void *YYPARSE_PARAM);
 
 
 //---------------------------------------------------------------------------
-// Character component classifications
-//---------------------------------------------------------------------------
-static bool inline TJS_iswspace(tjs_char ch)
-{
-	if(ch&0xff00) return false; else return 0!=isspace(ch);
-}
-//---------------------------------------------------------------------------
-static bool inline TJS_iswdigit(tjs_char ch)
-{
-	if(ch&0xff00) return false; else return 0!=isdigit(ch);
-}
-//---------------------------------------------------------------------------
-static bool inline TJS_iswalpha(tjs_char ch)
-{
-	if(ch&0xff00) return true; else return 0!=isalpha(ch);
-}
-//---------------------------------------------------------------------------
-
-
-
-
-//---------------------------------------------------------------------------
 // tTJSDateParser : A date/time parser class
 //---------------------------------------------------------------------------
 tTJSDateParser::tTJSDateParser(const tjs_char *in)
@@ -139,18 +117,18 @@ int tTJSDateParser::Lex(YYSTYPE *yylex)
 {
 	if(*InputPointer == 0) return -1;
 
-	while( *InputPointer && TJS_iswspace(*InputPointer)) InputPointer++;
+        while( *InputPointer && TJS_iswspace(InputPointer)) InputPointer++;
 
 	if(*InputPointer == 0) return -1;
 
-	if(TJS_iswdigit(*InputPointer))
+        if(TJS_iswdigit(InputPointer))
 	{
-		tjs_int32 val = *InputPointer - TJS_W('0');
+		tjs_int32 val = *InputPointer - TJS_N('0');
 		InputPointer ++;
-		while(TJS_iswdigit(*InputPointer))
+                while(TJS_iswdigit(InputPointer))
 		{
 			val *= 10;
-			val += *InputPointer - TJS_W('0');
+			val += *InputPointer - TJS_N('0');
 			InputPointer++;
 		}
 		yylex->val = val;
@@ -160,7 +138,7 @@ int tTJSDateParser::Lex(YYSTYPE *yylex)
 	#include "tjsDateWordMap.cc"
 
 	int n =  (int)*(InputPointer++);
-	if(n >= TJS_W('A') && n <= TJS_W('Z')) n += TJS_W('a') - TJS_W('A');
+	if(n >= TJS_N('A') && n <= TJS_N('Z')) n += TJS_N('a') - TJS_N('A');
 	return n;
 }
 //---------------------------------------------------------------------------

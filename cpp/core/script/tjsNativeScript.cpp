@@ -11,7 +11,7 @@
 // tTJSNC_Scripts
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Scripts::ClassID = -1;
-tTJSNC_Scripts::tTJSNC_Scripts() : inherited(TJS_W("Scripts"))
+tTJSNC_Scripts::tTJSNC_Scripts() : inherited(TJS_N("Scripts"))
 {
 	// registration of native members
 
@@ -187,7 +187,7 @@ tTJSNC_Scripts::tTJSNC_Scripts() : inherited(TJS_W("Scripts"))
 
 		if (dsp)
 		{
-			tTJSVariant missing(TJS_W("missing"));
+			tTJSVariant missing(TJS_N("missing"));
 			dsp->ClassInstanceInfo(TJS_CII_SET_MISSING, 0, &missing);
 		}
 

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-#define NCB_MODULE_NAME TJS_W("getSample.dll")
+#define NCB_MODULE_NAME TJS_N("getSample.dll")
 //------------------------------------------------------------------------------------------------ 
 // 旧方式（互換のために残されています） 
 
@@ -24,7 +24,7 @@ getSample(tTJSVariant *result,tjs_int numparams, tTJSVariant **param, iTJSDispat
 			tTJSVariant numsamples = n;
 			tTJSVariant channel    = 1;
 			tTJSVariant *p[3] = {&buffer, &numsamples, &channel};
-			if (TJS_SUCCEEDED(ret = objthis->FuncCall(0, TJS_W("getVisBuffer"), NULL, NULL, 3, p, objthis))) {
+			if (TJS_SUCCEEDED(ret = objthis->FuncCall(0, TJS_N("getVisBuffer"), NULL, NULL, 3, p, objthis))) {
 				int c=0;
 				int sum = 0;
 				for (int i=0;i<n;i++) {
@@ -45,8 +45,8 @@ NCB_ATTACH_FUNCTION(getSample, WaveSoundBuffer, getSample);
 //template <> struct ncbNativeFunctionAutoRegisterTempl<ncbFunctionTag_WaveSoundBuffer_getSample> 
 //	: public ncbNativeFunctionAutoRegister 
 //{ 
-//	void Regist()   const { RegistFunction(TJS_W("getSample"), TJS_W("WaveSoundBuffer"), &getSample); } 
-//	void Unregist() const { UnregistFunction(TJS_W("getSample"), TJS_W("WaveSoundBuffer")); } 
+//	void Regist()   const { RegistFunction(TJS_N("getSample"), TJS_N("WaveSoundBuffer"), &getSample); } 
+//	void Unregist() const { UnregistFunction(TJS_N("getSample"), TJS_N("WaveSoundBuffer")); } 
 //}; 
 //static ncbNativeFunctionAutoRegisterTempl<ncbFunctionTag_WaveSoundBuffer_getSample> ncbFunctionAutoRegister_WaveSoundBuffer_getSample; 
 
@@ -73,9 +73,9 @@ public:
 		buf = new short[counts];
 		// useVisBuffer = true; にする 
 		tTJSVariant val(1);
-		tjs_error r = objthis->PropSet(0, TJS_W("useVisBuffer"), NULL, &val, objthis);
+		tjs_error r = objthis->PropSet(0, TJS_N("useVisBuffer"), NULL, &val, objthis);
 		if (r != TJS_S_OK)
-			TVPAddLog(ttstr(TJS_W("useVisBuffer=1 failed: ")) + ttstr(r));
+			TVPAddLog(ttstr(TJS_N("useVisBuffer=1 failed: ")) + ttstr(r));
 
 		// getVisBuffer用の引数を作る 
 		vBuffer     = (tTVInteger)buf;
@@ -100,9 +100,9 @@ public:
 	double getSampleValue() {
 		memset(buf, 0, counts*sizeof(short));
 		tTJSVariant result;
-		tjs_error r = objthis->FuncCall(0, TJS_W("getVisBuffer"), &hint, &result, 4, params, objthis);
+		tjs_error r = objthis->FuncCall(0, TJS_N("getVisBuffer"), &hint, &result, 4, params, objthis);
 
-		if (r != TJS_S_OK) TVPAddLog(ttstr(TJS_W("getVisBuffer failed: "))+ttstr(r));
+		if (r != TJS_S_OK) TVPAddLog(ttstr(TJS_N("getVisBuffer failed: "))+ttstr(r));
 
 		int cnt = (int)result.AsInteger();
 		if (cnt > counts || cnt < 0) cnt = counts;
@@ -162,9 +162,9 @@ NCB_GET_INSTANCE_HOOK(WaveSoundBufferAdd)
 
 // 登録 
 NCB_ATTACH_CLASS_WITH_HOOK(WaveSoundBufferAdd, WaveSoundBuffer) {
-	Property(TJS_W("sampleValue"), &Class::getSampleValue, (int)0);
-	Property(TJS_W("sampleCount"), &Class::getSampleCount, &Class::setSampleCount);
-	Property(TJS_W("sampleAhead"), &Class::getSampleAhead, &Class::setSampleAhead);
+	Property(TJS_N("sampleValue"), &Class::getSampleValue, (int)0);
+	Property(TJS_N("sampleCount"), &Class::getSampleCount, &Class::setSampleCount);
+	Property(TJS_N("sampleAhead"), &Class::getSampleAhead, &Class::setSampleAhead);
 }
 NCB_ATTACH_FUNCTION(setDefaultCounts, WaveSoundBuffer, WaveSoundBufferAdd::setDefaultCounts);
 NCB_ATTACH_FUNCTION(setDefaultAheads, WaveSoundBuffer, WaveSoundBufferAdd::setDefaultAheads);

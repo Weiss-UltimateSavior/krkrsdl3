@@ -11,14 +11,14 @@ void TVPLoadWEBP(void* formatdata, void *callbackdata,
 {
 	WebPDecoderConfig config;
 	if (WebPInitDecoderConfig(&config) == 0) {
-		TVPThrowExceptionMessage(TJS_W("Invalid WebP image"));
+		TVPThrowExceptionMessage(TJS_N("Invalid WebP image"));
 	}
 
 	int datasize = src->GetSize();
 	std::unique_ptr<uint8_t[]> data(new uint8_t[datasize]);
 	src->ReadBuffer(data.get(), datasize);
 	if (WebPGetFeatures(data.get(), datasize, &config.input) != VP8_STATUS_OK) {
-		TVPThrowExceptionMessage(TJS_W("Invalid WebP image"));
+		TVPThrowExceptionMessage(TJS_N("Invalid WebP image"));
 	}
 
 	unsigned int stride = sizecallback(callbackdata, config.input.width, config.input.height,
@@ -31,7 +31,7 @@ void TVPLoadWEBP(void* formatdata, void *callbackdata,
 		config.output.u.RGBA.size = config.input.height * stride;
 		config.output.is_external_memory = 1;
 		if (WebPDecode(data.get(), datasize, &config) != VP8_STATUS_OK) {
-			TVPThrowExceptionMessage(TJS_W("Invalid WebP image(RGBA mode)"));
+			TVPThrowExceptionMessage(TJS_N("Invalid WebP image(RGBA mode)"));
 		}
 	} else if (glmGrayscale == mode) {
 		config.output.colorspace = MODE_YUV;
@@ -52,10 +52,10 @@ void TVPLoadWEBP(void* formatdata, void *callbackdata,
 		config.output.is_external_memory = 1;
 
 		if (WebPDecode(data.get(), datasize, &config) != VP8_STATUS_OK) {
-			TVPThrowExceptionMessage(TJS_W("Invalid WebP image(Grayscale Mode)"));
+			TVPThrowExceptionMessage(TJS_N("Invalid WebP image(Grayscale Mode)"));
 		}
 	} else {
-		TVPThrowExceptionMessage(TJS_W("WebP does not support palettized image"));
+		TVPThrowExceptionMessage(TJS_N("WebP does not support palettized image"));
 	}
 	scanlinecallback(callbackdata, -1); // image was written
 }
@@ -63,21 +63,21 @@ void TVPLoadWEBP(void* formatdata, void *callbackdata,
 void TVPLoadHeaderWEBP(void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** dic) {
 	WebPDecoderConfig config;
 	if (WebPInitDecoderConfig(&config) == 0) {
-		TVPThrowExceptionMessage(TJS_W("Invalid WebP image"));
+		TVPThrowExceptionMessage(TJS_N("Invalid WebP image"));
 	}
 
 	int datasize = src->GetSize();
 	std::unique_ptr<uint8_t[]> data(new uint8_t[datasize]);
 	src->ReadBuffer(data.get(), datasize);
 	if (WebPGetFeatures(data.get(), datasize, &config.input) != VP8_STATUS_OK) {
-		TVPThrowExceptionMessage(TJS_W("Invalid WebP image"));
+		TVPThrowExceptionMessage(TJS_N("Invalid WebP image"));
 	}
 
 	*dic = TJSCreateDictionaryObject();
 	tTJSVariant val((tjs_int32)config.input.width);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("width"), 0, &val, (*dic));
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("width"), 0, &val, (*dic));
 	val = tTJSVariant((tjs_int32)config.input.height);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("height"), 0, &val, (*dic));
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("height"), 0, &val, (*dic));
 	val = tTJSVariant(config.input.has_alpha ? 32 : 24);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("bpp"), 0, &val, (*dic));
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("bpp"), 0, &val, (*dic));
 }

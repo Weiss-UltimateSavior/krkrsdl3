@@ -63,9 +63,9 @@ static void* TVPAllocBitmapBits(tjs_uint size, tjs_uint width,
     ptr = ptrorg = (tjs_uint8*)malloc(allocbytes);
     if (!ptr)
         TVPThrowExceptionMessage(
-            TVPCannotAllocateBitmapBits, TJS_W("at TVPAllocBitmapBits"),
-            ttstr((tjs_int)allocbytes) + TJS_W("(") + ttstr((int)width) +
-                TJS_W("x") + ttstr((int)height) + TJS_W(")"));
+            TVPCannotAllocateBitmapBits, TJS_N("at TVPAllocBitmapBits"),
+            ttstr((tjs_int)allocbytes) + TJS_N("(") + ttstr((int)width) +
+                TJS_N("x") + ttstr((int)height) + TJS_N(")"));
     // align to a paragraph ( 16-bytes )
     ptr += 16 + sizeof(tTVPLayerBitmapMemoryRecord);
     *reinterpret_cast<tTJSPointerSizedInteger*>(&ptr) >>= 4;
@@ -110,11 +110,11 @@ static void TVPFreeBitmapBits(void* ptr) {
         if (~(*(tjs_uint32*)(bptr - sizeof(tjs_uint32))) !=
             record->sentinel_backup1)
             TVPThrowExceptionMessage(
-                TJS_W("Layer bitmap: Buffer underrun detected. Check your "
+                TJS_N("Layer bitmap: Buffer underrun detected. Check your "
                       "drawing code!"));
         if (~(*(tjs_uint32*)(bptr + record->size)) != record->sentinel_backup2)
             TVPThrowExceptionMessage(
-                TJS_W("Layer bitmap: Buffer overrun detected. Check your "
+                TJS_N("Layer bitmap: Buffer overrun detected. Check your "
                       "drawing code!"));
 
         free(record->alloc_ptr);
@@ -323,7 +323,7 @@ public:
                 BPP = 32;
                 break;
             default:
-                TVPThrowExceptionMessage(TJS_W("unsupported texture format %1"),
+                TVPThrowExceptionMessage(TJS_N("unsupported texture format %1"),
                                          TJSIntegerToString((int)format));
                 break;
         }
@@ -359,7 +359,7 @@ public:
                 break;
             default:
                 TVPThrowExceptionMessage(
-                    TJS_W("unsupported texture format %1"),
+                    TJS_N("unsupported texture format %1"),
                     TJSIntegerToString((int)tex->GetFormat()));
                 break;
         }
@@ -457,7 +457,7 @@ public:
 
     uint32_t GetNameHash() {
         if (!_nameHash)
-            _nameHash = tTJSHashFunc<tjs_nchar*>::Make(Name.c_str());
+            _nameHash = tTJSHashFunc<tjs_char*>::Make(Name.c_str());
         return _nameHash;
     }
 };
@@ -1671,17 +1671,17 @@ iTVPRenderMethod* iTVPRenderManager::GetRenderMethod(const char* name,
         hash = *hint;
     }
     else {
-        hash = tTJSHashFunc<tjs_nchar*>::Make(name);
+        hash = tTJSHashFunc<tjs_char*>::Make(name);
         if (hint)
             *hint = hash;
     }
     auto it = AllMethods.find(hash);
     if (it != AllMethods.end())
         return it->second;
-    TVPShowSimpleMessageBox(ttstr(TJS_W("Operation \"")) + name +
-                                TJS_W("\" is not supported under ") +
-                                GetName() + TJS_W(" mode."),
-                            TJS_W("Please use software renderer"));
+    TVPShowSimpleMessageBox(ttstr(TJS_N("Operation \"")) + name +
+                                TJS_N("\" is not supported under ") +
+                                GetName() + TJS_N(" mode."),
+                            TJS_N("Please use software renderer"));
     return nullptr;
 }
 
@@ -1897,7 +1897,7 @@ void iTVPRenderManager::Initialize() {
 
 void iTVPRenderManager::RegisterRenderMethod(const char* name,
                                              iTVPRenderMethod* method) {
-    tjs_uint32 hash = tTJSHashFunc<tjs_nchar*>::Make(name);
+    tjs_uint32 hash = tTJSHashFunc<tjs_char*>::Make(name);
     assert(method && AllMethods.find(hash) == AllMethods.end());
     AllMethods[hash] = method;
     method->SetName(name);
@@ -1907,7 +1907,7 @@ iTVPRenderMethod* iTVPRenderManager::CompileRenderMethod(const char* name,
                                                          const char* script,
                                                          int nTex,
                                                          unsigned int flags) {
-    auto it = AllMethods.find(tTJSHashFunc<tjs_nchar*>::Make(name));
+    auto it = AllMethods.find(tTJSHashFunc<tjs_char*>::Make(name));
     assert(it == AllMethods.end());
     iTVPRenderMethod* method = GetRenderMethodFromScript(script, nTex, flags);
     RegisterRenderMethod(name, method);
@@ -1923,7 +1923,7 @@ iTVPRenderManager::GetOrCompileRenderMethod(const char* name, uint32_t* hint,
         hash = *hint;
     }
     else {
-        hash = tTJSHashFunc<tjs_nchar*>::Make(name);
+        hash = tTJSHashFunc<tjs_char*>::Make(name);
         if (hint)
             *hint = hash;
     }
@@ -4064,7 +4064,7 @@ void TVPRegisterRenderManager(const char* name, iTVPRenderManager* (*func)()) {
 iTVPRenderManager* TVPGetRenderManager(const ttstr& name) {
     auto it = _RenderManagerFactory->find(name);
     if (it == _RenderManagerFactory->end()) {
-        TVPThrowExceptionMessage(TJS_W("unsupported renderer %1"), name);
+        TVPThrowExceptionMessage(TJS_N("unsupported renderer %1"), name);
     }
     if (it->second.second) {
         return it->second.second;

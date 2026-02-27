@@ -2,7 +2,7 @@
 #include "TVPPlugin.h"
 #include "TVPStorage.h"
 #include "UtilStreams.h"
-#define NCB_MODULE_NAME TJS_W("saveStruct.dll")
+#define NCB_MODULE_NAME TJS_N("saveStruct.dll")
 
 class tTVPStringStream
 {
@@ -19,8 +19,8 @@ public:
 };
 
 tTVPStringStream::tTVPStringStream(tTJSBinaryStream *s, bool onlyLF /*= false*/) : stream(s) {
-	if (onlyLF)  _newline = TJS_W("\n");
-	else        _newline = TJS_W("\r\n");
+	if (onlyLF)  _newline = TJS_N("\n");
+	else        _newline = TJS_N("\r\n");
 }
 
 void tTVPStringStream::write(tjs_char c) {
@@ -54,16 +54,16 @@ quoteString(const tjs_char *str, tTVPStringStream *writer)
 		int ch;
 		while ((ch = *p++)) {
 			if (ch == '"') {
-				writer->write(TJS_W("\\\""));
+				writer->write(TJS_N("\\\""));
 			} else if (ch == '\\') {
-				writer->write(TJS_W("\\\\"));
+				writer->write(TJS_N("\\\\"));
 			} else {
 				writer->write((tjs_char)ch);
 			}
 		}
 		writer->write((tjs_char)'"');
 	} else {
-		writer->write(TJS_W("\"\""));
+		writer->write(TJS_N("\"\""));
 	}
 }
 
@@ -71,13 +71,13 @@ static void quoteOctet(tTJSVariantOctet *octet, tTVPStringStream *writer)
 {
   const tjs_uint8 *data = octet->GetData();
   tjs_uint length = octet->GetLength();
-  writer->write(TJS_W("<% "));
+  writer->write(TJS_N("<% "));
   for (tjs_uint i = 0; i < length; i++) {
     tjs_char buf[256];
-    TJS_sprintf(buf, TJS_W("%02x "), data[i]);
+    TJS_sprintf(buf, TJS_N("%02x "), data[i]);
     writer->write(buf);
   }
-  writer->write(TJS_W("%>"));
+  writer->write(TJS_N("%>"));
 }
 
 static void getVariantString(tTJSVariant &var, tTVPStringStream *writer);
@@ -112,7 +112,7 @@ public:
 				}
 				const tjs_char *name = param[0]->GetString();
 				quoteString(name, writer);
-				writer->write(TJS_W("=>"));
+				writer->write(TJS_N("=>"));
 				getVariantString(*param[2], writer);
 			}
 		}
@@ -125,7 +125,7 @@ public:
 
 static void getDictString(iTJSDispatch2 *dict, tTVPStringStream *writer)
 {
-	writer->write(TJS_W("%["));
+	writer->write(TJS_N("%["));
 	//writer->addIndent();
 	DictMemberDispCaller *caller = new DictMemberDispCaller(writer);
 	tTJSVariantClosure closure(caller);
@@ -169,15 +169,15 @@ getVariantString(tTJSVariant &var, tTVPStringStream *writer)
 	switch(var.Type()) {
 
 	case tvtVoid:
-		writer->write(TJS_W("void"));
+		writer->write(TJS_N("void"));
 		break;
 		
 	case tvtObject:
 		{
 			iTJSDispatch2 *obj = var.AsObjectNoAddRef();
 			if (obj == NULL) {
-				writer->write(TJS_W("null"));
-			} else if (obj->IsInstanceOf(TJS_IGNOREPROP,NULL,NULL,TJS_W("Array"),obj) == TJS_S_TRUE) {
+				writer->write(TJS_N("null"));
+			} else if (obj->IsInstanceOf(TJS_IGNOREPROP,NULL,NULL,TJS_N("Array"),obj) == TJS_S_TRUE) {
 				getArrayString(obj, writer);
 			} else {
 				getDictString(obj, writer);
@@ -194,17 +194,17 @@ getVariantString(tTJSVariant &var, tTVPStringStream *writer)
                break;
 
 	case tvtInteger:
-		writer->write(TJS_W("int "));
+		writer->write(TJS_N("int "));
 		writer->write(TJSIntegerToString((tTVInteger)var)->operator const tjs_char *());
 		break;
 
 	case tvtReal:
-		writer->write(TJS_W("real "));
+		writer->write(TJS_N("real "));
 		writer->write((tTVReal)var);
 		break;
 
 	default:
-		writer->write(TJS_W("void"));
+		writer->write(TJS_N("void"));
 		break;
 	};
 }
@@ -374,15 +374,15 @@ static void PostRegistCallback()
 	// Array.count を取得
 	{
 		tTJSVariant varScripts;
-		TVPExecuteExpression(TJS_W("Array"), &varScripts);
+		TVPExecuteExpression(TJS_N("Array"), &varScripts);
 		iTJSDispatch2 *dispatch = varScripts.AsObjectNoAddRef();
 		tTJSVariant val;
 		if (TJS_FAILED(dispatch->PropGet(TJS_IGNOREPROP,
-										 TJS_W("count"),
+										 TJS_N("count"),
 										 NULL,
 										 &val,
 										 dispatch))) {
-			TVPThrowExceptionMessage(TJS_W("can't get Array.count"));
+			TVPThrowExceptionMessage(TJS_N("can't get Array.count"));
 		}
 		ArrayCountProp = val.AsObject();
 	}

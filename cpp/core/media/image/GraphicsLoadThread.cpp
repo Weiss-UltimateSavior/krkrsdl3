@@ -144,7 +144,7 @@ void tTVPAsyncImageLoader::HandleLoadedImage() {
 				param[1] = 1; // true async
 				param[2] = 1; // true error
 				param[3] = cmd->result_; // error_mes
-				static ttstr eventname(TJS_W("onLoaded"));
+				static ttstr eventname(TJS_N("onLoaded"));
 				if (cmd->owner_ && cmd->owner_->IsValid(0, NULL, NULL, cmd->owner_) == TJS_S_TRUE) {
 					TVPPostEvent(cmd->owner_, cmd->owner_, eventname, 0, TVP_EPT_IMMEDIATE, 4, param);
 				}
@@ -173,8 +173,8 @@ void tTVPAsyncImageLoader::HandleLoadedImage() {
 				if( metainfo ) metainfo->Release();
 				param[1] = 1; // true async
 				param[2] = 0; // false error
-				param[3] = TJS_W(""); // error_mes
-				static ttstr eventname(TJS_W("onLoaded"));
+				param[3] = TJS_N(""); // error_mes
+				static ttstr eventname(TJS_N("onLoaded"));
 				if (cmd->owner_ && cmd->owner_->IsValid(0, NULL, NULL, cmd->owner_) == TJS_S_TRUE) {
 					TVPPostEvent(cmd->owner_, cmd->owner_, eventname, 0, TVP_EPT_IMMEDIATE, 4, param);
 				}
@@ -204,8 +204,8 @@ void tTVPAsyncImageLoader::LoadRequest( iTJSDispatch2 *owner, tTJSNI_Bitmap* bmp
 		if( metainfo ) metainfo->Release();
 		param[1] = 0; // false
 		param[2] = 0; // false
-		param[3] = TJS_W(""); // error_mes
-		static ttstr eventname(TJS_W("onLoaded"));
+		param[3] = TJS_N(""); // error_mes
+		static ttstr eventname(TJS_N("onLoaded"));
 		TVPPostEvent(owner, owner, eventname, 0, TVP_EPT_IMMEDIATE, 4, param);
 		return;
 	}
@@ -213,8 +213,8 @@ void tTVPAsyncImageLoader::LoadRequest( iTJSDispatch2 *owner, tTJSNI_Bitmap* bmp
 		TVPThrowExceptionMessage(TVPCannotFindStorage, name);
 	}
 	ttstr ext = TVPExtractStorageExt(name);
-	if(ext == TJS_W("")) {
-		TVPThrowExceptionMessage(TJS_W("Filename extension not found/%1"), name);
+	if(ext == TJS_N("")) {
+		TVPThrowExceptionMessage(TJS_N("Filename extension not found/%1"), name);
 	}
 
 	PushLoadQueue( owner, bmp, nname );
@@ -278,7 +278,7 @@ void tTVPAsyncImageLoader::LoadImageFromCommand( tTVPImageLoadCommand* cmd ) {
 	if (ext.IsEmpty()) {
 		// missing extension
 		handler = TVPGuessGraphicLoadHandler(name);
-//		cmd->result_ = TJS_W("Filename extension not found");
+//		cmd->result_ = TJS_N("Filename extension not found");
 	} else {
 		handler = TVPGetGraphicLoadHandler(ext);
 	}

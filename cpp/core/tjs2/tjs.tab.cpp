@@ -2213,7 +2213,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 222 "syntax/tjs.y"
-    { sb->PushContextStack(TJS_W("global"),
+    { sb->PushContextStack(TJS_N("global"),
 												ctTopLevel); ;}
     break;
 
@@ -2447,7 +2447,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 382 "syntax/tjs.y"
     { sb->PushContextStack(
-												TJS_W("(anonymous)"),
+												TJS_N("(anonymous)"),
 											  ctExprFunction);
 											  cc->EnterBlock(); ;}
     break;
@@ -2516,7 +2516,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 450 "syntax/tjs.y"
     { sb->PushContextStack(
-												TJS_W("(setter)"),
+												TJS_N("(setter)"),
 												ctPropertySetter);
 											  cc->EnterBlock();
 											  cc->SetPropertyDeclArg(
@@ -2536,7 +2536,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 461 "syntax/tjs.y"
     { sb->PushContextStack(
-												TJS_W("(getter)"),
+												TJS_N("(getter)"),
 												ctPropertyGetter);
 											  cc->EnterBlock(); ;}
     break;

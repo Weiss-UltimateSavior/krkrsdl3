@@ -21,10 +21,10 @@ public:
 	void Release();
 	void ApplyFont( class tTVPNativeBaseBitmap *bmp, bool force );
 	void ApplyFont( const struct tTVPFont& font );
-	void GetTextExtent(tjs_char ch, tjs_int &w, tjs_int &h);
+	void GetTextExtent(tjs_wchar ch, tjs_int &w, tjs_int &h);
 	tjs_int GetAscentHeight();
 	tTVPCharacterData* GetBitmap( const tTVPFontAndCharacterData & font, tjs_int aofsx, tjs_int aofsy );
-	void GetGlyphDrawRect( const ttstr & text, struct tTVPRect& area );
+	void GetGlyphDrawRect(std::vector<tjs_wchar> text, struct tTVPRect& area );
 };
 
 #endif // __FREE_TYPE_FONT_RASTERIZER_H__

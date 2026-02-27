@@ -4,7 +4,7 @@
 #include "TVPFont.h"
 #include "TVPStorage.h"
 
-#define NCB_MODULE_NAME TJS_W("addFont.dll")
+#define NCB_MODULE_NAME TJS_N("addFont.dll")
 
 struct FontEx
 {

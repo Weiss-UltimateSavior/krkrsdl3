@@ -20,15 +20,15 @@ void TVPInitCDDAVolumeControlType() {
     // -cdvol=direct : use direct volume control
 
     tTJSVariant val;
-    if(TVPGetCommandLine(TJS_W("-cdvol"), &val)) {
+    if(TVPGetCommandLine(TJS_N("-cdvol"), &val)) {
         ttstr str(val);
-        if(str == TJS_W("mixer"))
+        if(str == TJS_N("mixer"))
             TVPCDDAVolumeControlType = cvctMixer;
-        else if(str == TJS_W("direct"))
+        else if(str == TJS_N("direct"))
             TVPCDDAVolumeControlType = cvctDirect;
         else
             TVPThrowExceptionMessage(TVPCommandLineParamIgnoredAndDefaultUsed,
-                                     TJS_W("-cdvol"), str);
+                                     TJS_N("-cdvol"), str);
     }
 
     TVPCDDAVolumeControlTypeInit = true;
@@ -284,7 +284,7 @@ void tTJSNI_CDDASoundBuffer::Open(const ttstr &storage) {
     const tjs_char *c = storage.c_str();
     char drive[4] = { ' ', ':', 0, 0 };
 
-    if(storage.GetLen() >= 2 && storage[1] == TJS_W(':')) {
+    if(storage.GetLen() >= 2 && storage[1] == TJS_N(':')) {
         // drive is specified
 
         // search the drive connected to the system
@@ -746,7 +746,7 @@ void tTJSNI_BaseCDDASoundBuffer::Invalidate() {
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_CDDASoundBuffer::ClassID = -1;
 tTJSNC_CDDASoundBuffer::tTJSNC_CDDASoundBuffer() :
-	tTJSNativeClass(TJS_W("CDDASoundBuffer"))
+	tTJSNativeClass(TJS_N("CDDASoundBuffer"))
 {
 	// registration of native members
 

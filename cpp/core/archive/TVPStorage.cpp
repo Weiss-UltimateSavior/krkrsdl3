@@ -55,17 +55,17 @@ class tTVPStorageMediaManager {
             const tjs_char *r_p = rhs.c_str();
 
             while(*l_p && *r_p) {
-                if(*l_p == TJS_W(':'))
+                if(*l_p == TJS_N(':'))
                     break;
-                if(*r_p == TJS_W(':'))
+                if(*r_p == TJS_N(':'))
                     break;
                 if(*l_p != *r_p)
                     break;
                 l_p++;
                 r_p++;
             }
-            if((*l_p == TJS_W(':') || *l_p == 0) &&
-               (*r_p == TJS_W(':') || *r_p == 0))
+            if((*l_p == TJS_N(':') || *l_p == 0) &&
+               (*r_p == TJS_N(':') || *r_p == 0))
                 return true;
             return false;
         }
@@ -217,8 +217,8 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
     // unify path delimiter
     pa = tmp.Independ();
     while(*pa) {
-        if(*pa == TJS_W('\\'))
-            *pa = TJS_W('/');
+        if(*pa == TJS_N('\\'))
+            *pa = TJS_N('/');
         pa++;
     }
 
@@ -245,13 +245,13 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
     //   media name is: /^[A-Za-z]+:/
     pa = pb = tmp.Independ();
     while(*pa) {
-        if(!((*pa >= TJS_W('A') && *pa <= TJS_W('Z')) ||
-             (*pa >= TJS_W('a') && *pa <= TJS_W('z'))))
+        if(!((*pa >= TJS_N('A') && *pa <= TJS_N('Z')) ||
+             (*pa >= TJS_N('a') && *pa <= TJS_N('z'))))
             break;
         pa++;
     }
 
-    if(*pa == TJS_W(':')) {
+    if(*pa == TJS_N(':')) {
         // media name found
         media = ttstr(pb, (int)(pa - pb));
         pa++;
@@ -266,16 +266,16 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
     //  /path          (domain is omitted)
     //  relative-path  (domain and current path are omitted)
 
-    if(pa[0] == TJS_W('/')) {
-        if(pa[1] == TJS_W('/')) {
-            if(pa[2] == TJS_W('/')) {
+    if(pa[0] == TJS_N('/')) {
+        if(pa[1] == TJS_N('/')) {
+            if(pa[2] == TJS_N('/')) {
                 // slash count 3: domain is ommited
                 pa += 2;
             } else {
                 // slash count 2: none is omitted
                 pa += 2;
                 // find '/' as a domain delimiter
-                pc = TJS_strchr(pa, TJS_W('/'));
+                pc = TJS_strchr(pa, TJS_N('/'));
                 if(!pc)
                     TVPThrowExceptionMessage(TVPInvalidPathName, name);
                 domain = ttstr(pa, (int)(pc - pa));
@@ -298,8 +298,8 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
         // normalize media name ( make them all small )
         tjs_char *p = media.Independ();
         while(*p) {
-            if(*p >= TJS_W('A') && *p <= TJS_W('Z'))
-                *p += (TJS_W('a') - TJS_W('A'));
+            if(*p >= TJS_N('A') && *p <= TJS_N('Z'))
+                *p += (TJS_N('a') - TJS_N('A'));
             p++;
         }
     }
@@ -311,8 +311,8 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
     mediarec->MediaIntf.GetObjectNoAddRef()->NormalizeDomainName(domain);
 
     if(path.IsEmpty()) {
-        path = TJS_W("/");
-    } else if(path.c_str()[0] != TJS_W('/')) {
+        path = TJS_N("/");
+    } else if(path.c_str()[0] != TJS_N('/')) {
         path = mediarec->CurrentPath + path;
     }
     mediarec->MediaIntf.GetObjectNoAddRef()->NormalizePathName(path);
@@ -330,7 +330,7 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
     tjs_int dot_count = -1;
 
     while(true) {
-        if(*pa == TVPArchiveDelimiter || *pa == TJS_W('/') || *pa == 0) {
+        if(*pa == TVPArchiveDelimiter || *pa == TJS_N('/') || *pa == 0) {
             tjs_char delim = 0;
 
             if(*pa && dot_count == 0) {
@@ -339,7 +339,7 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
             } else if(dot_count > 0) {
                 pb--;
                 while(pb >= pc) {
-                    if(*pb == TJS_W('/') || *pb == TVPArchiveDelimiter) {
+                    if(*pb == TJS_N('/') || *pb == TVPArchiveDelimiter) {
                         dot_count--;
                         if(dot_count == 0) {
                             delim = *pb;
@@ -363,7 +363,7 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
             pb++;
             pa++;
             dot_count = 0;
-        } else if(*pa == TJS_W('.')) {
+        } else if(*pa == TJS_N('.')) {
             *(pb++) = *(pa++);
             if(dot_count != -1)
                 dot_count++;
@@ -383,14 +383,14 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
     if(ret_path)
         *ret_path = path;
 
-    tmp = media + TJS_W("://") + domain + path;
+    tmp = media + TJS_N("://") + domain + path;
 
     return tmp;
 }
 //---------------------------------------------------------------------------
 void tTVPStorageMediaManager::SetCurrentDirectory(const ttstr &name) {
     tjs_char ch = name.GetLastChar();
-    if(ch != TJS_W('/') && ch != TJS_W('\\') && ch != TVPArchiveDelimiter)
+    if(ch != TJS_N('/') && ch != TJS_N('\\') && ch != TVPArchiveDelimiter)
         TVPThrowExceptionMessage(TVPMissingPathDelimiterAtLast);
 
     ttstr media, domain, path;
@@ -408,7 +408,7 @@ ttstr tTVPStorageMediaManager::ExtractMediaName(const ttstr &name) {
 
     const tjs_char *p = name.c_str();
     const tjs_char *po = p;
-    while(*p && *p != TJS_W(':'))
+    while(*p && *p != TJS_N(':'))
         p++;
     return ttstr(po, (int)(p - po));
 }
@@ -493,7 +493,7 @@ void TVPGetLocalName(ttstr &name) {
 //---------------------------------------------------------------------------
 ttstr TVPGetLocallyAccessibleName(const ttstr &name) {
     if(TJS_strchr(name.c_str(), TVPArchiveDelimiter))
-        return TJS_W("");
+        return TJS_N("");
     // in-archive storage is always not accessible from local file system
     return TVPStorageMediaManager.GetLocallyAccessibleName(name);
 }
@@ -603,13 +603,13 @@ ttstr TVPExtractStorageExt(const ttstr &name) {
     const tjs_char *p = s + slen;
     p--;
     while(p >= s) {
-        if(*p == TJS_W('\\'))
+        if(*p == TJS_N('\\'))
             break;
-        if(*p == TJS_W('/'))
+        if(*p == TJS_N('/'))
             break;
         if(*p == TVPArchiveDelimiter)
             break;
-        if(*p == TJS_W('.')) {
+        if(*p == TJS_N('.')) {
             // found extension delimiter
             tjs_int extlen = (tjs_int)(slen - (p - s));
             return ttstr(p, extlen);
@@ -634,9 +634,9 @@ ttstr TVPExtractStorageName(const ttstr &name) {
     const tjs_char *p = s + slen;
     p--;
     while(p >= s) {
-        if(*p == TJS_W('\\'))
+        if(*p == TJS_N('\\'))
             break;
-        if(*p == TJS_W('/'))
+        if(*p == TJS_N('/'))
             break;
         if(*p == TVPArchiveDelimiter)
             break;
@@ -663,9 +663,9 @@ ttstr TVPExtractStoragePath(const ttstr &name) {
     const tjs_char *p = s + slen;
     p--;
     while(p >= s) {
-        if(*p == TJS_W('\\'))
+        if(*p == TJS_N('\\'))
             break;
-        if(*p == TJS_W('/'))
+        if(*p == TJS_N('/'))
             break;
         if(*p == TVPArchiveDelimiter)
             break;
@@ -689,13 +689,13 @@ ttstr TVPChopStorageExt(const ttstr &name) {
     const tjs_char *p = s + slen;
     p--;
     while(p >= s) {
-        if(*p == TJS_W('\\'))
+        if(*p == TJS_N('\\'))
             break;
-        if(*p == TJS_W('/'))
+        if(*p == TJS_N('/'))
             break;
         if(*p == TVPArchiveDelimiter)
             break;
-        if(*p == TJS_W('.')) {
+        if(*p == TJS_N('.')) {
             // found extension delimiter
             return ttstr(s, (int)(p - s));
         }
@@ -740,8 +740,8 @@ void TVPAddAutoPath(const ttstr &name) {
     tTJSCriticalSectionHolder cs_holder(TVPCreateStreamCS);
 
     tjs_char lastchar = name.GetLastChar();
-    if(lastchar != TVPArchiveDelimiter && lastchar != TJS_W('/') &&
-       lastchar != TJS_W('\\'))
+    if(lastchar != TVPArchiveDelimiter && lastchar != TJS_N('/') &&
+       lastchar != TJS_N('\\'))
         TVPThrowExceptionMessage(TVPMissingPathDelimiterAtLast);
 
     ttstr normalized = TVPNormalizeStorageName(name);
@@ -758,8 +758,8 @@ void TVPRemoveAutoPath(const ttstr &name) {
     tTJSCriticalSectionHolder cs_holder(TVPCreateStreamCS);
 
     tjs_char lastchar = name.GetLastChar();
-    if(lastchar != TVPArchiveDelimiter && lastchar != TJS_W('/') &&
-       lastchar != TJS_W('\\'))
+    if(lastchar != TVPArchiveDelimiter && lastchar != TJS_N('/') &&
+       lastchar != TJS_N('\\'))
         TVPThrowExceptionMessage(TVPMissingPathDelimiterAtLast);
 
     ttstr normalized = TVPNormalizeStorageName(name);
@@ -816,7 +816,7 @@ static tjs_uint TVPRebuildAutoPathTable() {
 
                         if(name.StartsWith(in_arc_name)) {
                             if(!TJS_strchr(name.c_str() + in_arc_name_len,
-                                           TJS_W('/'))) {
+                                           TJS_N('/'))) {
                                 ttstr sname = TVPExtractStorageName(name);
                                 TVPAutoPathTable.Add(sname, path);
                                 count++;
@@ -856,11 +856,11 @@ static tjs_uint TVPRebuildAutoPathTable() {
 
     tjs_uint64 endtick = TVPGetTickCount();
 
-    TVPAddLog(ttstr(TJS_W("(info) Total ")) + ttstr((tjs_int)totalcount) +
-              TJS_W(" file(s) found, ") +
+    TVPAddLog(ttstr(TJS_N("(info) Total ")) + ttstr((tjs_int)totalcount) +
+              TJS_N(" file(s) found, ") +
               ttstr((tjs_int)TVPAutoPathTable.GetCount()) +
-              TJS_W(" file(s) activated.") + TJS_W(" (") +
-              ttstr((tjs_int)(endtick - tick)) + TJS_W("ms)"));
+              TJS_N(" file(s) activated.") + TJS_N(" (") +
+              ttstr((tjs_int)(endtick - tick)) + TJS_N("ms)"));
 
     AutoPathTableInit = true;
 
@@ -1002,23 +1002,23 @@ tTJSBinaryStream *TVPCreateStream(const ttstr &_name, tjs_uint32 flags) {
     } catch(eTJSScriptException &e) {
         if(TJS_strchr(_name.c_str(), '#'))
             e.AppendMessage(
-                TJS_W("[") +
+                TJS_N("[") +
                 TVPFormatMessage(TVPFilenameContainsSharpWarn, _name) +
-                TJS_W("]"));
+                TJS_N("]"));
         throw e;
     } catch(eTJSScriptError &e) {
         if(TJS_strchr(_name.c_str(), '#'))
             e.AppendMessage(
-                TJS_W("[") +
+                TJS_N("[") +
                 TVPFormatMessage(TVPFilenameContainsSharpWarn, _name) +
-                TJS_W("]"));
+                TJS_N("]"));
         throw e;
     } catch(eTJSError &e) {
         if(TJS_strchr(_name.c_str(), '#'))
             e.AppendMessage(
-                TJS_W("[") +
+                TJS_N("[") +
                 TVPFormatMessage(TVPFilenameContainsSharpWarn, _name) +
-                TJS_W("]"));
+                TJS_N("]"));
         throw e;
     } catch(...) {
         // check whether the filename contains '#' (former delimiter for archive
@@ -1061,11 +1061,11 @@ ttstr TVPGetTemporaryName() {
     TVPGetRandomBits128(buf);
     tjs_char random[128];
     TJS_snprintf(random, sizeof(random) / sizeof(tjs_char),
-                 TJS_W("%02x%02x%02x%02x%02x%02x"), buf[0], buf[1], buf[2],
+                 TJS_N("%02x%02x%02x%02x%02x%02x"), buf[0], buf[1], buf[2],
                  buf[3], buf[4], buf[5]);
 
-    return TVPTempPath + TJS_W("krkr_") + ttstr(random) + TJS_W("_") +
-        ttstr(num) + TJS_W("_") + ttstr(TVPProcessID);
+    return TVPTempPath + TJS_N("krkr_") + ttstr(random) + TJS_N("_") +
+        ttstr(num) + TJS_N("_") + ttstr(TVPProcessID);
 }
 //---------------------------------------------------------------------------
 
@@ -1074,8 +1074,7 @@ ttstr TVPGetTemporaryName() {
 // TVPRemoveFile
 //---------------------------------------------------------------------------
 bool TVPRemoveFile(const ttstr &name) {
-    tTJSNarrowStringHolder holder(name.c_str());
-    return !remove(holder);
+    return !remove(name.c_str());
 }
 //---------------------------------------------------------------------------
 
@@ -1084,8 +1083,7 @@ bool TVPRemoveFile(const ttstr &name) {
 // TVPRemoveFolder
 //---------------------------------------------------------------------------
 bool TVPRemoveFolder(const ttstr &name) {
-    tTJSNarrowStringHolder holder(name.c_str());
-    return !TVPDeleteFile(holder.Buf);
+    return !TVPDeleteFile(name.c_str());
 }
 //---------------------------------------------------------------------------
 
@@ -1131,35 +1129,41 @@ bool TVPCheckExistentLocalFolder(const ttstr &name) {
 //---------------------------------------------------------------------------
 ttstr TVPStringFromBMPUnicode(const tjs_uint16 *src, tjs_int maxlen) {
     // convert to ttstr from BMP unicode
-    if(sizeof(tjs_char) == 2) {
-        // sizeof(tjs_char) is 2 (windows native)
-        if(maxlen == -1)
-            return ttstr((const tjs_char *)src);
-        else
-            return ttstr((const tjs_char *)src, maxlen);
-    } else if(sizeof(tjs_char) == 4) {
-        // sizeof(tjs_char) is 4 (UCS32)
-        // FIXME: NOT TESTED CODE
-        tjs_int len = 0;
-        const tjs_uint16 *p = src;
-        while(*p)
-            len++, p++;
-        if(maxlen != -1 && len > maxlen)
-            len = maxlen;
-        ttstr ret((tTJSStringBufferLength)(len));
-        tjs_char *dest = ret.Independ();
-        p = src;
-        while(len && *p) {
-            *dest = *p;
-            dest++;
+    // sizeof(tjs_char) is 2 (windows native)
+    if (sizeof(tjs_wchar) != 2)
+        throw TVPTjsCharMustBeTwoOrFour;
+    // get size
+    size_t srcSize = maxlen;
+    if (maxlen != -1)
+    {
+        tjs_int max = maxlen;
+        if (!src)
+            return 0;
+        const tjs_uint16* p = src;
+        max++;
+        while (*p && --max)
             p++;
-            len--;
-        }
-        *dest = 0;
-        ret.FixLen();
-        return ret;
+        srcSize = (tjs_int)(p - src);
     }
-    return (const tjs_char *)TVPTjsCharMustBeTwoOrFour;
+    else
+    {
+        const tjs_uint16* p = src;
+        while (*p)
+            p++;
+        srcSize = p - src;
+    }
+    // convert
+    std::vector<tjs_char> ch(srcSize * 3 + 1);
+    size_t currLen = 0;
+    for (int j = 0; j < srcSize; j++)
+    {
+        tjs_uint16 tmpCh = src[j];
+        int chLen = TVPWideCharToUtf8(tmpCh, NULL);
+        TVPWideCharToUtf8(tmpCh, ch.data() + currLen);
+        currLen += chLen;
+    }
+    ch[currLen] = 0;
+    return ttstr(ch.data(), ch.size());
 }
 //---------------------------------------------------------------------------
 
@@ -1196,8 +1200,8 @@ int TVPCheckArchive(const ttstr &localname) {
         arc = TVPOpenArchive(TVPNormalizeStorageName(localname), false);
         if(arc) {
             tjs_uint count = arc->GetCount();
-            ttstr str_startup_tjs = TJS_W("startup.tjs");
-            // ttstr str_sys_init_tjs = TJS_W("system/initialize.tjs");
+            ttstr str_startup_tjs = TJS_N("startup.tjs");
+            // ttstr str_sys_init_tjs = TJS_N("system/initialize.tjs");
             for(int i = 0; i < count; ++i) {
                 ttstr name = arc->GetName(i);
                 if(name.length() == str_startup_tjs.length()) {
@@ -1238,14 +1242,14 @@ tTJSBinaryStream *TVPCreateBinaryStreamForRead(const ttstr &name,
     // check o mode
     tTJSBinaryStream *stream = TVPCreateStream(name, TJS_BS_READ);
 
-    const tjs_char *o_ofs = TJS_strchr(modestr.c_str(), TJS_W('o'));
+    const tjs_char *o_ofs = TJS_strchr(modestr.c_str(), TJS_N('o'));
     if(o_ofs != NULL) {
         // seek to offset
         o_ofs++;
         tjs_char buf[256];
         int i;
         for(i = 0; i < 255; i++) {
-            if(o_ofs[i] >= TJS_W('0') && o_ofs[i] <= TJS_W('9'))
+            if(o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
                 buf[i] = o_ofs[i];
             else
                 break;
@@ -1262,14 +1266,14 @@ tTJSBinaryStream *TVPCreateBinaryStreamForWrite(const ttstr &name,
     tTJSBinaryStream *stream;
     // check o mode
     const tjs_char *o_ofs;
-    o_ofs = TJS_strchr(modestr.c_str(), TJS_W('o'));
+    o_ofs = TJS_strchr(modestr.c_str(), TJS_N('o'));
     if(o_ofs != NULL) {
         // seek to offset
         o_ofs++;
         tjs_char buf[256];
         int i;
         for(i = 0; i < 255; i++) {
-            if(o_ofs[i] >= TJS_W('0') && o_ofs[i] <= TJS_W('9'))
+            if(o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
                 buf[i] = o_ofs[i];
             else
                 break;
@@ -1306,29 +1310,31 @@ bool TVPSelectFile(iTJSDispatch2 *params) {
     std::string result;
 
     // get filter
-    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("filter"), 0,
+    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("filter"), 0,
                                      &val, params))) {
     }
 
     // initial dir
-    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("initialDir"),
+    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("initialDir"),
                                      0, &val, params))) {
         ttstr lname(val);
         if(!lname.IsEmpty()) {
             TVPGetLocalName(lname);
-            initialdir = tTJSNarrowStringHolder(lname.c_str());
+            initialdir = lname.c_str();
         }
     }
 
     // default extension
-    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("defaultExt"),
+    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("defaultExt"),
                                      0, &val, params))) {
-        defaultext = tTJSNarrowStringHolder(
-            val.AsStringNoAddRef()->operator const tjs_char *());
+        if (val.AsStringNoAddRef())
+            defaultext = *(val.AsStringNoAddRef());
+        else
+            defaultext = "";
     }
 
     // filenames
-    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("name"), 0,
+    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("name"), 0,
                                      &val, params))) {
         ttstr lname(val);
         if(!lname.IsEmpty()) {
@@ -1344,23 +1350,25 @@ bool TVPSelectFile(iTJSDispatch2 *params) {
 
             if(!defaultext.empty() && TVPExtractStorageExt(lname).IsEmpty()) {
                 if(defaultext[0] != '.')
-                    lname += TJS_W(".");
+                    lname += TJS_N(".");
                 lname += defaultext.c_str();
             }
-            filename = tTJSNarrowStringHolder(lname.c_str());
+            filename = lname.c_str();
         }
     }
 
     // title
-    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("title"), 0,
+    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("title"), 0,
                                      &val, params))) {
-        title = tTJSNarrowStringHolder(
-            val.AsStringNoAddRef()->operator const tjs_char *());
+        if (val.AsStringNoAddRef())
+            title = *(val.AsStringNoAddRef());
+        else
+            title = "";
     }
 
     // flags
     bool issave = false;
-    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("save"), 0,
+    if(TJS_SUCCEEDED(params->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("save"), 0,
                                      &val, params)))
         issave = val.operator bool();
 
@@ -1372,13 +1380,13 @@ bool TVPSelectFile(iTJSDispatch2 *params) {
 
         // filter index
         val = (tjs_int)0;
-        params->PropSet(TJS_MEMBERENSURE, TJS_W("filterIndex"), 0, &val,
+        params->PropSet(TJS_MEMBERENSURE, TJS_N("filterIndex"), 0, &val,
                         params);
 
         // file name
         ttstr tresult = TVPNormalizeStorageName(ttstr(result.c_str()));
         val = tresult;
-        params->PropSet(TJS_MEMBERENSURE, TJS_W("name"), 0, &val, params);
+        params->PropSet(TJS_MEMBERENSURE, TJS_N("name"), 0, &val, params);
         return true;
     }
 

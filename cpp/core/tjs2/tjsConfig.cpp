@@ -13,7 +13,8 @@
 
 #include "Log.h"
 
-#include <codecvt>
+#include <ctime>
+#include <cstring>
 
 /*
  * core/utils/cp932_uni.cpp
@@ -24,7 +25,7 @@
  * ため使用が中止されました。
  */
 
-static int utf8_mbtowc(tjs_char* pwc, const unsigned char* s, int n)
+static int utf8_mbtowc(tjs_wchar* pwc, const unsigned char* s, int n)
 {
     unsigned char c = s[0];
 
@@ -40,8 +41,7 @@ static int utf8_mbtowc(tjs_char* pwc, const unsigned char* s, int n)
             return -1;
         if (!((s[1] ^ 0x80) < 0x40))
             return -1;
-        *pwc = ((tjs_char)(c & 0x1f) << 6)
-               | (tjs_char)(s[1] ^ 0x80);
+        *pwc = ((tjs_wchar)(c & 0x1f) << 6) | (tjs_wchar)(s[1] ^ 0x80);
         return 2;
     }
     else if (c < 0xf0) {
@@ -50,16 +50,15 @@ static int utf8_mbtowc(tjs_char* pwc, const unsigned char* s, int n)
         if (!((s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
               && (c >= 0xe1 || s[1] >= 0xa0)))
             return -1;
-        *pwc = ((tjs_char)(c & 0x0f) << 12)
-               | ((tjs_char)(s[1] ^ 0x80) << 6)
-               | (tjs_char)(s[2] ^ 0x80);
+        *pwc = ((tjs_wchar)(c & 0x0f) << 12) | ((tjs_wchar)(s[1] ^ 0x80) << 6) |
+               (tjs_wchar)(s[2] ^ 0x80);
         return 3;
     }
     else
         return -1;
 }
 
-static int utf8_wctomb(unsigned char* r, tjs_char wc, int n)
+static int utf8_wctomb(unsigned char* r, tjs_wchar wc, int n)
 {
     int count;
     if (wc < 0x80)
@@ -70,10 +69,7 @@ static int utf8_wctomb(unsigned char* r, tjs_char wc, int n)
         count = 3;
     if (n < count)
         return -2;
-    switch (count) { /* note: code falls through cases! */
-            // 	case 6: r[5] = 0x80 | (wc & 0x3f); wc = wc >> 6; wc |= 0x4000000;
-            // 	case 5: r[4] = 0x80 | (wc & 0x3f); wc = wc >> 6; wc |= 0x200000;
-            // 	case 4: r[3] = 0x80 | (wc & 0x3f); wc = wc >> 6; wc |= 0x10000;
+    switch (count) {
         case 3: r[2] = 0x80 | (wc & 0x3f); wc = wc >> 6; wc |= 0x800;
         case 2: r[1] = 0x80 | (wc & 0x3f); wc = wc >> 6; wc |= 0xc0;
         case 1: r[0] = (unsigned char)wc;
@@ -105,7 +101,7 @@ tjs_int TJS_atoi(const tjs_char* s)
     bool sign = false;
     while (*s && *s <= 0x20) s++; // skip spaces
     if (!*s) return 0;
-    if (*s == TJS_W('-'))
+    if (*s == TJS_N('-'))
     {
         sign = true;
         s++;
@@ -113,10 +109,10 @@ tjs_int TJS_atoi(const tjs_char* s)
         if (!*s) return 0;
     }
 
-    while (*s >= TJS_W('0') && *s <= TJS_W('9'))
+    while (*s >= TJS_N('0') && *s <= TJS_N('9'))
     {
         r *= 10;
-        r += *s - TJS_W('0');
+        r += *s - TJS_N('0');
         s++;
     }
     if (sign) r = -r;
@@ -129,7 +125,7 @@ tjs_int64 TJS_atoll(const tjs_char* s)
     bool sign = false;
     while (*s && *s <= 0x20) s++; // skip spaces
     if (!*s) return 0;
-    if (*s == TJS_W('-'))
+    if (*s == TJS_N('-'))
     {
         sign = true;
         s++;
@@ -137,10 +133,10 @@ tjs_int64 TJS_atoll(const tjs_char* s)
         if (!*s) return 0;
     }
 
-    while (*s >= TJS_W('0') && *s <= TJS_W('9'))
+    while (*s >= TJS_N('0') && *s <= TJS_N('9'))
     {
         r *= 10;
-        r += *s - TJS_W('0');
+        r += *s - TJS_N('0');
         s++;
     }
     if (sign) r = -r;
@@ -151,7 +147,7 @@ tjs_char* TJS_int_to_str(tjs_int value, tjs_char* string)
 {
     tjs_char* ostring = string;
 
-    if (value < 0) *(string++) = TJS_W('-'), value = -value;
+    if (value < 0) *(string++) = TJS_N('-'), value = -value;
 
     tjs_char buf[40];
 
@@ -159,7 +155,7 @@ tjs_char* TJS_int_to_str(tjs_int value, tjs_char* string)
 
     do
     {
-        *(p++) = (value % 10) + TJS_W('0');
+        *(p++) = (value % 10) + TJS_N('0');
         value /= 10;
     } while (value);
 
@@ -175,13 +171,13 @@ tjs_char* TJS_tTVInt_to_str(tjs_int64 value, tjs_char* string)
     if (value == TJS_UI64_VAL(0x8000000000000000))
     {
         // this is a special number which we must avoid normal conversion
-        TJS_strcpy(string, TJS_W("-9223372036854775808"));
+        TJS_strcpy(string, TJS_N("-9223372036854775808"));
         return string;
     }
 
     tjs_char* ostring = string;
 
-    if (value < 0) *(string++) = TJS_W('-'), value = -value;
+    if (value < 0) *(string++) = TJS_N('-'), value = -value;
 
     tjs_char buf[40];
 
@@ -189,7 +185,7 @@ tjs_char* TJS_tTVInt_to_str(tjs_int64 value, tjs_char* string)
 
     do
     {
-        *(p++) = (value % 10) + TJS_W('0');
+        *(p++) = (value % 10) + TJS_N('0');
         value /= 10;
     } while (value);
 
@@ -205,8 +201,8 @@ tjs_int TJS_strnicmp(const tjs_char* s1, const tjs_char* s2,
 {
     while (maxlen--)
     {
-        if (*s1 == TJS_W('\0')) return (*s2 == TJS_W('\0')) ? 0 : -1;
-        if (*s2 == TJS_W('\0')) return (*s1 == TJS_W('\0')) ? 0 : 1;
+        if (*s1 == TJS_N('\0')) return (*s2 == TJS_N('\0')) ? 0 : -1;
+        if (*s2 == TJS_N('\0')) return (*s1 == TJS_N('\0')) ? 0 : 1;
         if (*s1 < *s2) return -1;
         if (*s1 > *s2) return 1;
         s1++;
@@ -224,10 +220,10 @@ tjs_int TJS_stricmp(const tjs_char* s1, const tjs_char* s2)
     for (;;)
     {
         tjs_char c1 = *s1, c2 = *s2;
-        if (c1 >= TJS_W('a') && c1 <= TJS_W('z')) c1 += TJS_W('Z') - TJS_W('z');
-        if (c2 >= TJS_W('a') && c2 <= TJS_W('z')) c2 += TJS_W('Z') - TJS_W('z');
-        if (c1 == TJS_W('\0')) return (c2 == TJS_W('\0')) ? 0 : -1;
-        if (c2 == TJS_W('\0')) return (c1 == TJS_W('\0')) ? 0 : 1;
+        if (c1 >= TJS_N('a') && c1 <= TJS_N('z')) c1 += TJS_N('Z') - TJS_N('z');
+        if (c2 >= TJS_N('a') && c2 <= TJS_N('z')) c2 += TJS_N('Z') - TJS_N('z');
+        if (c1 == TJS_N('\0')) return (c2 == TJS_N('\0')) ? 0 : -1;
+        if (c2 == TJS_N('\0')) return (c1 == TJS_N('\0')) ? 0 : 1;
         if (c1 < c2) return -1;
         if (c1 > c2) return 1;
         s1++;
@@ -316,12 +312,12 @@ void TJS_debug_out(const tjs_char* format, ...)
 //---------------------------------------------------------------------------
 #define TJS_MB_MAX_CHARLEN 2
 //---------------------------------------------------------------------------
-size_t TJS_mbstowcs(tjs_char* pwcs, const tjs_nchar* s, size_t n)
+size_t TJS_mbstowcs(tjs_wchar* pwcs, const tjs_char* s, size_t n)
 {
     if (!s) return -1;
     if (pwcs && n == 0) return 0;
 
-    tjs_char wc;
+    tjs_wchar wc;
     size_t count = 0;
     int cl;
     if (!pwcs) {
@@ -336,7 +332,7 @@ size_t TJS_mbstowcs(tjs_char* pwcs, const tjs_nchar* s, size_t n)
         }
     }
     else {
-        tjs_char* pwcsend = pwcs + n;
+        tjs_wchar* pwcsend = pwcs + n;
         n = strlen(s);
         while (*s && pwcs < pwcsend) {
             cl = utf8_mbtowc(&wc, (const unsigned char*)s, (int)n);
@@ -351,7 +347,7 @@ size_t TJS_mbstowcs(tjs_char* pwcs, const tjs_nchar* s, size_t n)
     return count;
 }
 
-size_t TJS_wcstombs(tjs_nchar* s, const tjs_char* pwcs, size_t n)
+size_t TJS_wcstombs(tjs_char* s, const tjs_wchar* pwcs, size_t n)
 {
     if (!pwcs) return -1;
     if (s && !n) return 0;
@@ -370,7 +366,7 @@ size_t TJS_wcstombs(tjs_nchar* s, const tjs_char* pwcs, size_t n)
         return count;
     }
     else {
-        tjs_nchar* d = s;
+        tjs_char* d = s;
         while (*pwcs && n > 0) {
             cl = utf8_wctomb((unsigned char*)d, *pwcs, (int)n);
             if (cl <= 0)
@@ -383,7 +379,7 @@ size_t TJS_wcstombs(tjs_nchar* s, const tjs_char* pwcs, size_t n)
     }
 }
 // 使われていないようなので未確認注意
-int TJS_mbtowc(tjs_char* pwc, const tjs_nchar* s, size_t n)
+int TJS_mbtowc(tjs_wchar* pwc, const tjs_char* s, size_t n)
 {
     if (!s || !n) return 0;
 
@@ -392,7 +388,7 @@ int TJS_mbtowc(tjs_char* pwc, const tjs_nchar* s, size_t n)
         if (pwc) *pwc = 0;
         return 0;
     }
-    tjs_char wc;
+    tjs_wchar wc;
     int ret = utf8_mbtowc(&wc, (const unsigned char*)s, (int)n);
     if (ret >= 0) {
         *pwc = wc;
@@ -400,45 +396,721 @@ int TJS_mbtowc(tjs_char* pwc, const tjs_nchar* s, size_t n)
     return ret;
 }
 // 使われていないようなので未確認注意
-int TJS_wctomb(tjs_nchar* s, tjs_char wc)
+int TJS_wctomb(tjs_char* s, tjs_wchar wc)
 {
     if (!s) return 0;
-    tjs_char tmp[2] = { wc, 0 };
+    tjs_wchar tmp[2] = { wc, 0 };
     return utf8_wctomb((unsigned char*)s, wc, 2);
 }
 //---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
-// tTJSNarrowStringHolder
-//---------------------------------------------------------------------------
-tTJSNarrowStringHolder::tTJSNarrowStringHolder(const tjs_char* wide)
+tjs_int64 TVPWideCharToUtf8(tjs_wchar in, char * out)
 {
-    int n;
-    if (!wide)
-        n = -1;
-    else
-        n = (int)TJS_wcstombs(NULL, wide, 0);
-
-    if (n == -1)
+    // convert a wide character 'in' to utf-8 character 'out'
+    if     (in < (1<< 7))
     {
-        Buf = NULL;
-        Allocated = false;
-        return;
+        if(out)
+        {
+            out[0] = (char)in;
+        }
+        return 1;
     }
-    Buf = new tjs_nchar[n + 1];
-    Allocated = true;
-    Buf[TJS_wcstombs(Buf, wide, n)] = 0;
-}
-
-tTJSNarrowStringHolder::~tTJSNarrowStringHolder()
-{
-    if (Allocated) delete[] Buf;
+    else if(in < (1<<11))
+    {
+        if(out)
+        {
+            out[0] = (char)(0xc0 | (in >> 6));
+            out[1] = (char)(0x80 | (in & 0x3f));
+        }
+        return 2;
+    }
+    else
+    {
+        if(out)
+        {
+            out[0] = (char)(0xe0 | (in >> 12));
+            out[1] = (char)(0x80 | ((in >> 6) & 0x3f));
+            out[2] = (char)(0x80 | (in & 0x3f));
+        }
+        return 3;
+    }
 }
 //---------------------------------------------------------------------------
+tjs_int64 TVPWideCharToUtf8String(const tjs_wchar* in, char* out, size_t max_len)
+{
+    if (max_len <= 0)
+    {
+        // convert input wide string to output utf-8 string
+        int count = 0;
+        while (*in)
+        {
+            tjs_int n;
+            if (out)
+            {
+                n = TVPWideCharToUtf8(*in, out);
+                out += n;
+            }
+            else
+            {
+                n = TVPWideCharToUtf8(*in, NULL);
+                /*
+                        in this situation, the compiler's inliner
+                        will collapse all null check parts in
+                        TVPWideCharToUtf8.
+                */
+            }
+            if (n == -1)
+                return -1; // invalid character found
+            count += n;
+            in++;
+        }
+        return count;
+    }
+    else
+    {
+        tjs_int64 total_bytes = 0;
+        size_t in_pos = 0;
 
+        while (in[in_pos] && (max_len == 0 || in_pos < max_len))
+        {
+            uint32_t codepoint = in[in_pos];
+            if (codepoint >= 0xD800 && codepoint <= 0xDBFF)
+            {
+                if (in[in_pos + 1] >= 0xDC00 && in[in_pos + 1] <= 0xDFFF)
+                {
+                    codepoint = 0x10000 + ((codepoint - 0xD800) << 10) + (in[in_pos + 1] - 0xDC00);
+                    in_pos++;
+                }
+                else
+                {
+                    codepoint = 0xFFFD;
+                }
+            }
+            else if (codepoint >= 0xDC00 && codepoint <= 0xDFFF)
+            {
+                codepoint = 0xFFFD;
+            }
+            if (codepoint <= 0x7F)
+            {
+                if (out)
+                {
+                    out[total_bytes] = static_cast<char>(codepoint);
+                }
+                total_bytes += 1;
+            }
+            else if (codepoint <= 0x7FF)
+            {
+                if (out)
+                {
+                    out[total_bytes] = static_cast<char>(0xC0 | ((codepoint >> 6) & 0x1F));
+                    out[total_bytes + 1] = static_cast<char>(0x80 | (codepoint & 0x3F));
+                }
+                total_bytes += 2;
+            }
+            else if (codepoint <= 0xFFFF)
+            {
+                if (out)
+                {
+                    out[total_bytes] = static_cast<char>(0xE0 | ((codepoint >> 12) & 0x0F));
+                    out[total_bytes + 1] = static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+                    out[total_bytes + 2] = static_cast<char>(0x80 | (codepoint & 0x3F));
+                }
+                total_bytes += 3;
+            }
+            else if (codepoint <= 0x10FFFF)
+            {
+                if (out)
+                {
+                    out[total_bytes] = static_cast<char>(0xF0 | ((codepoint >> 18) & 0x07));
+                    out[total_bytes + 1] = static_cast<char>(0x80 | ((codepoint >> 12) & 0x3F));
+                    out[total_bytes + 2] = static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+                    out[total_bytes + 3] = static_cast<char>(0x80 | (codepoint & 0x3F));
+                }
+                total_bytes += 4;
+            }
 
+            in_pos++;
+        }
+        return total_bytes;
+    }
+}
+//---------------------------------------------------------------------------
+static bool inline TVPUtf8ToWideChar(const char * & in, tjs_wchar *out)
+{
+    // convert a utf-8 charater from 'in' to wide charater 'out'
+    const unsigned char * & p = (const unsigned char * &)in;
+    if(p[0] < 0x80)
+    {
+        if(out) *out = (tjs_wchar)in[0];
+        in++;
+        return true;
+    }
+    else if(p[0] < 0xc2)
+    {
+        // invalid character
+        return false;
+    }
+    else if(p[0] < 0xe0)
+    {
+        // two bytes (11bits)
+        if((p[1] & 0xc0) != 0x80) return false;
+        if(out) *out = ((p[0] & 0x1f) << 6) + (p[1] & 0x3f);
+        in += 2;
+        return true;
+    }
+    else if(p[0] < 0xf0)
+    {
+        // three bytes (16bits)
+        if((p[1] & 0xc0) != 0x80) return false;
+        if((p[2] & 0xc0) != 0x80) return false;
+        if(out) *out = ((p[0] & 0x1f) << 12) + ((p[1] & 0x3f) << 6) + (p[2] & 0x3f);
+        in += 3;
+        return true;
+    }
+    else if(p[0] < 0xf8)
+    {
+        // four bytes (21bits)
+        if((p[1] & 0xc0) != 0x80) return false;
+        if((p[2] & 0xc0) != 0x80) return false;
+        if((p[3] & 0xc0) != 0x80) return false;
+        if(out) *out = ((p[0] & 0x07) << 18) + ((p[1] & 0x3f) << 12) +
+                   ((p[2] & 0x3f) << 6) + (p[3] & 0x3f);
+        in += 4;
+        return true;
+    }
+    else if(p[0] < 0xfc)
+    {
+        // five bytes (26bits)
+        if((p[1] & 0xc0) != 0x80) return false;
+        if((p[2] & 0xc0) != 0x80) return false;
+        if((p[3] & 0xc0) != 0x80) return false;
+        if((p[4] & 0xc0) != 0x80) return false;
+        if(out) *out = ((p[0] & 0x03) << 24) + ((p[1] & 0x3f) << 18) +
+                   ((p[2] & 0x3f) << 12) + ((p[3] & 0x3f) << 6) + (p[4] & 0x3f);
+        in += 5;
+        return true;
+    }
+    else if(p[0] < 0xfe)
+    {
+        // six bytes (31bits)
+        if((p[1] & 0xc0) != 0x80) return false;
+        if((p[2] & 0xc0) != 0x80) return false;
+        if((p[3] & 0xc0) != 0x80) return false;
+        if((p[4] & 0xc0) != 0x80) return false;
+        if((p[5] & 0xc0) != 0x80) return false;
+        if(out) *out = ((p[0] & 0x01) << 30) + ((p[1] & 0x3f) << 24) +
+                   ((p[2] & 0x3f) << 18) + ((p[3] & 0x3f) << 12) +
+                   ((p[4] & 0x3f) << 6) + (p[5] & 0x3f);
+        in += 6;
+        return true;
+    }
+    return false;
+}
+//---------------------------------------------------------------------------
+bool TVP_utf8_to_utf16(const char* in, tjs_wchar* out)
+{
+    const unsigned char* p = (const unsigned char*)in;
+    if (p[0] < 0x80)
+    {
+        if (out)
+            *out = (tjs_wchar)in[0];
+        return true;
+    }
+    else if (p[0] < 0xc2)
+    {
+        // invalid character
+        return false;
+    }
+    else if (p[0] < 0xe0)
+    {
+        // two bytes (11bits)
+        if ((p[1] & 0xc0) != 0x80)
+            return false;
+        if (out)
+            *out = ((p[0] & 0x1f) << 6) + (p[1] & 0x3f);
+        return true;
+    }
+    else if (p[0] < 0xf0)
+    {
+        // three bytes (16bits)
+        if ((p[1] & 0xc0) != 0x80)
+            return false;
+        if ((p[2] & 0xc0) != 0x80)
+            return false;
+        if (out)
+            *out = ((p[0] & 0x1f) << 12) + ((p[1] & 0x3f) << 6) + (p[2] & 0x3f);
+        return true;
+    }
+    else if (p[0] < 0xf8)
+    {
+        // four bytes (21bits)
+        if ((p[1] & 0xc0) != 0x80)
+            return false;
+        if ((p[2] & 0xc0) != 0x80)
+            return false;
+        if ((p[3] & 0xc0) != 0x80)
+            return false;
+        if (out)
+            *out = ((p[0] & 0x07) << 18) + ((p[1] & 0x3f) << 12) + ((p[2] & 0x3f) << 6) +
+                   (p[3] & 0x3f);
+        return true;
+    }
+    else if (p[0] < 0xfc)
+    {
+        // five bytes (26bits)
+        if ((p[1] & 0xc0) != 0x80)
+            return false;
+        if ((p[2] & 0xc0) != 0x80)
+            return false;
+        if ((p[3] & 0xc0) != 0x80)
+            return false;
+        if ((p[4] & 0xc0) != 0x80)
+            return false;
+        if (out)
+            *out = ((p[0] & 0x03) << 24) + ((p[1] & 0x3f) << 18) + ((p[2] & 0x3f) << 12) +
+                   ((p[3] & 0x3f) << 6) + (p[4] & 0x3f);
+        return true;
+    }
+    else if (p[0] < 0xfe)
+    {
+        // six bytes (31bits)
+        if ((p[1] & 0xc0) != 0x80)
+            return false;
+        if ((p[2] & 0xc0) != 0x80)
+            return false;
+        if ((p[3] & 0xc0) != 0x80)
+            return false;
+        if ((p[4] & 0xc0) != 0x80)
+            return false;
+        if ((p[5] & 0xc0) != 0x80)
+            return false;
+        if (out)
+            *out = ((p[0] & 0x01) << 30) + ((p[1] & 0x3f) << 24) + ((p[2] & 0x3f) << 18) +
+                   ((p[3] & 0x3f) << 12) + ((p[4] & 0x3f) << 6) + (p[5] & 0x3f);
+        return true;
+    }
+    return false;
+}
+//---------------------------------------------------------------------------
+tjs_int64 TVPUtf8ToWideCharString(const char* in, tjs_wchar* out)
+{
+    // convert input utf-8 string to output wide string
+    int count = 0;
+    while(*in)
+    {
+        tjs_wchar c;
+        if(out)
+        {
+            if(!TVPUtf8ToWideChar(in, &c))
+                return -1; // invalid character found
+            *out++ = c;
+        }
+        else
+        {
+            if(!TVPUtf8ToWideChar(in, NULL))
+                return -1; // invalid character found
+        }
+        count ++;
+    }
+    return count;
+}
+//---------------------------------------------------------------------------
+tjs_int64 TVPUtf8ToWideCharString(const char* in, tjs_uint length, tjs_wchar* out)
+{
+    // convert input utf-8 string to output wide string
+    int count = 0;
+    const char *end = in + length;
+    while(*in && in < end)
+    {
+        if(in + 6 > end)
+        {
+            // fetch utf-8 character length
+            const unsigned char ch = *(const unsigned char *)in;
+
+            if(ch >= 0x80)
+            {
+                tjs_uint len = 0;
+
+                if(ch < 0xc2) return -1;
+                else if(ch < 0xe0) len = 2;
+                else if(ch < 0xf0) len = 3;
+                else if(ch < 0xf8) len = 4;
+                else if(ch < 0xfc) len = 5;
+                else if(ch < 0xfe) len = 6;
+                else return -1;
+
+                if(in + len > end) return -1;
+            }
+        }
+
+        tjs_wchar c;
+        if(out)
+        {
+            if(!TVPUtf8ToWideChar(in, &c))
+                return -1; // invalid character found
+            *out++ = c;
+        }
+        else
+        {
+            if(!TVPUtf8ToWideChar(in, NULL))
+                return -1; // invalid character found
+        }
+        count ++;
+    }
+    return count;
+}
+//---------------------------------------------------------------------------
+std::vector<uint32_t> decodeUTF8ToTTF(const char* utf8_str)
+{
+    std::vector<uint32_t> codepoints;
+    const unsigned char* str = reinterpret_cast<const unsigned char*>(utf8_str);
+    while (*str)
+    {
+        uint32_t codepoint = 0;
+        if ((*str & 0x80) == 0)
+        {
+            codepoint = *str;
+            str += 1;
+        }
+        else if ((*str & 0xE0) == 0xC0)
+        {
+            codepoint = (*str & 0x1F) << 6;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F);
+            str += 1;
+        }
+        else if ((*str & 0xF0) == 0xE0)
+        {
+            codepoint = (*str & 0x0F) << 12;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F) << 6;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F);
+            str += 1;
+        }
+        else if ((*str & 0xF8) == 0xF0)
+        {
+            codepoint = (*str & 0x07) << 18;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F) << 12;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F) << 6;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F);
+            str += 1;
+        }
+        else
+        {
+            break;
+        }
+        codepoints.push_back(codepoint);
+    }
+    return codepoints;
+}
+//---------------------------------------------------------------------------
+std::vector<tjs_wchar> decodeUTF8ToTTFe(const char* utf8_str)
+{
+    std::vector<tjs_wchar> codepoints;
+    const unsigned char* str = reinterpret_cast<const unsigned char*>(utf8_str);
+    while (*str)
+    {
+        tjs_wchar codepoint = 0;
+        if ((*str & 0x80) == 0)
+        {
+            codepoint = *str;
+            str += 1;
+        }
+        else if ((*str & 0xE0) == 0xC0)
+        {
+            codepoint = (*str & 0x1F) << 6;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F);
+            str += 1;
+        }
+        else if ((*str & 0xF0) == 0xE0)
+        {
+            codepoint = (*str & 0x0F) << 12;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F) << 6;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F);
+            str += 1;
+        }
+        else if ((*str & 0xF8) == 0xF0)
+        {
+            codepoint = (*str & 0x07) << 18;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F) << 12;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F) << 6;
+            str += 1;
+            if ((*str & 0xC0) != 0x80)
+                break;
+            codepoint |= (*str & 0x3F);
+            str += 1;
+        }
+        else
+        {
+            break;
+        }
+        codepoints.push_back(codepoint);
+    }
+    return codepoints;
+}
+//---------------------------------------------------------------------------
+tjs_int64 utf8_char_len(const char* str)
+{
+    if (!str || !*str)
+        return 0;
+    unsigned char c = *reinterpret_cast<const unsigned char*>(str);
+    if ((c & 0x80) == 0)
+        return 1;
+    if ((c & 0xE0) == 0xC0)
+        return 2;
+    if ((c & 0xF0) == 0xE0)
+        return 3;
+    if ((c & 0xF8) == 0xF0)
+        return 4;
+    return 0;
+}
+//---------------------------------------------------------------------------
+tjs_int64 utf8_chars_len(const char* str)
+{
+    tjs_int count = 0;
+    for (const unsigned char* p = (const unsigned char*)str; *p; p++)
+        count += ((*p & 0xC0) != 0x80);
+    return count;
+}
+//---------------------------------------------------------------------------
+tjs_int64 utf8_indexOf(const char* data, const char* chs, int startpos)
+{
+    if (!data || !chs || startpos < 0)
+        return -1;
+    if (!*chs)
+        return startpos;
+    const unsigned char* data_ptr = reinterpret_cast<const unsigned char*>(data);
+    const unsigned char* search_ptr = reinterpret_cast<const unsigned char*>(chs);
+    int search_bytes = std::strlen(chs);
+    int search_chars = utf8_chars_len(chs);
+    if (search_bytes == 0)
+        return startpos;
+
+    int data_char_index = 0;
+    const unsigned char* data_start = data_ptr;
+    while (*data_ptr)
+    {
+        if (data_char_index < startpos)
+        {
+            int len = utf8_char_len(reinterpret_cast<const char*>(data_ptr));
+            if (len == 0)
+                len = 1;
+            data_ptr += len;
+            data_char_index++;
+            continue;
+        }
+        if (strlen(reinterpret_cast<const char*>(data_ptr)) < search_bytes)
+        {
+            return -1;
+        }
+        if (std::memcmp(data_ptr, search_ptr, search_bytes) == 0)
+        {
+            return data_char_index;
+        }
+        int len = utf8_char_len(reinterpret_cast<const char*>(data_ptr));
+        if (len == 0)
+            len = 1;
+        data_ptr += len;
+        data_char_index++;
+    }
+    return -1;
+}
+//---------------------------------------------------------------------------
+const char* utf8_substr(const char* data, int start, int len, int& retLen)
+{
+    if (!data || start < 0)
+    {
+        retLen = 0;
+        return NULL;
+    }
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(data);
+    int char_index = 0;
+    const unsigned char* start_ptr = NULL;
+    while (*p)
+    {
+        if (char_index == start)
+        {
+            start_ptr = p;
+            break;
+        }
+
+        int clen = utf8_char_len(reinterpret_cast<const char*>(p));
+        if (clen == 0)
+            clen = 1;
+        p += clen;
+        char_index++;
+    }
+    if (!start_ptr)
+    {
+        retLen = 0;
+        return NULL;
+    }
+
+    
+    int bytes = 0;
+    if (len < 0)
+    {
+        bytes = std::strlen(reinterpret_cast<const char*>(p));
+    }
+    else
+    {
+        p = start_ptr;
+        int taken = 0;
+        while (*p && taken < len)
+        {
+            int clen = utf8_char_len(reinterpret_cast<const char*>(p));
+            if (clen == 0)
+                clen = 1;
+            bytes += clen;
+            p += clen;
+            taken++;
+        }
+    }
+    retLen = bytes;
+    return reinterpret_cast<const char*>(start_ptr);
+}
+//---------------------------------------------------------------------------
+void utf8_reverse(const char* data, char* outputdata)
+{
+    if (!data || !outputdata)
+        return;
+    std::vector<const char*> char_pointers;
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(data);
+    while (*p)
+    {
+        char_pointers.push_back(reinterpret_cast<const char*>(p));
+        int len = utf8_char_len(reinterpret_cast<const char*>(p));
+        if (len == 0)
+            len = 1;
+        p += len;
+    }
+
+    // 反向复制字符
+    char* t = outputdata;
+    for (int i = char_pointers.size() - 1; i >= 0; i--)
+    {
+        const char* src = char_pointers[i];
+        int len = utf8_char_len(src);
+        if (len == 0)
+            len = 1;
+        for (int j = 0; j < len; j++)
+        {
+            *t++ = src[j];
+        }
+    }
+    *t = '\0';
+}
+//---------------------------------------------------------------------------
+const char* utf8_char_get(const char* str, int idx)
+{
+    if (!str || idx < 0)
+        return NULL;
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(str);
+    int current_idx = 0;
+    while (*p)
+    {
+        if (current_idx == idx)
+        {
+            return reinterpret_cast<const char*>(p);
+        }
+        if ((*p & 0x80) == 0)
+        {
+            p += 1;
+        }
+        else if ((*p & 0xE0) == 0xC0)
+        {
+            p += 2;
+        }
+        else if ((*p & 0xF0) == 0xE0)
+        {
+            p += 3;
+        }
+        else if ((*p & 0xF8) == 0xF0)
+        {
+            p += 4;
+        }
+        else
+        {
+            p++;
+        }
+        current_idx++;
+    }
+    return NULL;
+}
+//---------------------------------------------------------------------------
+bool TJS_iswspace(const char* chs)
+{
+    unsigned char c = *reinterpret_cast<const unsigned char*>(chs);
+    if ((c & 0x80) == 0) {
+        bool is_ascii_space = (c == ' ' || c == '\t' || c == '\n' ||
+                               c == '\r' || c == '\f' || c == '\v');
+        if (is_ascii_space) {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+//---------------------------------------------------------------------------
+bool TJS_iswdigit(const char* chs)
+{
+    unsigned char c = *reinterpret_cast<const unsigned char*>(chs);
+    if ((c & 0x80) == 0) {
+        if (c >= '0' && c <= '9') {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+//---------------------------------------------------------------------------
+tjs_int TJS_iswalpha(const char* chs)
+{
+    unsigned char c = *reinterpret_cast<const unsigned char*>(chs);
+
+    if ((c & 0x80) == 0) {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            return 1;
+        }
+        return 0;
+    }
+    int len = 0;
+    if ((c & 0xE0) == 0xC0) len = 2;
+    else if ((c & 0xF0) == 0xE0) len = 3;
+    else if ((c & 0xF8) == 0xF0) len = 4;
+    return len;
+}
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 // native debugger break point
@@ -521,31 +1193,12 @@ void TJSRestoreFPUE()
 
 int TJS_strcmp(const tjs_char* src, const tjs_char* dst)
 {
-    int ret = 0;
-
-    while (!(ret = (int)(*src - *dst)) && *dst)
-        ++src, ++dst;
-
-    if (ret < 0)
-        ret = -1;
-    else if (ret > 0)
-        ret = 1;
-
-    return(ret);
+    return strcmp(src, dst);
 }
 
 int TJS_strncmp( const tjs_char* first, const tjs_char* last, size_t count)
 {
-    if (!count)
-        return(0);
-
-    while (--count && *first && *first == *last)
-    {
-        first++;
-        last++;
-    }
-
-    return((int)(*first - *last));
+    return strncmp(first, last, count);
 }
 
 tjs_char* TJS_strncpy(tjs_char* dest, const tjs_char* source, size_t count)
@@ -557,7 +1210,7 @@ tjs_char* TJS_strncpy(tjs_char* dest, const tjs_char* source, size_t count)
 
     if (count)                              /* pad out with zeroes */
         while (--count)
-            *dest++ = L'\0';
+            *dest++ = '\0';
 
     return(start);
 }
@@ -846,37 +1499,23 @@ done:
     return fraction;
 }
 
-extern std::string TVP_codecvt_utf8_utf16(const tjs_char* indata);
-extern std::u16string TVP_codecvt_utf16_utf8(const char* indata);
 size_t TJS_strftime(tjs_char* wstring, size_t maxsize, const tjs_char* wformat, const tm* timeptr)
 {
-    std::string formatStr = TVP_codecvt_utf8_utf16(wformat);
-    char buffer[256];
-    strftime(buffer, sizeof(buffer), formatStr.c_str(), timeptr);
-    std::u16string ret = TVP_codecvt_utf16_utf8(buffer);
-    size_t retLen = ret.size() > maxsize ? maxsize : ret.size();
-    memcpy(wstring, ret.data(), retLen);
-    return retLen;
+    return strftime(wstring, maxsize, wformat, timeptr);
 }
 
 int TJS_vsnprintf(tjs_char* string, size_t count, const tjs_char* format, va_list ap)
 {
     try {
-        // 字符体系会改的，先这样凑合着用吧
-        std::string format_utf8 = TVP_codecvt_utf8_utf16(format);
-        std::string buffer(count * 4, '\0');
         va_list ap_copy;
         va_copy(ap_copy, ap);
-        int result = std::vsnprintf(buffer.data(), buffer.size(), format_utf8.c_str(), ap_copy);
+        int result = std::vsnprintf(string, count, format, ap_copy);
         va_end(ap_copy);
-        if (result < 0 || static_cast<size_t>(result) >= buffer.size()) {
+        if (result < 0 || static_cast<size_t>(result) >= count)
+        {
             return 0;
         }
-        std::u16string result_utf16 = TVP_codecvt_utf16_utf8(buffer.c_str());
-        size_t copy_len = std::min<size_t>(result_utf16.size(), count - 1);
-        std::copy_n(result_utf16.c_str(), copy_len, string);
-        string[copy_len] = u'\0';
-        return static_cast<int>(result_utf16.size());
+        return result;
     } catch (...) {
         return 0;
     }

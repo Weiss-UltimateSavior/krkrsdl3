@@ -1182,7 +1182,7 @@ public:
 	virtual ~tTVPRippleTransHandler()
 	{
 #ifdef TVP_DEBUG_RIPPLE_SHOW_UPDATE_COUNT
-		TVPAddLog(TJS_W("ripple update count : ") + ttstr(UpdateCount));
+		TVPAddLog(TJS_N("ripple update count : ") + ttstr(UpdateCount));
 #endif
 		Table->Release();
 	}
@@ -1551,7 +1551,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
-		if(name) *name = TJS_W("ripple");
+		if(name) *name = TJS_N("ripple");
 		return TJS_S_OK;
 	}
 
@@ -1589,47 +1589,47 @@ public:
 //		tjs_int rippletype = 0; // タイプ
 
 
-		if(TJS_FAILED(options->GetValue(TJS_W("time"), &tmp)))
+		if(TJS_FAILED(options->GetValue(TJS_N("time"), &tmp)))
 			return TJS_E_FAIL; // time 属性が指定されていない
 		if(tmp.Type() == tvtVoid) return TJS_E_FAIL;
 		time = (tjs_int64)tmp;
 		if(time < 2) time = 2; // あまり小さな数値を指定すると問題が起きるので
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("centerx"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("centerx"), &tmp)))
 			if(tmp.Type() != tvtVoid) centerx = (tjs_int)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("centery"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("centery"), &tmp)))
 			if(tmp.Type() != tvtVoid) centery = (tjs_int)tmp;
 
 		if(centerx < 0 || centery < 0 ||
 			(tjs_uint)centerx >= src1w || (tjs_uint)centery >= src1h)
-			TVPThrowExceptionMessage(TJS_W("centerx and centery cannot be out of the image"));
+			TVPThrowExceptionMessage(TJS_N("centerx and centery cannot be out of the image"));
 
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("rwidth"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("rwidth"), &tmp)))
 			if(tmp.Type() != tvtVoid) ripplewidth = (tjs_int)tmp;
 
 		if(ripplewidth != 16 && ripplewidth != 32 && ripplewidth != 64 &&
 			ripplewidth != 128)
-			TVPThrowExceptionMessage(TJS_W("rwidth must be 16, 32, 64 or 128"));
+			TVPThrowExceptionMessage(TJS_N("rwidth must be 16, 32, 64 or 128"));
 
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("roundness"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("roundness"), &tmp)))
 			if(tmp.Type() != tvtVoid) roundness = (float)(double)tmp;
 
 		if(roundness <= 0.0)
-			TVPThrowExceptionMessage(TJS_W("roundness cannot be nagative or equal to 0"));
+			TVPThrowExceptionMessage(TJS_N("roundness cannot be nagative or equal to 0"));
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("speed"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("speed"), &tmp)))
 			if(tmp.Type() != tvtVoid) speed = (float)(double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("maxdrift"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("maxdrift"), &tmp)))
 			if(tmp.Type() != tvtVoid) maxdrift = (tjs_int)tmp;
 		if(maxdrift < 0 || maxdrift >= 128)
-			TVPThrowExceptionMessage(TJS_W("maxdrift cannot be nagative or larger than 127"));
+			TVPThrowExceptionMessage(TJS_N("maxdrift cannot be nagative or larger than 127"));
 
 		if((tjs_uint)maxdrift >= src1w || (tjs_uint)maxdrift >= src1h)
-			TVPThrowExceptionMessage(TJS_W("maxdrift must be lesser than both image width and height"));
+			TVPThrowExceptionMessage(TJS_N("maxdrift must be lesser than both image width and height"));
 
 		// オブジェクトを作成
 		*handler = new tTVPRippleTransHandler(time, layertype,

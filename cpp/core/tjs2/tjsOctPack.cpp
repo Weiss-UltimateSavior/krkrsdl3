@@ -42,34 +42,34 @@ enum OctPackType {
 	OctPack_EOT
 };
 static const tjs_char OctPackChar[OctPack_EOT] = {
-	L'a',
-	L'A',
-	L'b',
-	L'B',
-	L'c',
-	L'C',
-	L'd',
-	L'f',
-	L'h',
-	L'H',
-	L'i',
-	L'I',
-	L'l',
-	L'L',
-	L'n',
-	L'N',
-	L'p',
-	L'P',
-	L's',
-	L'S',
-	L'v',
-	L'V',
-	L'u',
-	L'w',
-	L'x',
-	L'X',
-	L'@',
-	L'm',
+	'a',
+	'A',
+	'b',
+	'B',
+	'c',
+	'C',
+	'd',
+	'f',
+	'h',
+	'H',
+	'i',
+	'I',
+	'l',
+	'L',
+	'n',
+	'N',
+	'p',
+	'P',
+	's',
+	'S',
+	'v',
+	'V',
+	'u',
+	'w',
+	'x',
+	'X',
+	'@',
+	'm',
 };
 static bool OctPackMapInit = false;
 static std::map<tjs_char,tjs_int> OctPackMap;
@@ -87,14 +87,14 @@ struct OctPackTemplate {
 };
 static const tjs_char* ParseTemplateLength( OctPackTemplate& result, const tjs_char* c ) {
 	if( *c ) {
-		if( *c == L'*' ) {
+		if( *c == '*' ) {
 			c++;
 			result.Length = -1;	// tail list
-		} else if( *c >= L'0' && *c <= L'9' ) {
+		} else if( *c >= '0' && *c <= '9' ) {
 			tjs_int num = 0;
-			while( *c && ( *c >= L'0' && *c <= L'9' ) ) {
+			while( *c && ( *c >= '0' && *c <= '9' ) ) {
 				num *= 10;
-				num += *c - L'0';
+				num += *c - '0';
 				c++;
 			}
 			result.Length = num;
@@ -124,7 +124,7 @@ static void ParsePackTemplate( std::vector<OctPackTemplate>& result, const tjs_c
 		}
 	}
 }
-static void AsciiToBin( std::vector<tjs_uint8>& bin, const ttstr& arg, tjs_nchar fillchar, tjs_int len ) {
+static void AsciiToBin( std::vector<tjs_uint8>& bin, const ttstr& arg, tjs_char fillchar, tjs_int len ) {
 	const tjs_char* str = arg.c_str();
 	if( len < 0 ) len = arg.length();
 	tjs_int i = 0;
@@ -145,9 +145,9 @@ static void BitStringToBin( std::vector<tjs_uint8>& bin, const ttstr& arg, bool 
 	if( mtol ) {
 		pos = 7;
 		for( tjs_int i = 0; i < len && *str; str++, i++ ) {
-			if( *str == L'0' ) {
+			if( *str == '0' ) {
 				// val |= 0;
-			} else if( *str == L'1' ) {
+			} else if( *str == '1' ) {
 				val |= 1 << pos;
 			} else {
 				TJS_eTJSError( TJSUnknownBitStringCharacter );
@@ -165,9 +165,9 @@ static void BitStringToBin( std::vector<tjs_uint8>& bin, const ttstr& arg, bool 
 		}
 	} else {
 		for( tjs_int i = 0; i < len && *str; str++, i++ ) {
-			if( *str == L'0' ) {
+			if( *str == '0' ) {
 				// val |= 0;
-			} else if( *str == L'1' ) {
+			} else if( *str == '1' ) {
 				val |= 1 << pos;
 			} else {
 				TJS_eTJSError( TJSUnknownBitStringCharacter );
@@ -193,12 +193,12 @@ static void HexToBin( std::vector<tjs_uint8>& bin, const ttstr& arg, bool mtol, 
 	if( mtol ) { // 上位ニブルが先
 		pos = 1;
 		for( tjs_int i = 0; i < len && *str; str++, i++ ) {
-			if( *str >= L'0' && *str <= L'9' ) {
-				val |= (*str - L'0') << (pos*4);
-			} else if( *str >= L'a' && *str <= L'f' ) {
-				val |= (*str - L'a' + 10) << (pos*4);
-			} else if( *str >= L'A' && *str <= L'E' ) {
-				val |= (*str - L'A' + 10) << (pos*4);
+			if( *str >= '0' && *str <= '9' ) {
+				val |= (*str - '0') << (pos*4);
+			} else if( *str >= 'a' && *str <= 'f' ) {
+				val |= (*str - 'a' + 10) << (pos*4);
+			} else if( *str >= 'A' && *str <= 'E' ) {
+				val |= (*str - 'A' + 10) << (pos*4);
 			} else {
 				TJS_eTJSError( TJSUnknownHexStringCharacter  );
 			}
@@ -215,12 +215,12 @@ static void HexToBin( std::vector<tjs_uint8>& bin, const ttstr& arg, bool mtol, 
 		}
 	} else { // 下位ニブルが先
 		for( tjs_int i = 0; i < len && *str; str++, i++ ) {
-			if( *str >= L'0' && *str <= L'9' ) {
-				val |= (*str - L'0') << (pos*4);
-			} else if( *str >= L'a' && *str <= L'f' ) {
-				val |= (*str - L'a' + 10) << (pos*4);
-			} else if( *str >= L'A' && *str <= L'E' ) {
-				val |= (*str - L'A' + 10) << (pos*4);
+			if( *str >= '0' && *str <= '9' ) {
+				val |= (*str - '0') << (pos*4);
+			} else if( *str >= 'a' && *str <= 'f' ) {
+				val |= (*str - 'a' + 10) << (pos*4);
+			} else if( *str >= 'A' && *str <= 'E' ) {
+				val |= (*str - 'A' + 10) << (pos*4);
 			} else {
 				TJS_eTJSError( TJSUnknownHexStringCharacter  );
 			}
@@ -344,11 +344,11 @@ static void decodeBase64( const ttstr& inbuf, std::vector<tjs_uint8>& outbuf ) {
 	outbuf.push_back( static_cast<tjs_uint8>( (base64tonum[data[dptr]] << 2) | (base64tonum[data[dptr+1]] >> 4) )) ;
 	dptr++;
 	tjs_uint8 tmp = static_cast<tjs_uint8>( base64tonum[data[dptr++]] << 4 );
-	if( data[dptr] != L'=' ) {
+	if( data[dptr] != '=' ) {
 		tmp |= base64tonum[data[dptr]] >> 2;
 		outbuf.push_back( tmp );
 		tmp =  base64tonum[data[dptr++]] << 6;
-		if( data[dptr] != L'=' ) {
+		if( data[dptr] != '=' ) {
 			tmp |= base64tonum[data[dptr]];
 			outbuf.push_back( tmp );
 		}
@@ -469,15 +469,14 @@ static tTJSVariantOctet* Pack( const std::vector<OctPackTemplate>& templ, const 
 }
 
 static void BinToAscii( const tjs_uint8 *data, const tjs_uint8 *tail, tjs_uint len, ttstr& result ) {
-	//std::vector<tjs_nchar> tmp(len+1);
-	std::vector<tjs_nchar> tmp;
+	std::vector<tjs_char> tmp;
 	tmp.reserve(len+1);
 	for( tjs_int i = 0; i < static_cast<tjs_int>(len) && data != tail; data++, i++ ) {
 		if( (*data) != '\0' ) {
-			tmp.push_back( (tjs_nchar)*data );
+			tmp.push_back( (tjs_char)*data );
 		}
 	}
-	tmp.push_back( (tjs_nchar)'\0' );
+	tmp.push_back( (tjs_char)'\0' );
 	result = tTJSString( &(tmp[0]) );
 }
 // mtol : true : 上位ビットから下位ビット, false : 下位ビットから上位ビット
@@ -491,9 +490,9 @@ static void BinToBitString( const tjs_uint8 *data, const tjs_uint8 *tail, tjs_ui
 		for( ; data < tail; data++ ) {
 			for( tjs_int i = 0; i < 8 && pos < static_cast<tjs_int>(len); i++, pos++ ) {
 				if( (*data)&(0x01<<(7-i)) ) {
-					tmp.push_back( L'1' );
+					tmp.push_back( '1' );
 				} else {
-					tmp.push_back( L'0' );
+					tmp.push_back( '0' );
 				}
 			}
 			if( pos >= static_cast<tjs_int>(len) ) break;
@@ -502,15 +501,15 @@ static void BinToBitString( const tjs_uint8 *data, const tjs_uint8 *tail, tjs_ui
 		for( ; data < tail; data++ ) {
 			for( tjs_int i = 0; i < 8 && pos < static_cast<tjs_int>(len); i++, pos++ ) {
 				if( (*data)&(0x01<<i) ) {
-					tmp.push_back( L'1' );
+					tmp.push_back( '1' );
 				} else {
-					tmp.push_back( L'0' );
+					tmp.push_back( '0' );
 				}
 			}
 			if( pos >= static_cast<tjs_int>(len) ) break;
 		}
 	}
-	tmp.push_back( L'\0' );
+	tmp.push_back( '\0' );
 	result = tTJSString( &(tmp[0]) );
 }
 
@@ -596,9 +595,9 @@ static void BinToHex( const tjs_uint8 *data, const tjs_uint8 *tail, tjs_uint len
 		for( tjs_int i = 0; i < static_cast<tjs_int>(len) && data < tail; i++ ) {
 			tjs_char ch = ((*data)&(0xF<<(pos*4)))>>(pos*4);
 			if( ch > 9 ) {
-				ch = L'A' + (ch-10);
+				ch = 'A' + (ch-10);
 			} else {
-				ch = L'0' + ch;
+				ch = '0' + ch;
 			}
 			tmp.push_back( ch );
 			if( pos == 0 ) {
@@ -612,9 +611,9 @@ static void BinToHex( const tjs_uint8 *data, const tjs_uint8 *tail, tjs_uint len
 		for( tjs_int i = 0; i < static_cast<tjs_int>(len) && data < tail; i++ ) {
 			tjs_char ch = ((*data)&(0xF<<(pos*4)))>>(pos*4);
 			if( ch > 9 ) {
-				ch = L'A' + (ch-10);
+				ch = 'A' + (ch-10);
 			} else {
-				ch = L'0' + ch;
+				ch = '0' + ch;
 			}
 			tmp.push_back( ch );
 			if( pos ) {
@@ -625,7 +624,7 @@ static void BinToHex( const tjs_uint8 *data, const tjs_uint8 *tail, tjs_uint len
 			}
 		}
 	}
-	tmp.push_back( L'\0' );
+	tmp.push_back( '\0' );
 	result = tTJSString( &(tmp[0]) );
 }
 static iTJSDispatch2* Unpack( const std::vector<OctPackTemplate>& templ, const tjs_uint8 *data, tjs_uint length ) {

@@ -1,14 +1,14 @@
 //---------------------------------------------------------------------------
 /*
-	Risa [傝偝]      alias 媑棦媑棦3 [kirikiri-3]
-	 stands for "Risa Is a Stagecraft Architecture"
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        Risa [りさ]      alias 吉里吉里3 [kirikiri-3]
+         stands for "Risa Is a Stagecraft Architecture"
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 //! @file
-//! @brief FreeType 僼僅儞僩僪儔僀僶
+//! @brief FreeType フォントドライバ
 //---------------------------------------------------------------------------
 
 #include "tjsCommHead.h"
@@ -31,11 +31,9 @@
 #endif
 #include "TVPFont.h"
 
-extern bool TVPEncodeUTF8ToUTF16(ttstr &output, const std::string &source);
-
 //---------------------------------------------------------------------------
 
-FT_Library FreeTypeLibrary = NULL;	//!< FreeType 儔僀僽儔儕
+FT_Library FreeTypeLibrary = NULL;	//!< FreeType ライブラリ
 void TVPInitializeFont() {
 	if( FreeTypeLibrary == NULL ) {
 		FT_Error err = FT_Init_FreeType( &FreeTypeLibrary );
@@ -50,14 +48,14 @@ void TVPUninitializeFreeFont() {
 
 //---------------------------------------------------------------------------
 /**
- * 僼傽僀儖僔僗僥儉宱桼偱偺FreeType Face 僋儔僗
+ * ファイルシステム経由でのFreeType Face クラス
  */
 class tGenericFreeTypeFace : public tBaseFreeTypeFace
 {
 protected:
-	FT_Face Face;	//!< FreeType face 僆僽僕僃僋僩
-	tTJSBinaryStream* File;	 //!< tTJSBinaryStream 僆僽僕僃僋僩
-	std::vector<ttstr> FaceNames; //!< Face柤傪楍嫇偟偨攝楍
+    FT_Face Face;                 //!< FreeType face オブジェクト
+    tTJSBinaryStream* File;       //!< tTJSBinaryStream オブジェクト
+    std::vector<ttstr> FaceNames; //!< Face名を列挙した配列
 
 private:
 	FT_StreamRec Stream;
@@ -68,7 +66,7 @@ public:
 
 	virtual FT_Face GetFTFace() const;
 	virtual void GetFaceNameList(std::vector<ttstr> & dest) const;
-	virtual tjs_char GetDefaultChar() const { return L' '; }
+	virtual tjs_wchar GetDefaultChar() const { return u' '; }
 
 private:
 	void Clear();
@@ -82,13 +80,15 @@ private:
 
 //---------------------------------------------------------------------------
 /**
- * 僐儞僗僩儔僋僞
- * @param fontname	僼僅儞僩柤
- * @param options	僆僾僔儑儞(TVP_TF_XXXX 掕悢偐TVP_FACE_OPTIONS_XXXX掕悢偺慻傒崌傢偣)
+ * コンストラクタ
+ * @param fontname	フォント名
+ * @param options	オプション(TVP_TF_XXXX
+ * 定数かTVP_FACE_OPTIONS_XXXX定数の組み合わせ)
  */
-tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 options) : File(NULL)
+tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr& fontname, tjs_uint32 options)
+  : File(nullptr)
 {
-	// 僼傿乕儖僪偺弶婜壔
+    // フィールドの初期化
 	Face = NULL;
 	memset(&Stream, 0, sizeof(Stream));
 
@@ -98,13 +98,13 @@ tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 opt
 			File = NULL;
 		} 
 
-		// 僼傽僀儖傪奐偔
+		// ファイルを開く
 		File = TVPCreateFontStream(fontname);
 		if( File == NULL ) {
 			TVPThrowExceptionMessage( TVPCannotOpenFontFile, fontname );
 		}
 
-		// FT_StreamRec 偺奺僼傿乕儖僪傪杽傔傞
+		// FT_StreamRec の各フィールドを埋める
 		FT_StreamRec * fsr = &Stream;
 		fsr->base = 0;
 		fsr->size = static_cast<unsigned long>(File->GetSize());
@@ -114,7 +114,7 @@ tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 opt
 		fsr->read = IoFunc;
 		fsr->close = CloseFunc;
 
-		// Face 傪偦傟偧傟奐偒丄Face柤傪庢摼偟偰 FaceNames 偵奿擺偡傞
+		// Face をそれぞれ開き、Face名を取得して FaceNames に格納する
 		tjs_uint face_num = 1;
 
 		FT_Face face = NULL;
@@ -128,8 +128,7 @@ tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 opt
 			else
 			{
 				const char * name = face->family_name;
-				ttstr wname;
-				TVPEncodeUTF8ToUTF16( wname, std::string(name) );
+				ttstr wname = std::string(name);
 				FaceNames.push_back( wname );
 				face_num = face->num_faces;
 			}
@@ -138,10 +137,10 @@ tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 opt
 		if(face) FT_Done_Face(face), face = NULL;
 
 
-		// FreeType 僄儞僕儞偱僼傽僀儖傪奐偙偆偲偟偰傒傞
+		// FreeType エンジンでファイルを開こうとしてみる
 		tjs_uint index = TVP_GET_FACE_INDEX_FROM_OPTIONS(options);
 		if(!OpenFaceByIndex(index, Face)) {
-			// 僼僅儞僩傪奐偗側偐偭偨
+			// フォントを開けなかった
 			TVPThrowExceptionMessage(TVPFontCannotBeUsed, fontname );
 		}
 	}
@@ -155,7 +154,7 @@ tGenericFreeTypeFace::tGenericFreeTypeFace(const ttstr &fontname, tjs_uint32 opt
 
 //---------------------------------------------------------------------------
 /**
- * 僨僗僩儔僋僞
+ * デストラクタ
  */
 tGenericFreeTypeFace::~tGenericFreeTypeFace()
 {
@@ -170,7 +169,7 @@ tGenericFreeTypeFace::~tGenericFreeTypeFace()
 
 //---------------------------------------------------------------------------
 /**
- * FreeType 偺 Face 僆僽僕僃僋僩傪曉偡
+ * FreeType の Face オブジェクトを返す
  */
 FT_Face tGenericFreeTypeFace::GetFTFace() const
 {
@@ -181,7 +180,7 @@ FT_Face tGenericFreeTypeFace::GetFTFace() const
 
 //---------------------------------------------------------------------------
 /**
- * 偙偺僼僅儞僩僼傽僀儖偑帩偭偰偄傞僼僅儞僩傪攝楍偲偟偰曉偡
+ * このフォントファイルが持っているフォントを配列として返す
  */
 void tGenericFreeTypeFace::GetFaceNameList(std::vector<ttstr> & dest) const
 {
@@ -193,7 +192,7 @@ void tGenericFreeTypeFace::GetFaceNameList(std::vector<ttstr> & dest) const
 
 //---------------------------------------------------------------------------
 /**
- * FreeType 梡 僗僩儕乕儉撉傒崬傒娭悢
+ * FreeType 用 ストリーム読み込み関数
  */
 unsigned long tGenericFreeTypeFace::IoFunc( FT_Stream stream, unsigned long offset, unsigned char* buffer, unsigned long count )
 {
@@ -221,7 +220,7 @@ unsigned long tGenericFreeTypeFace::IoFunc( FT_Stream stream, unsigned long offs
 
 //---------------------------------------------------------------------------
 /**
- * FreeType 梡 僗僩儕乕儉嶍彍娭悢
+ * FreeType 用 ストリーム削除関数
  */
 void tGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 {
@@ -231,18 +230,19 @@ void tGenericFreeTypeFace::CloseFunc( FT_Stream  stream )
 
 //---------------------------------------------------------------------------
 /**
- * 巜掕僀儞僨僢僋僗偺Face傪奐偔
- * @param index	奐偔index
- * @param face	FT_Face 曄悢傊偺嶲徠
- * @return	Face傪奐偗傟偽 true 偦偆偱側偗傟偽 false
- * @note	弶傔偰 Face 傪奐偔応崌偼 face 偱巜掕偡傞曄悢偵偼 null 傪擖傟偰偍偔偙偲
+ * 指定インデックスのFaceを開く
+ * @param index	開くindex
+ * @param face	FT_Face 変数への参照
+ * @return	Faceを開ければ true そうでなければ false
+ * @note	初めて Face を開く場合は face で指定する変数には nullptr
+ * を入れておくこと
  */
 bool tGenericFreeTypeFace::OpenFaceByIndex(tjs_uint index, FT_Face & face)
 {
 	if(face) FT_Done_Face(face), face = NULL;
 
 	FT_Parameter parameters[1];
-	parameters[0].tag = FT_PARAM_TAG_UNPATENTED_HINTING; // Apple偺摿嫋夞旔傪峴偆
+	parameters[0].tag = FT_PARAM_TAG_UNPATENTED_HINTING; // Appleの特許回避を行う
 	parameters[0].data = NULL;
 
 	FT_Open_Args args;
@@ -265,9 +265,9 @@ bool tGenericFreeTypeFace::OpenFaceByIndex(tjs_uint index, FT_Face & face)
 
 //---------------------------------------------------------------------------
 /**
- * 僐儞僗僩儔僋僞
- * @param fontname	僼僅儞僩柤
- * @param options	僆僾僔儑儞
+ * コンストラクタ
+ * @param fontname	フォント名
+ * @param options	オプション
  */
 tFreeTypeFace::tFreeTypeFace(const ttstr &fontname, tjs_uint32 options)
 	: FontName(fontname)
@@ -283,29 +283,29 @@ tFreeTypeFace::tFreeTypeFace(const ttstr &fontname, tjs_uint32 options)
 	Height = 10;
 
 
-	// 僼僅儞僩傪奐偔
-	//if(options & TVP_FACE_OPTIONS_FILE)
-	{
-		// 僼傽僀儖傪奐偔
-		Face = new tGenericFreeTypeFace(fontname, options);
-			// 椺奜偑偙偙偱敪惗偡傞壜擻惈偑偁傞偺偱拲堄
-	}
-	//else
-	{
-		// 僱僀僥傿僽偺僼僅儞僩柤偵傛傞巜掕 (僾儔僢僩僼僅乕儉埶懚)
-		//Face = new tNativeFreeTypeFace(fontname, options);
-			// 椺奜偑偙偙偱敪惗偡傞壜擻惈偑偁傞偺偱拲堄
-	}
+	// フォントを開く
+    // if(options & TVP_FACE_OPTIONS_FILE)
+    {
+        // ファイルを開く
+        Face = new tGenericFreeTypeFace(fontname, options);
+        // 例外がここで発生する可能性があるので注意
+    }
+    // else
+    {
+        // ネイティブのフォント名による指定 (プラットフォーム依存)
+        // Face = new tNativeFreeTypeFace(fontname, options);
+        // 例外がここで発生する可能性があるので注意
+    }
 	FTFace = Face->GetFTFace();
 
-	// 儅僢僺儞僌傪妋擣偡傞
-	if(FTFace->charmap == NULL)
-	{
-		// FreeType 偼帺摦揑偵 UNICODE 儅僢僺儞僌傪巊梡偡傞偑丄
-		// 僼僅儞僩偑 UNICODE 儅僢僺儞僌偺忣曬傪娷傫偱偄側偄応崌偼
-		// 帺摦揑側暥帤儅僢僺儞僌偺慖戰偼峴傢傟側偄丅
-		// 偲傝偁偊偢(擔杮岅娐嫬偵尷偭偰尵偊偽) SJIS 儅僢僺儞僌偟偐傕偭偰側偄
-		// 僼僅儞僩偑懡偄偺偱SJIS傪慖戰偝偣偰傒傞丅
+	 // マッピングを確認する
+    if(FTFace->charmap == nullptr) {
+        // FreeType は自動的に UNICODE マッピングを使用するが、
+        // フォントが UNICODE マッピングの情報を含んでいない場合は
+        // 自動的な文字マッピングの選択は行われない。
+        // とりあえず(日本語環境に限って言えば) SJIS
+        // マッピングしかもってない
+        // フォントが多いのでSJISを選択させてみる。
 		FT_Error err;
 		{
 			int numcharmap = FTFace->num_charmaps;
@@ -328,7 +328,7 @@ tFreeTypeFace::tFreeTypeFace(const ttstr &fontname, tjs_uint32 options)
 
 //---------------------------------------------------------------------------
 /**
- * 僨僗僩儔僋僞
+ * デストラクタ
  */
 tFreeTypeFace::~tFreeTypeFace()
 {
@@ -340,20 +340,21 @@ tFreeTypeFace::~tFreeTypeFace()
 
 //---------------------------------------------------------------------------
 /**
- * 偙偺Face偑曐帩偟偰偄傞glyph偺悢傪摼傞
- * @return	偙偺Face偑曐帩偟偰偄傞glyph偺悢
+ * このFaceが保持しているglyphの数を得る
+ * @return	このFaceが保持しているglyphの数
  */
 tjs_uint tFreeTypeFace::GetGlyphCount()
 {
 	if(!FTFace) return 0;
 
-	// FreeType 偑曉偟偰偔傞僌儕僼偺悢偼丄幚嵺偵暥帤僐乕僪偑妱傝摉偰傜傟偰偄側偄
-	// 僌儕僼傪傕娷傫偩悢偲側偭偰偄傞
-	// 偙偙偱丄幚嵺偵僼僅儞僩偵娷傑傟偰偄傞僌儕僼傪庢摼偡傞
-	// TODO:僗儗僢僪曐岇偝傟偰偄側偄偺偱拲堄両両両両両両
+	 // FreeType
+    // が返してくるグリフの数は、実際に文字コードが割り当てられていない
+    // グリフをも含んだ数となっている
+    // ここで、実際にフォントに含まれているグリフを取得する
+    // TODO:スレッド保護されていないので注意！！！！！！
 	if(!GlyphIndexToCharcodeVector)
 	{
-		// 儅僢僾偑嶌惉偝傟偰偄側偄偺偱嶌惉偡傞
+		// マップが作成されていないので作成する
 		GlyphIndexToCharcodeVector = new tGlyphIndexToCharcodeVector;
 		FT_ULong  charcode;
 		FT_UInt   gindex;
@@ -370,7 +371,7 @@ tjs_uint tFreeTypeFace::GetGlyphCount()
 		}
 		std::sort(
 			GlyphIndexToCharcodeVector->begin(),
-			GlyphIndexToCharcodeVector->end()); // 暥帤僐乕僪弴偱暲傃懼偊
+			GlyphIndexToCharcodeVector->end()); // 文字コード順で並び替え
 	}
 
 	return (tjs_uint)GlyphIndexToCharcodeVector->size();
@@ -381,26 +382,27 @@ tjs_uint tFreeTypeFace::GetGlyphCount()
 
 //---------------------------------------------------------------------------
 /**
- * Glyph 僀儞僨僢僋僗偐傜懳墳偡傞暥帤僐乕僪傪摼傞
- * @param index	僀儞僨僢僋僗(FreeType偺娗棟偟偰偄傞暥帤index偲偼堘偆偺偱拲堄)
- * @return	懳墳偡傞暥帤僐乕僪(懳墳偡傞僐乕僪偑柍偄応崌偼 0)
+ * Glyph インデックスから対応する文字コードを得る
+ * @param index
+ * インデックス(FreeTypeの管理している文字indexとは違うので注意)
+ * @return	対応する文字コード(対応するコードが無い場合は 0)
  */
-tjs_char tFreeTypeFace::GetCharcodeFromGlyphIndex(tjs_uint index)
+tjs_wchar tFreeTypeFace::GetCharcodeFromGlyphIndex(tjs_uint index)
 {
-	tjs_uint size = GetGlyphCount(); // 僌儕僼悢傪摼傞偮偄偱偵儅僢僾傪嶌惉偡傞
+	tjs_uint size = GetGlyphCount(); /// グリフ数を得るついでにマップを作成する
 
 	if(!GlyphIndexToCharcodeVector) return 0;
 	if(index >= size) return 0;
 
-	return static_cast<tjs_char>((*GlyphIndexToCharcodeVector)[index]);
+	return static_cast<tjs_wchar>((*GlyphIndexToCharcodeVector)[index]);
 }
 //---------------------------------------------------------------------------
 
 
 //---------------------------------------------------------------------------
 /**
- * 偙偺僼僅儞僩偵娷傑傟傞Face柤偺儕僗僩傪摼傞
- * @param dest	奿擺愭攝楍
+ * このフォントに含まれるFace名のリストを得る
+ * @param dest	格納先配列
  */
 void tFreeTypeFace::GetFaceNameList(std::vector<ttstr> &dest)
 {
@@ -411,8 +413,8 @@ void tFreeTypeFace::GetFaceNameList(std::vector<ttstr> &dest)
 
 //---------------------------------------------------------------------------
 /**
- * 僼僅儞僩偺崅偝傪愝掕偡傞
- * @param height	僼僅儞僩偺崅偝(僺僋僙儖扨埵)
+ * フォントの高さを設定する
+ * @param height	フォントの高さ(ピクセル単位)
  */
 void tFreeTypeFace::SetHeight(int height)
 {
@@ -420,7 +422,7 @@ void tFreeTypeFace::SetHeight(int height)
 	FT_Error err = FT_Set_Pixel_Sizes(FTFace, 0, Height);
 	if(err)
 	{
-		// TODO: Error 僴儞僪儕儞僌
+		// TODO: Error ハンドリング
 	}
 }
 //---------------------------------------------------------------------------
@@ -428,19 +430,19 @@ void tFreeTypeFace::SetHeight(int height)
 
 //---------------------------------------------------------------------------
 /**
- * 巜掕偟偨暥帤僐乕僪偵懳偡傞僌儕僼價僢僩儅僢僾傪摼傞
- * @param code	暥帤僐乕僪
- * @return	怴婯嶌惉偝傟偨僌儕僼價僢僩儅僢僾僆僽僕僃僋僩傊偺億僀儞僞
- *			NULL 偺応崌偼曄姺偵幐攕偟偨応崌
+ * 指定した文字コードに対するグリフビットマップを得る
+ * @param code	文字コード
+ * @return	新規作成されたグリフビットマップオブジェクトへのポインタ
+ *			NULL の場合は変換に失敗した場合
  */
-tTVPCharacterData * tFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
+tTVPCharacterData * tFreeTypeFace::GetGlyphFromCharcode(tjs_wchar code)
 {
-	// 僌儕僼僗儘僢僩偵僌儕僼傪撉傒崬傒丄悺朄傪庢摼偡傞
+    // グリフスロットにグリフを読み込み、寸法を取得する
 	tGlyphMetrics metrics;
 	if(!GetGlyphMetricsFromCharcode(code, metrics))
 		return NULL;
 
-	// 暥帤傪儗儞僟儕儞僌偡傞
+	// 文字をレンダリングする
 	FT_Error err;
 
 	if(FTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP)
@@ -451,12 +453,13 @@ tTVPCharacterData * tFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 		else
 			mode = FT_RENDER_MODE_MONO;
 		err = FT_Render_Glyph(FTFace->glyph, mode);
-			// note: 僨僼僅儖僩偺儗儞僟儕儞僌儌乕僪偼 FT_RENDER_MODE_NORMAL (256怓僌儗乕僗働乕儖)
-			//       FT_RENDER_MODE_MONO 偼 1bpp 儌僲僋儘乕儉
+		// note: デフォルトのレンダリングモードは
+        // FT_RENDER_MODE_NORMAL (256色グレースケール)
+        //       FT_RENDER_MODE_MONO は 1bpp モノクローム
 		if(err) return NULL;
 	}
 
-	// 堦墳價僢僩儅僢僾宍幃傪僠僃僢僋
+    // 一応ビットマップ形式をチェック
 	FT_Bitmap *ft_bmp = &(FTFace->glyph->bitmap);
 	FT_Bitmap new_bmp;
 	bool release_ft_bmp = false;
@@ -465,18 +468,20 @@ tTVPCharacterData * tFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 	{
 		if(ft_bmp->rows && ft_bmp->width)
 		{
-			// 價僢僩儅僢僾偑僒僀僘傪帩偭偰偄傞応崌
+			// ビットマップがサイズを持っている場合
 			if(ft_bmp->pixel_mode != ft_pixel_mode_grays)
 			{
-				// ft_pixel_mode_grays 偱偼側偄偺偱 ft_pixel_mode_grays 宍幃偵曄姺偡傞
+                            // ft_pixel_mode_grays ではないので
+                            // ft_pixel_mode_grays 形式に変換する
 				FT_Bitmap_New(&new_bmp);
 				release_ft_bmp = true;
 				ft_bmp = &new_bmp;
 				err = FT_Bitmap_Convert(FTFace->glyph->library,
 					&(FTFace->glyph->bitmap),
 					&new_bmp, 1);
-					// 寢嬊 tGlyphBitmap 宍幃偵曄姺偡傞嵺偵傾儔僀儞儊儞僩傪偟捈偡偺偱
-					// 偙偙偱巜掕偡傞 alignment 偼 1 偱傛偄
+					// 結局 tGlyphBitmap
+                // 形式に変換する際にアラインメントをし直すので
+                // ここで指定する alignment は 1 でよい
 				if(err)
 				{
 					if(release_ft_bmp) FT_Bitmap_Done(FTFace->glyph->library, ft_bmp);
@@ -486,8 +491,8 @@ tTVPCharacterData * tFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 
 			if(ft_bmp->num_grays != 256)
 			{
-				// gray 儗儀儖偑 256 偱偼側偄
-				// 256 偵側傞傛偆偵忔嶼傪峴偆
+				// gray レベルが 256 ではない
+                // 256 になるように乗算を行う
 				tjs_int32 multiply =
 					static_cast<tjs_int32>((static_cast<tjs_int32> (1) << 30) - 1) /
 						(ft_bmp->num_grays - 1);
@@ -503,12 +508,13 @@ tTVPCharacterData * tFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 				}
 			}
 		}
-		// 64攞偝傟偰偄傞傕偺傪夝彍偡傞
+		// 64倍されているものを解除する
 		metrics.CellIncX = FT_PosToInt( metrics.CellIncX );
 		metrics.CellIncY = FT_PosToInt( metrics.CellIncY );
 
-		// tGlyphBitmap 傪嶌惉偟偰曉偡
-		//int baseline = (int)(FTFace->height + FTFace->descender) * FTFace->size->metrics.y_ppem / FTFace->units_per_EM;
+		// tGlyphBitmap を作成して返す
+        // int baseline = (int)(FTFace->height + FTFace->descender) *
+        // FTFace->size->metrics.y_ppem / FTFace->units_per_EM;
 		int baseline = (int)( FTFace->ascender ) * FTFace->size->metrics.y_ppem / FTFace->units_per_EM;
 
 		glyph_bmp = new tTVPCharacterData(
@@ -550,12 +556,12 @@ tTVPCharacterData * tFreeTypeFace::GetGlyphFromCharcode(tjs_char code)
 
 //---------------------------------------------------------------------------
 /**
- * 巜掕偟偨暥帤僐乕僪偵懳偡傞昤夋椞堟傪摼傞
- * @param code	暥帤僐乕僪
- * @return	儗儞僟儕儞僌椞堟嬮宍傊偺億僀儞僞
- *			NULL 偺応崌偼曄姺偵幐攕偟偨応崌
+ * 指定した文字コードに対する描画領域を得る
+ * @param code	文字コード
+ * @return	レンダリング領域矩形へのポインタ
+ *			nullptr の場合は変換に失敗した場合
  */
-bool tFreeTypeFace::GetGlyphRectFromCharcode( tTVPRect& rt, tjs_char code, tjs_int& advancex, tjs_int& advancey )
+bool tFreeTypeFace::GetGlyphRectFromCharcode( tTVPRect& rt, tjs_wchar code, tjs_int& advancex, tjs_int& advancey )
 {
 	advancex = advancey = 0;
 	if( !LoadGlyphSlotFromCharcode(code) )
@@ -563,12 +569,12 @@ bool tFreeTypeFace::GetGlyphRectFromCharcode( tTVPRect& rt, tjs_char code, tjs_i
 
 	int baseline = (int)( FTFace->ascender ) * FTFace->size->metrics.y_ppem / FTFace->units_per_EM;
 	/*
-	FT_Render_Glyph 偱儗儞僟儕儞僌偟側偄偲埲壓偺奺抣偼庢摼偱偒側偄
-	tjs_int t = baseline - FTFace->glyph->bitmap_top;
-	tjs_int l = FTFace->glyph->bitmap_left;
-	tjs_int w = FTFace->glyph->bitmap.width;
-	tjs_int h = FTFace->glyph->bitmap.rows;
-	*/
+    FT_Render_Glyph でレンダリングしないと以下の各値は取得できない
+    tjs_int t = baseline - FTFace->glyph->bitmap_top;
+    tjs_int l = FTFace->glyph->bitmap_left;
+    tjs_int w = FTFace->glyph->bitmap.width;
+    tjs_int h = FTFace->glyph->bitmap.rows;
+    */
 	tjs_int t = baseline - FT_PosToInt( FTFace->glyph->metrics.horiBearingY );
 	tjs_int l = FT_PosToInt( FTFace->glyph->metrics.horiBearingX );
 	tjs_int w = FT_PosToInt( FTFace->glyph->metrics.width );
@@ -602,20 +608,20 @@ bool tFreeTypeFace::GetGlyphRectFromCharcode( tTVPRect& rt, tjs_char code, tjs_i
 
 //---------------------------------------------------------------------------
 /**
- * 巜掕偟偨暥帤僐乕僪偵懳偡傞僌儕僼偺悺朄傪摼傞(暥帤傪恑傔傞偨傔偺僒僀僘)
- * @param code		暥帤僐乕僪
- * @param metrics	悺朄
- * @return	惉岟偺応崌恀丄幐攕偺応崌婾
+ * 指定した文字コードに対するグリフの寸法を得る(文字を進めるためのサイズ)
+ * @param code		文字コード
+ * @param metrics	寸法
+ * @return	成功の場合真、失敗の場合偽
  */
-bool tFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_char code,
+bool tFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_wchar code,
 	tGlyphMetrics & metrics)
 {
 	if(!LoadGlyphSlotFromCharcode(code)) return false;
 
-	// 儊僩儕僢僋峔憿懱傪嶌惉
-	// CellIncX 傗 CellIncY 偼 僺僋僙儖抣偑 64 攞偝傟偨抣側偺偱拲堄
-	// 偙傟偼傕偲傕偲 FreeType 偺巇條偩偗傟偳傕丄Risa偱傕撪晹揑偵偼
-	// 偙偺惛搙偱 CellIncX 傗 CellIncY 傪埖偆
+	// メトリック構造体を作成
+    // CellIncX や CellIncY は ピクセル値が 64 倍された値なので注意
+    // これはもともと FreeType の仕様だけれども、Risaでも内部的には
+    // この精度で CellIncX や CellIncY を扱う
 	metrics.CellIncX =  FTFace->glyph->advance.x;
 	metrics.CellIncY =  FTFace->glyph->advance.y;
 
@@ -625,16 +631,16 @@ bool tFreeTypeFace::GetGlyphMetricsFromCharcode(tjs_char code,
 
 //---------------------------------------------------------------------------
 /**
- * 巜掕偟偨暥帤僐乕僪偵懳偡傞僌儕僼偺僒僀僘傪摼傞(暥帤偺戝偒偝)
- * @param code		暥帤僐乕僪
- * @param metrics	僒僀僘
- * @return	惉岟偺応崌恀丄幐攕偺応崌婾
+ * 指定した文字コードに対するグリフのサイズを得る(文字の大きさ)
+ * @param code		文字コード
+ * @param metrics	サイズ
+ * @return	成功の場合真、失敗の場合偽
  */
-bool tFreeTypeFace::GetGlyphSizeFromCharcode(tjs_char code, tGlyphMetrics & metrics)
+bool tFreeTypeFace::GetGlyphSizeFromCharcode(tjs_wchar code, tGlyphMetrics & metrics)
 {
 	if(!LoadGlyphSlotFromCharcode(code)) return false;
 
-	// 儊僩儕僢僋峔憿懱傪嶌惉
+	// メトリック構造体を作成
 	metrics.CellIncX = FT_PosToInt( FTFace->glyph->metrics.horiAdvance );
 	metrics.CellIncY = FT_PosToInt( FTFace->glyph->metrics.vertAdvance );
 
@@ -645,33 +651,34 @@ bool tFreeTypeFace::GetGlyphSizeFromCharcode(tjs_char code, tGlyphMetrics & metr
 
 //---------------------------------------------------------------------------
 /**
- * 巜掕偟偨暥帤僐乕僪偵懳偡傞僌儕僼傪僌儕僼僗儘僢僩偵愝掕偡傞
- * @param code	暥帤僐乕僪
- * @return	惉岟偺応崌恀丄幐攕偺応崌婾
+ * 指定した文字コードに対するグリフをグリフスロットに設定する
+ * @param code	文字コード
+ * @return	成功の場合真、失敗の場合偽
  */
-bool tFreeTypeFace::LoadGlyphSlotFromCharcode(tjs_char code)
+bool tFreeTypeFace::LoadGlyphSlotFromCharcode(tjs_wchar code)
 {
-	// TODO: 僗儗僢僪曐岇
+    // TODO: スレッド保護
 
-	// 暥帤僐乕僪傪摼傞
+    // 文字コードを得る
 	FT_ULong localcode;
 	if(UnicodeToLocalChar == NULL)
 		localcode = code;
 	else
 		localcode = UnicodeToLocalChar(code);
 
-	// 暥帤僐乕僪偐傜 index 傪摼傞
+	// 文字コードから index を得る
 	FT_UInt glyph_index = FT_Get_Char_Index(FTFace, localcode);
 	if(glyph_index == 0)
 		return false;
 
-	// 僌儕僼僗儘僢僩偵暥帤傪撉傒崬傓
+	// グリフスロットに文字を読み込む
 	FT_Int32 load_glyph_flag = 0;
 	if(!(Options & TVP_FACE_OPTIONS_NO_ANTIALIASING))
 		load_glyph_flag |= FT_LOAD_NO_BITMAP;
 	else
 		load_glyph_flag |= FT_LOAD_TARGET_MONO;
-			// note: 價僢僩儅僢僾僼僅儞僩傪撉傒崬傒偨偔側偄応崌偼 FT_LOAD_NO_BITMAP 傪巜掕
+        // note: ビットマップフォントを読み込みたくない場合は
+        // FT_LOAD_NO_BITMAP を指定
 
 	if(Options & TVP_FACE_OPTIONS_NO_HINTING)
 		load_glyph_flag |= FT_LOAD_NO_HINTING|FT_LOAD_NO_AUTOHINT;
@@ -683,7 +690,7 @@ bool tFreeTypeFace::LoadGlyphSlotFromCharcode(tjs_char code)
 
 	if(err) return false;
 
-	// 僼僅儞僩偺曄宍傪峴偆
+	// フォントの変形を行う
 	if( Options & TVP_TF_BOLD ) FT_GlyphSlot_Embolden(FTFace->glyph);
 	if( Options & TVP_TF_ITALIC ) FT_GlyphSlot_Oblique( FTFace->glyph );
 
@@ -697,7 +704,7 @@ float FT_fixed26p6_to_float(long fixP) {
 	return (float)(abs(fixP) & fractional_mask) / fractional_base + (fixP >> 6);
 }
 
-const FT_Outline* tFreeTypeFace::GetOulineData(tjs_char code, float &w, float &h)
+const FT_Outline* tFreeTypeFace::GetOulineData(tjs_wchar code, float &w, float &h)
 {
 	FT_UInt glyph_index = FT_Get_Char_Index(FTFace, code);
 	if (glyph_index == 0) return GetOulineData(GetDefaultChar(), w, h);

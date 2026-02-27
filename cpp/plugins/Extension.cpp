@@ -13,7 +13,7 @@ struct tTVPAtClassInstallInfo {
 			const tjs_char* start = dependences;
 			const tjs_char* cur = dependences;
 			while( *cur ) {
-				if( (*cur) == TJS_W(',') ) {
+				if( (*cur) == TJS_N(',') ) {
 					if( start != cur ) {
 						Dependences.push_back( ttstr(start, cur - start) );
 					}

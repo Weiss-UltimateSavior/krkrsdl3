@@ -73,14 +73,14 @@ ttstr tTJSMessageMapper::CreateMessageMapString()
 	{
 		ttstr name = i.GetKey();
 		tTJSMessageHolder *holder = i.GetValue();
-		script += TJS_W("\tr(\"");
+		script += TJS_N("\tr(\"");
 		script += name.EscapeC();
-		script += TJS_W("\", \"");
+		script += TJS_N("\", \"");
 		script += ttstr((const tjs_char *)(*holder)).EscapeC();
 #ifdef TJS_TEXT_OUT_CRLF
-		script += TJS_W("\");\r\n");
+		script += TJS_N("\");\r\n");
 #else
-		script += TJS_W("\");\n");
+		script += TJS_N("\");\n");
 #endif
 	}
 	return script;
@@ -134,7 +134,7 @@ bool TJSAssignMessage(const tjs_char *name, const tjs_char *newmsg)
 ttstr TJSCreateMessageMapString()
 {
 	if(TJSMessageMapper) return TJSMessageMapper->CreateMessageMapString();
-	return TJS_W("");
+	return TJS_N("");
 }
 //---------------------------------------------------------------------------
 ttstr TJSGetMessageMapMessage(const tjs_char *name)

@@ -230,7 +230,7 @@ void TVPPostEvent(iTJSDispatch2 * source, iTJSDispatch2 *target,
 			}
 			TJS_CONVERT_TO_TJS_EXCEPTION
 		}
-		TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_W("immediate event"));
+		TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_N("immediate event"));
 
 		return;
 	}
@@ -571,7 +571,7 @@ void TVPDeliverAllEvents()
 		}
 		TJS_CONVERT_TO_TJS_EXCEPTION
 	}
-	TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_W("event"));
+	TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_N("event"));
 
 	if(!r)
 	{
@@ -592,7 +592,7 @@ void TVPDeliverAllEvents()
 			}
 			TJS_CONVERT_TO_TJS_EXCEPTION
 		}
-		TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_W("idle event"));
+		TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_N("idle event"));
 
 		// process continuous events
 		if(TVPProcessContinuousHandlerEventFlag)
@@ -614,7 +614,7 @@ void TVPDeliverAllEvents()
 			}
 			TJS_CONVERT_TO_TJS_EXCEPTION
 		}
-		TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_W("window update"));
+		TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_N("window update"));
 	} else {
 	}
 
@@ -851,8 +851,8 @@ iTJSDispatch2 * TVPCreateEventObject(const tjs_char *type,
 	// create a dictionary object for event dispatching ( to "action" method )
 	iTJSDispatch2 * object = TJSCreateDictionaryObject();
 
-	static ttstr type_name(TJS_W("type"));
-	static ttstr target_name(TJS_W("target"));
+	static ttstr type_name(TJS_N("type"));
+	static ttstr target_name(TJS_N("target"));
 
 	{
 		tTJSVariant val(type);
@@ -875,7 +875,7 @@ iTJSDispatch2 * TVPCreateEventObject(const tjs_char *type,
 
 
 //---------------------------------------------------------------------------
-ttstr TVPActionName(TJS_W("action"));
+ttstr TVPActionName(TJS_N("action"));
 //---------------------------------------------------------------------------
 
 
@@ -1043,7 +1043,7 @@ void TVPDeliverContinuousEvent()
 		}
 		TJS_CONVERT_TO_TJS_EXCEPTION
 	}
-	TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_W("continuous event"));
+	TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION(TJS_N("continuous event"));
 
 	TVPContinuousEventProcessing = false;
 }
@@ -1129,7 +1129,7 @@ void TVPDeliverCompactEvent(tjs_int level)
 				}
 				TJS_CONVERT_TO_TJS_EXCEPTION
 			}
-			TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(TJS_W("Compact Event"));
+			TVP_CATCH_AND_SHOW_SCRIPT_EXCEPTION_FORCE_SHOW_EXCEPTION(TJS_N("Compact Event"));
 		}
 
 		if(emptyflag)
@@ -1212,7 +1212,7 @@ void tTJSNI_AsyncTrigger::Trigger()
 			// remove undelivered events from queue when "Cached" flag is set
 			TVPCancelSourceEvents(Owner);
 		}
-		static ttstr eventname(TJS_W("onFire"));
+		static ttstr eventname(TJS_N("onFire"));
 
 		tjs_uint32 flags = TVP_EPT_POST;
 		if(Mode == atmExclusive) flags |= TVP_EPT_EXCLUSIVE;  // fire exclusive event

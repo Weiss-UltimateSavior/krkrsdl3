@@ -9,7 +9,7 @@
 #include <ncbind/ncbind.hpp>
 #include "LayerExImage.h"
 
-#define NCB_MODULE_NAME TJS_W("layerExImage.dll")
+#define NCB_MODULE_NAME TJS_N("layerExImage.dll")
 
 void
 layerExImage::lut(BYTE* pLut)

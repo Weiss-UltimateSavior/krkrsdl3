@@ -10,7 +10,7 @@
 // tTJSNC_Storages
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Storages::ClassID = -1;
-tTJSNC_Storages::tTJSNC_Storages() : inherited(TJS_W("Storages"))
+tTJSNC_Storages::tTJSNC_Storages() : inherited(TJS_N("Storages"))
 {
 	// registration of native members
 

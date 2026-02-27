@@ -26,10 +26,10 @@ static bool TVPGetMainThreadPriorityControl()
 {
 	if(TVPMainThreadPriorityControlInit) return TVPMainThreadPriorityControl;
 	tTJSVariant val;
-	if( TVPGetCommandLine(TJS_W("-lowpri"), &val) )
+	if( TVPGetCommandLine(TJS_N("-lowpri"), &val) )
 	{
 		ttstr str(val);
-		if(str == TJS_W("yes"))
+		if(str == TJS_N("yes"))
 			TVPMainThreadPriorityControl = true;
 	}
 

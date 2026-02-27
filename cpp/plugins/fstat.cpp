@@ -6,7 +6,7 @@
 
 #include <filesystem>
 
-#define NCB_MODULE_NAME TJS_W("fstat.dll")
+#define NCB_MODULE_NAME TJS_N("fstat.dll")
 
 #ifndef _KRKRSDL3_WINDOWS
 #define FILE_ATTRIBUTE_READONLY 0x0001
@@ -30,7 +30,7 @@ static iTJSDispatch2* dateClass = nullptr;   // Date のクラスオブジェク
 static iTJSDispatch2* dateSetTime = nullptr; // Date.setTime メソッド
 static iTJSDispatch2* dateGetTime = nullptr; // Date.getTime メソッド
 
-static const tjs_nchar* StoragesFstatPreScript = R"(
+static const tjs_char* StoragesFstatPreScript = R"(
 global.FILE_ATTRIBUTE_READONLY = 0x00000001,
 global.FILE_ATTRIBUTE_HIDDEN = 0x00000002,
 global.FILE_ATTRIBUTE_SYSTEM = 0x00000004,
@@ -143,7 +143,7 @@ class StoragesFstat
     static void getLocalName(ttstr& path)
     {
         TVPGetLocalName(path);
-        if (path.GetLastChar() == TJS_W('\\'))
+        if (path.GetLastChar() == TJS_N('\\'))
         {
             tjs_int i, len = path.length();
             auto* tmp = new tjs_char[len];
@@ -214,7 +214,7 @@ class StoragesFstat
 
         tjs_int64 m;
         const bool hasC = restoreDate(mtime, m);
-        const bool r = TVP_utime(filename.AsNarrowStdString().c_str(), hasC ? m : 0);
+        const bool r = TVP_utime(filename.AsStdString().c_str(), hasC ? m : 0);
 
         return r ? 0 : isdir ? 2 : 1;
     }
@@ -230,10 +230,10 @@ class StoragesFstat
             if (iTJSDispatch2* dict = TJSCreateDictionaryObject(); dict != nullptr)
             {
                 if (chksize && sel == 1)
-                    dict->PropSet(TJS_MEMBERENSURE, TJS_W("size"), nullptr, &size, dict);
-                dict->PropSet(TJS_MEMBERENSURE, TJS_W("mtime"), nullptr, &mtime, dict);
-                dict->PropSet(TJS_MEMBERENSURE, TJS_W("ctime"), nullptr, &ctime, dict);
-                dict->PropSet(TJS_MEMBERENSURE, TJS_W("atime"), nullptr, &atime, dict);
+                    dict->PropSet(TJS_MEMBERENSURE, TJS_N("size"), nullptr, &size, dict);
+                dict->PropSet(TJS_MEMBERENSURE, TJS_N("mtime"), nullptr, &mtime, dict);
+                dict->PropSet(TJS_MEMBERENSURE, TJS_N("ctime"), nullptr, &ctime, dict);
+                dict->PropSet(TJS_MEMBERENSURE, TJS_N("atime"), nullptr, &atime, dict);
                 *result = dict;
                 dict->Release();
             }
@@ -273,7 +273,7 @@ public:
                     iTJSDispatch2* dict;
                     if ((dict = TJSCreateDictionaryObject()) != nullptr)
                     {
-                        dict->PropSet(TJS_MEMBERENSURE, TJS_W("size"), nullptr, &size, dict);
+                        dict->PropSet(TJS_MEMBERENSURE, TJS_N("size"), nullptr, &size, dict);
                         *result = dict;
                         dict->Release();
                     }
@@ -319,9 +319,9 @@ public:
         iTJSDispatch2* dict = param[1]->AsObjectNoAddRef();
         if (dict != nullptr)
         {
-            dict->PropGet(0, TJS_W("ctime"), nullptr, &ctime, dict);
-            dict->PropGet(0, TJS_W("atime"), nullptr, &atime, dict);
-            dict->PropGet(0, TJS_W("mtime"), nullptr, &mtime, dict);
+            dict->PropGet(0, TJS_N("ctime"), nullptr, &ctime, dict);
+            dict->PropGet(0, TJS_N("atime"), nullptr, &atime, dict);
+            dict->PropGet(0, TJS_N("mtime"), nullptr, &mtime, dict);
         }
         setFileTime(filename, ctime, atime, mtime);
         if (result)
@@ -350,7 +350,7 @@ public:
     {
         ttstr filename = TVPNormalizeStorageName(target);
         getLocalName(filename);
-        return TVP_utime(filename.AsNarrowStdString().c_str(), time);
+        return TVP_utime(filename.AsStdString().c_str(), time);
     }
 
     /**
@@ -379,12 +379,12 @@ public:
             {
                 delete in;
                 TVPThrowExceptionMessage(
-                    (ttstr(TJS_W("cannot open storefile: ")) + storename).c_str());
+                    (ttstr(TJS_N("cannot open storefile: ")) + storename).c_str());
             }
         }
         else
         {
-            TVPThrowExceptionMessage((ttstr(TJS_W("cannot open readfile: ")) + filename).c_str());
+            TVPThrowExceptionMessage((ttstr(TJS_N("cannot open readfile: ")) + filename).c_str());
         }
     }
 
@@ -402,10 +402,10 @@ public:
         ttstr filename(TVPGetLocallyAccessibleName(filePlacedPath));
         if (filename.length())
         {
-            r = TVPDeleteFile(filename.AsNarrowStdString());
+            r = TVPDeleteFile(filename.AsStdString());
             if (!r)
             {
-                TVPAddLog(ttstr(TJS_W("deleteFile : ")) + filename + TJS_W("Failed"));
+                TVPAddLog(ttstr(TJS_N("deleteFile : ")) + filename + TJS_N("Failed"));
             }
             else
             {
@@ -425,7 +425,14 @@ public:
      */
     static bool truncateFile(const tjs_char* file, tjs_int size)
     {
-        std::filesystem::resize_file(ttstr(file).AsNarrowStdString(), size);
+        try
+        {
+            std::filesystem::resize_file(ttstr(file).AsStdString(), size);
+        }
+        catch (...)
+        {
+            return false;
+        }
         return true;
     }
 
@@ -443,13 +450,13 @@ public:
         const ttstr& toFile(TVPGetLocallyAccessibleName(to));
         if (fromFile.length() && toFile.length())
         {
-            const std::string& ff = fromFile.AsNarrowStdString();
-            r = TVPCopyFile(ff, toFile.AsNarrowStdString());
+            const std::string& ff = fromFile.AsStdString();
+            r = TVPCopyFile(ff, toFile.AsStdString());
             TVPDeleteFile(ff);
             if (!r)
             {
                 ttstr mes;
-                TVPAddLog(ttstr(TJS_W("moveFile : ")) + fromFile + ", " + toFile + TJS_W("Failed"));
+                TVPAddLog(ttstr(TJS_N("moveFile : ")) + fromFile + ", " + toFile + TJS_N("Failed"));
             }
             else
             {
@@ -468,7 +475,7 @@ public:
             return TJS_E_BADPARAMCOUNT;
         bool dironly = numparams > 1 ? param[1]->operator bool() : false;
 
-        ttstr path(TVPNormalizeStorageName(ttstr(*param[0]) + TJS_W("/")));
+        ttstr path(TVPNormalizeStorageName(ttstr(*param[0]) + TJS_N("/")));
         TVPGetLocalName(path);
 
         iTJSDispatch2* array = TJSCreateArrayObject();
@@ -498,9 +505,9 @@ public:
 
             if (entry.is_directory())
             {
-                ttstr fullName = subdir + name + TJS_W("/");
+                ttstr fullName = subdir + name + TJS_N("/");
                 setDirListFile(array, count++, fullName, entry);
-                _dirtree(path + name + TJS_W("/"), fullName, array, count, dironly);
+                _dirtree(path + name + TJS_N("/"), fullName, array, count, dironly);
             }
             else if (!dironly)
             {
@@ -536,10 +543,10 @@ private:
     {
         dir = TVPNormalizeStorageName(dir);
 
-        if (dir.GetLastChar() != TJS_W('/'))
+        if (dir.GetLastChar() != TJS_N('/'))
         {
             TVPThrowExceptionMessage(
-                TJS_W("'/' must be specified at the end of given directory name."));
+                TJS_N("'/' must be specified at the end of given directory name."));
         }
         TVPGetLocalName(dir);
 
@@ -551,7 +558,7 @@ private:
             std::filesystem::path path(dir.c_str());
             if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
             {
-                TVPThrowExceptionMessage(TJS_W("Directory not found."));
+                TVPThrowExceptionMessage(TJS_N("Directory not found."));
             }
 
             tjs_int count = 0;
@@ -598,17 +605,17 @@ private:
         {
             // 文件名
             tTJSVariant vname = file;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_W("name"), nullptr, &vname, dict);
+            dict->PropSet(TJS_MEMBERENSURE, TJS_N("name"), nullptr, &vname, dict);
 
                    // 文件大小
             int64_t size = entry.is_regular_file() ? entry.file_size() : 0;
             tTJSVariant vsize = size;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_W("size"), nullptr, &vsize, dict);
+            dict->PropSet(TJS_MEMBERENSURE, TJS_N("size"), nullptr, &vsize, dict);
 
                    // 文件属性（权限 & 类型）
             int32_t attrib = static_cast<int32_t>(entry.status().permissions());
             tTJSVariant vattr = attrib;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_W("attrib"), nullptr, &vattr, dict);
+            dict->PropSet(TJS_MEMBERENSURE, TJS_N("attrib"), nullptr, &vattr, dict);
 
                    // 文件时间
             auto ftime = entry.last_write_time(); // mtime
@@ -617,18 +624,18 @@ private:
             int64_t mtime = std::chrono::system_clock::to_time_t(sctp);
 
             tTJSVariant vmtime = mtime;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_W("mtime"), nullptr, &vmtime, dict);
+            dict->PropSet(TJS_MEMBERENSURE, TJS_N("mtime"), nullptr, &vmtime, dict);
 
                    // Unix 没有直接的创建时间，ctime 用 st_ctime
                    // 或文件系统支持的创建时间
             tTJSVariant vctime = static_cast<tjs_int64>(mtime);
-            dict->PropSet(TJS_MEMBERENSURE, TJS_W("ctime"), nullptr, &vctime, dict);
+            dict->PropSet(TJS_MEMBERENSURE, TJS_N("ctime"), nullptr, &vctime, dict);
 
                    // atime
                    // 如果系统支持 nanoseconds: use std::filesystem::last_access_time
                    // (C++23) 或 stat
             tTJSVariant vatime = mtime; // 可以用 mtime 代替
-            dict->PropSet(TJS_MEMBERENSURE, TJS_W("atime"), nullptr, &vatime, dict);
+            dict->PropSet(TJS_MEMBERENSURE, TJS_N("atime"), nullptr, &vatime, dict);
 
             tTJSVariant val(dict, dict);
             array->PropSetByNum(0, count, &val, array);
@@ -653,20 +660,20 @@ public:
     static bool removeDirectory(ttstr dir)
     {
 
-        if (dir.GetLastChar() != TJS_W('/'))
+        if (dir.GetLastChar() != TJS_N('/'))
         {
             TVPThrowExceptionMessage(
-                TJS_W("'/' must be specified at the end of given directory name."));
+                TJS_N("'/' must be specified at the end of given directory name."));
         }
 
                // OSネイティブな表現に変換
         dir = TVPNormalizeStorageName(dir);
         TVPGetLocalName(dir);
 
-        const bool r = TVPDeleteFile(dir.AsNarrowStdString());
+        const bool r = TVPDeleteFile(dir.AsStdString());
         if (!r)
         {
-            TVPAddLog(ttstr(TJS_W("removeDirectory : ")) + dir + TJS_W(" failed."));
+            TVPAddLog(ttstr(TJS_N("removeDirectory : ")) + dir + TJS_N(" failed."));
         }
         return r;
     }
@@ -678,17 +685,17 @@ public:
      */
     static bool createDirectory(ttstr dir)
     {
-        if (dir.GetLastChar() != TJS_W('/'))
+        if (dir.GetLastChar() != TJS_N('/'))
         {
             TVPThrowExceptionMessage(
-                TJS_W("'/' must be specified at the end of given directory name."));
+                TJS_N("'/' must be specified at the end of given directory name."));
         }
         dir = TVPNormalizeStorageName(dir);
         TVPGetLocalName(dir);
-        const bool r = std::filesystem::create_directories(dir.AsNarrowStdString());
+        const bool r = std::filesystem::create_directories(dir.AsStdString());
         if (!r)
         {
-            TVPAddLog(ttstr(TJS_W("createDirectory : ")) + dir + TJS_W(" failed."));
+            TVPAddLog(ttstr(TJS_N("createDirectory : ")) + dir + TJS_N(" failed."));
         }
         return r;
     }
@@ -700,16 +707,16 @@ public:
      */
     static bool createDirectoryNoNormalize(ttstr dir)
     {
-        if (dir.GetLastChar() != TJS_W('/'))
+        if (dir.GetLastChar() != TJS_N('/'))
         {
             TVPThrowExceptionMessage(
-                TJS_W("'/' must be specified at the end of given directory name."));
+                TJS_N("'/' must be specified at the end of given directory name."));
         }
         TVPGetLocalName(dir);
-        const bool r = std::filesystem::create_directories(dir.AsNarrowStdString());
+        const bool r = std::filesystem::create_directories(dir.AsStdString());
         if (!r)
         {
-            TVPAddLog(ttstr(TJS_W("createDirectory : ")) + dir + TJS_W(" failed."));
+            TVPAddLog(ttstr(TJS_N("createDirectory : ")) + dir + TJS_N(" failed."));
         }
         return r;
     }
@@ -831,7 +838,7 @@ public:
         }
         catch (const std::filesystem::filesystem_error&)
         {
-            return 0xFFFFFFFF;
+            return 0xFFFF;
         }
         return attr;
     }
@@ -858,28 +865,28 @@ public:
 
                // title
         iTJSDispatch2* dsp = param[0]->AsObjectThisNoAddRef();
-        if (TJS_SUCCEEDED(dsp->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("caption"), 0, &val, dsp)))
+        if (TJS_SUCCEEDED(dsp->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("caption"), 0, &val, dsp)))
         {
-            title = tTJSNarrowStringHolder(val.AsStringNoAddRef()->operator const tjs_char*());
+            title = val.AsStringNoAddRef()->operator const tjs_char*();
         }
         // initial dir
-        if (TJS_SUCCEEDED(dsp->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("initialDir"), 0, &val, dsp)))
+        if (TJS_SUCCEEDED(dsp->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("initialDir"), 0, &val, dsp)))
         {
             ttstr lname(val);
             if (!lname.IsEmpty())
             {
                 TVPGetLocalName(lname);
-                initialdir = tTJSNarrowStringHolder(lname.c_str());
+                initialdir = lname.c_str();
             }
         }
         // rootDir
-        if (TJS_SUCCEEDED(dsp->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("rootDir"), 0, &val, dsp)))
+        if (TJS_SUCCEEDED(dsp->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("rootDir"), 0, &val, dsp)))
         {
             ttstr lname(val);
             if (!lname.IsEmpty())
             {
                 TVPGetLocalName(lname);
-                initialdir = tTJSNarrowStringHolder(lname.c_str());
+                initialdir = lname.c_str();
             }
         }
 
@@ -891,7 +898,7 @@ public:
             // returns some informations
             ttstr tresult = TVPNormalizeStorageName(ttstr(retDir.c_str()));
             val = tresult;
-            dsp->PropSet(TJS_MEMBERENSURE, TJS_W("name"), 0, &val, dsp);
+            dsp->PropSet(TJS_MEMBERENSURE, TJS_N("name"), 0, &val, dsp);
             return TJS_S_OK;
         }
 
@@ -906,14 +913,14 @@ public:
      */
     static int isExistentDirectory(ttstr dir)
     {
-        if (dir.GetLastChar() != TJS_W('/'))
+        if (dir.GetLastChar() != TJS_N('/'))
         {
             TVPThrowExceptionMessage(
-                TJS_W("'/' must be specified at the end of given directory name."));
+                TJS_N("'/' must be specified at the end of given directory name."));
         }
         dir = TVPNormalizeStorageName(dir);
         TVPGetLocalName(dir);
-        const std::string& p = dir.AsNarrowStdString();
+        const std::string& p = dir.AsStdString();
         return std::filesystem::exists(p) && std::filesystem::is_directory(p);
     }
 
@@ -937,7 +944,7 @@ private:
     {
         if (from.length() && to.length())
         {
-            if (TVPCopyFile(from.AsNarrowStdString(), to.AsNarrowStdString()))
+            if (TVPCopyFile(from.AsStdString(), to.AsStdString()))
             {
                 TVPClearStorageCaches();
                 return true;
@@ -987,7 +994,7 @@ public:
     {
         filename = TVPNormalizeStorageName(filename);
         TVPGetLocalName(filename);
-        std::filesystem::path p = filename.AsNarrowStdString();
+        std::filesystem::path p = filename.AsStdString();
         if (!std::filesystem::exists(p))
             return "";                // 文件不存在返回空
         return p.filename().string(); // 返回文件名部分
@@ -1010,7 +1017,7 @@ public:
         tTJSBinaryStream* in = TVPCreateBinaryStreamForRead(filename, "");
         if (!in)
             TVPThrowExceptionMessage(
-                (ttstr(TJS_W("cannot open : ")) + param[0]->GetString()).c_str());
+                (ttstr(TJS_N("cannot open : ")) + param[0]->GetString()).c_str());
 
         TVP_md5_state_t st;
         TVP_md5_init(&st);
@@ -1026,7 +1033,7 @@ public:
         TVP_md5_finish(&st, buffer);
 
         tjs_char ret[32 + 1]{};
-        static constexpr tjs_char hex[17] = TJS_W("0123456789abcdef");
+        static constexpr tjs_char hex[17] = TJS_N("0123456789abcdef");
         for (tjs_int i = 0; i < 16; i++)
         {
             ret[i * 2] = hex[buffer[i] >> 4 & 0xF];
@@ -1058,8 +1065,8 @@ public:
         if (TJS_PARAM_EXIST(1))
             searchpath = *param[1];
         if (const std::string& tmp =
-            _searchPath(filename.AsNarrowStdString(),
-                        searchpath.length() ? searchpath.AsNarrowStdString() : "");
+            _searchPath(filename.AsStdString(),
+                        searchpath.length() ? searchpath.AsStdString() : "");
             tmp.length() > 0)
         {
             if (result)
@@ -1081,7 +1088,7 @@ public:
     {
         const std::string crDir = TVPGetAppStoragePath().front();
         const ttstr result(crDir);
-        return TVPNormalizeStorageName(result + TJS_W("\\"));
+        return TVPNormalizeStorageName(result + TJS_N("\\"));
     }
 
     static void setCurrentPath(ttstr path) { changeDirectory(path); }
@@ -1118,7 +1125,7 @@ NCB_ATTACH_CLASS(StoragesFstat, Storages)
     RawCallback("getMD5HashString", &Class::getMD5HashString, TJS_STATICMEMBER);
     RawCallback("searchPath", &Class::searchPath, TJS_STATICMEMBER);
     Property("currentPath", &Class::getCurrentPath, &Class::setCurrentPath);
-    Method(TJS_W("getTemporaryName"), &TVPGetTemporaryName);
+    Method(TJS_N("getTemporaryName"), &TVPGetTemporaryName);
 };
 
 // テンポラリファイル処理用クラス
@@ -1136,13 +1143,13 @@ NCB_REGISTER_CLASS(TemporaryFiles)
 static void PostRegistCallback()
 {
     tTJSVariant var;
-    TVPExecuteExpression(TJS_W("Date"), &var);
+    TVPExecuteExpression(TJS_N("Date"), &var);
     dateClass = var.AsObject();
     var.Clear();
-    TVPExecuteExpression(TJS_W("Date.setTime"), &var);
+    TVPExecuteExpression(TJS_N("Date.setTime"), &var);
     dateSetTime = var.AsObject();
     var.Clear();
-    TVPExecuteExpression(TJS_W("Date.getTime"), &var);
+    TVPExecuteExpression(TJS_N("Date.getTime"), &var);
     dateGetTime = var.AsObject();
     var.Clear();
     TVPExecuteExpression(StoragesFstatPreScript);

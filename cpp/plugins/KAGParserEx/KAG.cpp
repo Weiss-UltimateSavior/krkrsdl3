@@ -2,7 +2,7 @@
 #include "KAGParserEx.hpp"
 #include "ncbind/ncbind.hpp"
 
-#define NCB_MODULE_NAME TJS_W("KAGParserEx.dll")
+#define NCB_MODULE_NAME TJS_N("KAGParserEx.dll")
 
 static iTJSDispatch2 *origKAGParser = NULL;
 

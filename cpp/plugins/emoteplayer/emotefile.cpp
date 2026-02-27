@@ -3934,7 +3934,7 @@ namespace emoteplayer
         switch (auto type = static_cast<PSB::PSBObjType>(typeByte))
         {
             case PSB::PSBObjType::None:
-                return NULL;
+                return tTJSVariant();
             case PSB::PSBObjType::Null:
                 return tTJSVariant();
             case PSB::PSBObjType::False:
@@ -4030,7 +4030,7 @@ namespace emoteplayer
                     tTJSVariant tmp(static_cast<tjs_int32>(i));
                     tTJSVariant* args[] = {&tmp};
                     static tjs_uint addHint = 0;
-                    array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+                    array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
                 }
                 tTJSVariant result(array, array);
                 array->Release();
@@ -4086,7 +4086,7 @@ namespace emoteplayer
                     tTJSVariant obj = readAllObjs(ttstr(), _tmpOffset + _offset);
                     tTJSVariant* args[] = {&obj};
                     static tjs_uint addHint = 0;
-                    array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+                    array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
                 }
                 tTJSVariant result(array, array);
                 array->Release();
@@ -4120,7 +4120,7 @@ namespace emoteplayer
             }
             default:
                 TVPConsoleLog("unknown psbObjType");
-                return NULL;
+                return tTJSVariant();
         }
     }
     uint32_t emotefile::readListInfo(std::vector<uint32_t>* target)

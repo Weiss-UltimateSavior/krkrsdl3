@@ -72,7 +72,7 @@ tTVPCharacterData::tTVPCharacterData( const tjs_uint8 * indata,
 tTVPCharacterData::tTVPCharacterData(const tTVPCharacterData &ref) {
     // コピーコンストラクタは未サポート
     TVPThrowExceptionMessage(
-        TJS_W("unimplemented: tTVPCharacterData::tTVPCharacterData(const "
+        TJS_N("unimplemented: tTVPCharacterData::tTVPCharacterData(const "
               "tTVPCharacterData & ref)"));
 }
 
@@ -91,7 +91,7 @@ void tTVPCharacterData::Alloc(tjs_int size)
 void tTVPCharacterData::Expand()
 {
 	if( FullColored )
-		TVPThrowExceptionMessage( TJS_W("unimplemented: tTVPCharacterData::Expand for FullColored") );
+		TVPThrowExceptionMessage( TJS_N("unimplemented: tTVPCharacterData::Expand for FullColored") );
 
 	// expand the bitmap stored in 1bpp, to 8bpp
 	tjs_int newpitch = (((BlackBoxX -1)>>2)+1)<<2;
@@ -115,7 +115,7 @@ void tTVPCharacterData::Expand()
 void tTVPCharacterData::Blur(tjs_int blurlevel, tjs_int blurwidth)
 {
 	if( FullColored )
-		TVPThrowExceptionMessage( TJS_W("unimplemented: tTVPCharacterData::Blur for FullColored") );
+		TVPThrowExceptionMessage( TJS_N("unimplemented: tTVPCharacterData::Blur for FullColored") );
 
 	// blur the bitmap with given parameters
 	// blur the bitmap
@@ -164,7 +164,7 @@ void tTVPCharacterData::Blur()
 void tTVPCharacterData::Bold(tjs_int size)
 {
 	if( FullColored )
-		TVPThrowExceptionMessage( TJS_W("unimplemented: tTVPCharacterData::Bold for FullColored") );
+		TVPThrowExceptionMessage( TJS_N("unimplemented: tTVPCharacterData::Bold for FullColored") );
 
 	// enbold the bitmap for 65-level grayscale bitmap
 	if(size < 0) size = -size;
@@ -209,7 +209,7 @@ void tTVPCharacterData::Bold(tjs_int size)
 void tTVPCharacterData::Bold2(tjs_int size)
 {
 	if( FullColored )
-		TVPThrowExceptionMessage( TJS_W("unimplemented: tTVPCharacterData::Bold2 for FullColored") );
+		TVPThrowExceptionMessage( TJS_N("unimplemented: tTVPCharacterData::Bold2 for FullColored") );
 
 	// enbold the bitmap for black/white monochrome bitmap
 	if(size < 0) size = -size;
@@ -258,7 +258,7 @@ void tTVPCharacterData::Bold2(tjs_int size)
 void tTVPCharacterData::Resample4()
 {
 	if( FullColored )
-		TVPThrowExceptionMessage( TJS_W("unimplemented: tTVPCharacterData::Resample4 for FullColored") );
+		TVPThrowExceptionMessage( TJS_N("unimplemented: tTVPCharacterData::Resample4 for FullColored") );
 
 	// down-sampling 4x4
 
@@ -335,7 +335,7 @@ void tTVPCharacterData::Resample4()
 void tTVPCharacterData::Resample8()
 {
 	if( FullColored )
-		TVPThrowExceptionMessage( TJS_W("unimplemented: tTVPCharacterData::Resample8 for FullColored") );
+		TVPThrowExceptionMessage( TJS_N("unimplemented: tTVPCharacterData::Resample8 for FullColored") );
 
 	// down-sampling 8x8
 
@@ -407,7 +407,7 @@ void tTVPCharacterData::Resample8()
 //---------------------------------------------------------------------------
 void tTVPCharacterData::AddHorizontalLine( tjs_int liney, tjs_int thickness, tjs_uint8 val ) {
 	if( FullColored )
-		TVPThrowExceptionMessage( TJS_W("unimplemented: tTVPCharacterData::AddHorizontalLine for FullColored") );
+		TVPThrowExceptionMessage( TJS_N("unimplemented: tTVPCharacterData::AddHorizontalLine for FullColored") );
 
 	tjs_int linetop = liney - thickness/2;
 	if( linetop < 0 ) linetop = 0;

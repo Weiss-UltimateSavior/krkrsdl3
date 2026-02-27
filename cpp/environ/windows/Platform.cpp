@@ -38,7 +38,7 @@ public:
 			RefCount--;
 	}
 
-	void GetName(ttstr& name) { name = TJS_W("file"); }
+	void GetName(ttstr& name) { name = TJS_N("file"); }
 
 	void NormalizeDomainName(ttstr& name);
 	void NormalizePathName(ttstr& name);
@@ -58,8 +58,8 @@ void tTVPFileMedia::NormalizeDomainName(ttstr& name)
 	tjs_char* p = name.Independ();
 	while (*p)
 	{
-		if (*p >= TJS_W('A') && *p <= TJS_W('Z'))
-			*p += TJS_W('a') - TJS_W('A');
+		if (*p >= TJS_N('A') && *p <= TJS_N('Z'))
+			*p += TJS_N('a') - TJS_N('A');
 		p++;
 	}
 }
@@ -71,8 +71,8 @@ void tTVPFileMedia::NormalizePathName(ttstr& name)
 	tjs_char* p = name.Independ();
 	while (*p)
 	{
-		if (*p >= TJS_W('A') && *p <= TJS_W('Z'))
-			*p += TJS_W('a') - TJS_W('A');
+		if (*p >= TJS_N('A') && *p <= TJS_N('Z'))
+			*p += TJS_N('a') - TJS_N('A');
 		p++;
 	}
 }
@@ -92,7 +92,7 @@ tTJSBinaryStream* tTVPFileMedia::Open(const ttstr& name, tjs_uint32 flags)
 	// open storage named "name".
 	// currently only local/network(by OS) storage systems are supported.
 	if (name.IsEmpty())
-		TVPThrowExceptionMessage(TVPCannotOpenStorage, TJS_W("\"\""));
+		TVPThrowExceptionMessage(TVPCannotOpenStorage, TJS_N("\"\""));
 
 	ttstr origname = name;
 	ttstr _name(name);
@@ -131,7 +131,7 @@ void tTVPFileMedia::GetLocallyAccessibleName(ttstr& name)
 
 	const tjs_char* ptr = name.c_str();
 
-	if (TJS_strncmp(ptr, TJS_W("./"), 2))
+	if (TJS_strncmp(ptr, TJS_N("./"), 2))
 	{
 		// differs from "./",
 		// this may be a UNC file name.
@@ -139,26 +139,26 @@ void tTVPFileMedia::GetLocallyAccessibleName(ttstr& name)
 		// AFAIK 32-bit version of Windows assumes that '/' can be used as a path
 		// delimiter. Can UNC "\\\\" be replaced by "//" though ?
 
-		newname = ttstr(TJS_W("\\\\")) + ptr;
+		newname = ttstr(TJS_N("\\\\")) + ptr;
 	}
 	else
 	{
 		ptr += 2;  // skip "./"
 		if (!*ptr) {
-			newname = TJS_W("");
+			newname = TJS_N("");
 		}
 		else {
 			tjs_char dch = *ptr;
-			if (*ptr < TJS_W('a') || *ptr > TJS_W('z')) {
-				newname = TJS_W("");
+			if (*ptr < TJS_N('a') || *ptr > TJS_N('z')) {
+				newname = TJS_N("");
 			}
 			else {
 				ptr++;
-				if (*ptr != TJS_W('/')) {
-					newname = TJS_W("");
+				if (*ptr != TJS_N('/')) {
+					newname = TJS_N("");
 				}
 				else {
-					newname = ttstr(dch) + TJS_W(":") + ptr;
+					newname = ttstr(dch) + TJS_N(":") + ptr;
 				}
 			}
 		}
@@ -168,7 +168,7 @@ void tTVPFileMedia::GetLocallyAccessibleName(ttstr& name)
 	tjs_char* pp = newname.Independ();
 	while (*pp)
 	{
-		if (*pp == TJS_W('/')) *pp = TJS_W('\\');
+		if (*pp == TJS_N('/')) *pp = TJS_N('\\');
 		pp++;
 	}
 	name = newname;
@@ -248,17 +248,6 @@ extern "C" int usleep(unsigned long us) {
 	Sleep(us / 1000);
 	return 0;
 }
-std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-std::string TVPGetDefaultFileDir() {
-	wchar_t buf[MAX_PATH];
-	_wgetcwd(buf, sizeof(buf) / sizeof(buf[0]));
-	wchar_t* p = buf;
-	while (*p) {
-		if (*p == '\\') *p = '/';
-		++p;
-	}
-	return converter.to_bytes(buf);
-}
 
 void TVPCheckAndSendDumps(const std::string& dumpdir, const std::string& packageName, const std::string& versionStr);
 bool TVPCheckStartupArg() {
@@ -278,12 +267,6 @@ std::vector<std::string> TVPGetDriverPath() {
 			break;
 		}
 	}
-	return ret;
-}
-
-std::vector<std::string> TVPGetAppStoragePath() {
-	std::vector<std::string> ret;
-	ret.emplace_back(TVPGetDefaultFileDir());
 	return ret;
 }
 
@@ -312,17 +295,17 @@ static bool _TVPCreateFolders(const ttstr& folder)
     const tjs_char *p = folder.c_str();
     tjs_int i = folder.GetLen() - 1;
 
-    if(p[i] == TJS_W(':'))
+    if(p[i] == TJS_N(':'))
         return true;
 
-    while(i >= 0 && (p[i] == TJS_W('/') || p[i] == TJS_W('\\')))
+    while(i >= 0 && (p[i] == TJS_N('/') || p[i] == TJS_N('\\')))
         i--;
 
-    if(i >= 0 && p[i] == TJS_W(':'))
+    if(i >= 0 && p[i] == TJS_N(':'))
         return true;
 
     for(; i >= 0; i--) {
-        if(p[i] == TJS_W(':') || p[i] == TJS_W('/') || p[i] == TJS_W('\\'))
+        if(p[i] == TJS_N(':') || p[i] == TJS_N('/') || p[i] == TJS_N('\\'))
             break;
     }
 
@@ -341,9 +324,9 @@ bool TVPCreateFolders(const ttstr& folder)
 	const tjs_char* p = folder.c_str();
 	tjs_int i = folder.GetLen() - 1;
 
-	if (p[i] == TJS_W(':')) return true;
+	if (p[i] == TJS_N(':')) return true;
 
-	if (p[i] == TJS_W('/') || p[i] == TJS_W('\\')) i--;
+	if (p[i] == TJS_N('/') || p[i] == TJS_N('\\')) i--;
 
 	return _TVPCreateFolders(ttstr(p, i + 1));
 }
@@ -487,11 +470,6 @@ void TVPPrintLog(const char* str) {
 	printf("%s", str);
 }
 
-bool TVP_stat(const tjs_char* name, tTVP_stat& s) {
-	tTJSNarrowStringHolder holder(name);
-	return TVP_stat(holder, s);
-}
-
 bool TVP_stat(const char* name, tTVP_stat& s) {
     struct stat t;
     bool ret = !stat(name, &t);
@@ -586,12 +564,12 @@ void TVPPreNormalizeStorageName(ttstr& name)
 	if (namelen == 0) return;
 	if (namelen >= 2)
 	{
-		if ((name[0] >= TJS_W('a') && name[0] <= TJS_W('z') ||
-			name[0] >= TJS_W('A') && name[0] <= TJS_W('Z')) &&
-			name[1] == TJS_W(':'))
+		if ((name[0] >= TJS_N('a') && name[0] <= TJS_N('z') ||
+			name[0] >= TJS_N('A') && name[0] <= TJS_N('Z')) &&
+			name[1] == TJS_N(':'))
 		{
 			// Windows drive:path expression
-			ttstr newname(TJS_W("file://./"));
+			ttstr newname(TJS_N("file://./"));
 			newname += name[0];
 			newname += (name.c_str() + 2);
 			name = newname;
@@ -601,11 +579,11 @@ void TVPPreNormalizeStorageName(ttstr& name)
 
 	if (namelen >= 3)
 	{
-		if (name[0] == TJS_W('\\') && name[1] == TJS_W('\\') ||
-			name[0] == TJS_W('/') && name[1] == TJS_W('/'))
+		if (name[0] == TJS_N('\\') && name[1] == TJS_N('\\') ||
+			name[0] == TJS_N('/') && name[1] == TJS_N('/'))
 		{
 			// unc expression
-			name = ttstr(TJS_W("file:")) + name;
+			name = ttstr(TJS_N("file:")) + name;
 			return;
 		}
 	}

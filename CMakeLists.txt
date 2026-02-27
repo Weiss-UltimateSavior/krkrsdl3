@@ -20,13 +20,12 @@ if(ANDROID)
     endif()
     set(CMAKE_ANDROID_NDK $ENV{ANDROID_NDK_HOME})
     set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE $ENV{ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake)
-    set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 elseif(LINUX)
-    # 直接使用系统包管理器，不然容易出现问题
+    set(VCPKG_TARGET_TRIPLET "x64-linux-release")
 elseif(WINDOWS)
     set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic")
-    set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 endif()
+set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
 
 # 建立项目

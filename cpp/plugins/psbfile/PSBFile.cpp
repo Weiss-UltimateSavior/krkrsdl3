@@ -243,7 +243,7 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
     switch (auto type = static_cast<PSB::PSBObjType>(typeByte))
     {
         case PSB::PSBObjType::None:
-            return NULL;
+            return tTJSVariant();;
         case PSB::PSBObjType::Null:
             return tTJSVariant();
         case PSB::PSBObjType::False:
@@ -339,7 +339,7 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
                 tTJSVariant tmp(static_cast<tjs_int32>(i));
                 tTJSVariant* args[] = {&tmp};
                 static tjs_uint addHint = 0;
-                array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+                array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
             }
             tTJSVariant result(array, array);
             array->Release();
@@ -430,7 +430,7 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
                 tTJSVariant obj = readAllObjs(ttstr(), _tmpOffset + _offset);
                 tTJSVariant* args[] = {&obj};
                 static tjs_uint addHint = 0;
-                array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+                array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
             }
             tTJSVariant result(array, array);
             array->Release();
@@ -464,7 +464,7 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
         }
         default:
             TVPConsoleLog("unknown psbObjType");
-            return NULL;
+            return tTJSVariant();
     }
 }
 
@@ -472,7 +472,7 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
 // tTJSNC_PsbFile : PsbFile TJS native class
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_PsbFile::ClassID = (tjs_uint32)-1;
-tTJSNC_PsbFile::tTJSNC_PsbFile() : tTJSNativeClass(TJS_W("PSBFile"))
+tTJSNC_PsbFile::tTJSNC_PsbFile() : tTJSNativeClass(TJS_N("PSBFile"))
 {
     TJS_BEGIN_NATIVE_MEMBERS(PSBFile)
     //----------------------------------------------------------------------

@@ -9,7 +9,7 @@ namespace PSB
 
 void PSBMedia::NormalizeDomainName(ttstr& name)
 {
-    tjs_int dotIndex = name.IndexOf(TJS_W('.'));
+    tjs_int dotIndex = name.IndexOf(TJS_N('.'));
     if (dotIndex == -1)
         return;
     name = name.SubString(0, dotIndex) + name.SubString(dotIndex, name.GetLen()).AsLowerCase();
@@ -22,7 +22,7 @@ void PSBMedia::NormalizePathName(ttstr& name)
 
 bool PSBMedia::CheckExistentStorage(const ttstr& name)
 {
-    tjs_int dotIndex = name.IndexOf(TJS_W('/'));
+    tjs_int dotIndex = name.IndexOf(TJS_N('/'));
     if (dotIndex == -1)
         return false;
     std::map<ttstr, PSBMediaInfo>::iterator iterFile = _resources.find(name.SubString(0, dotIndex));
@@ -43,7 +43,7 @@ bool PSBMedia::CheckExistentStorage(const ttstr& name)
 
 tTJSBinaryStream* PSBMedia::Open(const ttstr& name, tjs_uint32 flags)
 {
-    tjs_int dotIndex = name.IndexOf(TJS_W('/'));
+    tjs_int dotIndex = name.IndexOf(TJS_N('/'));
     if (dotIndex == -1)
         return nullptr;
     std::map<ttstr, PSBMediaInfo>::iterator iterFile = _resources.find(name.SubString(0, dotIndex));
@@ -68,13 +68,13 @@ tTJSBinaryStream* PSBMedia::Open(const ttstr& name, tjs_uint32 flags)
 void PSBMedia::GetListAt(const ttstr& name, iTVPStorageLister* lister)
 {
     // nothing to do
-    SDL_Log("PSB:GetListAt");
+    SDL_Log("TODO PSB:GetListAt");
 }
 
 void PSBMedia::GetLocallyAccessibleName(ttstr& name)
 {
     // nothing to do
-    SDL_Log("PSB:GetLocallyAccessibleName");
+    SDL_Log("TODO PSB:GetLocallyAccessibleName");
 }
 
 void PSBMedia::AddPSBFile(const ttstr& name, PSBMediaInfo data)

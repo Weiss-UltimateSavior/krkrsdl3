@@ -222,7 +222,7 @@ void tTJSNI_Bitmap::CopyFrom(const iTVPBaseBitmap *src) {
 tjs_uint32 tTJSNC_Bitmap::ClassID = -1;
 
 //----------------------------------------------------------------------
-tTJSNC_Bitmap::tTJSNC_Bitmap() : inherited(TJS_W("Bitmap")) {
+tTJSNC_Bitmap::tTJSNC_Bitmap() : inherited(TJS_N("Bitmap")) {
 
 	// registration of native members
 
@@ -319,7 +319,7 @@ tTJSNC_Bitmap::tTJSNC_Bitmap() : inherited(TJS_W("Bitmap")) {
 		TJS_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tTJSNI_Bitmap);
 		if (numparams < 1) return TJS_E_BADPARAMCOUNT;
 		ttstr name(*param[0]);
-		ttstr type(TJS_W("bmp"));
+		ttstr type(TJS_N("bmp"));
 		if (numparams >= 2 && param[1]->Type() != tvtVoid)
 			type = *param[1];
 		iTJSDispatch2* meta = NULL;

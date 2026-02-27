@@ -11,7 +11,7 @@ tTVPPrerenderedFont::tTVPPrerenderedFont(const ttstr &storage)
 	RefCount = 1;
 	Storage = storage;
 
-	tTJSBinaryStream* stream = TVPCreateBinaryStreamForRead( storage, TJS_W("") );
+	tTJSBinaryStream* stream = TVPCreateBinaryStreamForRead( storage, TJS_N("") );
 	if( stream == NULL ) {
 		TVPThrowExceptionMessage(TVPCannotOpenStorage, storage);
 	}
@@ -49,7 +49,7 @@ tTVPPrerenderedFont::tTVPPrerenderedFont(const ttstr &storage)
 
 		// read index offset
 		IndexCount = *(const tjs_uint32*)(Image + 24);
-		ChIndex = (const tjs_char*)(Image + *(const tjs_uint32*)(Image + 28));
+		ChIndex = (const tjs_wchar*)(Image + *(const tjs_uint32*)(Image + 28));
 		Index = (const tTVPPrerenderedCharacterItem*)(Image + *(const tjs_uint32*)(Image + 32));
 	} catch(...) {
 		if( stream ) delete stream;
@@ -80,12 +80,12 @@ void tTVPPrerenderedFont::Release()
 }
 //---------------------------------------------------------------------------
 const tTVPPrerenderedCharacterItem *
-		tTVPPrerenderedFont::Find(tjs_char ch)
+		tTVPPrerenderedFont::Find(tjs_wchar ch)
 {
 	// search through ChIndex
 	tjs_uint s = 0;
 	tjs_uint e = IndexCount;
-	const tjs_char *chindex = ChIndex;
+	const tjs_wchar *chindex = ChIndex;
 	while(true)
 	{
 		tjs_int d = e-s;

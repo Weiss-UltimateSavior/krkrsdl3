@@ -20,10 +20,10 @@ struct ObjectCache
 	ObjectCache(DispatchT obj, NameT name) : _obj(obj), _cache(0), _name(name) {
 
 		tTJSVariant layer;
-		TVPExecuteExpression(TJS_W("Layer"), &layer);
+		TVPExecuteExpression(TJS_N("Layer"), &layer);
 		tTJSVariant var;
 		if (TJS_SUCCEEDED(layer.AsObjectNoAddRef()->PropGet(TJS_IGNOREPROP, name, NULL, &var, layer.AsObjectNoAddRef()))) _cache = var;
-		else _Exception(TJS_W("FAILED: get property object :"));
+		else _Exception(TJS_N("FAILED: get property object :"));
 	}
 
 	~ObjectCache() {
@@ -33,7 +33,7 @@ struct ObjectCache
 	inline VariantT GetValue() const {
 		VariantT var;
 		if (TJS_FAILED(_cache->PropGet(0, 0, 0, &var, _obj)))
-			_Exception(TJS_W("FAILED: get property value :"));
+			_Exception(TJS_N("FAILED: get property value :"));
 		return var;
 	}
 	inline operator VariantT() const { return GetValue(); }
@@ -42,14 +42,14 @@ struct ObjectCache
 	inline VariantT operator ()(int numparams, VariantT **param) {
 		VariantT var;
 		if (TJS_FAILED(_cache->FuncCall(0, 0, 0, &var, numparams, param, _obj)))
-			_Exception(TJS_W("FAILED: function call :"));
+			_Exception(TJS_N("FAILED: function call :"));
 		return var;
 	}
 
 	inline void SetValue(int n) const {
 		VariantT var = n;
 		if (TJS_FAILED(_cache->PropSet(0, 0, 0, &var, _obj)))
-			_Exception(TJS_W("FAILED: get property value :"));
+			_Exception(TJS_N("FAILED: get property value :"));
 	}
 
 private:
@@ -78,15 +78,15 @@ struct layerExBase
 	 */
 	layerExBase(DispatchT obj)
 		: _obj(obj),
-		  _pWidth( obj, TJS_W("imageWidth")),
-		  _pHeight(obj, TJS_W("imageHeight")),
-		  //_pBuffer(obj, TJS_W("mainImageBufferForWrite")),
-		  //_pPitch( obj, TJS_W("mainImageBufferPitch")),
-		  _pUpdate(obj, TJS_W("update")),
-		  _pClipLeft(  obj, TJS_W("clipLeft")),
-	      _pClipTop(   obj, TJS_W("clipTop")),
-	      _pClipWidth( obj, TJS_W("clipWidth")),
-	      _pClipHeight(obj, TJS_W("clipHeight")),
+		  _pWidth( obj, TJS_N("imageWidth")),
+		  _pHeight(obj, TJS_N("imageHeight")),
+		  //_pBuffer(obj, TJS_N("mainImageBufferForWrite")),
+		  //_pPitch( obj, TJS_N("mainImageBufferPitch")),
+		  _pUpdate(obj, TJS_N("update")),
+		  _pClipLeft(  obj, TJS_N("clipLeft")),
+	      _pClipTop(   obj, TJS_N("clipTop")),
+	      _pClipWidth( obj, TJS_N("clipWidth")),
+	      _pClipHeight(obj, TJS_N("clipHeight")),
 		  _width(0), _height(0), /*_pitch(0),*/ /*_buffer(0),*/ _clipLeft(0), _clipTop(0), _clipWidth(0), _clipHeight(0)
 	{
 	}
@@ -155,7 +155,7 @@ struct layerExBase_GL
         tjs_error hr; 
         hr = obj->NativeInstanceSupport(TJS_NIS_GETINSTANCE, 
             tTJSNC_Layer::ClassID, (iTJSNativeInstance**)&_this);
-        if(TJS_FAILED(hr)) TVPThrowExceptionMessage(TJS_W("Not Layer"));
+        if(TJS_FAILED(hr)) TVPThrowExceptionMessage(TJS_N("Not Layer"));
         _buffer = nullptr;
         _pitch = 0;
         reset();

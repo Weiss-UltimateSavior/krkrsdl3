@@ -56,7 +56,7 @@ void tTJSNI_BaseTimer::Invalidate() {
 void tTJSNI_BaseTimer::Fire(tjs_uint n) {
     if(!Owner)
         return;
-    static ttstr eventname(TJS_W("onTimer"));
+    static ttstr eventname(TJS_N("onTimer"));
 
     tjs_int count = TVPCountEventsInQueue(Owner, Owner, eventname, 0);
 
@@ -95,7 +95,7 @@ void tTJSNI_BaseTimer::Fire(tjs_uint n) {
 void tTJSNI_BaseTimer::CancelEvents() {
     // cancel all events
     if(Owner) {
-        static ttstr eventname(TJS_W("onTimer"));
+        static ttstr eventname(TJS_N("onTimer"));
         TVPCancelEvents(Owner, Owner, eventname, 0);
     }
 }
@@ -104,7 +104,7 @@ bool tTJSNI_BaseTimer::AreEventsInQueue() {
     // are events in event queue ?
 
     if(Owner) {
-        static ttstr eventname(TJS_W("onTimer"));
+        static ttstr eventname(TJS_N("onTimer"));
         return TVPAreEventsInQueue(Owner, Owner, eventname, 0);
     }
     return 0;
@@ -475,7 +475,7 @@ void tTJSNI_Timer::FirePendingEventsAndClear() {
 // tTJSNC_Timer
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Timer::ClassID = -1;
-tTJSNC_Timer::tTJSNC_Timer() : inherited(TJS_W("Timer"))
+tTJSNC_Timer::tTJSNC_Timer() : inherited(TJS_N("Timer"))
 {
 	// registration of native members
 
@@ -614,10 +614,10 @@ tTJSNC_Timer::tTJSNC_Timer() : inherited(TJS_W("Timer"))
 
 
 		tTJSVariant val;
-	if (TVPGetCommandLine(TJS_W("-laxtimer"), &val))
+	if (TVPGetCommandLine(TJS_N("-laxtimer"), &val))
 	{
 		ttstr str(val);
-		if (str == TJS_W("yes"))
+		if (str == TJS_N("yes"))
 			TVPLimitTimerCapacity = true;
 	}
 

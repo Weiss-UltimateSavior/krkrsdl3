@@ -39,11 +39,11 @@ static tjs_uint32 TJSRegExpFlagToValue(tjs_char ch, tjs_uint32 prev)
 
 	switch(ch)
 	{
-	case TJS_W('g'): // global search
+	case TJS_N('g'): // global search
 		prev|=globalsearch; return prev;
-	case TJS_W('i'): // ignore case
+	case TJS_N('i'): // ignore case
 		prev|=ONIG_OPTION_IGNORECASE; return prev;
-	case TJS_W('l'): // use localized collation
+	case TJS_N('l'): // use localized collation
 		/*prev &= ~regbase::nocollate;*/ return prev; // ignore
 	default:
 		return prev;
@@ -56,7 +56,7 @@ static tjs_uint32 TJSGetRegExpFlagsFromString(const tjs_char *string)
 
 	tjs_uint32 flag = TJSRegExpFlagToValue(0, 0);
 
-	while(*string && *string != TJS_W('/'))
+	while(*string && *string != TJS_N('/'))
 	{
 		flag = TJSRegExpFlagToValue(*string, flag);
 		string++;
@@ -201,7 +201,7 @@ tTJSVariant tTJSNC_RegExp::LastRegExp;
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_RegExp::ClassID = (tjs_uint32)-1;
 tTJSNC_RegExp::tTJSNC_RegExp() :
-	tTJSNativeClass(TJS_W("RegExp"))
+	tTJSNativeClass(TJS_N("RegExp"))
 {
 	// class constructor
 
@@ -256,14 +256,14 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/_compile)
 	if(numparams != 1) return TJS_E_BADPARAMCOUNT;
 
         ttstr expr = *param[0];
-        expr.Replace(TJS_W("\\x0100-\\xFFFF"), "\\w");
+        expr.Replace(TJS_N("\\x0100-\\xFFFF"), "\\w");
         const tjs_char* p = expr.c_str();
 	if(!p || !p[0]) return TJS_E_FAIL;
 
-	if(p[0] != TJS_W('/') || p[1] != TJS_W('/')) return TJS_E_FAIL;
+	if(p[0] != TJS_N('/') || p[1] != TJS_N('/')) return TJS_E_FAIL;
 
 	p+=2;
-	const tjs_char *exprstart = TJS_strchr(p, TJS_W('/'));
+	const tjs_char *exprstart = TJS_strchr(p, TJS_N('/'));
 	if(!exprstart) return TJS_E_FAIL;
 	exprstart ++;
 
@@ -278,7 +278,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/_compile)
 		OnigErrorInfo einfo;
                 int r = onig_new(&(_this->RegEx), (UChar *)exprstart,
                                  (UChar *)(expr.c_str() + expr.length()),
-			flags&((ONIG_OPTION_MAXBIT<<1)-1), ONIG_ENCODING_UTF16_LE, ONIG_SYNTAX_PERL, &einfo );
+			flags&((ONIG_OPTION_MAXBIT<<1)-1), ONIG_ENCODING_UTF8, ONIG_SYNTAX_PERL, &einfo );
 		if( r ) {
 			char s[ONIG_MAX_ERROR_MESSAGE_LEN];
 			onig_error_code_to_str( (UChar* )s, r, &einfo );
@@ -622,7 +622,7 @@ void tTJSNC_RegExp::Compile(tjs_int numparams, tTJSVariant **param, tTJSNI_RegEx
 		flags = TJSRegExpFlagToValue(0, 0);
 	}
 
-	if(expr.IsEmpty()) expr = TJS_W("(?:)"); // generate empty regular expression
+	if(expr.IsEmpty()) expr = TJS_N("(?:)"); // generate empty regular expression
 
 	if( _this->RegEx ) {
 		onig_free( _this->RegEx );
@@ -630,7 +630,7 @@ void tTJSNC_RegExp::Compile(tjs_int numparams, tTJSVariant **param, tTJSNI_RegEx
 	}
 	OnigErrorInfo einfo;
 	int r = onig_new( &(_this->RegEx), (UChar*)expr.c_str(), (UChar*)(expr.c_str()+expr.length()),
-		flags&((ONIG_OPTION_MAXBIT<<1)-1), ONIG_ENCODING_UTF16_LE, ONIG_SYNTAX_PERL, &einfo );
+		flags&((ONIG_OPTION_MAXBIT<<1)-1), ONIG_ENCODING_UTF8, ONIG_SYNTAX_PERL, &einfo );
 	if( r ) {
 		char s[ONIG_MAX_ERROR_MESSAGE_LEN];
 		onig_error_code_to_str( (UChar* )s, r, &einfo );
@@ -701,7 +701,7 @@ iTJSDispatch2 * tTJSNC_RegExp::GetResultArray( bool matched, const tjs_char *tar
 	if( matched ) {
 		//if(_this->RegEx->.empty()) {
 		if( region->num_regs <= 0 ) {
-			tTJSVariant val(TJS_W(""));
+			tTJSVariant val(TJS_N(""));
 			array->PropSetByNum(TJS_MEMBERENSURE|TJS_IGNOREPROP, 0, &val, array);
 		} else {
 			tjs_uint size = region->num_regs;

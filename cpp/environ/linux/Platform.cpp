@@ -42,7 +42,7 @@ public:
 			RefCount--;
 	}
 
-	void GetName(ttstr& name) { name = TJS_W("file"); }
+	void GetName(ttstr& name) { name = TJS_N("file"); }
 
 	void NormalizeDomainName(ttstr& name);
 	void NormalizePathName(ttstr& name);
@@ -62,8 +62,8 @@ void tTVPFileMedia::NormalizeDomainName(ttstr& name)
 	tjs_char* p = name.Independ();
 	while (*p)
 	{
-		if (*p >= TJS_W('A') && *p <= TJS_W('Z'))
-			*p += TJS_W('a') - TJS_W('A');
+		if (*p >= TJS_N('A') && *p <= TJS_N('Z'))
+			*p += TJS_N('a') - TJS_N('A');
 		p++;
 	}
 }
@@ -75,8 +75,8 @@ void tTVPFileMedia::NormalizePathName(ttstr& name)
 	tjs_char* p = name.Independ();
 	while (*p)
 	{
-		if (*p >= TJS_W('A') && *p <= TJS_W('Z'))
-			*p += TJS_W('a') - TJS_W('A');
+		if (*p >= TJS_N('A') && *p <= TJS_N('Z'))
+			*p += TJS_N('a') - TJS_N('A');
 		p++;
 	}
 }
@@ -96,7 +96,7 @@ tTJSBinaryStream* tTVPFileMedia::Open(const ttstr& name, tjs_uint32 flags)
 	// open storage named "name".
 	// currently only local/network(by OS) storage systems are supported.
 	if (name.IsEmpty())
-		TVPThrowExceptionMessage(TVPCannotOpenStorage, TJS_W("\"\""));
+		TVPThrowExceptionMessage(TVPCannotOpenStorage, TJS_N("\"\""));
 
 	ttstr origname = name;
 	ttstr _name(name);
@@ -135,27 +135,27 @@ void tTVPFileMedia::GetLocallyAccessibleName(ttstr& name)
 
 	const tjs_char* ptr = name.c_str();
 
-	if (!TJS_strncmp(ptr, TJS_W("./"), 2)) {
+	if (!TJS_strncmp(ptr, TJS_N("./"), 2)) {
 		ptr += 2;  // skip "./"
 		newname.Clear();
 	}
 
 	while (*ptr) {
 		const tjs_char* ptr_end = ptr;
-		while (*ptr_end && *ptr_end != TJS_W('/')) ++ptr_end;
+		while (*ptr_end && *ptr_end != TJS_N('/')) ++ptr_end;
 		if (ptr_end == ptr) break;
 		const tjs_char* ptr_cur = ptr;
-		tTJSNarrowStringHolder walker(ttstr(ptr, ptr_end - ptr).c_str());
-		while (*ptr_end && *ptr_end == TJS_W('/')) ++ptr_end;
+		ttstr walker(ptr, ptr_end - ptr);
+		while (*ptr_end && *ptr_end == TJS_N('/')) ++ptr_end;
 		ptr = ptr_end;
 
 		DIR* dirp;
 		struct dirent* direntp;
 		newname += "/";
-		if ((dirp = opendir(tTJSNarrowStringHolder(newname.c_str())))) {
+		if ((dirp = opendir(newname.c_str()))) {
 			bool found = false;
 			while ((direntp = readdir(dirp)) != NULL) {
-				if (!_utf8_strcasecmp(walker, direntp->d_name)) {
+				if (!_utf8_strcasecmp(walker.c_str(), direntp->d_name)) {
 					newname += direntp->d_name;
 					found = true;
 					break;
@@ -257,39 +257,6 @@ void TVPGetMemoryInfo(TVPMemoryInfo& m)
     fclose(meminfo);
 }
 
-// int gettimeofday(struct timeval * val, struct timezone *)
-// {
-// 	if (val)
-// 	{
-// 		LARGE_INTEGER liTime, liFreq;
-// 		QueryPerformanceFrequency(&liFreq);
-// 		QueryPerformanceCounter(&liTime);
-// 		val->tv_sec = (long)(liTime.QuadPart / liFreq.QuadPart);
-// 		val->tv_usec = (long)(liTime.QuadPart * 1000000.0 / liFreq.QuadPart - val->tv_sec * 1000000.0);
-// 	}
-// 	return 0;
-// }
-
-//extern "C" __declspec(dllimport) int __cdecl __wgetmainargs(int * _Argc, wchar_t *** _Argv, wchar_t *** _Env, int _DoWildCard, void * _StartInfo);
-#define PATH_MAX 260
-std::string TVPGetDefaultFileDir() {
-	char buffer[PATH_MAX];
-    ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-    if(len == -1) {
-        // 错误处理（例如抛出异常或返回空字符串）
-        return "";
-    }
-    buffer[len] = '\0'; // 手动添加终止符
-    // symbol link
-    char* resolved = realpath(buffer, nullptr);
-    if(resolved != nullptr) {
-        std::string result(resolved);
-        free(resolved);  // 记得释放内存
-        return result;
-    }
-    return std::string(buffer);
-}
-
 void TVPCheckAndSendDumps(const std::string& dumpdir, const std::string& packageName, const std::string& versionStr);
 bool TVPCheckStartupArg() {
 	return false;
@@ -297,12 +264,6 @@ bool TVPCheckStartupArg() {
 
 std::vector<std::string> TVPGetDriverPath() {
 	return { "/" };
-}
-
-std::vector<std::string> TVPGetAppStoragePath() {
-	std::vector<std::string> ret;
-	ret.emplace_back(TVPGetDefaultFileDir());
-	return ret;
 }
 
 bool TVPCheckStartupPath(const std::string& path) { return true; }
@@ -330,17 +291,17 @@ static bool _TVPCreateFolders(const ttstr& folder)
     const tjs_char *p = folder.c_str();
     tjs_int i = folder.GetLen() - 1;
 
-    if(p[i] == TJS_W(':'))
+    if(p[i] == TJS_N(':'))
         return true;
 
-    while(i >= 0 && (p[i] == TJS_W('/') || p[i] == TJS_W('\\')))
+    while(i >= 0 && (p[i] == TJS_N('/') || p[i] == TJS_N('\\')))
         i--;
 
-    if(i >= 0 && p[i] == TJS_W(':'))
+    if(i >= 0 && p[i] == TJS_N(':'))
         return true;
 
     for(; i >= 0; i--) {
-        if(p[i] == TJS_W(':') || p[i] == TJS_W('/') || p[i] == TJS_W('\\'))
+        if(p[i] == TJS_N(':') || p[i] == TJS_N('/') || p[i] == TJS_N('\\'))
             break;
     }
 
@@ -360,9 +321,9 @@ bool TVPCreateFolders(const ttstr& folder)
 	const tjs_char* p = folder.c_str();
 	tjs_int i = folder.GetLen() - 1;
 
-	if (p[i] == TJS_W(':')) return true;
+	if (p[i] == TJS_N(':')) return true;
 
-	if (p[i] == TJS_W('/') || p[i] == TJS_W('\\')) i--;
+	if (p[i] == TJS_N('/') || p[i] == TJS_N('\\')) i--;
 
 	return _TVPCreateFolders(ttstr(p, i + 1));
 }
@@ -493,11 +454,6 @@ void TVPPrintLog(const char* str) {
 	printf("%s", str);
 }
 
-bool TVP_stat(const tjs_char* name, tTVP_stat& s) {
-	tTJSNarrowStringHolder holder(name);
-	return TVP_stat(holder, s);
-}
-
 bool TVP_stat(const char* name, tTVP_stat& s) {
     struct stat t;
     // static_assert(sizeof(t.st_size) == 4, "");
@@ -544,7 +500,7 @@ void TVPGetLocalFileListAt(const ttstr& name, const std::function<void(const tts
 	DIR* dirp;
 	struct dirent* direntp;
 	tTVP_stat stat_buf;
-	std::string folder(name.AsNarrowStdString());
+	std::string folder(name.AsStdString());
 	if ((dirp = opendir(folder.c_str())))
 	{
 		while ((direntp = readdir(dirp)) != NULL)
@@ -554,15 +510,15 @@ void TVPGetLocalFileListAt(const ttstr& name, const std::function<void(const tts
 				continue;
 			ttstr file(direntp->d_name);
 			if (file.length() <= 2) {
-				if (file == TJS_W(".") || file == TJS_W(".."))
+				if (file == TJS_N(".") || file == TJS_N(".."))
 					continue;
 			}
 			tjs_char* p = file.Independ();
 			while (*p)
 			{
 				// make all characters small
-				if (*p >= TJS_W('A') && *p <= TJS_W('Z'))
-					*p += TJS_W('a') - TJS_W('A');
+				if (*p >= TJS_N('A') && *p <= TJS_N('Z'))
+					*p += TJS_N('a') - TJS_N('A');
 				p++;
 			}
 			tTVPLocalFileInfo info;
@@ -596,8 +552,8 @@ void TVPPreNormalizeStorageName(ttstr& name)
     if(namelen == 0)
         return;
     if(namelen >= 1) {
-        if(name[0] == TJS_W('/')) {
-            name = ttstr(TJS_W("file://.")) + name;
+        if(name[0] == TJS_N('/')) {
+            name = ttstr(TJS_N("file://.")) + name;
             return;
         }
     }

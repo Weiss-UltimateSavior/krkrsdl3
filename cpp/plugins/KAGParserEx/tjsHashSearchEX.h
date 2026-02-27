@@ -96,30 +96,6 @@ namespace TJSEX {
         }
     };
     //---------------------------------------------------------------------------
-    template <>
-    class tTJSHashFunc<tjs_nchar *> // a specialized template of tTJSHashFunc
-                                    // for tjs_nchar
-    {
-    public:
-        static tjs_uint32 Make(const tjs_nchar *str) {
-            if(!str)
-                return 0;
-            tjs_uint32 ret = 0;
-            while(*str) {
-                ret += *str;
-                ret += (ret << 10);
-                ret ^= (ret >> 6);
-                str++;
-            }
-            ret += (ret << 3);
-            ret ^= (ret >> 11);
-            ret += (ret << 15);
-            if(!ret)
-                ret = (tjs_uint32)-1;
-            return ret;
-        }
-    };
-    //---------------------------------------------------------------------------
     // tTJSHashTable : a simple implementation of Chain Hash algorithm
     //---------------------------------------------------------------------------
     /*

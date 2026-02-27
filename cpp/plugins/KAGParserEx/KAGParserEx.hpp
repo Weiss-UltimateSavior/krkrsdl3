@@ -6,7 +6,7 @@
 #include "tjsNative.h"
 #include "tjsArray.h"
 
-#define TVP_KAGPARSER_EX_CLASSNAME TJS_W("KAGParser")
+#define TVP_KAGPARSER_EX_CLASSNAME TJS_N("KAGParser")
 
 #define TVP_KAGPARSER_CONCAT(a, b) a##b
 

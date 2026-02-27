@@ -297,7 +297,7 @@ void TVPAddTransHandlerProvider(iTVPTransHandlerProvider *pro)
 	const tjs_char *cname;
 	if(TJS_FAILED(pro->GetName(&cname)))
 		TVPThrowExceptionMessage(TVPTransHandlerError,
-		TJS_W("tTVPTransHandlerProvider::GetName failed"));
+		TJS_N("tTVPTransHandlerProvider::GetName failed"));
 	ttstr name = cname;
 	tTVPTransHandlerProviderHolder *p =
 		TVPTransHandlerProviders.Find(name);
@@ -316,7 +316,7 @@ void TVPRemoveTransHandlerProvider(iTVPTransHandlerProvider *pro)
 	const tjs_char * cname;
 	if(TJS_FAILED(pro->GetName(&cname)))
 		TVPThrowExceptionMessage(TVPTransHandlerError,
-		TJS_W("tTVPTransHandlerProvider::GetName failed"));
+		TJS_N("tTVPTransHandlerProvider::GetName failed"));
 	ttstr name = cname;
 
 	TVPTransHandlerProviders.Delete(name);
@@ -338,10 +338,10 @@ iTVPTransHandlerProvider * TVPFindTransHandlerProvider(const ttstr &name)
 	if (!holder) {
 		static bool showed = false;
 		if (!showed) {
-            TVPShowSimpleMessageBox(TVPFormatMessage(TVPCannotFindTransHander, name), TJS_W("Warning"));
+            TVPShowSimpleMessageBox(TVPFormatMessage(TVPCannotFindTransHander, name), TJS_N("Warning"));
 			showed = true;
 		}
-		holder = TVPTransHandlerProviders.Find(TJS_W("crossfade"));
+		holder = TVPTransHandlerProviders.Find(TJS_N("crossfade"));
 	}
 
 	iTVPTransHandlerProvider * pro = holder->GetObjectNoAddRef();
@@ -477,7 +477,7 @@ tjs_error tTVPCrossFadeTransHandlerProvider::GetName(/*out*/const tjs_char ** na
 {
 	if (name)
 	{
-		*name = TJS_W("crossfade"); return TJS_S_OK;
+		*name = TJS_N("crossfade"); return TJS_S_OK;
 	} else
 	{
 		return TJS_E_FAIL;
@@ -494,8 +494,8 @@ tjs_error tTVPCrossFadeTransHandlerProvider::StartTransition(/*in*/iTVPSimpleOpt
 
 	if (src1w != src2w || src1h != src2h)
 		TVPThrowExceptionMessage(TVPTransitionLayerSizeMismatch,
-		ttstr((tjs_int)src2w) + TJS_W("x") + ttstr((tjs_int)src2h),
-		ttstr((tjs_int)src1w) + TJS_W("x") + ttstr((tjs_int)src1h));
+		ttstr((tjs_int)src2w) + TJS_N("x") + ttstr((tjs_int)src2h),
+		ttstr((tjs_int)src1w) + TJS_N("x") + ttstr((tjs_int)src1h));
 
 	*handler = GetTransitionObject(options, imagepro, layertype, src1w, src1h,
 		src2w, src2h);
@@ -506,8 +506,8 @@ tjs_error tTVPCrossFadeTransHandlerProvider::StartTransition(/*in*/iTVPSimpleOpt
 iTVPBaseTransHandler * tTVPCrossFadeTransHandlerProvider::GetTransitionObject(/*in*/iTVPSimpleOptionProvider *options, /* option provider */ /*in*/iTVPSimpleImageProvider *imagepro, /* image provider */ /*in*/tTVPLayerType layertype, /*in*/tjs_uint src1w, tjs_uint src1h, /* source 1 size */ /*in*/tjs_uint src2w, tjs_uint src2h) // source 2 size
 {
 	tjs_int64 time;
-	tjs_error er = options->GetAsNumber(TJS_W("time"), (tjs_int64 *)&time);
-	if (TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_W("time"));
+	tjs_error er = options->GetAsNumber(TJS_N("time"), (tjs_int64 *)&time);
+	if (TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_N("time"));
 	if (time < 2) time = 2; // too small time may cause problem
 
 	return  (iTVPBaseTransHandler *)
@@ -535,20 +535,20 @@ tjs_error tTVPCrossFadeTransHandler::
 	{
 		if(Count)
 		{
-			TVPAddLog(TJS_W("update count : ") + ttstr(Count));
-			TVPAddLog(TJS_W("trans time : ") + ttstr((tjs_int)(tick-StartTick)));
-			TVPAddLog(TJS_W("process time : ") + ttstr((tjs_int)ProcessTime));
-			TVPAddLog(TJS_W("process time / trans time (%) : ") +
+			TVPAddLog(TJS_N("update count : ") + ttstr(Count));
+			TVPAddLog(TJS_N("trans time : ") + ttstr((tjs_int)(tick-StartTick)));
+			TVPAddLog(TJS_N("process time : ") + ttstr((tjs_int)ProcessTime));
+			TVPAddLog(TJS_N("process time / trans time (%) : ") +
 				ttstr((tjs_int)(ProcessTime*100/(tick-StartTick))));
-			TVPAddLog(TJS_W("blend time / trans time (%) : ") +
+			TVPAddLog(TJS_N("blend time / trans time (%) : ") +
 				ttstr((tjs_int)(BlendTime*100/(tick-StartTick))));
-//			TVPAddLog(TJS_W("blt time / trans time (%) : ") +
+//			TVPAddLog(TJS_N("blt time / trans time (%) : ") +
 //				ttstr((tjs_int)(acctime*100/(tick-StartTick))));
 			tjs_int avgtime;
 			avgtime = ProcessTime / Count;
-			TVPAddLog(TJS_W("process time / update count : ") + ttstr(avgtime));
+			TVPAddLog(TJS_N("process time / update count : ") + ttstr(avgtime));
 			tjs_int fps = Count * 1000 / (tick - StartTick);
-			TVPAddLog(TJS_W("fps : ") + ttstr(fps));
+			TVPAddLog(TJS_N("fps : ") + ttstr(fps));
 
 			Count = 0;
 		}
@@ -717,7 +717,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		if(name)
-			{ *name = TJS_W("universal"); return TJS_S_OK; }
+			{ *name = TJS_N("universal"); return TJS_S_OK; }
 		else
 			{ return TJS_E_FAIL; }
 
@@ -734,19 +734,19 @@ public:
 
 		// retrieve "time" option
 		tjs_int64 time;
-		er = options->GetAsNumber(TJS_W("time"), (tjs_int64 *)&time);
-		if(TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_W("time"));
+		er = options->GetAsNumber(TJS_N("time"), (tjs_int64 *)&time);
+		if(TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_N("time"));
 		if(time < 2) time = 2; // too small time may cause problem
 
 		// retrieve "vague" option
 		tjs_int64 vague;
-		er = options->GetAsNumber(TJS_W("vague"), (tjs_int64 *)&vague);
+		er = options->GetAsNumber(TJS_N("vague"), (tjs_int64 *)&vague);
 		if(TJS_FAILED(er)) vague = 64;
 
 		// retrieve "rule" option and load it as an image
 		const tjs_char *rulename;
-		er = options->GetAsString(TJS_W("rule"), &rulename);
-		if(TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_W("rule"));
+		er = options->GetAsString(TJS_N("rule"), &rulename);
+		if(TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_N("rule"));
 
 		iTVPScanLineProvider *scpro;
 		er = imagepro->LoadImage(rulename, 8, 0x02ffffff,
@@ -858,7 +858,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		if(name)
-			{ *name = TJS_W("scroll"); return TJS_S_OK; }
+			{ *name = TJS_N("scroll"); return TJS_S_OK; }
 		else
 			{ return TJS_E_FAIL; }
 
@@ -897,18 +897,18 @@ public:
 
 		// retrieve "time" option
 		tjs_int64 time;
-		er = options->GetAsNumber(TJS_W("time"), &time);
-		if(TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_W("time"));
+		er = options->GetAsNumber(TJS_N("time"), &time);
+		if(TJS_FAILED(er)) TVPThrowExceptionMessage(TVPSpecifyOption, TJS_N("time"));
 		if(time < 2) time = 2; // too small time may cause problem
 
 		// retrieve "from" option
 		tTVPScrollTransFrom from;
-		er = options->GetAsNumber(TJS_W("from"), &value);
+		er = options->GetAsNumber(TJS_N("from"), &value);
 		if(TJS_FAILED(er)) from = sttLeft; else from = (tTVPScrollTransFrom)value;
 
 		// retrieve "stay" option
 		tTVPScrollTransStay stay;
-		er = options->GetAsNumber(TJS_W("stay"), &value);
+		er = options->GetAsNumber(TJS_N("stay"), &value);
 		if(TJS_FAILED(er)) stay = ststNoStay; else stay = (tTVPScrollTransStay)value;
 
 		// determine maximum phase count

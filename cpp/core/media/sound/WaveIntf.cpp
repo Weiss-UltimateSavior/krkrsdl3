@@ -235,7 +235,7 @@ static bool TVPFindRIFFChunk(tTVPStreamHolder & stream, const tjs_uint8 *chunk)
 tTVPWaveDecoder * tTVPWDC_RIFFWave::Create(const ttstr & storagename,
 	const ttstr &extension)
 {
-	if(extension != TJS_W(".wav")) return NULL;
+	if(extension != TJS_N(".wav")) return NULL;
 
 	tTVPStreamHolder stream(storagename);
 

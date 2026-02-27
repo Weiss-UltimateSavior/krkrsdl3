@@ -22,7 +22,7 @@
 
 #include "tvp_msg.h"
 
-#define WIDEN2(x) TJS_W(x)
+#define WIDEN2(x) TJS_N(x)
 #define WIDEN(x) WIDEN2(x)
 
 

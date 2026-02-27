@@ -11,7 +11,7 @@
 #include "KRMovieLayer.h"
 #include "TVPStorage.h"
 
-#define NCB_MODULE_NAME TJS_W("layerExMovie.dll")
+#define NCB_MODULE_NAME TJS_N("layerExMovie.dll")
 
 /*
 * Movie 描画用レイヤ
@@ -85,7 +85,7 @@ public:
 /**
  * コンストラクタ
  */
-layerExMovie::layerExMovie(DispatchT obj) : /*_pType(obj, TJS_W("type")),*/ layerExBase_GL(obj)
+layerExMovie::layerExMovie(DispatchT obj) : /*_pType(obj, TJS_N("type")),*/ layerExBase_GL(obj)
 {
 	VideoOverlay = NULL;
 	loop = false;
@@ -95,11 +95,11 @@ layerExMovie::layerExMovie(DispatchT obj) : /*_pType(obj, TJS_W("type")),*/ laye
 	in = nullptr;
 	{
 		tTJSVariant var;
-		if (TJS_SUCCEEDED(obj->PropGet(TJS_IGNOREPROP, TJS_W("onStartMovie"), NULL, &var, obj))) onStartMovie = var;
+		if (TJS_SUCCEEDED(obj->PropGet(TJS_IGNOREPROP, TJS_N("onStartMovie"), NULL, &var, obj))) onStartMovie = var;
 		else onStartMovie = NULL;
-		if (TJS_SUCCEEDED(obj->PropGet(TJS_IGNOREPROP, TJS_W("onStopMovie"), NULL, &var, obj))) onStopMovie = var;
+		if (TJS_SUCCEEDED(obj->PropGet(TJS_IGNOREPROP, TJS_N("onStopMovie"), NULL, &var, obj))) onStopMovie = var;
 		else onStopMovie = NULL;
-		if (TJS_SUCCEEDED(obj->PropGet(TJS_IGNOREPROP, TJS_W("onUpdateMovie"), NULL, &var, obj))) onUpdateMovie = var;
+		if (TJS_SUCCEEDED(obj->PropGet(TJS_IGNOREPROP, TJS_N("onUpdateMovie"), NULL, &var, obj))) onUpdateMovie = var;
 		else onUpdateMovie = NULL;
 	}
 	playing = false;
@@ -142,7 +142,7 @@ layerExMovie::openMovie(const tjs_char* filename, bool alpha)
 	// ファイルをテンポラリにコピーして対応 
 	if ((in = TVPCreateStream(filename, TJS_BS_READ)) == NULL) {
 		ttstr error = filename;
-		error += TJS_W(":ファイルが開けません");
+		error += TJS_N(":ファイルが開けません");
 		TVPAddLog(error);
 		return;
 	}

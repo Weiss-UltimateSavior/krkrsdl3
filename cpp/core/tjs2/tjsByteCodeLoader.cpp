@@ -120,12 +120,16 @@ void tTJSByteCodeLoader::ReadDataArea( const tjs_uint8* buff, int offset, size_t
 		for( int i = 0; i < count; i++ ) {
 			int len = read4byte( &(buff[offset]) );
 			offset += 4;
-			std::vector<tjs_uint16> ch(len+1);
-			ch[len] = 0;
+			std::vector<tjs_char> ch(len * 3 + 1);
+			size_t currLen = 0;
 			for( int j = 0; j < len; j++ ) {
-				ch[j] = read2byte( &(buff[offset]) );
+				tjs_uint16 tmpCh = read2byte( &(buff[offset]) );
+                int chLen = TVPWideCharToUtf8(tmpCh, NULL);
+                TVPWideCharToUtf8(tmpCh, ch.data() + currLen);
+                currLen += chLen;
 				offset += 2;
 			}
+            ch[currLen] = 0;
 			StringArray.push_back( TJSMapGlobalStringMap( (const tjs_char *)&(ch[0]) ) );
 			offset += (len & 1) << 1;
 		}

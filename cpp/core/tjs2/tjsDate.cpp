@@ -43,7 +43,7 @@ tTJSNI_Date::tTJSNI_Date()
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Date::ClassID = (tjs_uint32)-1;
 tTJSNC_Date::tTJSNC_Date() :
-	tTJSNativeClass(TJS_W("Date"))
+	tTJSNativeClass(TJS_N("Date"))
 {
 	// class constructor
 

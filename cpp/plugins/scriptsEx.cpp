@@ -6,7 +6,7 @@
 #include "TVPStorage.h"
 #include "TextStream.h"
 
-#define NCB_MODULE_NAME TJS_W("scriptsEx.dll")
+#define NCB_MODULE_NAME TJS_N("scriptsEx.dll")
 
 template<typename CHAR, typename MASK>
 int bitap_fuzzy_bitwise_search(const CHAR* text,
@@ -359,10 +359,10 @@ public:
         if (numparams > 1)
         {
             tTVInteger flag = param[1]->AsInteger();
-            static tjs_uint addHint = NULL;
+            static tjs_uint addHint = 0;
             if (!(flag & TJS_HIDDENMEMBER))
             {
-                array->FuncCall(0, TJS_W("add"), &addHint, 0, 1, &param[0], array);
+                array->FuncCall(0, TJS_N("add"), &addHint, 0, 1, &param[0], array);
             }
         }
         if (result)
@@ -552,9 +552,9 @@ void ScriptsAdd::_getKeys(tTJSVariant* result, tTJSVariant& obj)
         obj.AsObjectClosureNoAddRef().EnumMembers(TJS_IGNOREPROP | TJS_ENUM_NO_VALUE, &closure,
                                                   NULL);
         caller->Release();
-        static tjs_uint sortHint = NULL;
+        static tjs_uint sortHint = 0;
         // 返すキーはソートする
-        array->FuncCall(0, TJS_W("sort"), &sortHint, 0, 0, 0, array);
+        array->FuncCall(0, TJS_N("sort"), &sortHint, 0, 0, 0, array);
         *result = tTJSVariant(array, array);
         array->Release();
     }
@@ -624,18 +624,18 @@ bool ScriptsAdd::equalStruct(tTJSVariant v1, tTJSVariant v2)
         tTJSVariantClosure& o2 = v2.AsObjectClosureNoAddRef();
 
         // 関数どうしなら特別扱いで関数比較
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Function"), NULL) == TJS_S_TRUE &&
-            o2.IsInstanceOf(0, NULL, NULL, TJS_W("Function"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Function"), NULL) == TJS_S_TRUE &&
+            o2.IsInstanceOf(0, NULL, NULL, TJS_N("Function"), NULL) == TJS_S_TRUE)
             return v1.DiscernCompare(v2);
 
         // Arrayどうしなら全項目を比較
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Array"), NULL) == TJS_S_TRUE &&
-            o2.IsInstanceOf(0, NULL, NULL, TJS_W("Array"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Array"), NULL) == TJS_S_TRUE &&
+            o2.IsInstanceOf(0, NULL, NULL, TJS_N("Array"), NULL) == TJS_S_TRUE)
         {
             // 長さが一致していなければ比較失敗
             tTJSVariant o1Count, o2Count;
-            (void)o1.PropGet(0, TJS_W("count"), &countHint, &o1Count, NULL);
-            (void)o2.PropGet(0, TJS_W("count"), &countHint, &o2Count, NULL);
+            (void)o1.PropGet(0, TJS_N("count"), &countHint, &o1Count, NULL);
+            (void)o2.PropGet(0, TJS_N("count"), &countHint, &o2Count, NULL);
             if (!o1Count.DiscernCompare(o2Count))
                 return false;
             // 全項目を順番に比較
@@ -652,8 +652,8 @@ bool ScriptsAdd::equalStruct(tTJSVariant v1, tTJSVariant v2)
         }
 
         // Dictionaryどうしなら全項目を比較
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Dictionary"), NULL) == TJS_S_TRUE &&
-            o2.IsInstanceOf(0, NULL, NULL, TJS_W("Dictionary"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Dictionary"), NULL) == TJS_S_TRUE &&
+            o2.IsInstanceOf(0, NULL, NULL, TJS_N("Dictionary"), NULL) == TJS_S_TRUE)
         {
             // キー一覧が一致してなければ比較失敗
             tTJSVariant k1, k2;
@@ -690,18 +690,18 @@ bool ScriptsAdd::equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
         tTJSVariantClosure& o2 = v2.AsObjectClosureNoAddRef();
 
         // 関数どうしなら特別扱いで関数比較
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Function"), NULL) == TJS_S_TRUE &&
-            o2.IsInstanceOf(0, NULL, NULL, TJS_W("Function"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Function"), NULL) == TJS_S_TRUE &&
+            o2.IsInstanceOf(0, NULL, NULL, TJS_N("Function"), NULL) == TJS_S_TRUE)
             return v1.DiscernCompare(v2);
 
         // Arrayどうしなら全項目を比較
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Array"), NULL) == TJS_S_TRUE &&
-            o2.IsInstanceOf(0, NULL, NULL, TJS_W("Array"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Array"), NULL) == TJS_S_TRUE &&
+            o2.IsInstanceOf(0, NULL, NULL, TJS_N("Array"), NULL) == TJS_S_TRUE)
         {
             // 長さが一致していなければ比較失敗
             tTJSVariant o1Count, o2Count;
-            (void)o1.PropGet(0, TJS_W("count"), &countHint, &o1Count, NULL);
-            (void)o2.PropGet(0, TJS_W("count"), &countHint, &o2Count, NULL);
+            (void)o1.PropGet(0, TJS_N("count"), &countHint, &o1Count, NULL);
+            (void)o2.PropGet(0, TJS_N("count"), &countHint, &o2Count, NULL);
             if (!o1Count.DiscernCompare(o2Count))
                 return false;
             // 全項目を順番に比較
@@ -718,8 +718,8 @@ bool ScriptsAdd::equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
         }
 
         // Dictionaryどうしなら全項目を比較
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Dictionary"), NULL) == TJS_S_TRUE &&
-            o2.IsInstanceOf(0, NULL, NULL, TJS_W("Dictionary"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Dictionary"), NULL) == TJS_S_TRUE &&
+            o2.IsInstanceOf(0, NULL, NULL, TJS_N("Dictionary"), NULL) == TJS_S_TRUE)
         {
             // 項目数が一致していなければ比較失敗
             tjs_int o1Count, o2Count;
@@ -768,7 +768,7 @@ tjs_error ScriptsAdd::foreach (tTJSVariant* result,
     }
 
     // 配列の場合
-    if (obj.IsInstanceOf(0, NULL, NULL, TJS_W("Array"), NULL) == TJS_S_TRUE)
+    if (obj.IsInstanceOf(0, NULL, NULL, TJS_N("Array"), NULL) == TJS_S_TRUE)
     {
 
         tTJSVariant key, value;
@@ -779,7 +779,7 @@ tjs_error ScriptsAdd::foreach (tTJSVariant* result,
             paramList[i] = param[i];
 
         tTJSVariant arrayCount;
-        (void)obj.PropGet(0, TJS_W("count"), &countHint, &arrayCount, NULL);
+        (void)obj.PropGet(0, TJS_N("count"), &countHint, &arrayCount, NULL);
         tjs_int count = arrayCount;
 
         tTJSVariant breakResult;
@@ -845,7 +845,7 @@ tjs_error ScriptsAdd::getMD5HashString(tTJSVariant* result,
     TVP_md5_finish(&st, buffer);
 
     tjs_char ret[32 + 1];
-    const tjs_char* hex = TJS_W("0123456789abcdef");
+    const tjs_char* hex = TJS_N("0123456789abcdef");
     for (tjs_int i = 0; i < 16; i++)
     {
         ret[i * 2] = hex[(buffer[i] >> 4) & 0xF];
@@ -898,11 +898,11 @@ tTJSVariant ScriptsAdd::clone(tTJSVariant obj)
             return obj; // nullなら無視
 
         // Arrayの複製
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Array"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Array"), NULL) == TJS_S_TRUE)
         {
             iTJSDispatch2* array = TJSCreateArrayObject();
             tTJSVariant o1Count;
-            (void)o1.PropGet(0, TJS_W("count"), &countHint, &o1Count, NULL);
+            (void)o1.PropGet(0, TJS_N("count"), &countHint, &o1Count, NULL);
             tjs_int count = o1Count;
             tTJSVariant val;
             tTJSVariant* args[] = {&val};
@@ -911,7 +911,7 @@ tTJSVariant ScriptsAdd::clone(tTJSVariant obj)
                 (void)o1.PropGetByNum(TJS_IGNOREPROP, i, &val, NULL);
                 val = ScriptsAdd::clone(val);
                 static tjs_uint addHint = 0;
-                (void)array->FuncCall(0, TJS_W("add"), &addHint, 0, 1, args, array);
+                (void)array->FuncCall(0, TJS_N("add"), &addHint, 0, 1, args, array);
             }
             tTJSVariant result(array, array);
             array->Release();
@@ -919,7 +919,7 @@ tTJSVariant ScriptsAdd::clone(tTJSVariant obj)
         }
 
         // Dictionaryの複製
-        if (o1.IsInstanceOf(0, NULL, NULL, TJS_W("Dictionary"), NULL) == TJS_S_TRUE)
+        if (o1.IsInstanceOf(0, NULL, NULL, TJS_N("Dictionary"), NULL) == TJS_S_TRUE)
         {
             iTJSDispatch2* dict = TJSCreateDictionaryObject();
             DictMemberCloneCaller* caller = new DictMemberCloneCaller(dict);
@@ -934,7 +934,7 @@ tTJSVariant ScriptsAdd::clone(tTJSVariant obj)
         // cloneメソッドの呼び出しに成功すればそれを返す
         tTJSVariant result;
         static tjs_uint cloneHint = 0;
-        if (o1.FuncCall(0, TJS_W("clone"), &cloneHint, &result, 0, NULL, NULL) == TJS_S_TRUE)
+        if (o1.FuncCall(0, TJS_N("clone"), &cloneHint, &result, 0, NULL, NULL) == TJS_S_TRUE)
         {
             return result;
         }
@@ -1014,16 +1014,16 @@ tjs_error ScriptsAdd::safeEvalStorage(tTJSVariant* result,
     stream->Destruct();
 
     /*
-    ttstr content(TJS_W("(const)["));
+    ttstr content(TJS_N("(const)["));
     content += buffer;
-    content += TJS_W("]");
+    content += TJS_N("]");
     buffer = content;
      */
     tjs_int length = buffer.length();
     tjs_char* top = buffer.AppendBuffer(8 + 1);                 // [MEMO] "(const)[]".length == 9
     memmove(top + 8, top, sizeof(tjs_char) * length);           // xxxxxxxx<buffer>x
-    memcpy(top, TJS_W("(const)["), sizeof(tjs_char) * 8);       // (const)[<buffer>x
-    memcpy(top + 8 + length, TJS_W("]"), sizeof(tjs_char) * 1); // (const)[<buffer>]
+    memcpy(top, TJS_N("(const)["), sizeof(tjs_char) * 8);       // (const)[<buffer>x
+    memcpy(top + 8 + length, TJS_N("]"), sizeof(tjs_char) * 1); // (const)[<buffer>]
     buffer.FixLen();
     // TVPAddLog(buffer);
 
@@ -1078,26 +1078,26 @@ tjs_error ScriptsAdd::stringFuzzySearch(tTJSVariant* result,
 //----------------------------------------------------------------------
 NCB_ATTACH_CLASS(ScriptsAdd, Scripts)
 {
-    RawCallback(TJS_W("getObjectKeys"), &ScriptsAdd::getKeys, TJS_STATICMEMBER);
-    RawCallback(TJS_W("getObjectCount"), &ScriptsAdd::getCount, TJS_STATICMEMBER);
+    RawCallback(TJS_N("getObjectKeys"), &ScriptsAdd::getKeys, TJS_STATICMEMBER);
+    RawCallback(TJS_N("getObjectCount"), &ScriptsAdd::getCount, TJS_STATICMEMBER);
     NCB_METHOD(getObjectContext);
     NCB_METHOD(isNullContext);
     NCB_METHOD(equalStruct);
     NCB_METHOD(equalStructNumericLoose);
-    RawCallback(TJS_W("foreach"), &ScriptsAdd::foreach, TJS_STATICMEMBER);
-    RawCallback(TJS_W("getMD5HashString"), &ScriptsAdd::getMD5HashString, TJS_STATICMEMBER);
+    RawCallback(TJS_N("foreach"), &ScriptsAdd::foreach, TJS_STATICMEMBER);
+    RawCallback(TJS_N("getMD5HashString"), &ScriptsAdd::getMD5HashString, TJS_STATICMEMBER);
     NCB_METHOD(clone);
 
     RawCallback("propSet", &ScriptsAdd::propSet, TJS_STATICMEMBER);
     RawCallback("propGet", &ScriptsAdd::propGet, TJS_STATICMEMBER);
-    Variant(TJS_W("pfMemberEnsure"), TJS_MEMBERENSURE);
-    Variant(TJS_W("pfMemberMustExist"), TJS_MEMBERMUSTEXIST);
-    Variant(TJS_W("pfIgnoreProp"), TJS_IGNOREPROP);
-    Variant(TJS_W("pfHiddenMember"), TJS_HIDDENMEMBER);
-    Variant(TJS_W("pfStaticMember"), TJS_STATICMEMBER);
+    Variant(TJS_N("pfMemberEnsure"), TJS_MEMBERENSURE);
+    Variant(TJS_N("pfMemberMustExist"), TJS_MEMBERMUSTEXIST);
+    Variant(TJS_N("pfIgnoreProp"), TJS_IGNOREPROP);
+    Variant(TJS_N("pfHiddenMember"), TJS_HIDDENMEMBER);
+    Variant(TJS_N("pfStaticMember"), TJS_STATICMEMBER);
 
-    RawCallback(TJS_W("safeEvalStorage"), &ScriptsAdd::safeEvalStorage, TJS_STATICMEMBER);
-    RawCallback(TJS_W("stringFuzzySearch"), &ScriptsAdd::stringFuzzySearch, TJS_STATICMEMBER);
+    RawCallback(TJS_N("safeEvalStorage"), &ScriptsAdd::safeEvalStorage, TJS_STATICMEMBER);
+    RawCallback(TJS_N("stringFuzzySearch"), &ScriptsAdd::stringFuzzySearch, TJS_STATICMEMBER);
 };
 
 NCB_ATTACH_FUNCTION(rehash, Scripts, TJSDoRehash);

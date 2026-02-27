@@ -2,7 +2,7 @@
 #include <list>
 #include <map>
 
-#define NCB_MODULE_NAME TJS_W("perspective.dll")
+#define NCB_MODULE_NAME TJS_N("perspective.dll")
 
 static const char *copyright = 
 "----- AntiGrainGeometry Copyright START -----\n"
@@ -98,7 +98,7 @@ addMethod(iTJSDispatch2 *dispatch, const tjs_char *methodName, tTJSDispatch *met
 	method->Release();
 	dispatch->PropSet(
 		TJS_MEMBERENSURE, // メンバがなかった場合には作成するようにするフラグ 
-		methodName, // メンバ名 ( かならず TJS_W( ) で囲む ) 
+		methodName, // メンバ名 ( かならず TJS_N( ) で囲む ) 
 		NULL, // ヒント ( 本来はメンバ名のハッシュ値だが、NULL でもよい ) 
 		&var, // 登録する値 
 		dispatch // コンテキスト 
@@ -123,8 +123,8 @@ void InitPlugin_Perspective()
 // 	    TVPAddImportantLog(ttstr(copyright)); 
 // 	 
 // 	    // クラスオブジェクトチェック 
-// 	    if ((NI_LayerExBase::classId = TJSFindNativeClassID(TJS_W("LayerExBase"))) <= 0) { 
-// 		    NI_LayerExBase::classId = TJSRegisterNativeClass(TJS_W("LayerExBase")); 
+// 	    if ((NI_LayerExBase::classId = TJSFindNativeClassID(TJS_N("LayerExBase"))) <= 0) { 
+// 		    NI_LayerExBase::classId = TJSRegisterNativeClass(TJS_N("LayerExBase")); 
 // 	    } 
 // 	 
 // 	    { 
@@ -133,14 +133,14 @@ void InitPlugin_Perspective()
 //  
 // 		    // Layer クラスオブジェクトを取得 
 // 		    tTJSVariant varScripts; 
-// 		    TVPExecuteExpression(TJS_W("Layer"), &varScripts); 
+// 		    TVPExecuteExpression(TJS_N("Layer"), &varScripts); 
 // 		    iTJSDispatch2 *dispatch = varScripts.AsObjectNoAddRef(); 
 // 		    if (dispatch) { 
 // 			    // プロパティ初期化 
 // 			    NI_LayerExBase::init(dispatch); 
 //  
 // 			    // 専用メソッドの追加 
-// 			    addMethod(dispatch, TJS_W("perspectiveCopy"), new tPerspectiveCopy()); 
+// 			    addMethod(dispatch, TJS_N("perspectiveCopy"), new tPerspectiveCopy()); 
 // 		    } 
 //  
 // 		    global->Release(); 
@@ -148,10 +148,10 @@ void InitPlugin_Perspective()
 //     } else { 
         iTJSDispatch2 * global = TVPGetScriptDispatch();
         tTJSVariant varScripts;
-        global->PropGet(0, TJS_W("Layer"), nullptr, &varScripts, global);
+        global->PropGet(0, TJS_N("Layer"), nullptr, &varScripts, global);
         iTJSDispatch2 *dispatch = varScripts.AsObjectNoAddRef();
         if (dispatch) {
-            addMethod(dispatch, TJS_W("perspectiveCopy"), TJSCreateNativeClassMethod(PerspectiveCopy_GL));
+            addMethod(dispatch, TJS_N("perspectiveCopy"), TJSCreateNativeClassMethod(PerspectiveCopy_GL));
         }
     //} 
 }

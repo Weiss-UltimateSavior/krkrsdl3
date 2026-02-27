@@ -317,7 +317,7 @@ inline extern tTJSNativeClassForPlugin* TJSCreateNativeClassForPlugin(
 
 #define TJS_BEGIN_NATIVE_MEMBERS(classname) \
 	{ \
-		static const tjs_char *__classname = TJS_W(#classname); \
+		static const tjs_char *__classname = TJS_N(#classname); \
 		static tjs_int32 TJS_NCM_CLASSID = \
 			TJSRegisterNativeClass(__classname); \
 		TJSNativeClassSetClassID(TJS_NCM_REG_THIS, TJS_NCM_CLASSID); \
@@ -335,30 +335,30 @@ inline extern tTJSNativeClassForPlugin* TJSCreateNativeClassForPlugin(
 
 #define TJS_END_NATIVE_METHOD_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_N(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), __classname, nitMethod);
 
 #define TJS_END_NATIVE_HIDDEN_METHOD_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_N(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), __classname, nitMethod, \
 		TJS_HIDDENMEMBER);
 
 #define TJS_END_NATIVE_STATIC_METHOD_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_N(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), __classname, nitMethod, \
 		TJS_STATICMEMBER);
 
 #define TJS_END_NATIVE_METHOD_DECL_OUTER(object, name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM((object), TJS_W(#name), \
+		TJSNativeClassRegisterNCM((object), TJS_N(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), \
 		(object)->GetClassName().c_str(), nitMethod);
 
 #define TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(object, name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM((object), TJS_W(#name), \
+		TJSNativeClassRegisterNCM((object), TJS_N(#name), \
 		TJSCreateNativeClassMethod(NCM_##name::Process), \
 		(object)->GetClassName().c_str(), nitMethod, TJS_STATICMEMBER);
 
@@ -393,13 +393,13 @@ inline extern tTJSNativeClassForPlugin* TJSCreateNativeClassForPlugin(
 
 #define TJS_END_NATIVE_CONSTRUCTOR_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_N(#name), \
 		TJSCreateNativeClassConstructor(NCM_##name::Process), __classname, \
 		nitMethod);
 
 #define TJS_END_NATIVE_STATIC_CONSTRUCTOR_DECL(name) \
 		TJS_END_NATIVE_METHOD_DECL_INT \
-		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_N(#name), \
 		TJSCreateNativeClassConstructor(NCM_##name::Process), __classname, \
 		nitMethod, TJS_STATICMEMBER);
 
@@ -407,22 +407,22 @@ inline extern tTJSNativeClassForPlugin* TJSCreateNativeClassForPlugin(
 		struct NCM_##name
 
 #define TJS_END_NATIVE_PROP_DECL(name) \
-		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_N(#name), \
 		TJSCreateNativeClassProperty(NCM_##name::Get, NCM_##name::Set), \
 		__classname, nitProperty);
 
 #define TJS_END_NATIVE_PROP_DECL_OUTER(object, name) \
-		;TJSNativeClassRegisterNCM((object), TJS_W(#name), \
+		;TJSNativeClassRegisterNCM((object), TJS_N(#name), \
 		TJSCreateNativeClassProperty(NCM_##name::Get, NCM_##name::Set), \
 		(object)->GetClassName().c_str(), nitProperty);
 
 #define TJS_END_NATIVE_STATIC_PROP_DECL(name) \
-		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_W(#name), \
+		;TJSNativeClassRegisterNCM(TJS_NCM_REG_THIS, TJS_N(#name), \
 		TJSCreateNativeClassProperty(NCM_##name::Get, NCM_##name::Set), \
 		__classname, nitProperty, TJS_STATICMEMBER);
 
 #define TJS_END_NATIVE_STATIC_PROP_DECL_OUTER(object, name) \
-		;TJSNativeClassRegisterNCM((object), TJS_W(#name), \
+		;TJSNativeClassRegisterNCM((object), TJS_N(#name), \
 		TJSCreateNativeClassProperty(NCM_##name::Get, NCM_##name::Set), \
 		(object)->GetClassName().c_str(), nitProperty, TJS_STATICMEMBER);
 

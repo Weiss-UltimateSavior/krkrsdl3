@@ -775,7 +775,7 @@ void tTJSNI_MIDISoundBuffer::Open(const ttstr &name) {
         tjs_uint8 buf[16];
         stream->ReadBuffer(buf, 4);
         if(memcmp(buf, "MThd", 4))
-            TVPThrowExceptionMessage(TVPInvalidSMF, TJS_W("MThd not found"));
+            TVPThrowExceptionMessage(TVPInvalidSMF, TJS_N("MThd not found"));
 
         tjs_uint32 headerlen;
         tjs_int format;
@@ -787,7 +787,7 @@ void tTJSNI_MIDISoundBuffer::Open(const ttstr &name) {
         format = TVPGetSMFInt16(pb);
         if(format != 0 && format != 1)
             TVPThrowExceptionMessage(TVPInvalidSMF,
-                                     TJS_W("Format must be 0 or 1"));
+                                     TJS_N("Format must be 0 or 1"));
 
 
         // clear tracks
@@ -806,7 +806,7 @@ void tTJSNI_MIDISoundBuffer::Open(const ttstr &name) {
 
         Division = TVPGetSMFInt16(pb);
         if(Division < 0)
-            TVPThrowExceptionMessage(TVPInvalidSMF, TJS_W("Invalid division"));
+            TVPThrowExceptionMessage(TVPInvalidSMF, TJS_N("Invalid division"));
 
         // read each track
         stream->SetPosition(headerlen + 8);
@@ -815,7 +815,7 @@ void tTJSNI_MIDISoundBuffer::Open(const ttstr &name) {
             stream->ReadBuffer(buf, 8);
             if(memcmp(buf, "MTrk", 4))
                 TVPThrowExceptionMessage(TVPInvalidSMF,
-                                         TJS_W("MTrk not found"));
+                                         TJS_N("MTrk not found"));
             pb = buf + 4;
             tjs_uint32 len = TVPGetSMFInt32(pb);
             tTVPSMFTrack *trk = new tTVPSMFTrack(this, stream.Get(), len);
@@ -970,7 +970,7 @@ void tTJSNI_MIDISoundBuffer::SetVolume2(tjs_int v) {
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_MIDISoundBuffer::ClassID = -1;
 tTJSNC_MIDISoundBuffer::tTJSNC_MIDISoundBuffer() :
-	tTJSNativeClass(TJS_W("MIDISoundBuffer"))
+	tTJSNativeClass(TJS_N("MIDISoundBuffer"))
 {
 	// registration of native members
 

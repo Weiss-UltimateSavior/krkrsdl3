@@ -21,7 +21,7 @@
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_PhaseVocoder::ClassID = (tjs_uint32)-1;
 tTJSNC_PhaseVocoder::tTJSNC_PhaseVocoder() :
-	tTJSNativeClass(TJS_W("PhaseVocoder"))
+	tTJSNativeClass(TJS_N("PhaseVocoder"))
 {
 	// register native methods/properties
 

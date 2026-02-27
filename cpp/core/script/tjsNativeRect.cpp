@@ -54,7 +54,7 @@ iTJSDispatch2 *TVPCreateRectObject(tjs_int left, tjs_int top, tjs_int right,
 }
 
 tjs_uint32 tTJSNC_Rect::ClassID = -1;
-tTJSNC_Rect::tTJSNC_Rect() : inherited(TJS_W("Rect")) {
+tTJSNC_Rect::tTJSNC_Rect() : inherited(TJS_N("Rect")) {
 	// registration of native members
 
 	TJS_BEGIN_NATIVE_MEMBERS(Rect) // constructor

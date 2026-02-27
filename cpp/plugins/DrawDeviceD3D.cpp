@@ -351,7 +351,7 @@ void tTVPDrawDeviceD3D::AddLayerManager(iTVPLayerManager* manager)
     tTJSVariant* args[] = {&pl};
     static tjs_uint addHint = 0;
 
-    primaryLayers->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, primaryLayers);
+    primaryLayers->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, primaryLayers);
 }
 //---------------------------------------------------------------------------
 void tTVPDrawDeviceD3D::RemoveLayerManager(iTVPLayerManager* manager)
@@ -359,7 +359,7 @@ void tTVPDrawDeviceD3D::RemoveLayerManager(iTVPLayerManager* manager)
     tTJSVariant pl(manager->GetPrimaryLayer());
     tTJSVariant* args[] = {&pl};
     static tjs_uint addHint = 0;
-    primaryLayers->FuncCall(0, TJS_W("remove"), &addHint, nullptr, 1, args, primaryLayers);
+    primaryLayers->FuncCall(0, TJS_N("remove"), &addHint, nullptr, 1, args, primaryLayers);
     std::vector<iTVPLayerManager*>::iterator i =
         std::find(Managers.begin(), Managers.end(), manager);
     if (i == Managers.end())
@@ -967,7 +967,7 @@ private:
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_DrawDeviceD3D::ClassID = (tjs_uint32)-1;
 tTJSNC_DrawDeviceD3D::tTJSNC_DrawDeviceD3D()
-  : tTJSNativeClass(TJS_W("DrawDeviceD3D")){
+  : tTJSNativeClass(TJS_N("DrawDeviceD3D")){
         // register native methods/properties
 
         TJS_BEGIN_NATIVE_MEMBERS(DrawDeviceD3D) TJS_DECL_EMPTY_FINALIZE_METHOD
@@ -1213,11 +1213,11 @@ void DrawDeviceD3D_init()
         iTJSDispatch2* tjsclass = TVPCreateNativeClass_DrawDeviceD3D();
         tTJSVariant val(tjsclass);
         tjsclass->Release();
-        global->PropSet(TJS_MEMBERENSURE, TJS_W("DrawDeviceD3D"), NULL, &val, global);
+        global->PropSet(TJS_MEMBERENSURE, TJS_N("DrawDeviceD3D"), NULL, &val, global);
         global->Release();
     }
 
-    TVPExecuteScript(TJS_W(" class D3D extends DrawDeviceD3D { function D3D(exD3DWidth, exD3DHeight) { super.DrawDeviceD3D(exD3DWidth, exD3DHeight); } } "));
+    TVPExecuteScript(TJS_N(" class D3D extends DrawDeviceD3D { function D3D(exD3DWidth, exD3DHeight) { super.DrawDeviceD3D(exD3DWidth, exD3DHeight); } } "));
 }
 
 void DrawDeviceD3D_done()
@@ -1226,7 +1226,7 @@ void DrawDeviceD3D_done()
     iTJSDispatch2* global = TVPGetScriptDispatch();
     if (global)
     {
-        global->DeleteMember(0, TJS_W("DrawDeviceD3D"), NULL, global);
+        global->DeleteMember(0, TJS_N("DrawDeviceD3D"), NULL, global);
         global->Release();
     }
 }
@@ -1250,7 +1250,7 @@ D3DLayer::D3DLayer(iTJSDispatch2* drawDevice)
     if (global)
     {
         tTJSVariant kagVar;
-        if (TJS_FAILED(global->PropGet(0, TJS_W("kag"), NULL, &kagVar, global)))
+        if (TJS_FAILED(global->PropGet(0, TJS_N("kag"), NULL, &kagVar, global)))
         {
             TVPThrowExceptionMessage(TVPSpecifyLayer);
         }
@@ -1258,12 +1258,12 @@ D3DLayer::D3DLayer(iTJSDispatch2* drawDevice)
         tTJSVariant baseLayer;
         // kag.fore.base
         iTJSDispatch2* kag = kagVar.AsObjectThisNoAddRef();
-        if (TJS_FAILED(kag->PropGet(0, TJS_W("fore"), NULL, &baseLayer, kag)))
+        if (TJS_FAILED(kag->PropGet(0, TJS_N("fore"), NULL, &baseLayer, kag)))
         {
             TVPThrowExceptionMessage(TVPSpecifyLayer);
         }
         kag = baseLayer.AsObjectThisNoAddRef();
-        if (TJS_FAILED(kag->PropGet(0, TJS_W("base"), NULL, &baseLayer, kag)))
+        if (TJS_FAILED(kag->PropGet(0, TJS_N("base"), NULL, &baseLayer, kag)))
         {
             TVPThrowExceptionMessage(TVPSpecifyLayer);
         }
@@ -1278,12 +1278,12 @@ D3DLayer::D3DLayer(iTJSDispatch2* drawDevice)
 
         // kag.back.base
         kag = kagVar.AsObjectThisNoAddRef();
-        if (TJS_FAILED(kag->PropGet(0, TJS_W("back"), NULL, &baseLayer, kag)))
+        if (TJS_FAILED(kag->PropGet(0, TJS_N("back"), NULL, &baseLayer, kag)))
         {
             TVPThrowExceptionMessage(TVPSpecifyLayer);
         }
         kag = baseLayer.AsObjectThisNoAddRef();
-        if (TJS_FAILED(kag->PropGet(0, TJS_W("base"), NULL, &baseLayer, kag)))
+        if (TJS_FAILED(kag->PropGet(0, TJS_N("base"), NULL, &baseLayer, kag)))
         {
             TVPThrowExceptionMessage(TVPSpecifyLayer);
         }
@@ -1390,7 +1390,7 @@ D3DPicture::D3DPicture(iTJSDispatch2* d3dlay, iTJSDispatch2* img)
     memcpy(imgData, _img->getRefLayer()->GetMainImagePixelBuffer(), imgWidth * imgHeight * 4);
     // 将onUpdate方法传入
     tTJSVariant cloFun;
-    d3dlay->PropGet(0, TJS_W("onUpdate"), NULL, &cloFun, d3dlay);
+    d3dlay->PropGet(0, TJS_N("onUpdate"), NULL, &cloFun, d3dlay);
     tTJSVariantClosure cls = cloFun.AsObjectClosure();
     _d3dlay->setUpdateClo(cls);
     _d3dlay->setD3DPicture(this);
@@ -1410,36 +1410,36 @@ void D3DPicture::assignImageRange(
 
 #pragma region Regist
 
-#define NCB_MODULE_NAME TJS_W("drawdeviceD3D.dll")
+#define NCB_MODULE_NAME TJS_N("drawdeviceD3D.dll")
 NCB_PRE_REGIST_CALLBACK(DrawDeviceD3D_init);
 NCB_POST_UNREGIST_CALLBACK(DrawDeviceD3D_done);
 NCB_REGISTER_CLASS(D3DLayer)
 {
     NCB_CONSTRUCTOR((iTJSDispatch2*));
-    Property(TJS_W("DrawPlaneBoth"), &Class::getDrawPlaneBoth, NULL);
-    Property(TJS_W("DrawPlaneFront"), &Class::getDrawPlaneFront, NULL);
-    Property(TJS_W("DrawPlaneBack"), &Class::getDrawPlaneBack, NULL);
-    Property(TJS_W("drawPlane"), &Class::getDrawPlane, &Class::setDrawPlane);
-    Property(TJS_W("frontIndex"), &Class::getFrontIndex, &Class::setFrontIndex);
-    Property(TJS_W("backIndex"), &Class::getBackIndex, &Class::setBackIndex);
-    Property(TJS_W("visible"), &Class::getVisible, &Class::setVisible);
-    Method(TJS_W("setMatrix"), &Class::setMatrix);
-    //Method(TJS_W("piledCopy"), &Class::piledCopy);
+    Property(TJS_N("DrawPlaneBoth"), &Class::getDrawPlaneBoth, NULL);
+    Property(TJS_N("DrawPlaneFront"), &Class::getDrawPlaneFront, NULL);
+    Property(TJS_N("DrawPlaneBack"), &Class::getDrawPlaneBack, NULL);
+    Property(TJS_N("drawPlane"), &Class::getDrawPlane, &Class::setDrawPlane);
+    Property(TJS_N("frontIndex"), &Class::getFrontIndex, &Class::setFrontIndex);
+    Property(TJS_N("backIndex"), &Class::getBackIndex, &Class::setBackIndex);
+    Property(TJS_N("visible"), &Class::getVisible, &Class::setVisible);
+    Method(TJS_N("setMatrix"), &Class::setMatrix);
+    //Method(TJS_N("piledCopy"), &Class::piledCopy);
 }
 NCB_REGISTER_CLASS(D3DImage)
 {
     NCB_CONSTRUCTOR((iTJSDispatch2*));
-    Property(TJS_W("width"), &Class::getWidth, NULL);
-    Property(TJS_W("height"), &Class::getHeight, NULL);
-    Method(TJS_W("load"), &Class::load);
+    Property(TJS_N("width"), &Class::getWidth, NULL);
+    Property(TJS_N("height"), &Class::getHeight, NULL);
+    Method(TJS_N("load"), &Class::load);
 }
 NCB_REGISTER_CLASS(D3DPicture)
 {
     NCB_CONSTRUCTOR((iTJSDispatch2*, iTJSDispatch2*));
-    Method(TJS_W("assignImageRange"), &Class::assignImageRange);
-    Property(TJS_W("blendMode"), &Class::getBlendMode, &Class::setBlendMode);
-    Property(TJS_W("opacity"), &Class::getOpacity, &Class::setOpacity);
-    Method(TJS_W("setCoord"), &Class::setCoord);
+    Method(TJS_N("assignImageRange"), &Class::assignImageRange);
+    Property(TJS_N("blendMode"), &Class::getBlendMode, &Class::setBlendMode);
+    Property(TJS_N("opacity"), &Class::getOpacity, &Class::setOpacity);
+    Method(TJS_N("setCoord"), &Class::setCoord);
 }
 
 #undef NCB_MODULE_NAME
@@ -1452,24 +1452,24 @@ void DrawDeviceD3DZ_done()
 {
     DrawDeviceD3D_done();
 }
-#define NCB_MODULE_NAME TJS_W("drawdeviceD3DZ.dll")
+#define NCB_MODULE_NAME TJS_N("drawdeviceD3DZ.dll")
 NCB_PRE_REGIST_CALLBACK(DrawDeviceD3DZ_init);
 NCB_POST_UNREGIST_CALLBACK(DrawDeviceD3DZ_done);
 static ncbNativeClassAutoRegister<D3DLayer> ncbNativeClassAutoRegister_D3DLayerZ(NCB_MODULE_NAME,
-                                                                                 TJS_W("D3DLayer"));
+                                                                                 TJS_N("D3DLayer"));
 static ncbNativeClassAutoRegister<D3DImage> ncbNativeClassAutoRegister_D3DImageZ(NCB_MODULE_NAME,
-                                                                                 TJS_W("D3DImage"));
+                                                                                 TJS_N("D3DImage"));
 static ncbNativeClassAutoRegister<D3DPicture> ncbNativeClassAutoRegister_D3DPictureZ(
-    NCB_MODULE_NAME, TJS_W("D3DPicture"));
+    NCB_MODULE_NAME, TJS_N("D3DPicture"));
 #pragma endregion
 
 #endif
 
-#define NCB_MODULE_NAME TJS_W("drawdeviceD3D.dll")
+#define NCB_MODULE_NAME TJS_N("drawdeviceD3D.dll")
 
 void DrawDeviceD3D_init()
 {
-    ncbAutoRegister::LoadModule(TJS_W("emoteplayer.dll"));
+    ncbAutoRegister::LoadModule(TJS_N("emoteplayer.dll"));
     TVPExecuteBinaryStream(GetResourceStream("D3DEmote.tjs"), ttstr("D3DEmote.tjs"));
 }
 

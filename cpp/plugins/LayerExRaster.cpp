@@ -3,7 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define NCB_MODULE_NAME TJS_W("layerExRaster.dll")
+#define NCB_MODULE_NAME TJS_N("layerExRaster.dll")
 
 #include "LayerExBase.hpp"
 
@@ -31,13 +31,13 @@ public:
         {
             iTJSDispatch2 *layerobj = layer.AsObjectNoAddRef();
             tTJSVariant var;
-            layerobj->PropGet(0, TJS_W("imageWidth"), NULL, &var, layerobj);
+            layerobj->PropGet(0, TJS_N("imageWidth"), NULL, &var, layerobj);
             width = (tjs_int)var;
-            layerobj->PropGet(0, TJS_W("imageHeight"), NULL, &var, layerobj);
+            layerobj->PropGet(0, TJS_N("imageHeight"), NULL, &var, layerobj);
             height = (tjs_int)var;
-            layerobj->PropGet(0, TJS_W("mainImageBuffer"), NULL, &var, layerobj);
+            layerobj->PropGet(0, TJS_N("mainImageBuffer"), NULL, &var, layerobj);
             buffer = (unsigned char*)(tjs_int64)var;
-            layerobj->PropGet(0, TJS_W("mainImageBufferPitch"), NULL, &var, layerobj);
+            layerobj->PropGet(0, TJS_N("mainImageBufferPitch"), NULL, &var, layerobj);
             pitch = (tjs_int)var;
         }
 

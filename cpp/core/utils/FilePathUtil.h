@@ -23,7 +23,7 @@ static std::string IncludeTrailingBackslash(const std::string & path)
 
 static ttstr IncludeTrailingBackslash(const ttstr& path) {
 	int n = path.length();
-	if (n == 0) return TJS_W("/");
+	if (n == 0) return TJS_N("/");
 	switch (path.c_str()[n - 1])
 	{
 	case '\\':
@@ -34,7 +34,7 @@ static ttstr IncludeTrailingBackslash(const ttstr& path) {
 	}
 }
 inline ttstr ExcludeTrailingBackslash(const ttstr& path) {
-	if( path[path.length()-1] == L'\\' ) {
+	if( path[path.length()-1] == '\\' ) {
 		return ttstr(path, path.length() - 1);
 	}
 	return path;

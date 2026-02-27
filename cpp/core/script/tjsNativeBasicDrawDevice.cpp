@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_BasicDrawDevice::ClassID = (tjs_uint32)-1;
 tTJSNC_BasicDrawDevice::tTJSNC_BasicDrawDevice() :
-    tTJSNativeClass(TJS_W("BasicDrawDevice")){
+    tTJSNativeClass(TJS_N("BasicDrawDevice")){
         // register native methods/properties
 
         TJS_BEGIN_NATIVE_MEMBERS(BasicDrawDevice) TJS_DECL_EMPTY_FINALIZE_METHOD

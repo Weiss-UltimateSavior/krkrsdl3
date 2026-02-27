@@ -90,9 +90,9 @@ static void TJSTrimStringLength(tTJSString &str, tjs_int len)
 		p[len] = 0; // trim length
 		if(len >= 3)
 		{
-			p[len-1] = TJS_W('.');
-			p[len-2] = TJS_W('.');
-			p[len-3] = TJS_W('.');
+			p[len-1] = TJS_N('.');
+			p[len-2] = TJS_N('.');
+			p[len-3] = TJS_N('.');
 		}
 		str.FixLen();
 	}
@@ -102,14 +102,14 @@ const tjs_char * TJSVariantTypeToTypeString(tTJSVariantType type)
 {
 	switch(type)
 	{
-	case tvtVoid: return (const tjs_char *)TJS_W("void");
-	case tvtInteger: return (const tjs_char *)TJS_W("int");
-	case tvtReal: return (const tjs_char *)TJS_W("real");
-	case tvtString: return (const tjs_char *)TJS_W("string");
-	case tvtOctet: return (const tjs_char *)TJS_W("octet");
-	case tvtObject: return (const tjs_char *)TJS_W("object");
+	case tvtVoid: return (const tjs_char *)TJS_N("void");
+	case tvtInteger: return (const tjs_char *)TJS_N("int");
+	case tvtReal: return (const tjs_char *)TJS_N("real");
+	case tvtString: return (const tjs_char *)TJS_N("string");
+	case tvtOctet: return (const tjs_char *)TJS_N("octet");
+	case tvtObject: return (const tjs_char *)TJS_N("object");
 	}
-	return (const tjs_char *)TJS_W("unknown");
+	return (const tjs_char *)TJS_N("unknown");
 }
 //---------------------------------------------------------------------------
 tTJSString TJSVariantToReadableString(const tTJSVariant &val,
@@ -124,36 +124,36 @@ tTJSString TJSVariantToReadableString(const tTJSVariant &val,
 	{
 	case tvtVoid:
 	  {
-		tTJSString str(TJS_W("(void)"));
+		tTJSString str(TJS_N("(void)"));
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtInteger:
 	  {
-		tTJSString str(TJS_W("(int)"));
+		tTJSString str(TJS_N("(int)"));
 		str += (tTJSString)val;
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtReal:
 	  {
-		tTJSString str(TJS_W("(real)"));
+		tTJSString str(TJS_N("(real)"));
 		str += (tTJSString)val;
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtString:
 	  {
-		tTJSString str(TJS_W("(string)\""));
+		tTJSString str(TJS_N("(string)\""));
 		str += ttstr(val).EscapeC();
-		str += TJS_W("\"");
+		str += TJS_N("\"");
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtOctet:
 	  {
 		// TODO: octet conversion
-		tTJSString str(TJS_W("(octet)<% "));
+		tTJSString str(TJS_N("(octet)<% "));
 		tTJSVariantString * s = TJSOctetToListString(val.AsOctetNoAddRef());
 		try
 		{
@@ -165,13 +165,13 @@ tTJSString TJSVariantToReadableString(const tTJSVariant &val,
 			throw;
 		}
 		if(s) s->Release();
-		str += TJS_W(" %>");
+		str += TJS_N(" %>");
 		TJSTrimStringLength(str, maxlen);
 		return str;
 	  }
 	case tvtObject:
 	  {
-		tTJSString str(TJS_W("(object)"));
+		tTJSString str(TJS_N("(object)"));
 		try
 		{
 			str += ttstr(val);
@@ -183,7 +183,7 @@ tTJSString TJSVariantToReadableString(const tTJSVariant &val,
 		return str;
 	  }
 	}
-	return TJS_W("");
+	return TJS_N("");
 }
 //---------------------------------------------------------------------------
 tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
@@ -197,7 +197,7 @@ tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
 	{
 	case tvtVoid:
 	  {
-		return TJS_W("void");
+		return TJS_N("void");
 	  }
 	case tvtInteger:
 	  {
@@ -217,18 +217,18 @@ tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
 			throw;
 		}
 		if(s) s->Release();
-		return str + TJS_W(" /") TJS_W("* ") + ttstr(val) + TJS_W(" *") TJS_W("/");
+		return str + TJS_N(" /") TJS_N("* ") + ttstr(val) + TJS_N(" *") TJS_N("/");
 	  }
 	case tvtString:
 	  {
-		tTJSString str(TJS_W("\""));
+		tTJSString str(TJS_N("\""));
 		str += ttstr(val).EscapeC();
-		str += TJS_W("\"");
+		str += TJS_N("\"");
 		return str;
 	  }
 	case tvtOctet:
 	  {
-		tTJSString str(TJS_W("<% "));
+		tTJSString str(TJS_N("<% "));
 		tTJSVariantString * s = TJSOctetToListString(val.AsOctetNoAddRef());
 		try
 		{
@@ -240,15 +240,15 @@ tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
 			throw;
 		}
 		if(s) s->Release();
-		str += TJS_W(" %>");
+		str += TJS_N(" %>");
 		return str;
 	  }
 	case tvtObject:
 	  {
-		return TJS_W("");
+		return TJS_N("");
 	  }
 	}
-	return TJS_W("");
+	return TJS_N("");
 }
 //---------------------------------------------------------------------------
 

@@ -253,7 +253,7 @@ void tTJSNI_Font::GetFontGlyphDrawRect(const ttstr &text, tTVPRect &area) {
         Layer->GetFontGlyphDrawRect(text, area);
     } else {
         GetCurrentRasterizer()->ApplyFont(Font);
-        GetCurrentRasterizer()->GetGlyphDrawRect(text, area);
+        GetCurrentRasterizer()->GetGlyphDrawRect(decodeUTF8ToTTFe(text.c_str()), area);
     }
 }
 //---------------------------------------------------------------------------
@@ -295,7 +295,7 @@ const tTVPFont &tTJSNI_Font::GetFont() const {
 // tTJSNC_Font : TJS Font class
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Font::ClassID = -1;
-tTJSNC_Font::tTJSNC_Font() : tTJSNativeClass(TJS_W("Font"))
+tTJSNC_Font::tTJSNC_Font() : tTJSNativeClass(TJS_N("Font"))
 {
 	TJS_BEGIN_NATIVE_MEMBERS(Font) // constructor
 		TJS_DECL_EMPTY_FINALIZE_METHOD

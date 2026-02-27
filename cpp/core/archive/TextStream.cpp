@@ -13,11 +13,15 @@
 
 #include "tjsError.h"
 #include "UtilStreams.h"
-#include "CharacterSet.h"
 #include "TVPMsg.h"
 #include "TVPDebug.h"
 
 #include <zlib.h>
+
+/*
+        Text stream is used by TJS's Array.save, Dictionary.saveStruct etc.
+        to input/output text files.
+*/
 
 extern "C" int sjis_mbtowc(unsigned short *wc, const unsigned char *s);
 extern "C" int gbk_mbtowc(unsigned short *wc, const unsigned char *s);
@@ -50,7 +54,7 @@ static int utf8_mbtowc(unsigned short *pwc, const unsigned char *s) {
 
 int(*mbtowc_for_text_stream)(unsigned short *wc, const unsigned char *s) = nullptr;
 
-static size_t _TextStream_mbstowcs(int(*func_mbtowc)(unsigned short *, const unsigned char *), tjs_char *pwcs, const tjs_nchar *s, size_t n)
+static size_t _TextStream_mbstowcs(int(*func_mbtowc)(unsigned short *, const unsigned char *), tjs_wchar *pwcs, const tjs_char *s, size_t n)
 {
     if(!s) return -1;
     if(pwcs && n == 0) return 0;
@@ -80,12 +84,7 @@ static size_t _TextStream_mbstowcs(int(*func_mbtowc)(unsigned short *, const uns
     return count;
 }
 
-/*
-        Text stream is used by TJS's Array.save, Dictionary.saveStruct etc.
-        to input/output text files.
-*/
-
-static size_t TextStream_mbstowcs(tjs_char *pwcs, const tjs_nchar *s, size_t n) {
+static size_t TextStream_mbstowcs(tjs_wchar *pwcs, const tjs_char *s, size_t n) {
     if (mbtowc_for_text_stream) {
         return _TextStream_mbstowcs(mbtowc_for_text_stream, pwcs, s, n);
     }
@@ -106,11 +105,11 @@ static size_t TextStream_mbstowcs(tjs_char *pwcs, const tjs_nchar *s, size_t n) 
     return ret;
 }
 
-static ttstr enc_utf8 = TJS_W("utf8"), enc_utf8_2 = TJS_W("utf-8"), enc_utf16 = TJS_W("utf16"),
-    enc_utf16_2 = TJS_W("utf-16"), enc_gbk = TJS_W("gbk"), enc_jis = TJS_W("sjis"),
-    enc_jis_2 = TJS_W("shiftjis"), enc_jis_3 = TJS_W("shift_jis"), enc_jis_4 = TJS_W("shift-jis");
+static ttstr enc_utf8 = TJS_N("utf8"), enc_utf8_2 = TJS_N("utf-8"), enc_utf16 = TJS_N("utf16"),
+    enc_utf16_2 = TJS_N("utf-16"), enc_gbk = TJS_N("gbk"), enc_jis = TJS_N("sjis"),
+    enc_jis_2 = TJS_N("shiftjis"), enc_jis_3 = TJS_N("shift_jis"), enc_jis_4 = TJS_N("shift-jis");
 
-static ttstr DefaultReadEncoding = TJS_W("UTF-8");
+static ttstr DefaultReadEncoding = TJS_N("UTF-8");
 //---------------------------------------------------------------------------
 // Interface to tTJSTextStream
 //---------------------------------------------------------------------------
@@ -134,7 +133,7 @@ public:
         // oN: read from binary offset N (in bytes)
 
 #ifndef TVP_NO_CHECK_WIDE_CHAR_SIZE
-        if (sizeof(tjs_char) != 2)
+        if (sizeof(tjs_wchar) != 2)
             TVPThrowExceptionMessage(TVPTheHostIsNotA16BitUnicodeSystem);
 #endif
 
@@ -148,7 +147,7 @@ public:
 
         tjs_uint64 ofs = 0;
         const tjs_char* o_ofs;
-        o_ofs = TJS_strchr(modestr.c_str(), TJS_W('o'));
+        o_ofs = TJS_strchr(modestr.c_str(), TJS_N('o'));
         if (o_ofs != NULL)
         {
             // seek to offset
@@ -157,7 +156,7 @@ public:
             int i;
             for (i = 0; i < 255; i++)
             {
-                if (o_ofs[i] >= TJS_W('0') && o_ofs[i] <= TJS_W('9'))
+                if (o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
                     buf[i] = o_ofs[i];
                 else
                     break;
@@ -203,25 +202,31 @@ public:
                     // too large stream
                     unsigned long destlen;
                     tjs_uint8* nbuf = new tjs_uint8[(unsigned long)compressed + 1];
+                    tjs_uint8* unbuf = new tjs_uint8[(destlen = (unsigned long)uncompressed) + 1];
                     try
                     {
                         Stream->ReadBuffer(nbuf, (unsigned long)compressed);
-                        Buffer =
-                            new tjs_char[(BufferLen = (destlen = (unsigned long)uncompressed) / 2) +
-                                         1];
                         int result = uncompress(/* uncompress from zlib */
-                                                (unsigned char*)Buffer, &destlen,
+                                                (unsigned char*)unbuf, &destlen,
                                                 (unsigned char*)nbuf, (unsigned long)compressed);
                         if (result != Z_OK || destlen != (unsigned long)uncompressed)
                             TVPThrowExceptionMessage(TVPUnsupportedCipherMode, "");
-                        // uncompression failed.
+
+                        // convert
+                        BufferLen = TVPWideCharToUtf8String((tjs_wchar*)nbuf, NULL);
+                        if (BufferLen == (size_t)-1)
+                            TVPThrowExceptionMessage(TJSWideToNarrowConversionError);
+                        Buffer = new tjs_char[BufferLen + 1];
+                        TVPWideCharToUtf8String((tjs_wchar*)nbuf, Buffer);
                     }
                     catch (...)
                     {
                         delete[] nbuf;
+                        delete[] unbuf;
                         throw;
                     }
                     delete[] nbuf;
+                    delete[] unbuf;
                     Buffer[BufferLen] = 0;
                     BufferPtr = Buffer;
                 }
@@ -232,24 +237,16 @@ public:
                 if (mark[0] == 0xef && mark[1] == 0xbb && mark[2] == 0xbf)
                 {
                     // UTF-8 BOM
-                    tjs_uint size = (tjs_uint)(Stream->GetSize() - 3) - ofs;
-                    tjs_uint8* nbuf = new tjs_uint8[size + 1];
+                    BufferLen = (tjs_uint)(Stream->GetSize() - 3) - ofs;
+                    Buffer = new tjs_char[BufferLen + 1];
                     try
                     {
-                        Stream->ReadBuffer(nbuf, size);
-                        nbuf[size] = 0; // terminater
-                        BufferLen = TVPUtf8ToWideCharString((const char*)nbuf, NULL);
-                        if (BufferLen == (size_t)-1)
-                            TVPThrowExceptionMessage(TJSNarrowToWideConversionError);
-                        Buffer = new tjs_char[BufferLen + 1];
-                        TVPUtf8ToWideCharString((const char*)nbuf, Buffer);
+                        Stream->ReadBuffer(Buffer, BufferLen);
                     }
                     catch (...)
                     {
-                        delete[] nbuf;
                         throw;
                     }
-                    delete[] nbuf;
                     Buffer[BufferLen] = 0;
                     BufferPtr = Buffer;
                 }
@@ -260,25 +257,35 @@ public:
                     Stream->SetPosition(ofs);
                     tjs_uint size = (tjs_uint)(Stream->GetSize()) - ofs;
                     tjs_uint8* nbuf = new tjs_uint8[size + 1];
+                    tjs_wchar* interBuff = nullptr;
                     try
                     {
                         Stream->ReadBuffer(nbuf, size);
                         nbuf[size] = 0; // terminater
-                        BufferLen = TextStream_mbstowcs(NULL, (tjs_nchar*)nbuf, 0);
+                        // 闲的慌啊？以后会优化的 TODO
+                        // to utf-16
+                        size_t interSize = TextStream_mbstowcs(NULL, (tjs_char*)nbuf, 0);
+                        if (interSize == (size_t)-1)
+                            TVPThrowExceptionMessage(TJSNarrowToWideConversionError);
+                        interBuff = new tjs_wchar[interSize + 1];
+                        TextStream_mbstowcs(interBuff, (tjs_char*)nbuf, interSize);
+                        // to utf-8
+                        BufferLen = TVPWideCharToUtf8String(interBuff, NULL);
                         if (BufferLen == (size_t)-1)
-                        {
-                            ttstr msg("err_narrow_to_wide");
-                            TVPThrowExceptionMessage(msg.c_str());
-                        }
+                            TVPThrowExceptionMessage(TJSWideToNarrowConversionError);
                         Buffer = new tjs_char[BufferLen + 1];
-                        TextStream_mbstowcs(Buffer, (tjs_nchar*)nbuf, BufferLen);
+                        TVPWideCharToUtf8String(interBuff, Buffer);
                     }
                     catch (...)
                     {
                         delete[] nbuf;
+                        if (interBuff)
+                            delete[] interBuff;
                         throw;
                     }
                     delete[] nbuf;
+                    if (interBuff)
+                        delete[] interBuff;
                     Buffer[BufferLen] = 0;
                     BufferPtr = Buffer;
                 }
@@ -297,7 +304,7 @@ public:
       // oN: read from binary offset N (in bytes)
 
 #ifndef TVP_NO_CHECK_WIDE_CHAR_SIZE
-        if(sizeof(tjs_char)  != 2)
+        if(sizeof(tjs_wchar)  != 2)
             TVPThrowExceptionMessage( TVPTheHostIsNotA16BitUnicodeSystem );
 #endif
 
@@ -311,7 +318,7 @@ public:
 
         tjs_uint64 ofs = 0;
         const tjs_char * o_ofs;
-        o_ofs = TJS_strchr(modestr.c_str(), TJS_W('o'));
+        o_ofs = TJS_strchr(modestr.c_str(), TJS_N('o'));
         if(o_ofs != NULL)
         {
             // seek to offset
@@ -320,7 +327,7 @@ public:
             int i;
             for(i = 0; i < 255; i++)
             {
-                if(o_ofs[i] >= TJS_W('0') && o_ofs[i] <= TJS_W('9'))
+                if(o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
                     buf[i] = o_ofs[i];
                 else break;
             }
@@ -355,37 +362,42 @@ public:
                     TVPThrowExceptionMessage(TVPUnsupportedCipherMode, name);
 
 
-                if(CryptMode == 2)
+                if (CryptMode == 2)
                 {
                     // compressed text stream
                     tjs_uint64 compressed = Stream->ReadI64LE();
                     tjs_uint64 uncompressed = Stream->ReadI64LE();
-                    if(compressed != (unsigned long)compressed ||
+                    if (compressed != (unsigned long)compressed ||
                         uncompressed != (unsigned long)uncompressed)
-                        TVPThrowExceptionMessage(TVPUnsupportedCipherMode, name);
-                                                                                  // too large stream
-                    unsigned long destlen ;
-                    tjs_uint8 *nbuf = new tjs_uint8[(unsigned long)compressed + 1];
+                        TVPThrowExceptionMessage(TVPUnsupportedCipherMode, "");
+                    // too large stream
+                    unsigned long destlen;
+                    tjs_uint8* nbuf = new tjs_uint8[(unsigned long)compressed + 1];
+                    tjs_uint16* unbuf = new tjs_uint16[(destlen = (unsigned long)uncompressed) / 2 + 1];
                     try
                     {
                         Stream->ReadBuffer(nbuf, (unsigned long)compressed);
-                        Buffer = new tjs_char [ (BufferLen = (destlen =
-                                                            (unsigned long)uncompressed) / 2) + 1];
-                        int result = uncompress( /* uncompress from zlib */
-                                                (unsigned char*)Buffer,
-                                                &destlen, (unsigned char*)nbuf,
-                                                (unsigned long)compressed);
-                        if(result != Z_OK ||
-                            destlen != (unsigned long)uncompressed)
-                            TVPThrowExceptionMessage(TVPUnsupportedCipherMode, name);
-                        // uncompression failed.
+                        int result = uncompress(/* uncompress from zlib */
+                                                (unsigned char*)unbuf, &destlen,
+                                                (unsigned char*)nbuf, (unsigned long)compressed);
+                        if (result != Z_OK || destlen != (unsigned long)uncompressed)
+                            TVPThrowExceptionMessage(TVPUnsupportedCipherMode, "");
+                        unbuf[destlen / 2] = 0;
+                        // convert
+                        BufferLen = TVPWideCharToUtf8String((tjs_wchar*)unbuf, NULL);
+                        if (BufferLen == (size_t)-1)
+                            TVPThrowExceptionMessage(TJSWideToNarrowConversionError);
+                        Buffer = new tjs_char[BufferLen + 1];
+                        TVPWideCharToUtf8String((tjs_wchar*)unbuf, Buffer);
                     }
-                    catch(...)
+                    catch (...)
                     {
-                        delete [] nbuf;
+                        delete[] nbuf;
+                        delete[] unbuf;
                         throw;
                     }
-                    delete [] nbuf;
+                    delete[] nbuf;
+                    delete[] unbuf;
                     Buffer[BufferLen] = 0;
                     BufferPtr = Buffer;
                 }
@@ -393,51 +405,60 @@ public:
             else
             {
                 // check UTF-8 BOM
-                if(mark[0] == 0xef && mark[1] == 0xbb && mark[2] == 0xbf) {
+                if (mark[0] == 0xef && mark[1] == 0xbb && mark[2] == 0xbf)
+                {
                     // UTF-8 BOM
-                    tjs_uint size = (tjs_uint)(Stream->GetSize() - 3) - ofs;
-                    tjs_uint8 *nbuf = new tjs_uint8[size + 1];
+                    BufferLen = (tjs_uint)(Stream->GetSize() - 3) - ofs;
+                    Buffer = new tjs_char[BufferLen + 1];
                     try
                     {
-                        Stream->ReadBuffer(nbuf, size);
-                        nbuf[size] = 0; // terminater
-                        BufferLen = TVPUtf8ToWideCharString((const char*)nbuf, NULL);
-                        if(BufferLen == (size_t)-1) TVPThrowExceptionMessage(TJSNarrowToWideConversionError);
-                        Buffer = new tjs_char [ BufferLen +1];
-                        TVPUtf8ToWideCharString((const char*)nbuf, Buffer);
+                        Stream->ReadBuffer(Buffer, BufferLen);
                     }
-                    catch(...)
+                    catch (...)
                     {
-                        delete [] nbuf;
                         throw;
                     }
-                    delete [] nbuf;
                     Buffer[BufferLen] = 0;
                     BufferPtr = Buffer;
-                } else {
+                }
+                else
+                {
                     // ansi/mbcs
                     // read whole and hold it
                     Stream->SetPosition(ofs);
                     tjs_uint size = (tjs_uint)(Stream->GetSize()) - ofs;
-                    tjs_uint8 *nbuf = new tjs_uint8[size + 1];
+                    tjs_uint8* nbuf = new tjs_uint8[size + 1];
+                    tjs_wchar* interBuff = nullptr;
                     try
                     {
                         Stream->ReadBuffer(nbuf, size);
-                        nbuf[size] = 0; // terminater
-                        BufferLen = TextStream_mbstowcs(NULL, (tjs_nchar*)nbuf, 0);
-                        if (BufferLen == (size_t)-1) {
-                            ttstr msg("err_narrow_to_wide");
-                            TVPThrowExceptionMessage(msg.c_str());
-                        }
-                        Buffer = new tjs_char [ BufferLen +1];
-                        TextStream_mbstowcs(Buffer, (tjs_nchar*)nbuf, BufferLen);
+                        nbuf[size] = 0;
+                        // terminater
+                        // 闲的慌啊？以后会优化的 TODO
+                        // to utf-16
+                        size_t interSize = TextStream_mbstowcs(NULL, (tjs_char*)nbuf, 0);
+                        if (interSize == (size_t)-1)
+                            TVPThrowExceptionMessage(TJSNarrowToWideConversionError);
+                        interBuff = new tjs_wchar[interSize + 1];
+                        TextStream_mbstowcs(interBuff, (tjs_char*)nbuf, interSize);
+                        interBuff[interSize] = 0;
+                        // to utf-8
+                        BufferLen = TVPWideCharToUtf8String(interBuff, NULL);
+                        if (BufferLen == (size_t)-1)
+                            TVPThrowExceptionMessage(TJSWideToNarrowConversionError);
+                        Buffer = new tjs_char[BufferLen + 1];
+                        TVPWideCharToUtf8String(interBuff, Buffer);
                     }
-                    catch(...)
+                    catch (...)
                     {
-                        delete [] nbuf;
+                        delete[] nbuf;
+                        if (interBuff)
+                            delete[] interBuff;
                         throw;
                     }
-                    delete [] nbuf;
+                    delete[] nbuf;
+                    if (interBuff)
+                        delete[] interBuff;
                     Buffer[BufferLen] = 0;
                     BufferPtr = Buffer;
                 }
@@ -461,97 +482,53 @@ public:
     {
         if(DirectLoad)
         {
-            if(sizeof(tjs_char) == 2)
+            if(size == 0) size = static_cast<tjs_uint>(Stream->GetSize() - Stream->GetPosition());
+            if(!size)
             {
-                if(size == 0) size = static_cast<tjs_uint>(Stream->GetSize() - Stream->GetPosition());
-                if(!size)
-                {
-                    targ.Clear();
-                    return 0;
-                }
-                tjs_char *buf = targ.AllocBuffer(size);
-                tjs_uint read = Stream->Read(buf, size * 2); // 2 = BMP unicode size
-                read /= 2;
+                targ.Clear();
+                return 0;
+            }
+            tjs_wchar* buf = new tjs_wchar[size * 2 + 1];
+            tjs_uint read = Stream->Read(buf, size * 2); // 2 = BMP unicode size
+            read /= 2;
 #if TJS_HOST_IS_BIG_ENDIAN
-                           // re-order input
+                        // re-order input
+            for(tjs_uint i = 0; i<read; i++)
+            {
+                tjs_wchar ch = buf[i];
+                buf[i] = ((ch >> 8) & 0xff) + ((ch & 0xff) << 8);
+            }
+#endif
+            if(CryptMode == 0)
+            {
+                // simple crypt
                 for(tjs_uint i = 0; i<read; i++)
                 {
-                    tjs_char ch = buf[i];
-                    buf[i] = ((ch >> 8) & 0xff) + ((ch & 0xff) << 8);
+                    tjs_wchar ch = buf[i];
+                    if(ch >= 0x20) buf[i] = ch ^ (((ch&0xfe) << 8)^1);
                 }
-#endif
-                if(CryptMode == 0)
-                {
-                    // simple crypt
-                    for(tjs_uint i = 0; i<read; i++)
-                    {
-                        tjs_char ch = buf[i];
-                        if(ch >= 0x20) buf[i] = ch ^ (((ch&0xfe) << 8)^1);
-                    }
-                }
-                else if(CryptMode == 1)
-                {
-                    // simple crypt
-                    for(tjs_uint i = 0; i<read; i++)
-                    {
-                        tjs_char ch = buf[i];
-                        ch = ((ch & 0xaaaaaaaa)>>1) | ((ch & 0x55555555)<<1);
-                        buf[i] = ch;
-                    }
-                }
-                buf[read] = 0;
-                targ.FixLen();
-                return read;
             }
-            else
+            else if(CryptMode == 1)
             {
-                // sizeof(tjs_char) is 4
-                // FIXME: NOT TESTED CODE
-                if(size == 0) size = static_cast<tjs_uint>(Stream->GetSize() - Stream->GetPosition());
-                tjs_uint16 *buf = new tjs_uint16[size / 2];
-                tjs_uint read;
-                try
+                // simple crypt
+                for(tjs_uint i = 0; i<read; i++)
                 {
-                    read = Stream->Read(buf, size * 2); // 2 = BMP unicode size
-                    read /= 2;
-#if TJS_HOST_IS_BIG_ENDIAN
-                           // re-order input
-                    for(tjs_uint i = 0; i<read; i++)
-                    {
-                        tjs_char ch = buf[i];
-                        buf[i] = ((ch >> 8) & 0xff) + ((ch & 0xff) << 8);
-                    }
-#endif
-                    if(CryptMode == 0)
-                    {
-                        // simple crypt (buggy version)
-                        for(tjs_uint i = 0; i<read; i++)
-                        {
-                            tjs_char ch = buf[i];
-                            if(ch >= 0x20) buf[i] = ch ^ (((ch&0xfe) << 8)^1);
-                        }
-                    }
-                    else if(CryptMode == 1)
-                    {
-                        // simple crypt
-                        for(tjs_uint i = 0; i<read; i++)
-                        {
-                            tjs_char ch = buf[i];
-                            ch = ((ch & 0xaaaaaaaa)>>1) | ((ch & 0x55555555)<<1);
-                            buf[i] = ch;
-                        }
-                    }
-                    buf[read] = 0;
+                    tjs_wchar ch = buf[i];
+                    ch = ((ch & 0xaaaaaaaa)>>1) | ((ch & 0x55555555)<<1);
+                    buf[i] = ch;
                 }
-                catch(...)
-                {
-                    delete [] buf;
-                    throw;
-                }
-                targ = TVPStringFromBMPUnicode(buf);
-                delete [] buf;
-                return read;
             }
+            buf[read] = 0;
+
+            // convert
+            BufferLen = TVPWideCharToUtf8String(buf, NULL);
+            if (BufferLen == (size_t)-1)
+                TVPThrowExceptionMessage(TJSWideToNarrowConversionError);
+            tjs_char* bufS = targ.AllocBuffer(BufferLen);
+            TVPWideCharToUtf8String(buf, bufS);
+            bufS[BufferLen] = 0;
+            targ.FixLen();
+            return read;
         }
         else
         {
@@ -594,7 +571,7 @@ class tTVPTextWriteStream : public iTJSTextWriteStream
 
     z_stream_s *ZStream;
     tjs_uint CompressionSizePosition;
-    tjs_nchar *CompressionBuffer;
+    tjs_char *CompressionBuffer;
     bool CompressionFailed;
 
 public:
@@ -615,27 +592,27 @@ public:
 
                // check c/z mode
         const tjs_char *p;
-        if((p = TJS_strchr(modestr.c_str(), TJS_W('c'))) != NULL)
+        if((p = TJS_strchr(modestr.c_str(), TJS_N('c'))) != NULL)
         {
             CryptMode = 1; // simple crypt
-            if(p[1] >= TJS_W('0') && p[1] <= TJS_W('9'))
-                CryptMode = p[1] - TJS_W('0');
+            if(p[1] >= TJS_N('0') && p[1] <= TJS_N('9'))
+                CryptMode = p[1] - TJS_N('0');
         }
 
-        if((p = TJS_strchr(modestr.c_str(), TJS_W('z'))) != NULL)
+        if((p = TJS_strchr(modestr.c_str(), TJS_N('z'))) != NULL)
         {
             CryptMode = 2; // compressed (cannot be with 'c')
-            if(p[1] >= TJS_W('0') && p[1] <= TJS_W('9'))
-                CompressionLevel = p[1] - TJS_W('0');
+            if(p[1] >= TJS_N('0') && p[1] <= TJS_N('9'))
+                CompressionLevel = p[1] - TJS_N('0');
         }
 
         if(CryptMode != -1 && CryptMode != 1 && CryptMode != 2)
             TVPThrowExceptionMessage(TVPUnsupportedModeString,
-                                     TJS_W("unsupported cipher mode"));
+                                     TJS_N("unsupported cipher mode"));
 
                // check o mode
         const tjs_char * o_ofs;
-        o_ofs = TJS_strchr(modestr.c_str(), TJS_W('o'));
+        o_ofs = TJS_strchr(modestr.c_str(), TJS_N('o'));
         if(o_ofs != NULL)
         {
             // seek to offset
@@ -644,7 +621,7 @@ public:
             int i;
             for(i = 0; i < 255; i++)
             {
-                if(o_ofs[i] >= TJS_W('0') && o_ofs[i] <= TJS_W('9'))
+                if(o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
                     buf[i] = o_ofs[i];
                 else break;
             }
@@ -686,7 +663,7 @@ public:
                 TVPThrowExceptionMessage(TVPCompressionFailed);
             }
 
-            CompressionBuffer = new tjs_nchar[COMPRESSION_BUFFER_SIZE];
+            CompressionBuffer = new tjs_char[COMPRESSION_BUFFER_SIZE];
 
             ZStream->next_in = NULL;
             ZStream->avail_in = 0;
@@ -766,18 +743,16 @@ public:
 
     void Write(const ttstr & targ)
     {
-        tjs_uint16 *buf;
-        tjs_int len = targ.GetLen();
-        buf = new tjs_uint16 [len + 1];
+        tjs_wchar* buf = NULL;
+        tjs_int len = 0;
         try
         {
-            const tjs_char *src = targ.c_str();
-            tjs_int i;
-            for(i = 0; i < len; i++)
-            {
-                buf[i] = src[i];
-            }
-            buf[i] = 0;
+            len = TVPUtf8ToWideCharString(targ.c_str(), NULL);
+            if (len <= 0)
+                return;
+            buf = new tjs_wchar[len + 1];
+            TVPUtf8ToWideCharString(targ.c_str(), buf);
+            buf[len] = 0;
 
 #if TJS_HOST_IS_BIG_ENDIAN
             tjs_uint16 *p;
@@ -813,25 +788,25 @@ public:
             if(CryptMode == 1)
             {
                 // simple crypt
-                tjs_uint16 *p;
+                tjs_wchar* p;
                 p = buf;
                 if(p)
                 {
                     while(*p)
                     {
-                        tjs_char ch = *p;
+                        tjs_wchar ch = *p;
                         ch = ((ch & 0xaaaaaaaa)>>1) | ((ch & 0x55555555)<<1);
                         *p = ch;
                         p++;
                     }
                 }
 
-                WriteRawData(buf, len * sizeof(tjs_uint16));
+                WriteRawData(buf, len * sizeof(tjs_wchar));
 
             }
             else
             {
-                WriteRawData(buf, len * sizeof(tjs_uint16));
+                WriteRawData(buf, len * sizeof(tjs_wchar));
             }
 #endif
         }
@@ -911,43 +886,4 @@ const tjs_char* TVPGetDefaultReadEncoding()
     return DefaultReadEncoding.c_str();
 }
 //---------------------------------------------------------------------------
-
-bool TVPStringDecode(const void *p, int len, ttstr &result, ttstr encoding) {
-    if(encoding == enc_utf8 || encoding == enc_utf8_2) {
-        int n = (int)TJS_mbstowcs(NULL, (char *)p, len);
-        if(n == -1)
-            return false;
-        TJS_mbstowcs(result.AllocBuffer(n), (char *)p, len);
-    } else if(encoding == enc_utf16 || encoding == enc_utf16_2) {
-        memcpy(result.AllocBuffer(len / 2), p, len);
-        result.FixLen();
-    } else if(encoding == enc_jis || encoding == enc_jis_2 ||
-             encoding == enc_jis_3 || encoding == enc_jis_4) {
-        int n = _TextStream_mbstowcs(sjis_mbtowc, NULL, (char *)p, len);
-        if(n == -1)
-            return false;
-        _TextStream_mbstowcs(sjis_mbtowc, result.AllocBuffer(n), (char *)p,
-                             len);
-    } else if(encoding == enc_gbk) {
-        int n = _TextStream_mbstowcs(gbk_mbtowc, NULL, (char *)p, len);
-        if(n == -1)
-            return false;
-        _TextStream_mbstowcs(gbk_mbtowc, result.AllocBuffer(n), (char *)p, len);
-    } else {
-        return false;
-    }
-    return true;
-}
-
-bool TVPStringEncode(const ttstr &src, std::string &result, ttstr encoding) {
-    if(encoding == enc_utf8 || encoding == enc_utf8_2) {
-        result = src.AsNarrowStdString();
-    } else if(encoding == enc_utf16 || encoding == enc_utf16_2) {
-        result.resize(src.length() * 2);
-        memcpy((char *)result.c_str(), src.c_str(), src.length() * 2);
-    } else {
-        return false;
-    }
-    return true;
-}
 

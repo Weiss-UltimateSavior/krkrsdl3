@@ -37,7 +37,7 @@ private:
 //	tTVPLocalTempStorageHolder LocalStorage;
 
 	tjs_int Version; // data version
-	const tjs_char * ChIndex;
+	const tjs_wchar * ChIndex;
 	const tTVPPrerenderedCharacterItem * Index;
 	tjs_uint IndexCount;
 
@@ -47,7 +47,7 @@ public:
 	void AddRef();
 	void Release();
 
-	const tTVPPrerenderedCharacterItem* Find(tjs_char ch); // serch character
+	const tTVPPrerenderedCharacterItem* Find(tjs_wchar ch); // serch character
 	void Retrieve(const tTVPPrerenderedCharacterItem * item, tjs_uint8 *buffer, tjs_int bufferpitch);
 
 };

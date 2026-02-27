@@ -107,24 +107,6 @@ public:
 		}
 	}
 
-	void SetString(const tjs_nchar* ref)
-	{
-		if(LongString) TJSVS_free(LongString), LongString = NULL;
-		tjs_int len = (tjs_int)TJS_narrowtowidelen(ref);
-		if(len == -1) TJSThrowNarrowToWideConversionError();
-
-		Length = len;
-		if(len>TJS_VS_SHORT_LEN)
-		{
-			LongString = TJSVS_malloc(len+1);
-			LongString[TJS_narrowtowide(LongString, ref, len)] = 0;
-		}
-		else
-		{
-			ShortString[TJS_narrowtowide(ShortString, ref, TJS_VS_SHORT_LEN)] = 0;
-		}
-	}
-
 	void AllocBuffer(tjs_uint len)
 	{
 		/* note that you must call FixLength if you allocate larger than the
@@ -221,6 +203,7 @@ public:
 	operator const tjs_char*() const;
 
 	tjs_int GetLength() const;
+	tjs_int GetCharLength() const;
 
 	tTJSVariantString* FixLength();
 
@@ -266,7 +249,6 @@ public:
 extern tTJSVariantString* TJSAllocVariantString(const tjs_char* ref1, const tjs_char* ref2);
 extern tTJSVariantString* TJSAllocVariantString(const tjs_char* ref, tjs_int n);
 extern tTJSVariantString* TJSAllocVariantString(const tjs_char* ref);
-extern tTJSVariantString* TJSAllocVariantString(const tjs_nchar* ref);
 extern tTJSVariantString* TJSAllocVariantString(const tjs_uint8** src);
 extern tTJSVariantString* TJSAllocVariantStringBuffer(tjs_uint len);
 extern tTJSVariantString* TJSAppendVariantString(tTJSVariantString* str, const tjs_char* app);

@@ -154,7 +154,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
-		if(name) *name = TJS_W("rotatezoom");
+		if(name) *name = TJS_N("rotatezoom");
 		return TJS_S_OK;
 	}
 
@@ -190,28 +190,28 @@ public:
 		tjs_int centerx = src1w / 2;
 		tjs_int centery = src1h / 2;
 
-		if(TJS_FAILED(options->GetValue(TJS_W("time"), &tmp)))
+		if(TJS_FAILED(options->GetValue(TJS_N("time"), &tmp)))
 			return TJS_E_FAIL; // time 属性が指定されていない
 		if(tmp.Type() == tvtVoid) return TJS_E_FAIL;
 		time = (tjs_int64)tmp;
 		if(time < 2) time = 2; // あまり小さな数値を指定すると問題が起きるので
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("factor"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("factor"), &tmp)))
 			if(tmp.Type() != tvtVoid) factor = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("accel"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("accel"), &tmp)))
 			if(tmp.Type() != tvtVoid) accel = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("twist"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("twist"), &tmp)))
 			if(tmp.Type() != tvtVoid) twist = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("twistaccel"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("twistaccel"), &tmp)))
 			if(tmp.Type() != tvtVoid) twistaccel = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("centerx"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("centerx"), &tmp)))
 			if(tmp.Type() != tvtVoid) centerx = (tjs_int)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("centery"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("centery"), &tmp)))
 			if(tmp.Type() != tvtVoid) centery = (tjs_int)tmp;
 
 		// オブジェクトを作成
@@ -254,7 +254,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
-		if(name) *name = TJS_W("rotatevanish");
+		if(name) *name = TJS_N("rotatevanish");
 		return TJS_S_OK;
 	}
 
@@ -289,25 +289,25 @@ public:
 		tjs_int centerx = src1w / 2;
 		tjs_int centery = src1h / 2;
 
-		if(TJS_FAILED(options->GetValue(TJS_W("time"), &tmp)))
+		if(TJS_FAILED(options->GetValue(TJS_N("time"), &tmp)))
 			return TJS_E_FAIL; // time 属性が指定されていない
 		if(tmp.Type() == tvtVoid) return TJS_E_FAIL;
 		time = (tjs_int64)tmp;
 		if(time < 2) time = 2; // あまり小さな数値を指定すると問題が起きるので
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("accel"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("accel"), &tmp)))
 			if(tmp.Type() != tvtVoid) accel = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("twist"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("twist"), &tmp)))
 			if(tmp.Type() != tvtVoid) twist = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("twistaccel"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("twistaccel"), &tmp)))
 			if(tmp.Type() != tvtVoid) twistaccel = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("centerx"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("centerx"), &tmp)))
 			if(tmp.Type() != tvtVoid) centerx = (tjs_int)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("centery"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("centery"), &tmp)))
 			if(tmp.Type() != tvtVoid) centery = (tjs_int)tmp;
 
 		// オブジェクトを作成
@@ -426,7 +426,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
-		if(name) *name = TJS_W("rotateswap");
+		if(name) *name = TJS_N("rotateswap");
 		return TJS_S_OK;
 	}
 
@@ -458,16 +458,16 @@ public:
 		tjs_uint32 bgcolor = 0;
 		double twist = 1;
 
-		if(TJS_FAILED(options->GetValue(TJS_W("time"), &tmp)))
+		if(TJS_FAILED(options->GetValue(TJS_N("time"), &tmp)))
 			return TJS_E_FAIL; // time 属性が指定されていない
 		if(tmp.Type() == tvtVoid) return TJS_E_FAIL;
 		time = (tjs_int64)tmp;
 		if(time < 2) time = 2; // あまり小さな数値を指定すると問題が起きるので
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("bgcolor"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("bgcolor"), &tmp)))
 			if(tmp.Type() != tvtVoid) bgcolor = (tjs_int)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("twist"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("twist"), &tmp)))
 			if(tmp.Type() != tvtVoid) twist = (double)tmp;
 
 		// オブジェクトを作成

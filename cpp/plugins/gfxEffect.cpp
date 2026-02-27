@@ -1,18 +1,18 @@
 #include "ncbind/ncbind.hpp"
 
-#define NCB_MODULE_NAME TJS_W("gfxEffect.dll")
+#define NCB_MODULE_NAME TJS_N("gfxEffect.dll")
 
 static void InitPlugin_GFXEffect()
 {
 	TVPExecuteScript(
-		TJS_W("class gfxFire {")
-		TJS_W("  function gfxFire() {")
-		TJS_W("    Debug.message('gfxFire construct'); ")
-		TJS_W("  }")
-		TJS_W("  function finalize() {")
-		TJS_W("    Debug.message('gfxFire finalize');")
-		TJS_W("  }")
-		TJS_W("};")
+		TJS_N("class gfxFire {")
+		TJS_N("  function gfxFire() {")
+		TJS_N("    Debug.message('gfxFire construct'); ")
+		TJS_N("  }")
+		TJS_N("  function finalize() {")
+		TJS_N("    Debug.message('gfxFire finalize');")
+		TJS_N("  }")
+		TJS_N("};")
 	);
 }
 

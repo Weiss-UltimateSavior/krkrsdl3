@@ -227,8 +227,7 @@ bool BasePlayer::OpenFromStream(tTJSBinaryStream* stream,
     if (IsRunning())
         CloseInputStream();
 
-    TJS::tTJSNarrowStringHolder holder(streamname);
-    std::string filename = holder.operator const tjs_nchar*();
+    std::string filename = streamname;
 
     m_bAbortRequest = false;
     SetPlaySpeed(DVD_PLAYSPEED_NORMAL);

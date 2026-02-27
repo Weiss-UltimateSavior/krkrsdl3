@@ -18,7 +18,7 @@ struct tTVPAtInstallClass {
 静的リンクするとクラス追加されるpluginの様な機能です。
 pluginは実行時にクラス等追加しますが、extensionはビルドする時に、入れるクラスを選択する形です。
 static tTVPAtInstallClass TVPInstallClassFoo
-	(TJS_W("ClassFoo"), TVPCreateNativeClass_ClassFoo,TJS_W("Window,Layer"));
+	(TJS_N("ClassFoo"), TVPCreateNativeClass_ClassFoo,TJS_N("Window,Layer"));
 呼び出される関数にはglobalが渡されるので、必要であればそこからメンバなど取得します。
 登録は呼び出し側が返り値のiTJSDispatch2をglobalに登録するので、呼び出された関数内で登録する必要
 はありません。

@@ -5,7 +5,7 @@
 #include "TVPStorage.h"
 #include "TextStream.h"
 
-#define NCB_MODULE_NAME TJS_W("csvParser.dll")
+#define NCB_MODULE_NAME TJS_N("csvParser.dll")
 
 //---------------------------------------------------------------------------
 
@@ -83,15 +83,14 @@ addMember(iTJSDispatch2 *dispatch, const tjs_char *name, iTJSDispatch2 *member)
 	member->Release();
 	dispatch->PropSet(
 		TJS_MEMBERENSURE, // メンバがなかった場合には作成するようにするフラグ
-		name, // メンバ名 ( かならず TJS_W( ) で囲む )
+		name, // メンバ名 ( かならず TJS_N( ) で囲む )
 		NULL, // ヒント ( 本来はメンバ名のハッシュ値だが、NULL でもよい )
 		&var, // 登録する値
 		dispatch // コンテキスト
 		);
 }
 
-static iTJSDispatch2*
-getMember(iTJSDispatch2 *dispatch, const tjs_char *name)
+static iTJSDispatch2* getMember(iTJSDispatch2* dispatch, const tjs_char* name)
 {
 	tTJSVariant val;
 	if (TJS_FAILED(dispatch->PropGet(TJS_IGNOREPROP,
@@ -99,15 +98,14 @@ getMember(iTJSDispatch2 *dispatch, const tjs_char *name)
 									 NULL,
 									 &val,
 									 dispatch))) {
-		ttstr msg = TJS_W("can't get member:");
+		ttstr msg = TJS_N("can't get member:");
 		msg += name;
 		TVPThrowExceptionMessage(msg.c_str());
 	}
 	return val.AsObject();
 }
 
-static bool
-isValidMember(iTJSDispatch2 *dispatch, const tjs_char *name)
+static bool isValidMember(iTJSDispatch2* dispatch, const tjs_char* name)
 {
 	return dispatch->IsValid(TJS_IGNOREPROP,
 							 name,
@@ -115,8 +113,7 @@ isValidMember(iTJSDispatch2 *dispatch, const tjs_char *name)
 							 dispatch) == TJS_S_TRUE;
 }
 
-static void
-delMember(iTJSDispatch2 *dispatch, const tjs_char *name)
+static void delMember(iTJSDispatch2* dispatch, const tjs_char* name)
 {
 	dispatch->DeleteMember(
 		0, // フラグ ( 0 でよい )
@@ -185,7 +182,7 @@ protected:
 		do {
 			if (i < line.length() && line[i] == '"') {
 				++i;
-				fld = TJS_W("");
+				fld = TJS_N("");
 				j = i;
 				do {
 					for (;j < line.length(); j++){
@@ -230,7 +227,7 @@ public:
 		file = NULL;
 		lineNo = 0;
 		separator = ',';
-		newline = TJS_W("\r\n");
+		newline = TJS_N("\r\n");
 	}
 
 	~NI_CSVParser() {
@@ -302,7 +299,7 @@ public:
 			delete []buff;
 			delete pStream;
 		} else {
-			iTJSTextReadStream *pStream = TVPCreateTextStreamForRead(filename, TJS_W(""));
+			iTJSTextReadStream *pStream = TVPCreateTextStreamForRead(filename, TJS_N(""));
 			pStream->Read(text, 0);
 			delete pStream;
 		}
@@ -315,7 +312,7 @@ public:
 	bool getNextLine(tTJSVariant *result = NULL) {
 		bool ret = false;
 		if (file) {
-			line = TJS_W("");
+			line = TJS_N("");
 			if (addline()) {
 				lineNo++;
 				iTJSDispatch2 *fields = TJSCreateArrayObject();
@@ -345,8 +342,8 @@ public:
 	 */
 	void parse(iTJSDispatch2 *objthis) {
 		iTJSDispatch2 *target = this->target ? this->target : objthis;
-		if (file && isValidMember(target, TJS_W("doLine"))) {
-			iTJSDispatch2 *method = getMember(target, TJS_W("doLine"));
+		if (file && isValidMember(target, TJS_N("doLine"))) {
+			iTJSDispatch2 *method = getMember(target, TJS_N("doLine"));
 			tTJSVariant result;
 			while (getNextLine(&result)) {
 				tTJSVariant var2 (lineNo);
@@ -369,7 +366,7 @@ static iTJSNativeInstance * Create_NI_CSVParser()
 
 static iTJSDispatch2 * Create_NC_CSVParser()
 {
-	tTJSNativeClassForPlugin * classobj = TJSCreateNativeClassForPlugin(TJS_W("CSVParser"), Create_NI_CSVParser);
+	tTJSNativeClassForPlugin * classobj = TJSCreateNativeClassForPlugin(TJS_N("CSVParser"), Create_NI_CSVParser);
 
 	TJS_BEGIN_NATIVE_MEMBERS(/*TJS class name*/CSVParser)
 
@@ -464,31 +461,16 @@ void InitPlugin_CSVParser() {
         // Arary クラスメンバー取得
         {
             tTJSVariant varScripts;
-            TVPExecuteExpression(TJS_W("Array"), &varScripts);
+            TVPExecuteExpression(TJS_N("Array"), &varScripts);
             iTJSDispatch2 *dispatch = varScripts.AsObjectNoAddRef();
             // メンバ取得
-            ArrayClearMethod = getMember(dispatch, TJS_W("clear"));
+            ArrayClearMethod = getMember(dispatch, TJS_N("clear"));
         }
 
-        addMember(global, TJS_W("CSVParser"), Create_NC_CSVParser());
+        addMember(global, TJS_N("CSVParser"), Create_NC_CSVParser());
         global->Release();
     }
 }
 //---------------------------------------------------------------------------
-// extern "C" __declspec(dllexport) HRESULT _stdcall V2Unlink()
-// {
-// 	// - まず、TJS のグローバルオブジェクトを取得する
-// 	iTJSDispatch2 * global = TVPGetScriptDispatch();
-// 
-// 	// - global の DeleteMember メソッドを用い、オブジェクトを削除する
-// 	if (global)	{
-// 		delMember(global, L"CSVParser");
-// 		if (ArrayClearMethod) {
-// 			ArrayClearMethod->Release();
-// 			ArrayClearMethod = NULL;
-// 		}
-// 		global->Release();
-// 	}
-// }
 
 NCB_PRE_REGIST_CALLBACK(InitPlugin_CSVParser);

@@ -208,14 +208,14 @@ extern ttstr TVPActionName;
 	{ \
 		if(numparams < (argnum)) return TJS_E_BADPARAMCOUNT; \
 		tjs_int arg_count = 0; \
-		iTJSDispatch2 *evobj = TVPCreateEventObject(TJS_W(name), (object), \
+		iTJSDispatch2 *evobj = TVPCreateEventObject(TJS_N(name), (object), \
 			(object)); \
 		tTJSVariant evval(evobj, evobj); \
 		evobj->Release();
 
 #define TVP_ACTION_INVOKE_MEMBER(name) \
 	{\
-		static ttstr member_name(TJS_W(name)); \
+		static ttstr member_name(TJS_N(name)); \
 		evobj->PropSet(TJS_MEMBERENSURE|TJS_IGNOREPROP, \
 			member_name.c_str(), member_name.GetHint(), param[arg_count++], \
 			evobj); \

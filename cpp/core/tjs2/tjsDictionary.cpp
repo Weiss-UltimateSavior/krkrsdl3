@@ -25,7 +25,7 @@ static tjs_int32 ClassID_Dictionary;
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSDictionaryClass::ClassID = (tjs_uint32)-1;
 tTJSDictionaryClass::tTJSDictionaryClass() :
-	tTJSNativeClass(TJS_W("Dictionary"))
+	tTJSNativeClass(TJS_N("Dictionary"))
 {
 	// TJS class constructor
 
@@ -131,7 +131,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func.name*/saveStruct)
 	ttstr mode;
 	if(numparams >= 2 && param[1]->Type() != tvtVoid) mode = *param[1];
 
-	if( TJS_strchr(mode.c_str(), TJS_W('b')) != NULL ) {
+	if( TJS_strchr(mode.c_str(), TJS_N('b')) != NULL ) {
 		tTJSBinaryStream* stream = TJSCreateBinaryStreamForWrite(name, mode);
 		try {
 			stream->Write( tTJSBinarySerializer::HEADER, tTJSBinarySerializer::HEADER_LENGTH );
@@ -149,7 +149,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func.name*/saveStruct)
 		{
 			std::vector<iTJSDispatch2 *> stack;
 			stack.push_back(objthis);
-			ni->SaveStructuredData(stack, *stream, TJS_W(""));
+			ni->SaveStructuredData(stack, *stream, TJS_N(""));
 		}
 		catch(...)
 		{
@@ -261,7 +261,7 @@ tjs_error tTJSDictionaryClass::CreateNew(tjs_uint32 flag, const tjs_char * membe
 	{
 		// set object type for debugging
 		if(TJSObjectHashMapEnabled())
-			TJSObjectHashSetType(dsp, TJS_W("instance of class ") + ClassName);
+			TJSObjectHashSetType(dsp, TJS_N("instance of class ") + ClassName);
 
 		// instance initialization
 		hr = FuncCall(0, NULL, NULL, NULL, 0, NULL, dsp); // add member to dsp
@@ -395,11 +395,11 @@ void tTJSDictionaryNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
 	iTJSTextWriteStream & stream, const ttstr &indentstr)
 {
 #ifdef TJS_TEXT_OUT_CRLF
-	stream.Write(TJS_W("(const) %[\r\n"));
+	stream.Write(TJS_N("(const) %[\r\n"));
 #else
-	stream.Write(TJS_W("(const) %[\n"));
+	stream.Write(TJS_N("(const) %[\n"));
 #endif
-	ttstr indentstr2 = indentstr + TJS_W(" ");
+	ttstr indentstr2 = indentstr + TJS_N(" ");
 
 	tSaveStructCallback callback;
 	callback.Stack = &stack;
@@ -410,12 +410,12 @@ void tTJSDictionaryNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
 	Owner->EnumMembers(TJS_IGNOREPROP, &clo, Owner);
 
 #ifdef TJS_TEXT_OUT_CRLF
-	if(!callback.First) stream.Write(TJS_W("\r\n"));
+	if(!callback.First) stream.Write(TJS_N("\r\n"));
 #else
-	if(!callback.First) stream.Write(TJS_W("\n"));
+	if(!callback.First) stream.Write(TJS_N("\n"));
 #endif
 	stream.Write(indentstr);
-	stream.Write(TJS_W("]"));
+	stream.Write(TJS_N("]"));
 }
 //---------------------------------------------------------------------------
 tjs_error tTJSDictionaryNI::tSaveStructCallback::FuncCall(
@@ -436,18 +436,18 @@ tjs_error tTJSDictionaryNI::tSaveStructCallback::FuncCall(
 	}
 
 #ifdef TJS_TEXT_OUT_CRLF
-	if(!First) Stream->Write(TJS_W(",\r\n"));
+	if(!First) Stream->Write(TJS_N(",\r\n"));
 #else
-	if(!First) Stream->Write(TJS_W(",\n"));
+	if(!First) Stream->Write(TJS_N(",\n"));
 #endif
 
 	First = false;
 
 	Stream->Write(*IndentStr);
 
-	Stream->Write(TJS_W("\""));
+	Stream->Write(TJS_N("\""));
 	Stream->Write(ttstr(*param[0]).EscapeC());
-	Stream->Write(TJS_W("\" => "));
+	Stream->Write(TJS_N("\" => "));
 
 	tTJSVariantType type = param[2]->Type();
 	if(type == tvtObject)

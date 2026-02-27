@@ -1,15 +1,15 @@
 #pragma once
 
-#include <string.h>
-#include <stdarg.h>
-#include <wchar.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdarg>
+#include <cwchar>
+#include <cstdlib>
+#include <cstdio>
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
-#include <math.h>
-#include <assert.h>
+#include <cmath>
+#include <cassert>
 
 #include <climits>
 #include <sstream>

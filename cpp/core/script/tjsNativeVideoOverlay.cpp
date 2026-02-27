@@ -61,12 +61,12 @@ void tTJSNI_BaseVideoOverlay::Invalidate() {
 }
 //---------------------------------------------------------------------------
 ttstr tTJSNI_BaseVideoOverlay::GetStatusString() const {
-    static ttstr unload(TJS_W("unload"));
-    static ttstr play(TJS_W("play"));
-    static ttstr stop(TJS_W("stop"));
-    static ttstr unknown(TJS_W("unknown"));
-    static ttstr pause(TJS_W("pause"));
-    static ttstr ready(TJS_W("ready"));
+    static ttstr unload(TJS_N("unload"));
+    static ttstr play(TJS_N("play"));
+    static ttstr stop(TJS_N("stop"));
+    static ttstr unknown(TJS_N("unknown"));
+    static ttstr pause(TJS_N("pause"));
+    static ttstr ready(TJS_N("ready"));
 
     switch(Status) {
         case ssUnload:
@@ -98,7 +98,7 @@ void tTJSNI_BaseVideoOverlay::SetStatus(tTVPSoundStatus s) {
             if(CanDeliverEvents) {
                 // fire onStatusChanged event
                 tTJSVariant param(GetStatusString());
-                static ttstr eventname(TJS_W("onStatusChanged"));
+                static ttstr eventname(TJS_N("onStatusChanged"));
                 TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 1,
                              &param);
             }
@@ -120,7 +120,7 @@ void tTJSNI_BaseVideoOverlay::SetStatusAsync(tTVPSoundStatus s) {
             if(CanDeliverEvents) {
                 // fire onStatusChanged event
                 tTJSVariant param(GetStatusString());
-                static ttstr eventname(TJS_W("onStatusChanged"));
+                static ttstr eventname(TJS_N("onStatusChanged"));
                 TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_POST, 1,
                              &param);
             }
@@ -137,7 +137,7 @@ void tTJSNI_BaseVideoOverlay::FireCallbackCommand(const ttstr &command,
         if(CanDeliverEvents) {
             // fire onStatusChanged event
             tTJSVariant param[2] = { command, argument };
-            static ttstr eventname(TJS_W("onCallbackCommand"));
+            static ttstr eventname(TJS_N("onCallbackCommand"));
             TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 2,
                          param);
         }
@@ -153,7 +153,7 @@ void tTJSNI_BaseVideoOverlay::FirePeriodEvent(tTVPPeriodEventReason reason) {
         if(CanDeliverEvents) {
             // fire onPeriod event
             tTJSVariant param[1] = { (tjs_int)reason };
-            static ttstr eventname(TJS_W("onPeriod"));
+            static ttstr eventname(TJS_N("onPeriod"));
             TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 1,
                          param);
         }
@@ -169,7 +169,7 @@ void tTJSNI_BaseVideoOverlay::FireFrameUpdateEvent(tjs_int frame) {
         if(CanDeliverEvents) {
             // fire onPeriod event
             tTJSVariant param[1] = { frame };
-            static ttstr eventname(TJS_W("onFrameUpdate"));
+            static ttstr eventname(TJS_N("onFrameUpdate"));
             TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 1,
                          param);
         }
@@ -272,7 +272,7 @@ void tTJSNI_VideoOverlay::Open(const ttstr &_name) {
 
     const tjs_char *param_pos;
     int param_pos_ind;
-    param_pos = TJS_strchr(name.c_str(), TJS_W('?'));
+    param_pos = TJS_strchr(name.c_str(), TJS_N('?'));
     param_pos_ind = (int)(param_pos - name.c_str());
     if(param_pos != NULL) {
         param = param_pos;
@@ -490,12 +490,12 @@ void tTJSNI_VideoOverlay::SetRectangleToVideoOverlay() {
         tjs_int t = Rect.top;
         tjs_int r = Rect.right;
         tjs_int b = Rect.bottom;
-        TVPAddLog(TJS_W("Video zoom: (") + ttstr(l) + TJS_W(",") + ttstr(t) +
-                  TJS_W(")-(") + ttstr(r) + TJS_W(",") + ttstr(b) +
-                  TJS_W(") ->"));
+        TVPAddLog(TJS_N("Video zoom: (") + ttstr(l) + TJS_N(",") + ttstr(t) +
+                  TJS_N(")-(") + ttstr(r) + TJS_N(",") + ttstr(b) +
+                  TJS_N(") ->"));
         Window->ZoomRectangle(l, t, r, b);
-        TVPAddLog(TJS_W("(") + ttstr(l) + TJS_W(",") + ttstr(t) + TJS_W(")-(") +
-                  ttstr(r) + TJS_W(",") + ttstr(b) + TJS_W(")"));
+        TVPAddLog(TJS_N("(") + ttstr(l) + TJS_N(",") + ttstr(t) + TJS_N(")-(") +
+                  ttstr(r) + TJS_N(",") + ttstr(b) + TJS_N(")"));
         //	RECT rect = {l + ofsx, t + ofsy, r + ofsx, b + ofsy};
         VideoOverlay->SetRect(l + ofsx, t + ofsy, r + ofsx, b + ofsy);
     }
@@ -1225,7 +1225,7 @@ bool tTJSNI_VideoOverlay::GetVideoSize(tjs_int &w, tjs_int &h) const {
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_VideoOverlay::ClassID = -1;
 tTJSNC_VideoOverlay::tTJSNC_VideoOverlay() :
-	tTJSNativeClass(TJS_W("VideoOverlay"))
+	tTJSNativeClass(TJS_N("VideoOverlay"))
 {
 	// registration of native members
 

@@ -26,7 +26,7 @@ static bool TVPAppTitleInit = false;
 // tTJSNC_System
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_System::ClassID = -1;
-tTJSNC_System::tTJSNC_System() : inherited(TJS_W("System"))
+tTJSNC_System::tTJSNC_System() : inherited(TJS_N("System"))
 {
 	// registration of native members
 
@@ -206,7 +206,7 @@ tTJSNC_System::tTJSNC_System() : inherited(TJS_W("System"))
 
 		tjs_char buf[40];
 		TJS_snprintf(buf, sizeof(buf) / sizeof(tjs_char),
-			TJS_W("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x"),
+			TJS_N("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x"),
 			uuid[0], uuid[1], uuid[2], uuid[3],
 			uuid[4], uuid[5], uuid[6], uuid[7],
 			uuid[8], uuid[9], uuid[10], uuid[11],
@@ -439,11 +439,11 @@ tTJSNC_System::tTJSNC_System() : inherited(TJS_W("System"))
 
 		// register default "exceptionHandler" member
 		tTJSVariant val((iTJSDispatch2*)NULL, (iTJSDispatch2*)NULL);
-	PropSet(TJS_MEMBERENSURE, TJS_W("exceptionHandler"), NULL, &val, this);
+	PropSet(TJS_MEMBERENSURE, TJS_N("exceptionHandler"), NULL, &val, this);
 
 	// and onActivate, onDeactivate
-	PropSet(TJS_MEMBERENSURE, TJS_W("onActivate"), NULL, &val, this);
-	PropSet(TJS_MEMBERENSURE, TJS_W("onDeactivate"), NULL, &val, this);
+	PropSet(TJS_MEMBERENSURE, TJS_N("onActivate"), NULL, &val, this);
+	PropSet(TJS_MEMBERENSURE, TJS_N("onDeactivate"), NULL, &val, this);
 }
 //---------------------------------------------------------------------------
 tTJSNativeInstance* tTJSNC_System::CreateNativeInstance()
@@ -480,7 +480,7 @@ tTJSNativeClass* TVPCreateNativeClass_System()
 		if (numparams >= 2 && param[1]->Type() != tvtVoid)
 			caption = *param[1];
 		else
-			caption = TJS_W("Information");
+			caption = TJS_N("Information");
 
 		if (numparams >= 3 && param[2]->Type() != tvtVoid) {
 			if (param[2]->Type() == tvtObject) { // vector of button
@@ -498,9 +498,9 @@ tTJSNativeClass* TVPCreateNativeClass_System()
 				int nButtons = param[2]->AsInteger();
 				std::vector<ttstr> vecButtons;
 				if (nButtons >= 1)
-					vecButtons.emplace_back(TJS_W("OK"));
+					vecButtons.emplace_back(TJS_N("OK"));
 				if (nButtons >= 2)
-					vecButtons.emplace_back(TJS_W("Cancel"));
+					vecButtons.emplace_back(TJS_N("Cancel"));
 				int ret = TVPShowSimpleMessageBox(text, caption, vecButtons);
 				if (result) result->operator =(ret);
 			}

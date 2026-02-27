@@ -10,7 +10,7 @@
 // tTJSNC_Window : TJS Window class
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Window::ClassID = -1;
-tTJSNC_Window::tTJSNC_Window() : tTJSNativeClass(TJS_W("Window"))
+tTJSNC_Window::tTJSNC_Window() : tTJSNativeClass(TJS_N("Window"))
 {
 	// registration of native members
 
@@ -1270,11 +1270,11 @@ tTJSNativeClass* TVPCreateNativeClass_Window()
 			if (result) {
 				iTJSDispatch2* object = TJSCreateDictionaryObject();
 
-				static ttstr startX_name(TJS_W("startX"));
-				static ttstr startY_name(TJS_W("startY"));
-				static ttstr X_name(TJS_W("x"));
-				static ttstr Y_name(TJS_W("y"));
-				static ttstr ID_name(TJS_W("ID"));
+				static ttstr startX_name(TJS_N("startX"));
+				static ttstr startY_name(TJS_N("startY"));
+				static ttstr X_name(TJS_N("x"));
+				static ttstr Y_name(TJS_N("y"));
+				static ttstr ID_name(TJS_N("ID"));
 				{
 					tTJSVariant val(_this->GetTouchPointStartX(index));
 					if (TJS_FAILED(object->PropSet(TJS_MEMBERENSURE | TJS_IGNOREPROP, startX_name.c_str(), startX_name.GetHint(), &val, object)))

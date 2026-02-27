@@ -75,7 +75,7 @@ tjs_error tTJSNativeClassMethod::IsInstanceOf(tjs_uint32 flag,
 {
 	if(membername == NULL)
 	{
-		if(!TJS_strcmp(classname, TJS_W("Function"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(classname, TJS_N("Function"))) return TJS_S_TRUE;
 	}
 
 	return inherited::IsInstanceOf(flag, membername, hint, classname, objthis);
@@ -166,7 +166,7 @@ tjs_error tTJSNativeClassProperty::IsInstanceOf(tjs_uint32 flag,
 {
 	if(membername == NULL)
 	{
-		if(!TJS_strcmp(classname, TJS_W("Property"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(classname, TJS_N("Property"))) return TJS_S_TRUE;
 	}
 
 	return inherited::IsInstanceOf(flag, membername, hint, classname, objthis);
@@ -236,7 +236,7 @@ tTJSNativeClass::tTJSNativeClass(const ttstr &name)
 	ClassName = TJSMapGlobalStringMap(name);
 
 	if(TJSObjectHashMapEnabled())
-		TJSObjectHashSetType(this, ttstr(TJS_W("(native class) ")) + ClassName);
+		TJSObjectHashSetType(this, ttstr(TJS_N("(native class) ")) + ClassName);
 }
 //---------------------------------------------------------------------------
 tTJSNativeClass::~tTJSNativeClass()
@@ -255,12 +255,12 @@ void tTJSNativeClass::RegisterNCM(const tjs_char *name, iTJSDispatch2 *dsp,
 		switch(type)
 		{
 		case nitMethod:
-			TJSObjectHashSetType(dsp, ttstr(TJS_W("(native function) ")) +
-										classname + TJS_W(".") + name);
+			TJSObjectHashSetType(dsp, ttstr(TJS_N("(native function) ")) +
+										classname + TJS_N(".") + name);
 			break;
 		case nitProperty:
-			TJSObjectHashSetType(dsp, ttstr(TJS_W("(native property) ")) +
-										classname + TJS_W(".") + name);
+			TJSObjectHashSetType(dsp, ttstr(TJS_N("(native property) ")) +
+										classname + TJS_N(".") + name);
 			break;
 		/*
 		case nitClass:
@@ -390,7 +390,7 @@ tjs_error tTJSNativeClass::CreateNew(tjs_uint32 flag, const tjs_char * membernam
 	{
 		// set object type for debugging
 		if(TJSObjectHashMapEnabled())
-			TJSObjectHashSetType(dsp, TJS_W("instance of class ") + ClassName);
+			TJSObjectHashSetType(dsp, TJS_N("instance of class ") + ClassName);
 
 		// instance initialization
 		hr = FuncCall(0, NULL, NULL, NULL, 0, NULL, dsp); // add member to dsp
@@ -430,7 +430,7 @@ tjs_error tTJSNativeClass::IsInstanceOf(tjs_uint32 flag,
 {
 	if(membername == NULL)
 	{
-		if(!TJS_strcmp(classname, TJS_W("Class"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(classname, TJS_N("Class"))) return TJS_S_TRUE;
 		if(!TJS_strcmp(classname, ClassName.c_str())) return TJS_S_TRUE;
 	}
 
@@ -448,7 +448,7 @@ tTJSNativeFunction::tTJSNativeFunction(const tjs_char *name)
 	{
 		TJSAddObjectHashRecord(this);
 		if(name)
-			TJSObjectHashSetType(this, ttstr(TJS_W("(native function) ")) + name);
+			TJSObjectHashSetType(this, ttstr(TJS_N("(native function) ")) + name);
 	}
 }
 //---------------------------------------------------------------------------
@@ -475,7 +475,7 @@ tjs_error tTJSNativeFunction::IsInstanceOf(
 {
 	if(membername == NULL)
 	{
-		if(!TJS_strcmp(classname, TJS_W("Function"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(classname, TJS_N("Function"))) return TJS_S_TRUE;
 	}
 
 	return inherited::IsInstanceOf(flag, membername, hint, classname, objthis);

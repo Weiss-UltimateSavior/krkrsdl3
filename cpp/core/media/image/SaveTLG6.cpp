@@ -13,19 +13,19 @@
 #include "TickCount.h"
 
 static const tjs_char * const LAYER_BLEND_MODES[] = {
-    TJS_W("opaque"), TJS_W("alpha"), TJS_W("add"), TJS_W("sub"), TJS_W("mul"),
-    TJS_W("dodge"), TJS_W("darken"), TJS_W("lighten"), TJS_W("screen"), TJS_W("addalpha"),
-    TJS_W("psnormal"), TJS_W("psadd"), TJS_W("pssub"), TJS_W("psmul"), TJS_W("psscreen"), TJS_W("psoverlay"),
-    TJS_W("pshlight"), TJS_W("psslight"), TJS_W("psdodge"), TJS_W("psdodge5"), TJS_W("psburn"), TJS_W("pslighten"),
-    TJS_W("psdarken"), TJS_W("psdiff"), TJS_W("psdiff5"), TJS_W("psexcl"), TJS_W("opaque"), NULL
+    TJS_N("opaque"), TJS_N("alpha"), TJS_N("add"), TJS_N("sub"), TJS_N("mul"),
+    TJS_N("dodge"), TJS_N("darken"), TJS_N("lighten"), TJS_N("screen"), TJS_N("addalpha"),
+    TJS_N("psnormal"), TJS_N("psadd"), TJS_N("pssub"), TJS_N("psmul"), TJS_N("psscreen"), TJS_N("psoverlay"),
+    TJS_N("pshlight"), TJS_N("psslight"), TJS_N("psdodge"), TJS_N("psdodge5"), TJS_N("psburn"), TJS_N("pslighten"),
+    TJS_N("psdarken"), TJS_N("psdiff"), TJS_N("psdiff5"), TJS_N("psexcl"), TJS_N("opaque"), NULL
 };
 bool TVPAcceptSaveAsTLG(void* formatdata, const ttstr & type, class iTJSDispatch2** dic )
 {
     bool result = false;
-    if( type.StartsWith(TJS_W("tlg")) ) result = true;
-    else if( type == TJS_W(".tlg") ) result = true;
-    else if( type == TJS_W(".tlg5") ) result = true;
-    else if( type == TJS_W(".tlg6") ) result = true;
+    if( type.StartsWith(TJS_N("tlg")) ) result = true;
+    else if( type == TJS_N(".tlg") ) result = true;
+    else if( type == TJS_N(".tlg5") ) result = true;
+    else if( type == TJS_N(".tlg6") ) result = true;
     if( result && dic ) {
         // mode : select text : opaque, alpha, add, sub, mul, dodge, darken, lighten, screen, addalpha
         //        psnormal, psadd, pssub, psmul, psscreen, psoverlay, pshlight, psslight, psdodge
@@ -35,17 +35,17 @@ bool TVPAcceptSaveAsTLG(void* formatdata, const ttstr & type, class iTJSDispatch
         // offs_unit : select text : pixel
         tTJSVariant result;
         TVPExecuteExpression(
-            TJS_W("(const)%[")
-            TJS_W("\"mode\"=>(const)%[\"type\"=>\"select text\",\"items\"=>")
-            TJS_W("(const)[\"opaque\", \"alpha\", \"add\", \"sub\", \"mul\", \"dodge\", \"darken\", \"lighten\", \"screen\", \"addalpha\",")
-            TJS_W("\"psnormal\", \"psadd\", \"pssub\", \"psmul\", \"psscreen\", \"psoverlay\", \"pshlight\", \"psslight\", \"psdodge\",")
-            TJS_W("\"psdodge5\", \"psburn\", \"pslighten\", \"psdarken\", \"psdiff\", \"psdiff5\", \"psexcl\", \"opaque\"],")
-            TJS_W("\"desc\"=>\"blending mode\",\"default\"=>\"alpha\"],")
+            TJS_N("(const)%[")
+            TJS_N("\"mode\"=>(const)%[\"type\"=>\"select text\",\"items\"=>")
+            TJS_N("(const)[\"opaque\", \"alpha\", \"add\", \"sub\", \"mul\", \"dodge\", \"darken\", \"lighten\", \"screen\", \"addalpha\",")
+            TJS_N("\"psnormal\", \"psadd\", \"pssub\", \"psmul\", \"psscreen\", \"psoverlay\", \"pshlight\", \"psslight\", \"psdodge\",")
+            TJS_N("\"psdodge5\", \"psburn\", \"pslighten\", \"psdarken\", \"psdiff\", \"psdiff5\", \"psexcl\", \"opaque\"],")
+            TJS_N("\"desc\"=>\"blending mode\",\"default\"=>\"alpha\"],")
 
-            TJS_W("\"offs_x\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>\"offset x\",\"default\"=>0],")
-            TJS_W("\"offs_y\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>\"offset y\",\"default\"=>0],")
-            TJS_W("\"offs_unit\"=>(const)%[\"type\"=>\"select text\",\"items\"=>(const)[\"pixel\"],\"desc\"=>\"offset unit\",\"default\"=>\"pixel\"]")
-            TJS_W("]"),
+            TJS_N("\"offs_x\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>\"offset x\",\"default\"=>0],")
+            TJS_N("\"offs_y\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>\"offset y\",\"default\"=>0],")
+            TJS_N("\"offs_unit\"=>(const)%[\"type\"=>\"select text\",\"items\"=>(const)[\"pixel\"],\"desc\"=>\"offset unit\",\"default\"=>\"pixel\"]")
+            TJS_N("]"),
             NULL, &result );
         if( result.Type() == tvtObject ) {
             *dic = result.AsObject();
@@ -1374,9 +1374,9 @@ void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
                 }
                 // push items
                 ttstr value = *param[0];
-                Tags.push_back( value.AsNarrowStdString() );
+                Tags.push_back( value.AsStdString() );
                 value = *param[2];
-                Tags.push_back( value.AsNarrowStdString() );
+                Tags.push_back( value.AsStdString() );
                 if(result) *result = (tjs_int)1;
                 return TJS_S_OK;
             }
@@ -1386,9 +1386,9 @@ void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
     }
 
     bool istls6 = false;
-    if( mode.StartsWith( TJS_W("tlg5") ) ) {
+    if( mode.StartsWith( TJS_N("tlg5") ) ) {
         istls6 = false;
-    } else if( mode.StartsWith( TJS_W("tlg6") ) ) {
+    } else if( mode.StartsWith( TJS_N("tlg6") ) ) {
         istls6 = true;
     } else {
         istls6 = false;	// default : TLG5
@@ -1409,9 +1409,9 @@ void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
 
                    // write raw TLG stream
             if( istls6 ) {
-                SaveTLG6( stream, image, mode == TJS_W("tlg624") );
+                SaveTLG6( stream, image, mode == TJS_N("tlg624") );
             } else {
-                SaveTLG5( stream, image, mode == TJS_W("tlg524") );
+                SaveTLG5( stream, image, mode == TJS_N("tlg524") );
             }
 
                    // write raw data size
@@ -1451,9 +1451,9 @@ void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
             stream->WriteBuffer( tagstr.c_str(), (tjs_uint)tagstr.length() );
         } else {
             if( istls6 ) {
-                SaveTLG6( stream, image, mode == TJS_W("tlg624") );
+                SaveTLG6( stream, image, mode == TJS_N("tlg624") );
             } else {
-                SaveTLG5( stream, image, mode == TJS_W("tlg524") );
+                SaveTLG5( stream, image, mode == TJS_N("tlg524") );
             }
         }
     } catch(...) {

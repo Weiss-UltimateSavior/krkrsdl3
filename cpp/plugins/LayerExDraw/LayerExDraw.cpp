@@ -8,7 +8,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#define NCB_MODULE_NAME TJS_W("layerExDraw.dll")
+#define NCB_MODULE_NAME TJS_N("layerExDraw.dll")
 
 static std::vector<BLFontDataCore> bl_font_data_vec;
 static std::vector<BLFontFace> bl_font_face_vec;
@@ -45,7 +45,7 @@ BLImage loadImage(const tjs_char *name) // 以后应该要让krkr内核进行图
     ttstr filename = TVPGetPlacedPath(name);
     if (filename.length())
     {
-        tTJSBinaryStream* in = TVPCreateBinaryStreamForRead(filename, TJS_W(""));
+        tTJSBinaryStream* in = TVPCreateBinaryStreamForRead(filename, TJS_N(""));
         if (in) {
             tjs_uint8* fileData = new tjs_uint8[in->GetSize()];
             in->ReadBuffer(fileData, in->GetSize());
@@ -71,7 +71,7 @@ GdiPlus::addPrivateFont(const tjs_char *fontFileName)
     ttstr filename = TVPGetPlacedPath(fontFileName);
     tTJSBinaryStream* in = NULL;
     if (filename.length()) {
-        in = TVPCreateBinaryStreamForRead(filename, TJS_W(""));
+        in = TVPCreateBinaryStreamForRead(filename, TJS_N(""));
     }
     else
     {
@@ -107,7 +107,7 @@ GdiPlus::addPrivateFont(const tjs_char *fontFileName)
         if (stat != BL_SUCCESS)
         {
             blFontDataDestroy(&bl_font_data);
-            TVPThrowExceptionMessage(TJS_W("blend2d cannot load:%1"), fontFileName);
+            TVPThrowExceptionMessage(TJS_N("blend2d cannot load:%1"), fontFileName);
         }
         bl_font_data_vec.push_back(bl_font_data);
         // 加入face
@@ -124,7 +124,7 @@ GdiPlus::addPrivateFont(const tjs_char *fontFileName)
         }
         return;
     }
-    TVPThrowExceptionMessage(TJS_W("cannot open:%1"), fontFileName);
+    TVPThrowExceptionMessage(TJS_N("cannot open:%1"), fontFileName);
 }
 
 /**
@@ -146,7 +146,7 @@ GdiPlus::getFontList(bool privateOnly)
             if (!ftN.IsEmpty())
             {
                 tTJSVariant vname(ftN), *param = &vname;
-                array->FuncCall(0, TJS_W("add"), NULL, 0, 1, &param, array);
+                array->FuncCall(0, TJS_N("add"), NULL, 0, 1, &param, array);
             }
         }
     }
@@ -157,7 +157,7 @@ GdiPlus::getFontList(bool privateOnly)
         if (bl_font_face_name.at(i).length())
         {
             tTJSVariant vname(bl_font_face_name.at(i)), *param = &vname;
-            array->FuncCall(0, TJS_W("add"), NULL, 0, 1, &param, array);
+            array->FuncCall(0, TJS_N("add"), NULL, 0, 1, &param, array);
         }
     }
 
@@ -546,7 +546,7 @@ void commonBrushParameter(ncbPropAccessor &info, T *brush)
 {
     tTJSVariant var;
     // SetBlend
-    if (info.checkVariant(TJS_W("blend"), var)) {
+    if (info.checkVariant(TJS_N("blend"), var)) {
         std::vector<tjs_real> factors;
         std::vector<tjs_real> positions;
         ncbPropAccessor binfo(var);
@@ -554,8 +554,8 @@ void commonBrushParameter(ncbPropAccessor &info, T *brush)
             getReals(binfo, 0, factors);
             getReals(binfo, 1, positions);
         } else {
-            getReals(binfo, TJS_W("blendFactors"), factors);
-            getReals(binfo, TJS_W("blendPositions"), positions);
+            getReals(binfo, TJS_N("blendFactors"), factors);
+            getReals(binfo, TJS_N("blendPositions"), positions);
         }
         int count = (int)factors.size();
         if ((int)positions.size() > count) {
@@ -566,33 +566,33 @@ void commonBrushParameter(ncbPropAccessor &info, T *brush)
         }
     }
     // SetBlendBellShape
-    if (info.checkVariant(TJS_W("blendBellShape"), var)) {
+    if (info.checkVariant(TJS_N("blendBellShape"), var)) {
         ncbPropAccessor sinfo(var);
         if (IsArray(var)) {
             brush->SetBlendBellShape((tjs_real)sinfo.getRealValue(0),
                                      (tjs_real)sinfo.getRealValue(1));
         } else {
-            brush->SetBlendBellShape((tjs_real)info.getRealValue(TJS_W("focus")),
-                                     (tjs_real)info.getRealValue(TJS_W("scale")));
+            brush->SetBlendBellShape((tjs_real)info.getRealValue(TJS_N("focus")),
+                                     (tjs_real)info.getRealValue(TJS_N("scale")));
         }
     }
     // SetBlendTriangularShape
-    if (info.checkVariant(TJS_W("blendTriangularShape"), var)) {
+    if (info.checkVariant(TJS_N("blendTriangularShape"), var)) {
         ncbPropAccessor sinfo(var);
         if (IsArray(var)) {
             brush->SetBlendTriangularShape((tjs_real)sinfo.getRealValue(0),
                                            (tjs_real)sinfo.getRealValue(1));
         } else {
-            brush->SetBlendTriangularShape((tjs_real)info.getRealValue(TJS_W("focus")),
-                                           (tjs_real)info.getRealValue(TJS_W("scale")));
+            brush->SetBlendTriangularShape((tjs_real)info.getRealValue(TJS_N("focus")),
+                                           (tjs_real)info.getRealValue(TJS_N("scale")));
         }
     }
     // SetGammaCorrection
-    if (info.checkVariant(TJS_W("useGammaCorrection"), var)) {
+    if (info.checkVariant(TJS_N("useGammaCorrection"), var)) {
         brush->SetGammaCorrection((bool)var);
     }
     // SetInterpolationColors
-    if (info.checkVariant(TJS_W("interpolationColors"), var)) {
+    if (info.checkVariant(TJS_N("interpolationColors"), var)) {
         std::vector<tjs_uint32> colors;
         std::vector<tjs_real> positions;
         ncbPropAccessor binfo(var);
@@ -600,8 +600,8 @@ void commonBrushParameter(ncbPropAccessor &info, T *brush)
             getColors(binfo, 0, colors);
             getReals(binfo, 1, positions);
         } else {
-            getColors(binfo, TJS_W("presetColors"), colors);
-            getReals(binfo, TJS_W("blendPositions"), positions);
+            getColors(binfo, TJS_N("presetColors"), colors);
+            getReals(binfo, TJS_N("blendPositions"), positions);
         }
         int count = (int)colors.size();
         if ((int)positions.size() > count) {
@@ -725,28 +725,28 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
     } else {
         // 種別ごとに作り分ける
         ncbPropAccessor info(colorOrBrush);
-        BrushType type = (BrushType)info.getIntValue(TJS_W("type"), BrushTypeSolidColor);
+        BrushType type = (BrushType)info.getIntValue(TJS_N("type"), BrushTypeSolidColor);
         switch (type) {
             case BrushTypeSolidColor:
-                return new BLBrush(info.getIntValue(TJS_W("color"), 0xFFFFFFFF));
+                return new BLBrush(info.getIntValue(TJS_N("color"), 0xFFFFFFFF));
             case BrushTypeHatchFill:
             {
                 HatchStyle hatchStyle =
-                    (HatchStyle)info.getIntValue(TJS_W("hatchStyle"), HatchStyleHorizontal);
-                BLRgba32 foreColor((tjs_uint32)info.getIntValue(TJS_W("foreColor"), 0xFFFFFFFF));
-                BLRgba32 backColor((tjs_uint32)info.getIntValue(TJS_W("backColor"), 0xFF000000));
+                    (HatchStyle)info.getIntValue(TJS_N("hatchStyle"), HatchStyleHorizontal);
+                BLRgba32 foreColor((tjs_uint32)info.getIntValue(TJS_N("foreColor"), 0xFFFFFFFF));
+                BLRgba32 backColor((tjs_uint32)info.getIntValue(TJS_N("backColor"), 0xFF000000));
                 return new BLBrush(createHatchPattern(hatchStyle, foreColor, backColor));
             }
             case BrushTypeTextureFill:
             {
-                ttstr imgname = info.GetValue(TJS_W("image"), ncbTypedefs::Tag<ttstr>());
+                ttstr imgname = info.GetValue(TJS_N("image"), ncbTypedefs::Tag<ttstr>());
                 BLImage image = loadImage(imgname.c_str());
 
                 if (!image.empty())
                 {
                     BLPattern pattern(image);
 
-                    WrapMode wrapMode = (WrapMode)info.getIntValue(TJS_W("wrapMode"), WrapModeTile);
+                    WrapMode wrapMode = (WrapMode)info.getIntValue(TJS_N("wrapMode"), WrapModeTile);
                     switch (wrapMode)
                     {
                         case WrapModeTile:
@@ -770,7 +770,7 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                     }
 
                     tTJSVariant dstRectVar;
-                    if (info.checkVariant(TJS_W("dstRect"), dstRectVar))
+                    if (info.checkVariant(TJS_N("dstRect"), dstRectVar))
                     {
                         RectF dstRect = getRect(dstRectVar);
                         if (dstRect.x != 0 || dstRect.y != 0 ||
@@ -792,9 +792,9 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
             {
                 BLGradient gradient(BL_GRADIENT_TYPE_RADIAL);
                 std::vector<PointF> points;
-                getPoints(info, TJS_W("points"), points);
+                getPoints(info, TJS_N("points"), points);
                 if ((int)points.size() == 0)
-                    TVPThrowExceptionMessage(TJS_W("must set poins"));
+                    TVPThrowExceptionMessage(TJS_N("must set poins"));
 
                        // TODO
                        // WrapMode wrapMode = (WrapMode)info.getIntValue(L"wrapMode", WrapModeTile);
@@ -813,17 +813,17 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
 
                     tTJSVariant var;
                     // SetCenterColor
-                    if (info.checkVariant(TJS_W("centerColor"), var))
+                    if (info.checkVariant(TJS_N("centerColor"), var))
                     {
                         gradient.addStop(0.0, BLRgba32((tjs_uint32)(tjs_int)var));
                     }
                     // SetCenterPoint
-                    if (info.checkVariant(TJS_W("centerPoint"), var))
+                    if (info.checkVariant(TJS_N("centerPoint"), var))
                     {
                       // TODO
                     }
                     // SetSurroundColors
-                    if (info.checkVariant(TJS_W("surroundColors"), var))
+                    if (info.checkVariant(TJS_N("surroundColors"), var))
                     {
                         std::vector<tjs_uint32> colors;
                         getColors(var, colors);
@@ -833,7 +833,7 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                         }
                     }
                     // SetFocusScales
-                    if (info.checkVariant(TJS_W("focusScales"), var))
+                    if (info.checkVariant(TJS_N("focusScales"), var))
                     {
                       // TODO
                     }
@@ -846,17 +846,17 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                 BLGradient gradient(BL_GRADIENT_TYPE_LINEAR);
 
                 tTJSVariant var;
-                if (info.checkVariant(TJS_W("point1"), var) && info.checkVariant(TJS_W("point2"), var))
+                if (info.checkVariant(TJS_N("point1"), var) && info.checkVariant(TJS_N("point2"), var))
                 {
                     PointF p1 = getPoint(var);
-                    info.checkVariant(TJS_W("point2"), var);
+                    info.checkVariant(TJS_N("point2"), var);
                     PointF p2 = getPoint(var);
                     gradient.setValues(BLLinearGradientValues(p1.x, p1.y, p2.x, p2.y));
                 }
-                else if (info.checkVariant(TJS_W("rect"), var))
+                else if (info.checkVariant(TJS_N("rect"), var))
                 {
                     RectF rect = getRect(var);
-                    float angle = info.getRealValue(TJS_W("angle"), 0.0f);
+                    float angle = info.getRealValue(TJS_N("angle"), 0.0f);
 
                     float rad = angle * M_PI / 180.0f;
                     float cx = rect.x + rect.w / 2;
@@ -868,11 +868,11 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                 }
                 else
                 {
-                    TVPThrowExceptionMessage(TJS_W("must set point1,2 or rect"));
+                    TVPThrowExceptionMessage(TJS_N("must set point1,2 or rect"));
                 }
 
-                gradient.addStop(0.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_W("color1"), 0)));
-                gradient.addStop(1.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_W("color2"), 0)));
+                gradient.addStop(0.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color1"), 0)));
+                gradient.addStop(1.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color2"), 0)));
 
                        // 共通パラメータ TODO
                 // commonBrushParameter(info, pbrush);
@@ -880,7 +880,7 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                 return new BLBrush(gradient);
             }
             default:
-                TVPThrowExceptionMessage(TJS_W("invalid brush type"));
+                TVPThrowExceptionMessage(TJS_N("invalid brush type"));
                 break;
         }
     }
@@ -926,32 +926,32 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
         tTJSVariant var;
 
                // SetWidth
-        if (info.checkVariant(TJS_W("width"), var)) {
+        if (info.checkVariant(TJS_N("width"), var)) {
             penWidth = (tjs_real)(tjs_real)var;
         }
         pen->strokeWidth = penWidth;
 
                // SetAlignment
-        if (info.checkVariant(TJS_W("alignment"), var)) {
+        if (info.checkVariant(TJS_N("alignment"), var)) {
             // TODO
         }
         // SetCompoundArray
-        if (info.checkVariant(TJS_W("compoundArray"), var)) {
+        if (info.checkVariant(TJS_N("compoundArray"), var)) {
             // TODO
         }
 
                // SetDashCap
-        if (info.checkVariant(TJS_W("dashCap"), var)) {
+        if (info.checkVariant(TJS_N("dashCap"), var)) {
             // TODO
         }
         // SetDashOffset
-        if (info.checkVariant(TJS_W("dashOffset"), var)) {
+        if (info.checkVariant(TJS_N("dashOffset"), var)) {
             pen->strokeOptions.dashOffset = (tjs_real)(tjs_real)var;
         }
 
                // SetDashStyle
                // SetDashPattern
-        if (info.checkVariant(TJS_W("dashStyle"), var)) {
+        if (info.checkVariant(TJS_N("dashStyle"), var)) {
             if (IsArray(var)) {
                 std::vector<tjs_real> reals;
                 getReals(var, reals);
@@ -1000,7 +1000,7 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
 
                // SetStartCap
                // SetCustomStartCap
-        if (info.checkVariant(TJS_W("startCap"), var)) {
+        if (info.checkVariant(TJS_N("startCap"), var)) {
             BLStrokeCap retCap;
             BLPath custom;
             if (getLineCap(var, retCap, custom, penWidth))
@@ -1017,7 +1017,7 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
 
                // SetEndCap
                // SetCustomEndCap
-        if (info.checkVariant(TJS_W("endCap"), var))
+        if (info.checkVariant(TJS_N("endCap"), var))
         {
             BLStrokeCap retCap;
             BLPath custom;
@@ -1034,7 +1034,7 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
         }
 
                // SetLineJoin
-        if (info.checkVariant(TJS_W("lineJoin"), var)) {
+        if (info.checkVariant(TJS_N("lineJoin"), var)) {
             LineJoin lineJoin = (LineJoin)(tjs_int)var;
             switch (lineJoin)
             {
@@ -1065,7 +1065,7 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
         }
 
                // SetMiterLimit
-        if (info.checkVariant(TJS_W("miterLimit"), var)) {
+        if (info.checkVariant(TJS_N("miterLimit"), var)) {
             pen->strokeOptions.miterLimit = (tjs_real)(tjs_real)var;
         }
     }
@@ -1114,11 +1114,11 @@ bool Appearance::getLineCap(tTJSVariant& in, BLStrokeCap& cap, BLPath& custom, t
             ncbPropAccessor info(in);
             tjs_real width = pw, height = pw;
             tTJSVariant var;
-            if (info.checkVariant(TJS_W("width"),  var)) width  = ((tjs_real)(tjs_real)var) * pw;
-            if (info.checkVariant(TJS_W("height"), var)) height = ((tjs_real)(tjs_real)var) * pw;
-            bool filled = (bool)info.getIntValue(TJS_W("filled"), 1);
+            if (info.checkVariant(TJS_N("width"),  var)) width  = ((tjs_real)(tjs_real)var) * pw;
+            if (info.checkVariant(TJS_N("height"), var)) height = ((tjs_real)(tjs_real)var) * pw;
+            bool filled = (bool)info.getIntValue(TJS_N("filled"), 1);
             tjs_real middleInset = 0;
-            if (info.checkVariant(TJS_W("middleInset"), var)) // TODO
+            if (info.checkVariant(TJS_N("middleInset"), var)) // TODO
                 middleInset = (tjs_real)(tjs_real)var;
 
             if (filled)
@@ -2254,7 +2254,7 @@ LayerExDraw::drawPathString(const FontInfo *font, const Appearance *app, tjs_rea
 
     BLPath path;
     BLGlyphBuffer gb;
-    gb.setUtf16Text(reinterpret_cast<const uint16_t*>(text), TJS_strlen(text));
+    gb.setUtf8Text(text, TJS_strlen(text));
     blFont.shape(gb);
     blFont.getGlyphRunOutlines(gb.glyphRun(), BLMatrix2D::makeTranslation(x, y + font->getEmSize()),
                                path);
@@ -2320,7 +2320,7 @@ LayerExDraw::drawString(const FontInfo *font, const Appearance *app, tjs_real x,
                     break;
             }
             // 绘制
-            context->fillUtf16Text(position, blFont, reinterpret_cast<const uint16_t*>(text), TJS_strlen(text));
+            context->fillUtf8Text(position, blFont, text, TJS_strlen(text));
         }
     }
     context->end();
@@ -2344,7 +2344,7 @@ LayerExDraw::measureString(const FontInfo *font, const tjs_char *text)
 
     BLTextMetrics tm;
     BLGlyphBuffer gb;
-    gb.setUtf16Text(reinterpret_cast<const uint16_t*>(text), TJS_strlen(text));
+    gb.setUtf8Text(text, TJS_strlen(text));
     blFont.shape(gb);
     blFont.getTextMetrics(gb, tm);
 
@@ -2771,7 +2771,7 @@ NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true);\
 {
     if (var.Type() == tvtObject) {
         iTJSDispatch2* obj = var.AsObjectNoAddRef();
-        return obj->IsInstanceOf(0, NULL, NULL, TJS_W("Array"), obj) == TJS_S_TRUE;
+        return obj->IsInstanceOf(0, NULL, NULL, TJS_N("Array"), obj) == TJS_S_TRUE;
     }
     return false;
 }
@@ -2787,7 +2787,7 @@ struct AutoProp_ ## name { \
 #define NCB_ARG_PROPERTY_RO(name, type, methodname) \
     struct AutoProp_ ## name { \
         static type ProxyGet(Class *inst) { type var; inst->methodname(var); return var; } }; \
-    Property(TJS_W(# name), &AutoProp_ ## name::ProxyGet, (int)0, Proxy)
+    Property(TJS_N(# name), &AutoProp_ ## name::ProxyGet, (int)0, Proxy)
 
            // ------------------------------------------------------
            // 型コンバータ登録
@@ -2818,8 +2818,8 @@ struct PointFConvertor {
                                  (tjs_real)info.getRealValue(1));
                 }
                 else {
-                    dst = PointF((tjs_real)info.getRealValue(TJS_W("x")),
-                                 (tjs_real)info.getRealValue(TJS_W("y")));
+                    dst = PointF((tjs_real)info.getRealValue(TJS_N("x")),
+                                 (tjs_real)info.getRealValue(TJS_N("y")));
                 }
             }
         }
@@ -2868,10 +2868,10 @@ struct RectFConvertor {
                                 (tjs_real)info.getRealValue(3));
                 }
                 else {
-                    dst = RectF((tjs_real)info.getRealValue(TJS_W("x")),
-                                (tjs_real)info.getRealValue(TJS_W("y")),
-                                (tjs_real)info.getRealValue(TJS_W("width")),
-                                (tjs_real)info.getRealValue(TJS_W("height")));
+                    dst = RectF((tjs_real)info.getRealValue(TJS_N("x")),
+                                (tjs_real)info.getRealValue(TJS_N("y")),
+                                (tjs_real)info.getRealValue(TJS_N("width")),
+                                (tjs_real)info.getRealValue(TJS_N("height")));
                 }
             }
         }
@@ -3032,17 +3032,17 @@ NCB_SET_CONVERTOR(type*, GdipTypeConvertor<type>);\
 // ラッピング処理用
 #define NCB_REGISTER_GDIP_SUBCLASS(Class) NCB_GDIP_CONVERTOR(Class);NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) { typedef Class GdipClass;
 #define NCB_REGISTER_GDIP_SUBCLASS2(Class, Convertor) NCB_GDIP_CONVERTOR2(Class, Convertor);NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) { typedef Class GdipClass;
-#define NCB_GDIP_METHOD(name)  Method(TJS_W(# name), &GdipClass::name, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_GDIP_METHOD(name)  Method(TJS_N(# name), &GdipClass::name, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 #define NCB_GDIP_MCAST(ret, method, args) static_cast<ret (GdipClass::*) args>(&GdipClass::method)
-#define NCB_GDIP_METHOD2(name, ret, method, args) Method(TJS_W(# name), NCB_GDIP_MCAST(ret, method, args), Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
-#define NCB_GDIP_PROPERTY(name,get,set)  Property(TJS_W(# name), &GdipClass::get, &GdipClass::set, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_GDIP_METHOD2(name, ret, method, args) Method(TJS_N(# name), NCB_GDIP_MCAST(ret, method, args), Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_GDIP_PROPERTY(name,get,set)  Property(TJS_N(# name), &GdipClass::get, &GdipClass::set, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 // XXX うまくうごかない
-#define NCB_GDIP_PROPERTY_RO(name,get)  Property(TJS_W(# name), &GdipClass::get, (int)0, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_GDIP_PROPERTY_RO(name,get)  Property(TJS_N(# name), &GdipClass::get, (int)0, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 #define NCB_GDIP_MEMBER_PROPERTY(name, type, membername) \
     struct AutoProp_ ## name { \
         static void ProxySet(GdipClass *inst, type value) { inst->membername = value; } \
         static type ProxyGet(GdipClass *inst) {      return inst->membername; } }; \
-    Property(TJS_W(#name), AutoProp_ ## name::ProxyGet, AutoProp_ ## name::ProxySet, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+    Property(TJS_N(#name), AutoProp_ ## name::ProxyGet, AutoProp_ ## name::ProxySet, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 
 
            // ------------------------------------------------------- Matrix
@@ -3066,12 +3066,12 @@ NCB_SET_CONVERTOR(type*, GdipTypeConvertor<type>);\
                                                              (tjs_real)info.getRealValue(5)));
                 }
                 else {
-                    this->result = new GdipMatrix(BLMatrix2D((tjs_real)info.getRealValue(TJS_W("m11")),
-                                                             (tjs_real)info.getRealValue(TJS_W("m12")),
-                                                             (tjs_real)info.getRealValue(TJS_W("m21")),
-                                                             (tjs_real)info.getRealValue(TJS_W("m22")),
-                                                             (tjs_real)info.getRealValue(TJS_W("dx")),
-                                                             (tjs_real)info.getRealValue(TJS_W("dy"))));
+                    this->result = new GdipMatrix(BLMatrix2D((tjs_real)info.getRealValue(TJS_N("m11")),
+                                                             (tjs_real)info.getRealValue(TJS_N("m12")),
+                                                             (tjs_real)info.getRealValue(TJS_N("m21")),
+                                                             (tjs_real)info.getRealValue(TJS_N("m22")),
+                                                             (tjs_real)info.getRealValue(TJS_N("dx")),
+                                                             (tjs_real)info.getRealValue(TJS_N("dy"))));
                 }
                 dst = this->result;
             }
@@ -3225,7 +3225,7 @@ ImageFactory(GdipWrapper<GdipImage>** result, tjs_int numparams, tTJSVariant** p
             return TJS_S_OK;
         }
         else {
-            TVPThrowExceptionMessage(TJS_W("cannot open:%1"), *params[0]);
+            TVPThrowExceptionMessage(TJS_N("cannot open:%1"), *params[0]);
         }
     }
     return TJS_E_INVALIDPARAM;
@@ -3238,7 +3238,7 @@ static void ImageLoad(GdipWrapper<GdipImage>* obj, const tjs_char* filename)
         obj->setGdipObject(image);
     }
     else {
-        TVPThrowExceptionMessage(TJS_W("cannot open:%1"), ttstr(filename));
+        TVPThrowExceptionMessage(TJS_N("cannot open:%1"), ttstr(filename));
     }
 }
 
@@ -3528,8 +3528,8 @@ NCB_REGISTER_CLASS(GdiPlus)
     NCB_SUBCLASS_NAME(PointF);
     NCB_SUBCLASS_NAME(RectF);
 
-    SubClass(TJS_W("Image"), TypeWrap<GdipWrapper<GdipImage>>());
-    SubClass(TJS_W("Matrix"), TypeWrap<GdipWrapper<GdipMatrix>>());
+    SubClass(TJS_N("Image"), TypeWrap<GdipWrapper<GdipImage>>());
+    SubClass(TJS_N("Matrix"), TypeWrap<GdipWrapper<GdipMatrix>>());
 
     NCB_SUBCLASS(Font, FontInfo);
     NCB_SUBCLASS(Appearance, Appearance);
@@ -3553,7 +3553,7 @@ return obj;
 }
 };
 
-#define LAYEREX_METHOD(type,name)  Method(TJS_W(# name), &Type::name, Bridge<LayerExDraw::BridgeFunctor<type>>())
+#define LAYEREX_METHOD(type,name)  Method(TJS_N(# name), &Type::name, Bridge<LayerExDraw::BridgeFunctor<type>>())
 
 /**
  * Image はラッピングする必要があるので rawcallback で対応

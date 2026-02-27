@@ -1,13 +1,13 @@
 #include "ncbind/ncbind.hpp"
 #include <vector>
 
-#define NCB_MODULE_NAME TJS_W("layerExBTOA.dll")
+#define NCB_MODULE_NAME TJS_N("layerExBTOA.dll")
 
 // レイヤクラスを参照
 iTJSDispatch2 *getLayerClass(void)
 {
 	tTJSVariant var;
-	TVPExecuteExpression(TJS_W("Layer"), &var);
+	TVPExecuteExpression(TJS_N("Layer"), &var);
 	return  var.AsObjectNoAddRef();
 }
 
@@ -27,24 +27,24 @@ GetLayerSize(iTJSDispatch2 *lay, long &w, long &h, long &pitch)
 	iTJSDispatch2 *layerClass = getLayerClass();
 
 	// レイヤインスタンス以外ではエラー
-	if (!lay || TJS_FAILED(lay->IsInstanceOf(0, 0, 0, TJS_W("Layer"), lay))) return false;
+	if (!lay || TJS_FAILED(lay->IsInstanceOf(0, 0, 0, TJS_N("Layer"), lay))) return false;
 
 	// レイヤイメージは在るか？
 	tTJSVariant val;
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("hasImage"), 0, &val, lay)) || (val.AsInteger() == 0)) return false;
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("hasImage"), 0, &val, lay)) || (val.AsInteger() == 0)) return false;
 
 	// レイヤサイズを取得
 	val.Clear();
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("imageWidth"), 0, &val, lay))) return false;
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("imageWidth"), 0, &val, lay))) return false;
 	w = (long)val.AsInteger();
 
 	val.Clear();
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("imageHeight"), 0, &val, lay))) return false;
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("imageHeight"), 0, &val, lay))) return false;
 	h = (long)val.AsInteger();
 
 	// ピッチ取得
 	val.Clear();
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("mainImageBufferPitch"), 0, &val, lay))) return false;
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("mainImageBufferPitch"), 0, &val, lay))) return false;
 	pitch = (long)val.AsInteger();
 
 	// 正常な値かどうか
@@ -61,7 +61,7 @@ GetLayerBufferAndSize(iTJSDispatch2 *lay, long &w, long &h, WrtRefT &ptr, long &
 
 	// バッファ取得
 	tTJSVariant val;
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("mainImageBufferForWrite"), 0, &val, lay))) return false;
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("mainImageBufferForWrite"), 0, &val, lay))) return false;
 	ptr = reinterpret_cast<WrtRefT>(val.AsInteger());
 	return  (ptr != 0);
 }
@@ -76,7 +76,7 @@ static tjs_error copyRightBlueToLeftAlpha(tTJSVariant *result, tjs_int numparams
 	WrtRefT dbuf = 0;
 	long dw, dh, dpitch;
 	if (!GetLayerBufferAndSize(lay, dw, dh, dbuf, dpitch)) {
-		TVPThrowExceptionMessage(TJS_W("dest must be Layer."));
+		TVPThrowExceptionMessage(TJS_N("dest must be Layer."));
 	}
 
 	// 半分
@@ -109,7 +109,7 @@ static tjs_error copyBottomBlueToTopAlpha(tTJSVariant *result, tjs_int numparams
 	WrtRefT dbuf = 0;
 	long dw, dh, dpitch;
 	if (!GetLayerBufferAndSize(lay, dw, dh, dbuf, dpitch)) {
-		TVPThrowExceptionMessage(TJS_W("dest must be Layer."));
+		TVPThrowExceptionMessage(TJS_N("dest must be Layer."));
 	}
 
 	// 半分
@@ -138,7 +138,7 @@ static tjs_error fillAlpha(tTJSVariant *result, tjs_int numparams, tTJSVariant *
 	WrtRefT dbuf = 0;
 	long dw, dh, dpitch;
 	if (!GetLayerBufferAndSize(lay, dw, dh, dbuf, dpitch)) {
-		TVPThrowExceptionMessage(TJS_W("dest must be Layer."));
+		TVPThrowExceptionMessage(TJS_N("dest must be Layer."));
 	}
 	// 全部 0xffでうめる
 	dbuf += 3;
@@ -165,24 +165,24 @@ static tjs_error copyAlphaToProvince(tTJSVariant *result, tjs_int numparams, tTJ
 	}
 
 	if (!GetLayerSize(lay, w, h, spitch)) {
-		TVPThrowExceptionMessage(TJS_W("src must be Layer."));
+		TVPThrowExceptionMessage(TJS_N("src must be Layer."));
 	}
 
 	tTJSVariant val;
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("mainImageBuffer"), 0, &val, lay)) ||
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("mainImageBuffer"), 0, &val, lay)) ||
 		(sbuf = reinterpret_cast<ReadRefT>(val.AsInteger())) == NULL) {
-		TVPThrowExceptionMessage(TJS_W("src has no image."));
+		TVPThrowExceptionMessage(TJS_N("src has no image."));
 	}
 
 	val.Clear();
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("provinceImageBufferForWrite"), 0, &val, lay)) ||
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("provinceImageBufferForWrite"), 0, &val, lay)) ||
 		(dbuf = reinterpret_cast<WrtRefT>(val.AsInteger())) == NULL) {
-		TVPThrowExceptionMessage(TJS_W("dst has no province image."));
+		TVPThrowExceptionMessage(TJS_N("dst has no province image."));
 	}
 	val.Clear();
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("provinceImageBufferPitch"), 0, &val, lay)) ||
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("provinceImageBufferPitch"), 0, &val, lay)) ||
 		(dpitch = (long)val.AsInteger()) == 0) {
-		TVPThrowExceptionMessage(TJS_W("dst has no province pitch."));
+		TVPThrowExceptionMessage(TJS_N("dst has no province pitch."));
 	}
 
 	sbuf += 3;
@@ -241,10 +241,10 @@ static tjs_error clipAlphaRect(tTJSVariant *result, tjs_int numparams, tTJSVaria
 	if (w <= 0|| h <= 0) return TJS_E_INVALIDPARAM;
 
 	if (!GetLayerSize(dst, diw, dih, dpitch)) {
-		TVPThrowExceptionMessage(TJS_W("dest must be Layer."));
+		TVPThrowExceptionMessage(TJS_N("dest must be Layer."));
 	}
 	if (!GetLayerSize(src, siw, sih, spitch)) {
-		TVPThrowExceptionMessage(TJS_W("src must be Layer."));
+		TVPThrowExceptionMessage(TJS_N("src must be Layer."));
 	}
 
 	// クリッピング
@@ -277,13 +277,13 @@ static tjs_error clipAlphaRect(tTJSVariant *result, tjs_int numparams, tTJSVaria
 	if (w <= 0 || h <= 0) goto none;
 
 	// バッファ取得
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("mainImageBuffer"), 0, &val, src))) return false;
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("mainImageBuffer"), 0, &val, src))) return false;
 	sbuf = reinterpret_cast<ReadRefT>(val.AsInteger());
 
-	if (TJS_FAILED(layerClass->PropGet(0, TJS_W("mainImageBufferForWrite"), 0, &val, dst))) return false;
+	if (TJS_FAILED(layerClass->PropGet(0, TJS_N("mainImageBufferForWrite"), 0, &val, dst))) return false;
 	dbuf = reinterpret_cast<WrtRefT>(val.AsInteger());
 
-	if (!sbuf || !dbuf) TVPThrowExceptionMessage(TJS_W("Layer has no images."));
+	if (!sbuf || !dbuf) TVPThrowExceptionMessage(TJS_N("Layer has no images."));
 
 	long x, y;
 	WrtRefT  p;
@@ -329,20 +329,20 @@ static tjs_error fillByProvince(tTJSVariant *result, tjs_int numparams, tTJSVari
 	WrtRefT dbuf = 0;
 	long dw, dh, dpitch;
 	if (!GetLayerBufferAndSize(lay, dw, dh, dbuf, dpitch)) {
-		TVPThrowExceptionMessage(TJS_W("must be Layer."));
+		TVPThrowExceptionMessage(TJS_N("must be Layer."));
 	}
 
 	ReadRefT sbuf = 0;
 	long spitch;
 	{
 		tTJSVariant val;
-		if (TJS_FAILED(layerClass->PropGet(0, TJS_W("provinceImageBuffer"), 0, &val, lay)) ||
+		if (TJS_FAILED(layerClass->PropGet(0, TJS_N("provinceImageBuffer"), 0, &val, lay)) ||
 			(sbuf = reinterpret_cast<ReadRefT>(val.AsInteger())) == NULL) {
-			TVPThrowExceptionMessage(TJS_W("no province image."));
+			TVPThrowExceptionMessage(TJS_N("no province image."));
 		}
-		if (TJS_FAILED(layerClass->PropGet(0, TJS_W("provinceImageBufferPitch"), 0, &val, lay)) ||
+		if (TJS_FAILED(layerClass->PropGet(0, TJS_N("provinceImageBufferPitch"), 0, &val, lay)) ||
 			(spitch = (long)val.AsInteger()) == 0) {
-			TVPThrowExceptionMessage(TJS_W("no province pitch."));
+			TVPThrowExceptionMessage(TJS_N("no province pitch."));
 		}
 	}
 

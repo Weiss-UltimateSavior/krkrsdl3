@@ -22,38 +22,38 @@ NI_LayerExBase::init(iTJSDispatch2 *layerobj)
 	// プロパティ取得
 	tTJSVariant var;
 	
-	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_W("imageLeft"), NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("invoking of Layer.imageLeft failed."));
+	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_N("imageLeft"), NULL, &var, layerobj))) {
+		TVPThrowExceptionMessage(TJS_N("invoking of Layer.imageLeft failed."));
 	} else {
 		_leftProp = var;
 	}
-	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_W("imageTop"), NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("invoking of Layer.imageTop failed."));
+	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_N("imageTop"), NULL, &var, layerobj))) {
+		TVPThrowExceptionMessage(TJS_N("invoking of Layer.imageTop failed."));
 	} else {
 		_topProp = var;
 	}
-	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_W("imageWidth"), NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("invoking of Layer.imageWidth failed."));
+	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_N("imageWidth"), NULL, &var, layerobj))) {
+		TVPThrowExceptionMessage(TJS_N("invoking of Layer.imageWidth failed."));
 	} else {
 		_widthProp = var;
 	}
-	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_W("imageHeight"), NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("invoking of Layer.imageHeight failed."));
+	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_N("imageHeight"), NULL, &var, layerobj))) {
+		TVPThrowExceptionMessage(TJS_N("invoking of Layer.imageHeight failed."));
 	} else {
 		_heightProp = var;
 	}
-	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_W("mainImageBufferForWrite"), NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("invoking of Layer.mainImageBufferForWrite failed."));
+	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_N("mainImageBufferForWrite"), NULL, &var, layerobj))) {
+		TVPThrowExceptionMessage(TJS_N("invoking of Layer.mainImageBufferForWrite failed."));
 	} else {
 		_bufferProp = var;
 	}
-	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_W("mainImageBufferPitch"), NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("invoking of Layer.mainImageBufferPitch failed."));
+	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_N("mainImageBufferPitch"), NULL, &var, layerobj))) {
+		TVPThrowExceptionMessage(TJS_N("invoking of Layer.mainImageBufferPitch failed."));
 	} else {
 		_pitchProp = var;
 	}
-	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_W("update"), NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("invoking of Layer.update failed."));
+	if (TJS_FAILED(layerobj->PropGet(TJS_IGNOREPROP, TJS_N("update"), NULL, &var, layerobj))) {
+		TVPThrowExceptionMessage(TJS_N("invoking of Layer.update failed."));
 	} else {
 		_updateProp = var;
 	}
@@ -78,7 +78,7 @@ static tjs_int64 getPropValue(iTJSDispatch2 *dispatch, iTJSDispatch2 *layerobj)
 {
 	tTJSVariant var;
 	if(TJS_FAILED(dispatch->PropGet(0, NULL, NULL, &var, layerobj))) {
-		TVPThrowExceptionMessage(TJS_W("can't get int value from property."));
+		TVPThrowExceptionMessage(TJS_N("can't get int value from property."));
 	}
 	return var;
 }

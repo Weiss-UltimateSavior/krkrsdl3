@@ -1,6 +1,6 @@
 #include "ncbind/ncbind.hpp"
 
-#define NCB_MODULE_NAME TJS_W("shrinkCopy.dll")
+#define NCB_MODULE_NAME TJS_N("shrinkCopy.dll")
 
 struct LayerUtils
 {
@@ -16,12 +16,12 @@ struct LayerUtils
     static bool IsValidLayer(iTJSDispatch2* lay)
     {
         // レイヤインスタンス以外ではエラー
-        if (!lay || TJS_FAILED(lay->IsInstanceOf(0, 0, 0, TJS_W("Layer"), lay)))
+        if (!lay || TJS_FAILED(lay->IsInstanceOf(0, 0, 0, TJS_N("Layer"), lay)))
             return false;
 
         // レイヤイメージは在るか？
         tTJSVariant val;
-        if (TJS_FAILED(lay->PropGet(0, TJS_W("hasImage"), 0, &val, lay)) || (val.AsInteger() == 0))
+        if (TJS_FAILED(lay->PropGet(0, TJS_N("hasImage"), 0, &val, lay)) || (val.AsInteger() == 0))
             return false;
 
         return true;
@@ -37,18 +37,18 @@ struct LayerUtils
 
         // レイヤサイズを取得
         tTJSVariant val;
-        if (TJS_FAILED(lay->PropGet(0, TJS_W("imageWidth"), 0, &val, lay)))
+        if (TJS_FAILED(lay->PropGet(0, TJS_N("imageWidth"), 0, &val, lay)))
             return false;
         w = (long)val.AsInteger();
 
         val.Clear();
-        if (TJS_FAILED(lay->PropGet(0, TJS_W("imageHeight"), 0, &val, lay)))
+        if (TJS_FAILED(lay->PropGet(0, TJS_N("imageHeight"), 0, &val, lay)))
             return false;
         h = (long)val.AsInteger();
 
         // ピッチ取得
         val.Clear();
-        if (TJS_FAILED(lay->PropGet(0, TJS_W("mainImageBufferPitch"), 0, &val, lay)))
+        if (TJS_FAILED(lay->PropGet(0, TJS_N("mainImageBufferPitch"), 0, &val, lay)))
             return false;
         pitch = (long)val.AsInteger();
 
@@ -65,7 +65,7 @@ struct LayerUtils
 
         // バッファ取得
         tTJSVariant val;
-        if (TJS_FAILED(lay->PropGet(0, TJS_W("mainImageBuffer"), 0, &val, lay)))
+        if (TJS_FAILED(lay->PropGet(0, TJS_N("mainImageBuffer"), 0, &val, lay)))
             return false;
         ptr = reinterpret_cast<BufRefT>(val.AsInteger());
         return (ptr != 0);
@@ -80,7 +80,7 @@ struct LayerUtils
 
         // バッファ取得
         tTJSVariant val;
-        if (TJS_FAILED(lay->PropGet(0, TJS_W("mainImageBufferForWrite"), 0, &val, lay)))
+        if (TJS_FAILED(lay->PropGet(0, TJS_N("mainImageBufferForWrite"), 0, &val, lay)))
             return false;
         ptr = reinterpret_cast<WrtRefT>(val.AsInteger());
         return (ptr != 0);
@@ -475,7 +475,7 @@ struct LimitedShrink : public LayerUtils
         tTJSVariant nw((tjs_int)((siw + stepx - 1) / stepx));
         tTJSVariant nh((tjs_int)((sih + stepy - 1) / stepy));
         tTJSVariant* param[] = {&nw, &nh};
-        return (TJS_SUCCEEDED(dst->FuncCall(0, TJS_W("setImageSize"), 0, NULL, 2, param, dst)) &&
+        return (TJS_SUCCEEDED(dst->FuncCall(0, TJS_N("setImageSize"), 0, NULL, 2, param, dst)) &&
                 GetLayerBufferAndSize(dst, diw, dih, pd, dpch));
     }
     void copy()

@@ -1217,7 +1217,7 @@ void tTVPComplexRect::DumpChain()
 	tIterator it = GetIterator();
 	while (it.Step()) {
 		tjs_char tmp[200];
-		TJS_snprintf(tmp, 200, TJS_W("%p (%p) %p : "), it.Get().Prev, &(it.Get()), it.Get().Next);
+		TJS_snprintf(tmp, 200, TJS_N("%p (%p) %p : "), it.Get().Prev, &(it.Get()), it.Get().Next);
 		str += tmp;
 	}
 	TVPConsoleLog(str.c_str());

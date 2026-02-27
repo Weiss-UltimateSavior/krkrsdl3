@@ -22,7 +22,7 @@
 
 namespace TJS
 {
-const tjs_char *TJSNullStrPtr = TJS_W("");
+const tjs_char *TJSNullStrPtr = TJS_N("");
 //---------------------------------------------------------------------------
 tTJSString::tTJSString(const tTJSVariant & val)
 {
@@ -37,19 +37,6 @@ tTJSString::tTJSString(tjs_int n) // from int
 tTJSString::tTJSString(tjs_int64 n) // from int64
 {
 	Ptr = TJSIntegerToString(n);
-}
-//---------------------------------------------------------------------------
-tjs_int tTJSString::GetNarrowStrLen() const
-{
-	// note that this function will return -1 when there are invalid chars in string.
-	if(!Ptr) return 0;
-	return (tjs_int)TJS_wcstombs(NULL, c_str(), 0);
-}
-//---------------------------------------------------------------------------
-void tTJSString::ToNarrowStr(tjs_nchar *dest, tjs_int destmaxlen) const
-{
-	// dest must be an array of char, its size must be at least destmaxlen+1
-	dest[TJS_wcstombs(dest, c_str(), destmaxlen)] = 0;
 }
 //---------------------------------------------------------------------------
 tjs_char * tTJSString::InternalIndepend()
@@ -113,8 +100,8 @@ tTJSString tTJSString::AsLowerCase() const
 	tjs_char *d = ret.Independ();
 	while(*s)
 	{
-		if(*s >= TJS_W('A') && *s <= TJS_W('Z'))
-			*d = *s +(TJS_W('a')-TJS_W('A'));
+		if(*s >= TJS_N('A') && *s <= TJS_N('Z'))
+			*d = *s +(TJS_N('a')-TJS_N('A'));
 		else
 			*d = *s;
 		d++;
@@ -136,8 +123,8 @@ tTJSString tTJSString::AsUpperCase() const
 	tjs_char *d = ret.Independ();
 	while(*s)
 	{
-		if(*s >= TJS_W('a') && *s <= TJS_W('z'))
-			*d = *s +(TJS_W('A')-TJS_W('a'));
+		if(*s >= TJS_N('a') && *s <= TJS_N('z'))
+			*d = *s +(TJS_N('A')-TJS_N('a'));
 		else
 			*d = *s;
 		d++;
@@ -154,8 +141,8 @@ void tTJSString::ToLowerCase()
 	{
 		while(*p)
 		{
-			if(*p >= TJS_W('A') && *p <= TJS_W('Z'))
-				*p += (TJS_W('a')-TJS_W('A'));
+			if(*p >= TJS_N('A') && *p <= TJS_N('Z'))
+				*p += (TJS_N('a')-TJS_N('A'));
 			p++;
 		}
 	}
@@ -168,14 +155,14 @@ void tTJSString::ToUppserCase()
 	{
 		while(*p)
 		{
-			if(*p >= TJS_W('a') && *p <= TJS_W('z'))
-				*p += (TJS_W('A')-TJS_W('a'));
+			if(*p >= TJS_N('a') && *p <= TJS_N('z'))
+				*p += (TJS_N('A')-TJS_N('a'));
 			p++;
 		}
 	}
 }
 //---------------------------------------------------------------------------
-tjs_int TJS_cdecl tTJSString::printf(const tjs_char *format, ...)
+tjs_int tTJSString::printf(const tjs_char *format, ...)
 {
 	tjs_int r;
 	tjs_char *buf = new tjs_char [TJS_TTSTR_SPRINTF_BUF_SIZE];
@@ -211,41 +198,43 @@ tTJSString tTJSString::EscapeC() const
 	{
 		switch(*p)
 		{
-		case 0x07: ret += TJS_W("\\a"); hexflag = false; continue;
-		case 0x08: ret += TJS_W("\\b"); hexflag = false; continue;
-		case 0x0c: ret += TJS_W("\\f"); hexflag = false; continue;
-		case 0x0a: ret += TJS_W("\\n"); hexflag = false; continue;
-		case 0x0d: ret += TJS_W("\\r"); hexflag = false; continue;
-		case 0x09: ret += TJS_W("\\t"); hexflag = false; continue;
-		case 0x0b: ret += TJS_W("\\v"); hexflag = false; continue;
-		case TJS_W('\\'): ret += TJS_W("\\\\"); hexflag = false; continue;
-		case TJS_W('\''): ret += TJS_W("\\\'"); hexflag = false; continue;
-		case TJS_W('\"'): ret += TJS_W("\\\""); hexflag = false; continue;
+		case 0x07: ret += TJS_N("\\a"); hexflag = false; continue;
+		case 0x08: ret += TJS_N("\\b"); hexflag = false; continue;
+		case 0x0c: ret += TJS_N("\\f"); hexflag = false; continue;
+		case 0x0a: ret += TJS_N("\\n"); hexflag = false; continue;
+		case 0x0d: ret += TJS_N("\\r"); hexflag = false; continue;
+		case 0x09: ret += TJS_N("\\t"); hexflag = false; continue;
+		case 0x0b: ret += TJS_N("\\v"); hexflag = false; continue;
+		case TJS_N('\\'): ret += TJS_N("\\\\"); hexflag = false; continue;
+		case TJS_N('\''): ret += TJS_N("\\\'"); hexflag = false; continue;
+		case TJS_N('\"'): ret += TJS_N("\\\""); hexflag = false; continue;
 		default:
+			int chLen = utf8_char_len(p);
+            if (chLen == 0) continue;
 			if(hexflag)
 			{
-				if((*p >= TJS_W('a') && *p <= TJS_W('f')) ||
-					(*p >= TJS_W('A') && *p <= TJS_W('F')) ||
-						(*p >= TJS_W('0') && *p <= TJS_W('9')) )
+				if(chLen == 1 && ((*p >= TJS_N('a') && *p <= TJS_N('f')) ||
+					(*p >= TJS_N('A') && *p <= TJS_N('F')) ||
+						(*p >= TJS_N('0') && *p <= TJS_N('9'))))
 				{
 					tjs_char buf[20];
-					TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("\\x%02x"), (int)*p);
+					TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("\\x%02x"), (int)*p);
 					hexflag = true;
 					ret += buf;
 					continue;
 				}
 			}
-
-			if(*p < 0x20)
+			if (chLen == 1 && *p < 0x20)
 			{
 				tjs_char buf[20];
-				TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("\\x%02x"), (int)*p);
+				TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("\\x%02x"), (int)*p);
 				hexflag = true;
 				ret += buf;
 			}
 			else
 			{
-				ret += *p;
+				ret += ttstr(p, chLen);
+				p += chLen - 1;
 				hexflag = false;
 			}
 		}
@@ -256,7 +245,7 @@ tTJSString tTJSString::EscapeC() const
 tTJSString tTJSString::UnescapeC() const
 {
 	// TODO: UnescapeC
-	return TJS_W("");
+	return TJS_N("");
 }
 //---------------------------------------------------------------------------
 bool tTJSString::StartsWith(const tjs_char *string) const
@@ -333,7 +322,7 @@ tTJSString TJSInt32ToHex(tjs_uint32 num, int zeropad)
 
 	do
 	{
-		*(p++) = (TJS_W("0123456789ABCDEF"))[num % 16];
+		*(p++) = (TJS_N("0123456789ABCDEF"))[num % 16];
 		num /= 16;
 		zeropad --;
 	} while(zeropad || num);

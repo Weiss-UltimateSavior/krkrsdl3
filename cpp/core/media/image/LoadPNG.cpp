@@ -14,8 +14,8 @@
 bool TVPAcceptSaveAsPNG(void* formatdata, const ttstr & type, class iTJSDispatch2** dic )
 {
 	bool result = false;
-	if( type.StartsWith(TJS_W("png")) ) result = true;
-	else if( type == TJS_W(".png") ) result = true;
+	if( type.StartsWith(TJS_N("png")) ) result = true;
+	else if( type == TJS_N(".png") ) result = true;
 
 	if( result && dic ) {
 		// タグ書き出し等には対応していない
@@ -26,19 +26,19 @@ bool TVPAcceptSaveAsPNG(void* formatdata, const ttstr & type, class iTJSDispatch
 //---------------------------------------------------------------------------
 // PNG loading handler
 //---------------------------------------------------------------------------
-static ttstr PNG_tag_offs_x(TJS_W("offs_x"));
-static ttstr PNG_tag_offs_y(TJS_W("offs_y"));
-static ttstr PNG_tag_offs_unit(TJS_W("offs_unit"));
-static ttstr PNG_tag_reso_x(TJS_W("reso_x"));
-static ttstr PNG_tag_reso_y(TJS_W("reso_y"));
-static ttstr PNG_tag_reso_unit(TJS_W("reso_unit"));
-static ttstr PNG_tag_vpag_w(TJS_W("vpag_w"));
-static ttstr PNG_tag_vpag_h(TJS_W("vpag_h"));
-static ttstr PNG_tag_vpag_unit(TJS_W("vpag_unit"));
-static ttstr PNG_tag_pixel(TJS_W("pixel"));
-static ttstr PNG_tag_micrometer(TJS_W("micrometer"));
-static ttstr PNG_tag_meter(TJS_W("meter"));
-static ttstr PNG_tag_unknown(TJS_W("unknown"));
+static ttstr PNG_tag_offs_x(TJS_N("offs_x"));
+static ttstr PNG_tag_offs_y(TJS_N("offs_y"));
+static ttstr PNG_tag_offs_unit(TJS_N("offs_unit"));
+static ttstr PNG_tag_reso_x(TJS_N("reso_x"));
+static ttstr PNG_tag_reso_y(TJS_N("reso_y"));
+static ttstr PNG_tag_reso_unit(TJS_N("reso_unit"));
+static ttstr PNG_tag_vpag_w(TJS_N("vpag_w"));
+static ttstr PNG_tag_vpag_h(TJS_N("vpag_h"));
+static ttstr PNG_tag_vpag_unit(TJS_N("vpag_unit"));
+static ttstr PNG_tag_pixel(TJS_N("pixel"));
+static ttstr PNG_tag_micrometer(TJS_N("micrometer"));
+static ttstr PNG_tag_meter(TJS_N("meter"));
+static ttstr PNG_tag_unknown(TJS_N("unknown"));
 //---------------------------------------------------------------------------
 // meta callback information structure used by  PNG_read_chunk_callback
 struct PNG_read_chunk_callback_user_struct
@@ -69,7 +69,7 @@ static void PNG_error (png_structp ps, png_const_charp msg)
 static void PNG_warning (png_structp ps, png_const_charp msg)
 {
 	// do nothing
-	//TVPAddLog( TJS_W("PNG warning:") );
+	//TVPAddLog( TJS_N("PNG warning:") );
 	//TVPAddLog( msg );
 }
 //---------------------------------------------------------------------------
@@ -476,8 +476,8 @@ static void PNG_write_write( png_structp png_ptr, png_bytep buf, png_size_t size
 void TVPSaveAsPNG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap* image, const ttstr & mode, iTJSDispatch2* meta )
 {
 	int bpp = 32;
-	if( mode.StartsWith(TJS_W("png")) && mode.length() > 3 ) {
-		if( mode == TJS_W("png24") ) {
+	if( mode.StartsWith(TJS_N("png")) && mode.length() > 3 ) {
+		if( mode == TJS_N("png24") ) {
 			bpp = 24;
 		}
 	}
@@ -594,11 +594,11 @@ void TVPLoadHeaderPNG(void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** d
 
 		*dic = TJSCreateDictionaryObject();
 		tTJSVariant val((tjs_int64)width);
-		(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("width"), 0, &val, (*dic) );
+		(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("width"), 0, &val, (*dic) );
 		val = tTJSVariant((tjs_int64)height);
-		(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("height"), 0, &val, (*dic) );
+		(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("height"), 0, &val, (*dic) );
 		val = tTJSVariant(bit_depth);
-		(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("bpp"), 0, &val, (*dic) );
+		(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("bpp"), 0, &val, (*dic) );
 		// color_type,interlace_type,compression_type,filter_type も入れた方がいいが……
 
 		// retrieve offset information
@@ -607,22 +607,22 @@ void TVPLoadHeaderPNG(void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** d
 		if( png_get_oFFs(png_ptr, info_ptr, &offset_x, &offset_y, &offset_unit_type) )
 		{
 			val = tTJSVariant(offset_x);
-			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("offset x"), 0, &val, (*dic) );
+			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("offset x"), 0, &val, (*dic) );
 			val = tTJSVariant(offset_y);
-			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("offset y"), 0, &val, (*dic) );
+			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("offset y"), 0, &val, (*dic) );
 			switch(offset_unit_type)
 			{
 			case PNG_OFFSET_PIXEL:
-				val = tTJSVariant(TJS_W("pixel"));
+				val = tTJSVariant(TJS_N("pixel"));
 				break;
 			case PNG_OFFSET_MICROMETER:
-				val = tTJSVariant(TJS_W("micro meter"));
+				val = tTJSVariant(TJS_N("micro meter"));
 				break;
 			default:
-				val = tTJSVariant(TJS_W("unknown"));
+				val = tTJSVariant(TJS_N("unknown"));
 				break;
 			}
-			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("offset unit"), 0, &val, (*dic) );
+			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("offset unit"), 0, &val, (*dic) );
 		}
 
 		png_uint_32 reso_x, reso_y;
@@ -630,19 +630,19 @@ void TVPLoadHeaderPNG(void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** d
 		if( png_get_pHYs(png_ptr, info_ptr, &reso_x, &reso_y, &reso_unit_type) )
 		{
 			val = tTJSVariant((tjs_int64)reso_x);
-			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("resolution x"), 0, &val, (*dic) );
+			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("resolution x"), 0, &val, (*dic) );
 			val = tTJSVariant((tjs_int64)reso_y);
-			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("resolution y"), 0, &val, (*dic) );
+			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("resolution y"), 0, &val, (*dic) );
 			switch(reso_unit_type)
 			{
 			case PNG_RESOLUTION_METER:
-				val = tTJSVariant(TJS_W("meter"));
+				val = tTJSVariant(TJS_N("meter"));
 				break;
 			default:
-				val = tTJSVariant(TJS_W("unknown"));
+				val = tTJSVariant(TJS_N("unknown"));
 				break;
 			}
-			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("resolution unit"), 0, &val, (*dic) );
+			(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("resolution unit"), 0, &val, (*dic) );
 		}
 	}
 	catch(...)

@@ -391,8 +391,8 @@ tTJSCustomObject::tTJSCustomObject(tjs_int hashbits)
 	if(FinalizeName.IsEmpty())
 	{
 		// first time; initialize 'finalize' name and 'missing' name
-		static ttstr _finalize = TJSMapGlobalStringMap(TJS_W("finalize"));
-		static ttstr _missing = TJSMapGlobalStringMap(TJS_W("missing"));
+		static ttstr _finalize = TJSMapGlobalStringMap(TJS_N("finalize"));
+		static ttstr _missing = TJSMapGlobalStringMap(TJS_N("missing"));
 		FinalizeName = _finalize;
 		MissingName = _missing;
 	}
@@ -1187,7 +1187,7 @@ bool tTJSCustomObject::CallEnumCallbackForData(
 	}
 
 	tTJSVariant res;
-	if(TJS_FAILED(callback.FuncCall(NULL, NULL, NULL, &res,
+	if(TJS_FAILED(callback.FuncCall(0, NULL, NULL, &res,
 		(flags & TJS_ENUM_NO_VALUE) ? 2 : 3, params, NULL))) return false;
 	return 0!=(tjs_int)(res);
 }
@@ -1823,7 +1823,7 @@ tjs_error TJSDefaultIsInstanceOf(tjs_uint32 flag, tTJSVariant &targ, const tjs_c
 		return TJS_S_FALSE;
 	}
 
-	if(!TJS_strcmp(name, TJS_W("Object"))) return TJS_S_TRUE;
+	if(!TJS_strcmp(name, TJS_N("Object"))) return TJS_S_TRUE;
 
 
 	switch(vt)
@@ -1832,13 +1832,13 @@ tjs_error TJSDefaultIsInstanceOf(tjs_uint32 flag, tTJSVariant &targ, const tjs_c
 		return TJS_S_FALSE; // returns always false about tvtVoid
 	case tvtInteger:
 	case tvtReal:
-		if(!TJS_strcmp(name, TJS_W("Number"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(name, TJS_N("Number"))) return TJS_S_TRUE;
 		return TJS_S_FALSE;
 	case tvtString:
-		if(!TJS_strcmp(name, TJS_W("String"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(name, TJS_N("String"))) return TJS_S_TRUE;
 		return TJS_S_FALSE;
 	case tvtOctet:
-		if(!TJS_strcmp(name, TJS_W("Octet"))) return TJS_S_TRUE;
+		if(!TJS_strcmp(name, TJS_N("Octet"))) return TJS_S_TRUE;
 		return TJS_S_FALSE;
 	case tvtObject:
 		if(vt == tvtObject)
@@ -1867,7 +1867,7 @@ tjs_error tTJSCustomObject::IsInstanceOf(tjs_uint32 flag, const tjs_char *member
 	if(membername == NULL)
 	{
 		// always returns true if "Object" is specified
-		if(!TJS_strcmp(classname, TJS_W("Object")))
+		if(!TJS_strcmp(classname, TJS_N("Object")))
 		{
 			return TJS_S_TRUE;
 		}
@@ -2088,7 +2088,7 @@ tTJSCustomObject::ClassInstanceInfo(tjs_uint32 flag, tjs_uint num, tTJSVariant *
 		// add value
 		ttstr name = value->AsStringNoAddRef();
 		if(TJSObjectHashMapEnabled() && ClassNames.size() == 0)
-			TJSObjectHashSetType(this, TJS_W("instance of class ") + name);
+			TJSObjectHashSetType(this, TJS_N("instance of class ") + name);
 				// First class name is used for the object classname
 				// because the order of the class name
 				// registration is from descendant to ancestor.

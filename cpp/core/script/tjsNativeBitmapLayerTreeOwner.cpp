@@ -87,7 +87,7 @@ void tTJSNI_BitmapLayerTreeOwner::EndBitmapCompletion(iTVPLayerManager *manager)
 void tTJSNI_BitmapLayerTreeOwner::OnSetMouseCursor(tjs_int cursor) {
     if(Owner) {
         tTJSVariant arg[1] = { cursor };
-        static ttstr eventname(TJS_W("onSetMouseCursor"));
+        static ttstr eventname(TJS_N("onSetMouseCursor"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 1, arg);
     }
 }
@@ -95,7 +95,7 @@ void tTJSNI_BitmapLayerTreeOwner::OnGetCursorPos(tjs_int &x, tjs_int &y) {
     if(Owner) {
         tjs_int vx = x, vy = y;
         tTJSVariant arg[2] = { vx, vy };
-        static ttstr eventname(TJS_W("onGetCursorPos"));
+        static ttstr eventname(TJS_N("onGetCursorPos"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 2, arg);
         x = arg[0];
         y = arg[1];
@@ -104,13 +104,13 @@ void tTJSNI_BitmapLayerTreeOwner::OnGetCursorPos(tjs_int &x, tjs_int &y) {
 void tTJSNI_BitmapLayerTreeOwner::OnSetCursorPos(tjs_int x, tjs_int y) {
     if(Owner) {
         tTJSVariant arg[2] = { x, y };
-        static ttstr eventname(TJS_W("onSetCursorPos"));
+        static ttstr eventname(TJS_N("onSetCursorPos"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 2, arg);
     }
 }
 void tTJSNI_BitmapLayerTreeOwner::OnReleaseMouseCapture() {
     if(Owner) {
-        static ttstr eventname(TJS_W("onReleaseMouseCapture"));
+        static ttstr eventname(TJS_N("onReleaseMouseCapture"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 0, NULL);
     }
 }
@@ -119,7 +119,7 @@ void tTJSNI_BitmapLayerTreeOwner::OnSetHintText(iTJSDispatch2 *sender,
     if(Owner) {
         tTJSVariant clo(sender, sender);
         tTJSVariant arg[2] = { clo, hint };
-        static ttstr eventname(TJS_W("onSetHintText"));
+        static ttstr eventname(TJS_N("onSetHintText"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 2, arg);
     }
 }
@@ -131,13 +131,13 @@ void tTJSNI_BitmapLayerTreeOwner::OnResizeLayer(tjs_int w, tjs_int h) {
     }
     if(Owner) {
         tTJSVariant arg[2] = { w, h };
-        static ttstr eventname(TJS_W("onResizeLayer"));
+        static ttstr eventname(TJS_N("onResizeLayer"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 2, arg);
     }
 }
 void tTJSNI_BitmapLayerTreeOwner::OnChangeLayerImage() {
     if(Owner) {
-        static ttstr eventname(TJS_W("onChangeLayerImage"));
+        static ttstr eventname(TJS_N("onChangeLayerImage"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 0, NULL);
     }
 }
@@ -148,26 +148,26 @@ void tTJSNI_BitmapLayerTreeOwner::OnSetAttentionPoint(tTJSNI_BaseLayer *layer,
         iTJSDispatch2 *owner = GetOwnerNoAddRef();
         tTJSVariant clo(owner, owner);
         tTJSVariant arg[3] = { clo, x, y };
-        static ttstr eventname(TJS_W("onSetAttentionPoint"));
+        static ttstr eventname(TJS_N("onSetAttentionPoint"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 3, arg);
     }
 }
 void tTJSNI_BitmapLayerTreeOwner::OnDisableAttentionPoint() {
     if(Owner) {
-        static ttstr eventname(TJS_W("onDisableAttentionPoint"));
+        static ttstr eventname(TJS_N("onDisableAttentionPoint"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 0, NULL);
     }
 }
 void tTJSNI_BitmapLayerTreeOwner::OnSetImeMode(tjs_int mode) {
     if(Owner) {
         tTJSVariant arg[1] = { mode };
-        static ttstr eventname(TJS_W("onSetImeMode"));
+        static ttstr eventname(TJS_N("onSetImeMode"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 1, arg);
     }
 }
 void tTJSNI_BitmapLayerTreeOwner::OnResetImeMode() {
     if(Owner) {
-        static ttstr eventname(TJS_W("onResetImeMode"));
+        static ttstr eventname(TJS_N("onResetImeMode"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 0, NULL);
     }
 }
@@ -178,7 +178,7 @@ void tTJSNI_BitmapLayerTreeOwner::OnResetImeMode() {
 tjs_uint32 tTJSNC_BitmapLayerTreeOwner::ClassID = -1;
 
 //----------------------------------------------------------------------
-tTJSNC_BitmapLayerTreeOwner::tTJSNC_BitmapLayerTreeOwner() : inherited(TJS_W("BitmapLayerTreeOwner")) {
+tTJSNC_BitmapLayerTreeOwner::tTJSNC_BitmapLayerTreeOwner() : inherited(TJS_N("BitmapLayerTreeOwner")) {
 
 	// registration of native members
 	TJS_BEGIN_NATIVE_MEMBERS(BitmapLayerTreeOwner) // constructor
@@ -551,7 +551,7 @@ tTJSNC_BitmapLayerTreeOwner::tTJSNC_BitmapLayerTreeOwner() : inherited(TJS_W("Bi
 		{
 			TJS_GET_NATIVE_INSTANCE(/*var. name*/_this, /*var. type*/tTJSNI_BitmapLayerTreeOwner);
 			tTJSNI_BaseLayer* pri = _this->GetPrimaryLayer();
-			if (!pri) TVPThrowExceptionMessage(TJS_W("Not have primary layer"));
+			if (!pri) TVPThrowExceptionMessage(TJS_N("Not have primary layer"));
 
 			if (pri && pri->GetOwnerNoAddRef())
 				*result = tTJSVariant(pri->GetOwnerNoAddRef(), pri->GetOwnerNoAddRef());

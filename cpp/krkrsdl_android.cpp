@@ -6,6 +6,7 @@
 #include <GLES3/gl32.h>
 
 #include <map>
+#include <vector>
 
 #include "TVPApplication.h"
 #include "RenderManager.h"

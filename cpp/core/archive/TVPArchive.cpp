@@ -19,10 +19,10 @@ void tTVPArchive::NormalizeInArchiveStorageName(ttstr &name) {
     // change '\\' to '/'
     tjs_char *ptr = name.Independ();
     while(*ptr) {
-        if(*ptr >= TJS_W('A') && *ptr <= TJS_W('Z'))
-            *ptr += TJS_W('a') - TJS_W('A');
-        else if(*ptr == TJS_W('\\'))
-            *ptr = TJS_W('/');
+        if(*ptr >= TJS_N('A') && *ptr <= TJS_N('Z'))
+            *ptr += TJS_N('a') - TJS_N('A');
+        else if(*ptr == TJS_N('\\'))
+            *ptr = TJS_N('/');
         ptr++;
     }
 
@@ -31,7 +31,7 @@ void tTVPArchive::NormalizeInArchiveStorageName(ttstr &name) {
     tjs_char *org_ptr = ptr;
     tjs_char *dest = ptr;
     while(*ptr) {
-        if(*ptr != TJS_W('/')) {
+        if(*ptr != TJS_N('/')) {
             *dest = *ptr;
             ptr++;
             dest++;
@@ -41,7 +41,7 @@ void tTVPArchive::NormalizeInArchiveStorageName(ttstr &name) {
                 ptr++;
                 dest++;
             }
-            while(*ptr == TJS_W('/'))
+            while(*ptr == TJS_N('/'))
                 ptr++;
         }
     }
@@ -301,10 +301,10 @@ void storeFilename(ttstr &name, const char *narrowName, const ttstr &filename) {
     tjs_int len = TJS_narrowtowidelen(narrowName);
     if(len == -1) {
         ttstr msg("Filename is not encoded in UTF8 in archive:\n");
-        TVPShowSimpleMessageBox(msg + filename, TJS_W("Error"));
-        TVPThrowExceptionMessage(TJS_W("Invalid archive entry name"));
+        TVPShowSimpleMessageBox(msg + filename, TJS_N("Error"));
+        TVPThrowExceptionMessage(TJS_N("Invalid archive entry name"));
     }
     tjs_char *p = name.AllocBuffer(len);
-    p[TJS_narrowtowide(p, narrowName, len)] = 0;
+    name = narrowName;
     name.FixLen();
 }

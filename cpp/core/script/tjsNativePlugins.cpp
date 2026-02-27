@@ -80,7 +80,7 @@ tTJSNativeClass* TVPCreateNativeClass_Plugins()
 // tTJSNC_Plugins
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Plugins::ClassID = -1;
-tTJSNC_Plugins::tTJSNC_Plugins() : inherited(TJS_W("Plugins"))
+tTJSNC_Plugins::tTJSNC_Plugins() : inherited(TJS_N("Plugins"))
 {
 	// registration of native members
 

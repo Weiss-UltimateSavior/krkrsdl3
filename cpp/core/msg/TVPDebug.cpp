@@ -238,7 +238,7 @@ public:
 	~tTVPLogStreamHolder() { if (Stream) fclose(Stream); Alive = false; }
 
 private:
-	void Open(const tjs_nchar* mode);
+	void Open(const tjs_char* mode);
 
 public:
 	void Clear(); // clear log stream
@@ -248,7 +248,7 @@ public:
 
 } static TVPLogStreamHolder;
 //---------------------------------------------------------------------------
-void tTVPLogStreamHolder::Open(const tjs_nchar* mode)
+void tTVPLogStreamHolder::Open(const tjs_char* mode)
 {
 	if (OpenFailed) return; // no more try
 
@@ -263,9 +263,9 @@ void tTVPLogStreamHolder::Open(const tjs_nchar* mode)
 		else
 		{
 			// no log location specified
-			filename = TVPNativeLogLocation + TJS_W("/krkr.console.log");
+			filename = TVPNativeLogLocation + TJS_N("/krkr.console.log");
 			TVPEnsureDataPathDirectory();
-			std::string _filename = filename.AsNarrowStdString();
+			std::string _filename = filename.AsStdString();
 			Stream = fopen(_filename.c_str(), mode);
 			if (!Stream) OpenFailed = true;
 		}
@@ -277,7 +277,7 @@ void tTVPLogStreamHolder::Open(const tjs_nchar* mode)
 			{
 				// write BOM
 				// TODO: 32-bit unicode support
-				fwrite("\xff\xfe", 1, 2, Stream); // indicate unicode text
+				//fwrite("\xff\xfe", 1, 2, Stream); // indicate unicode text
 			}
 
 #ifdef TJS_TEXT_OUT_CRLF
@@ -295,9 +295,9 @@ void tTVPLogStreamHolder::Open(const tjs_nchar* mode)
 			timer = time(&timer);
 
 			struct_tm = localtime(&timer);
-			TJS_strftime(timebuf, 79, TJS_W("%#c"), struct_tm);
+			TJS_strftime(timebuf, 79, TJS_N("%#c"), struct_tm);
 
-			Log(ttstr(TJS_W("Logging to ")) + ttstr(filename) + TJS_W(" started on ") + timebuf);
+			Log(ttstr(TJS_N("Logging to ")) + ttstr(filename) + TJS_N(" started on ") + timebuf);
 
 		}
 	}
@@ -332,9 +332,9 @@ void tTVPLogStreamHolder::Log(const ttstr& text)
 				return;
 			}
 #ifdef TJS_TEXT_OUT_CRLF
-			fwrite(TJS_W("\r\n"), 1, 2 * sizeof(tjs_char), Stream);
+			fwrite(TJS_N("\r\n"), 1, 2 * sizeof(tjs_char), Stream);
 #else
-			fwrite(TJS_W("\n"), 1, 1 * sizeof(tjs_char), Stream);
+			fwrite(TJS_N("\n"), 1, 1 * sizeof(tjs_char), Stream);
 #endif
 
 			// flush
@@ -386,7 +386,7 @@ void TVPAddLog(const ttstr& line, bool appendtoimportant)
 	if (prevlogtime != timer)
 	{
 		struct_tm = localtime(&timer);
-		TJS_strftime(timebuf, 39, TJS_W("%H:%M:%S"), struct_tm);
+		TJS_strftime(timebuf, 39, TJS_N("%H:%M:%S"), struct_tm);
 		prevlogtime = timer;
 		prevtimebuf = timebuf;
 	}
@@ -396,9 +396,9 @@ void TVPAddLog(const ttstr& line, bool appendtoimportant)
 	if (appendtoimportant)
 	{
 #ifdef TJS_TEXT_OUT_CRLF
-		* TVPImportantLogs += ttstr(timebuf) + TJS_W(" ! ") + line + TJS_W("\r\n");
+		* TVPImportantLogs += ttstr(timebuf) + TJS_N(" ! ") + line + TJS_N("\r\n");
 #else
-		* TVPImportantLogs += ttstr(timebuf) + TJS_W(" ! ") + line + TJS_W("\n");
+		* TVPImportantLogs += ttstr(timebuf) + TJS_N(" ! ") + line + TJS_N("\n");
 #endif
 	}
 	while (TVPLogDeque->size() >= TVPLogMaxLines + 100)
@@ -412,7 +412,7 @@ void TVPAddLog(const ttstr& line, bool appendtoimportant)
 	tjs_char* p = buf.Independ();
 	TJS_strcpy(p, timebuf);
 	p += timebuflen;
-	*p = TJS_W(' ');
+	*p = TJS_N(' ');
 	p++;
 	TJS_strcpy(p, line.c_str());
 	if (TVPOnLog) TVPOnLog(buf);
@@ -453,7 +453,7 @@ ttstr TVPGetImportantLog()
 ttstr TVPGetLastLog(tjs_uint n)
 {
 	TVPEnsureLogObjects();
-	if (!TVPLogDeque) return TJS_W(""); // log system is shuttingdown
+	if (!TVPLogDeque) return TJS_N(""); // log system is shuttingdown
 
 	tjs_uint len = 0;
 	tjs_uint size = (tjs_uint)TVPLogDeque->size();
@@ -480,17 +480,17 @@ ttstr TVPGetLastLog(tjs_uint n)
 	{
 		TJS_strcpy(p, i->Time.c_str());
 		p += i->Time.GetLen();
-		*p = TJS_W(' ');
+		*p = TJS_N(' ');
 		p++;
 		TJS_strcpy(p, i->Log.c_str());
 		p += i->Log.GetLen();
 #ifdef TJS_TEXT_OUT_CRLF
-		* p = TJS_W('\r');
+		* p = TJS_N('\r');
 		p++;
-		*p = TJS_W('\n');
+		*p = TJS_N('\n');
 		p++;
 #else
-		* p = TJS_W('\n');
+		* p = TJS_N('\n');
 		p++;
 #endif
 		i++;
@@ -518,12 +518,12 @@ void TVPStartLogToFile(bool clear)
 	TVPLogStreamHolder.Log(*TVPImportantLogs);
 
 #ifdef TJS_TEXT_OUT_CRLF
-	ttstr separator(TJS_W("\r\n")
-		TJS_W("------------------------------------------------------------------------------\r\n"
+	ttstr separator(TJS_N("\r\n")
+		TJS_N("------------------------------------------------------------------------------\r\n"
 		));
 #else
-	ttstr separator(TJS_W("\n")
-		TJS_W("------------------------------------------------------------------------------\n"
+	ttstr separator(TJS_N("\n")
+		TJS_N("------------------------------------------------------------------------------\n"
 		));
 #endif
 
@@ -567,37 +567,37 @@ void TVPSetLogLocation(const ttstr& loc)
 	else
 	{
 		TVPNativeLogLocation = native;
-		if (TVPNativeLogLocation[TVPNativeLogLocation.length() - 1] != TJS_W('/'))
-			TVPNativeLogLocation += TJS_W("/");
+		if (TVPNativeLogLocation[TVPNativeLogLocation.length() - 1] != TJS_N('/'))
+			TVPNativeLogLocation += TJS_N("/");
 	}
 
 	TVPLogStreamHolder.Reopen();
 
 	// check force logging option
 	tTJSVariant val;
-	if (TVPGetCommandLine(TJS_W("-forcelog"), &val))
+	if (TVPGetCommandLine(TJS_N("-forcelog"), &val))
 	{
 		ttstr str(val);
-		if (str == TJS_W("yes"))
+		if (str == TJS_N("yes"))
 		{
 			TVPLoggingToFile = false;
 			TVPStartLogToFile(false);
 		}
-		else if (str == TJS_W("clear"))
+		else if (str == TJS_N("clear"))
 		{
 			TVPLoggingToFile = false;
 			TVPStartLogToFile(true);
 		}
 	}
-	if (TVPGetCommandLine(TJS_W("-logerror"), &val))
+	if (TVPGetCommandLine(TJS_N("-logerror"), &val))
 	{
 		ttstr str(val);
-		if (str == TJS_W("no"))
+		if (str == TJS_N("no"))
 		{
 			TVPAutoClearLogOnError = false;
 			TVPAutoLogToFileOnError = false;
 		}
-		else if (str == TJS_W("clear"))
+		else if (str == TJS_N("clear"))
 		{
 			TVPAutoClearLogOnError = true;
 			TVPAutoLogToFileOnError = true;
@@ -641,9 +641,9 @@ class tTVPTJS2DumpOutputGateway : public iTJSConsoleOutput
 		{
 			fwrite(msg, 1, TJS_strlen(msg) * sizeof(tjs_char), TVPDumpOutFile);
 #ifdef TJS_TEXT_OUT_CRLF
-			fwrite(TJS_W("\r\n"), 1, 2 * sizeof(tjs_char), TVPDumpOutFile);
+			fwrite(TJS_N("\r\n"), 1, 2 * sizeof(tjs_char), TVPDumpOutFile);
 #else
-			fwrite(TJS_W("\n"), 1, 1 * sizeof(tjs_char), TVPDumpOutFile);
+			fwrite(TJS_N("\n"), 1, 1 * sizeof(tjs_char), TVPDumpOutFile);
 #endif
 		}
 	}

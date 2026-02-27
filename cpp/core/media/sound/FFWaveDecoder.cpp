@@ -226,7 +226,7 @@ bool FFWaveDecoder::SetPosition( tjs_uint64 samplepos )
 bool FFWaveDecoder::SetStream( const ttstr & url )
 {
     Clear();
-    InputStream = TVPCreateBinaryStreamForRead(url, TJS_W(""));
+    InputStream = TVPCreateBinaryStreamForRead(url, TJS_N(""));
     if(!InputStream) return false;
     int bufSize = 32 * 1024;
     AVIOContext *pIOCtx = avio_alloc_context(
@@ -239,8 +239,7 @@ bool FFWaveDecoder::SetStream( const ttstr & url )
         AVSeekFunc);
 
     const AVInputFormat *fmt = NULL;
-    tTJSNarrowStringHolder holder(url.c_str());
-    av_probe_input_buffer2(pIOCtx, &fmt, holder, NULL, 0, 0);
+    av_probe_input_buffer2(pIOCtx, &fmt, url.c_str(), NULL, 0, 0);
     AVFormatContext *ic = FormatCtx = avformat_alloc_context();
     ic->pb = pIOCtx;
 	if (avformat_open_input(&ic, "", fmt, nullptr) < 0) {

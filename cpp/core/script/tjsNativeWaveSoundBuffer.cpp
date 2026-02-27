@@ -56,10 +56,10 @@ void tTJSNI_BaseSoundBuffer::Invalidate() {
 }
 //---------------------------------------------------------------------------
 ttstr tTJSNI_BaseSoundBuffer::GetStatusString() const {
-    static ttstr unload(TJS_W("unload"));
-    static ttstr play(TJS_W("play"));
-    static ttstr stop(TJS_W("stop"));
-    static ttstr unknown(TJS_W("unknown"));
+    static ttstr unload(TJS_N("unload"));
+    static ttstr play(TJS_N("play"));
+    static ttstr stop(TJS_N("stop"));
+    static ttstr unknown(TJS_N("unknown"));
 
     switch(Status) {
         case ssUnload:
@@ -85,7 +85,7 @@ void tTJSNI_BaseSoundBuffer::SetStatus(tTVPSoundStatus s) {
             if(CanDeliverEvents) {
                 // fire onStatusChanged event
                 tTJSVariant param(GetStatusString());
-                static ttstr eventname(TJS_W("onStatusChanged"));
+                static ttstr eventname(TJS_N("onStatusChanged"));
                 TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 1,
                              &param);
             }
@@ -104,7 +104,7 @@ void tTJSNI_BaseSoundBuffer::SetStatusAsync(tTVPSoundStatus s) {
             // fire onStatusChanged event
             if(Owner) {
                 tTJSVariant param(GetStatusString());
-                static ttstr eventname(TJS_W("onStatusChanged"));
+                static ttstr eventname(TJS_N("onStatusChanged"));
                 TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_POST, 1,
                              &param);
             }
@@ -180,7 +180,7 @@ void tTJSNI_BaseSoundBuffer::StopFade(bool async, bool settargetvol) {
 
         // post "onFadeCompleted" event to the owner
         if(CanDeliverEvents) {
-            static ttstr eventname(TJS_W("onFadeCompleted"));
+            static ttstr eventname(TJS_N("onFadeCompleted"));
             TVPPostEvent(Owner, Owner, eventname, 0,
                          async ? TVP_EPT_POST : TVP_EPT_IMMEDIATE, 0, NULL);
         }
@@ -784,7 +784,7 @@ void tTJSNI_BaseWaveSoundBuffer::InvokeLabelEvent(const ttstr& name)
     if (Owner && CanDeliverEvents)
     {
         tTJSVariant param(name);
-        static ttstr eventname(TJS_W("onLabel"));
+        static ttstr eventname(TJS_N("onLabel"));
         TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_POST, 1, &param);
     }
 }
@@ -808,7 +808,7 @@ void tTJSNI_BaseWaveSoundBuffer::RebuildFilterChain()
     // get filter count
     tTJSVariant v;
     tjs_int count = 0;
-    Filters->PropGet(0, TJS_W("count"), NULL, &v, Filters);
+    Filters->PropGet(0, TJS_N("count"), NULL, &v, Filters);
     count = v;
 
     // reset filter output
@@ -822,7 +822,7 @@ void tTJSNI_BaseWaveSoundBuffer::RebuildFilterChain()
         // get iTVPBasicWaveFilter interface
         tTJSVariantClosure clo = v.AsObjectClosureNoAddRef();
         tTJSVariant iface_v;
-        if (TJS_FAILED(clo.PropGet(0, TJS_W("interface"), NULL, &iface_v, NULL)))
+        if (TJS_FAILED(clo.PropGet(0, TJS_N("interface"), NULL, &iface_v, NULL)))
             continue;
         iTVPBasicWaveFilter* filter =
             reinterpret_cast<iTVPBasicWaveFilter*>((tjs_intptr_t)(tjs_int64)iface_v);
@@ -941,11 +941,11 @@ iTJSDispatch2* tTJSNI_BaseWaveSoundBuffer::GetWaveLabelsObjectNoAddRef()
             {
                 tTJSVariant val;
                 val = i->Name.c_str(); // c_str() to avoid race condition for ttstr
-                item_dic->PropSet(TJS_MEMBERENSURE, TJS_W("name"), NULL, &val, item_dic);
+                item_dic->PropSet(TJS_MEMBERENSURE, TJS_N("name"), NULL, &val, item_dic);
                 val = i->Position;
-                item_dic->PropSet(TJS_MEMBERENSURE, TJS_W("samplePosition"), NULL, &val, item_dic);
+                item_dic->PropSet(TJS_MEMBERENSURE, TJS_N("samplePosition"), NULL, &val, item_dic);
                 val = freq ? i->Position * 1000 / freq : 0;
-                item_dic->PropSet(TJS_MEMBERENSURE, TJS_W("position"), NULL, &val, item_dic);
+                item_dic->PropSet(TJS_MEMBERENSURE, TJS_N("position"), NULL, &val, item_dic);
 
                 tTJSVariant item_dic_var(item_dic, item_dic);
 
@@ -1010,7 +1010,7 @@ void tTJSNI_WaveFlags::Invalidate()
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_WaveFlags::ClassID = -1;
 tTJSNC_WaveFlags::tTJSNC_WaveFlags()
-  : tTJSNativeClass(TJS_W("WaveFlags")){
+  : tTJSNativeClass(TJS_N("WaveFlags")){
         TJS_BEGIN_NATIVE_MEMBERS(WaveFlags) // constructor
         TJS_DECL_EMPTY_FINALIZE_METHOD
             //----------------------------------------------------------------------
@@ -1160,7 +1160,7 @@ static void TVPInitSoundOptions()
     */
 
     tTJSVariant val;
-    if (TVPGetCommandLine(TJS_W("-wsdecpri"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsdecpri"), &val))
     {
         tjs_int v = val;
         if (v < 0)
@@ -1172,70 +1172,70 @@ static void TVPInitSoundOptions()
             TVPDecodeThreadHighPriority = TVPDecodeThreadLowPriority;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wscontrolpri"), &val))
+    if (TVPGetCommandLine(TJS_N("-wscontrolpri"), &val))
     {
-        if (ttstr(val) == TJS_W("yes"))
+        if (ttstr(val) == TJS_N("yes"))
             TVPControlPrimaryBufferRun = true;
         else
             TVPControlPrimaryBufferRun = false;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wssoft"), &val))
+    if (TVPGetCommandLine(TJS_N("-wssoft"), &val))
     {
-        if (ttstr(val) == TJS_W("no"))
+        if (ttstr(val) == TJS_N("no"))
             TVPUseSoftwareBuffer = false;
         else
             TVPUseSoftwareBuffer = true;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsrecreate"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsrecreate"), &val))
     {
-        if (ttstr(val) == TJS_W("yes"))
+        if (ttstr(val) == TJS_N("yes"))
             TVPAlwaysRecreateSoundBuffer = true;
         else
             TVPAlwaysRecreateSoundBuffer = false;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsfreq"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsfreq"), &val))
     {
         TVPPriamrySBFrequency = val;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsbits"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsbits"), &val))
     {
         ttstr sval(val);
-        if (sval == TJS_W("f32"))
+        if (sval == TJS_N("f32"))
         {
             TVPPrimaryFloat = true;
             TVPPrimarySBBits = 32;
         }
-        else if (sval[0] == TJS_W('i'))
+        else if (sval[0] == TJS_N('i'))
         {
             TVPPrimaryFloat = false;
             TVPPrimarySBBits = TJS_atoi(sval.c_str() + 1);
         }
     }
 
-    if (TVPGetCommandLine(TJS_W("-wspritry"), &val))
+    if (TVPGetCommandLine(TJS_N("-wspritry"), &val))
     {
         ttstr sval(val);
-        if (sval == TJS_W("all"))
+        if (sval == TJS_N("all"))
             TVPPrimarySBCreateTryLevel = -1;
         else
             TVPPrimarySBCreateTryLevel = val;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsuse3d"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsuse3d"), &val))
     {
         ttstr sval(val);
-        if (sval == TJS_W("no"))
+        if (sval == TJS_N("no"))
             TVPDirectSoundUse3D = false;
         else
             TVPDirectSoundUse3D = true;
     }
-    if (TVPGetCommandLine(TJS_W("-wsexpandquad"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsexpandquad"), &val))
     {
-        if (ttstr(val) == TJS_W("yes"))
+        if (ttstr(val) == TJS_N("yes"))
             TVPExpandToQuad = true;
         else
             TVPExpandToQuad = false;
@@ -1244,39 +1244,39 @@ static void TVPInitSoundOptions()
         TVPExpandToQuad = false;
     // quad expansion is disabled when using 3D sounds
 
-    if (TVPGetCommandLine(TJS_W("-wsmute"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsmute"), &val))
     {
         ttstr str(val);
-        if (str == TJS_W("no") || str == TJS_W("never"))
+        if (str == TJS_N("no") || str == TJS_N("never"))
             TVPSoundGlobalFocusModeByOption = sgfmNeverMute;
-        else if (str == TJS_W("minimize"))
+        else if (str == TJS_N("minimize"))
             TVPSoundGlobalFocusModeByOption = sgfmMuteOnMinimize;
-        else if (str == TJS_W("yes") || str == TJS_W("deactive"))
+        else if (str == TJS_N("yes") || str == TJS_N("deactive"))
             TVPSoundGlobalFocusModeByOption = sgfmMuteOnDeactivate;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsmutevol"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsmutevol"), &val))
     {
         tjs_int n = (tjs_int)val;
         if (n >= 0 && n <= 100)
             TVPSoundGlobalFocusMuteVolume = n * 1000;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsl1len"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsl1len"), &val))
     {
         tjs_int n = (tjs_int)val;
         if (n > 0 && n < 600000)
             TVPL1BufferLength = n;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsl2len"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsl2len"), &val))
     {
         tjs_int n = (tjs_int)val;
         if (n > 0 && n < 600000)
             TVPL2BufferLength = n;
     }
 
-    if (TVPGetCommandLine(TJS_W("-wsvolfactor"), &val))
+    if (TVPGetCommandLine(TJS_N("-wsvolfactor"), &val))
     {
         tjs_int n = (tjs_int)val;
         if (n > 0 && n < 200000)
@@ -1326,16 +1326,16 @@ static void TVPEnsurePrimaryBufferPlay()
 //---------------------------------------------------------------------------
 static ttstr TVPGetSoundBufferFormatString(const tTVPWaveFormat& wfx)
 {
-    ttstr debuglog(TJS_W("format container = "));
-    debuglog += TJS_W("WAVE_PCM_");
-    debuglog += wfx.IsFloat ? TJS_W("F") : TJS_W("S");
+    ttstr debuglog(TJS_N("format container = "));
+    debuglog += TJS_N("WAVE_PCM_");
+    debuglog += wfx.IsFloat ? TJS_N("F") : TJS_N("S");
     debuglog += ttstr((tjs_int)wfx.BitsPerSample);
-    debuglog += TJS_W("LE");
-    debuglog += TJS_W(", ");
+    debuglog += TJS_N("LE");
+    debuglog += TJS_N(", ");
 
-    debuglog += TJS_W("frequency = ") + ttstr((tjs_int)wfx.SamplesPerSec) + TJS_W("Hz, ") +
-                TJS_W("bits = ") + ttstr((tjs_int)wfx.BitsPerSample) + TJS_W("bits, ") +
-                TJS_W("channels = ") + ttstr((tjs_int)wfx.Channels);
+    debuglog += TJS_N("frequency = ") + ttstr((tjs_int)wfx.SamplesPerSec) + TJS_N("Hz, ") +
+                TJS_N("bits = ") + ttstr((tjs_int)wfx.BitsPerSample) + TJS_N("bits, ") +
+                TJS_N("channels = ") + ttstr((tjs_int)wfx.Channels);
 
     return debuglog;
 }
@@ -1872,7 +1872,7 @@ void tTJSNI_WaveSoundBuffer::Invalidate()
 void tTJSNI_WaveSoundBuffer::ThrowSoundBufferException(const ttstr& reason)
 {
     TVPThrowExceptionMessage(TVPCannotCreateDSSecondaryBuffer, reason,
-                             ttstr().printf(TJS_W("frequency=%d/channels=%d/bits=%d"),
+                             ttstr().printf(TJS_N("frequency=%d/channels=%d/bits=%d"),
                                             InputFormat.SamplesPerSec, InputFormat.Channels,
                                             InputFormat.BitsPerSample));
 }
@@ -1901,7 +1901,7 @@ void tTJSNI_WaveSoundBuffer::TryCreateSoundBuffer(bool use3d)
     // l1 buffer bytes
 
     if (BufferBytes <= 0)
-        ThrowSoundBufferException(TJS_W("Invalid format."));
+        ThrowSoundBufferException(TJS_N("Invalid format."));
 
     // allocate visualization buffer
     if (UseVisBuffer)
@@ -2732,7 +2732,7 @@ void tTJSNI_WaveSoundBuffer::Open(const ttstr& storagename)
     }
 
     // open loop information file
-    ttstr sliname = storagename + TJS_W(".sli");
+    ttstr sliname = storagename + TJS_N(".sli");
     if (TVPIsExistentStorage(sliname))
     {
         tTVPStreamHolder slistream(sliname);
@@ -3144,7 +3144,7 @@ tjs_int tTJSNI_WaveSoundBuffer::GetVisBuffer(tjs_int16* dest,
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_WaveSoundBuffer::ClassID = -1;
 tTJSNC_WaveSoundBuffer::tTJSNC_WaveSoundBuffer() :
-	tTJSNativeClass(TJS_W("WaveSoundBuffer"))
+	tTJSNativeClass(TJS_N("WaveSoundBuffer"))
 {
 	// registration of native members
 

@@ -28,7 +28,7 @@ tjs_uint32 tTJSNC_Controller::ClassID = (tjs_uint32)-1;
 
 
 //---------------------------------------------------------------------------
-tTJSNC_Controller::tTJSNC_Controller() : tTJSNativeClass(TJS_W("Controller"))
+tTJSNC_Controller::tTJSNC_Controller() : tTJSNativeClass(TJS_N("Controller"))
 {
 	TJS_BEGIN_NATIVE_MEMBERS(Debug)
 		TJS_DECL_EMPTY_FINALIZE_METHOD
@@ -98,7 +98,7 @@ tjs_uint32 tTJSNC_Console::ClassID = (tjs_uint32)-1;
 
 
 //---------------------------------------------------------------------------
-tTJSNC_Console::tTJSNC_Console() : tTJSNativeClass(TJS_W("Console"))
+tTJSNC_Console::tTJSNC_Console() : tTJSNativeClass(TJS_N("Console"))
 {
 	TJS_BEGIN_NATIVE_MEMBERS(Debug)
 		TJS_DECL_EMPTY_FINALIZE_METHOD
@@ -207,7 +207,7 @@ tTJSNativeClass* TVPCreateNativeClass_Debug()
 // tTJSNC_Debug
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Debug::ClassID = -1;
-tTJSNC_Debug::tTJSNC_Debug() : tTJSNativeClass(TJS_W("Debug"))
+tTJSNC_Debug::tTJSNC_Debug() : tTJSNativeClass(TJS_N("Debug"))
 {
 	TJS_BEGIN_NATIVE_MEMBERS(Debug)
 		TJS_DECL_EMPTY_FINALIZE_METHOD
@@ -236,7 +236,7 @@ tTJSNC_Debug::tTJSNC_Debug() : tTJSNativeClass(TJS_W("Debug"))
 			ttstr args;
 			for (int i = 0; i < numparams; i++)
 			{
-				if (i != 0) args += TJS_W(", ");
+				if (i != 0) args += TJS_N(", ");
 				args += ttstr(*param[i]);
 			}
 			TVPAddLog(args);
@@ -260,7 +260,7 @@ tTJSNC_Debug::tTJSNC_Debug() : tTJSNativeClass(TJS_W("Debug"))
 			ttstr args;
 			for (int i = 0; i < numparams; i++)
 			{
-				if (i != 0) args += TJS_W(", ");
+				if (i != 0) args += TJS_N(", ");
 				args += ttstr(*param[i]);
 			}
 			TVPAddImportantLog(args);

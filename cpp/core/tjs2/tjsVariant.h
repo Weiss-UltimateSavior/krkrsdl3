@@ -553,19 +553,6 @@ public:
 		if(String) String->AddRef();
 	}
 
-	tTJSVariant(const tjs_nchar* ref) //  from NarrowString
-	{
-		vt=tvtString;
-		if(ref)
-		{
-			String=TJSAllocVariantString(ref);
-		}
-		else
-		{
-			String=NULL;
-		}
-	}
-
 	tTJSVariant(const tjs_uint8* ref, tjs_uint len) // from octet
 	{
 		vt=tvtOctet;
@@ -888,7 +875,6 @@ public:
         tTJSVariant& operator=(tTJSVariantOctet* ref);  // from tTJSVariantOctet
         tTJSVariant& operator=(const tTJSString& ref);                     // from tTJSString
         tTJSVariant& operator=(const tjs_char* ref);    //  from String
-        tTJSVariant& operator=(const tjs_nchar* ref);                      // from narrow string
         tTJSVariant& operator=(bool ref);
         tTJSVariant& operator=(tjs_int32 ref);
         tTJSVariant& operator=(const tTVInteger ref);            // from Integer64

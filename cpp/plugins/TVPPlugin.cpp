@@ -112,7 +112,7 @@ void TVPLoadPluigins(void)
 		i != list.end();
 		i++)
 	{
-		TVPAddImportantLog(ttstr(TJS_W("(info) Loading ")) + ttstr(i->Name.c_str()));
+		TVPAddImportantLog(ttstr(TJS_N("(info) Loading ")) + ttstr(i->Name.c_str()));
 		TVPLoadPlugin((i->Path + "/" + i->Name).c_str());
 	}
 }
@@ -220,7 +220,7 @@ void TVPDoTryBlock(
 	{
 		if(finallyblock) finallyblock(data);
 		tTVPExceptionDesc desc;
-		desc.type = TJS_W("eTJS");
+		desc.type = TJS_N("eTJS");
 		desc.message = e.GetMessage();
 		if(catchblock(data, desc)) throw;
 		return;
@@ -229,7 +229,7 @@ void TVPDoTryBlock(
 	{
 		if(finallyblock) finallyblock(data);
 		tTVPExceptionDesc desc;
-		desc.type = TJS_W("unknown");
+		desc.type = TJS_N("unknown");
 		if(catchblock(data, desc)) throw;
 		return;
 	}
@@ -243,9 +243,9 @@ void TVPDoTryBlock(
 void TVPLoadInternalPlugins() {
 	// 如果插件不冲突，实际上可以加载全部
 	ncbAutoRegister::AllRegist();
-	ncbAutoRegister::LoadModule(TJS_W("xp3filter.dll"));
-    ncbAutoRegister::LoadModule(TJS_W("varfile.dll"));
-    ncbAutoRegister::LoadModule(TJS_W("shrinkCopy.dll"));
+	ncbAutoRegister::LoadModule(TJS_N("xp3filter.dll"));
+    ncbAutoRegister::LoadModule(TJS_N("varfile.dll"));
+    ncbAutoRegister::LoadModule(TJS_N("shrinkCopy.dll"));
 }
 
 [[maybe_unused]] void TVPUnloadInternalPlugins() {

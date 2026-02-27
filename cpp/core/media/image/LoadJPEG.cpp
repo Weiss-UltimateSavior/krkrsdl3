@@ -11,10 +11,10 @@
 bool TVPAcceptSaveAsJPG(void* formatdata, const ttstr & type, class iTJSDispatch2** dic )
 {
 	bool result = false;
-	if( type.StartsWith(TJS_W("jpg")) ) result = true;
-	else if( type == TJS_W(".jpg") ) result = true;
-	else if( type == TJS_W(".jpeg") ) result = true;
-	else if( type == TJS_W(".jif") ) result = true;
+	if( type.StartsWith(TJS_N("jpg")) ) result = true;
+	else if( type == TJS_N(".jpg") ) result = true;
+	else if( type == TJS_N(".jpeg") ) result = true;
+	else if( type == TJS_N(".jif") ) result = true;
 	// quality 1 - 100
 	// subsampling : select 0 : 4:2:0, 1 : 4:2:2, 2 : 4:4:4
 	// dct : select 0 : islow, 1 : ifast, 2 : float
@@ -22,12 +22,12 @@ bool TVPAcceptSaveAsJPG(void* formatdata, const ttstr & type, class iTJSDispatch
 	if( result && dic ) {
 		tTJSVariant result;
 		TVPExecuteExpression(
-			TJS_W("(const)%[")
-			TJS_W("\"quality\"=>(const)%[\"type\"=>\"range\",\"min\"=>1,\"max\"=>100,\"desc\"=>\"100 is high quality, 1 is low quality\",\"default\"=>90],")
-			TJS_W("\"subsampling\"=>(const)%[\"type\"=>\"select\",\"items\"=>(const)[\"4:2:0\",\"4:2:2\",\"4:4:4\"],\"desc\"=>\"subsampling\",\"default\"=>0],")
-			TJS_W("\"dct\"=>(const)%[\"type\"=>\"select\",\"items\"=>(const)[\"islow\",\"ifast\",\"float\"],\"desc\"=>\"DCT method\",\"default\"=>0],")
-			TJS_W("\"progressive\"=>(const)%[\"type\"=>\"boolean\",\"desc\"=>\"100 is high quality, 1 is low quality\",\"default\"=>true]")
-			TJS_W("]"),
+			TJS_N("(const)%[")
+			TJS_N("\"quality\"=>(const)%[\"type\"=>\"range\",\"min\"=>1,\"max\"=>100,\"desc\"=>\"100 is high quality, 1 is low quality\",\"default\"=>90],")
+			TJS_N("\"subsampling\"=>(const)%[\"type\"=>\"select\",\"items\"=>(const)[\"4:2:0\",\"4:2:2\",\"4:4:4\"],\"desc\"=>\"subsampling\",\"default\"=>0],")
+			TJS_N("\"dct\"=>(const)%[\"type\"=>\"select\",\"items\"=>(const)[\"islow\",\"ifast\",\"float\"],\"desc\"=>\"DCT method\",\"default\"=>0],")
+			TJS_N("\"progressive\"=>(const)%[\"type\"=>\"boolean\",\"desc\"=>\"100 is high quality, 1 is low quality\",\"default\"=>true]")
+			TJS_N("]"),
 			NULL, &result );
 		if( result.Type() == tvtObject ) {
 			*dic = result.AsObject();
@@ -458,13 +458,13 @@ struct tTVPJPGOption
 void TVPSaveAsJPG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap* image, const ttstr & mode, iTJSDispatch2* meta )
 {
 	tTVPJPGOption opt = { 90, JDCT_ISLOW, 0, true };
-	if( mode.StartsWith(TJS_W("jpg")) && mode.length() > 3 ) {
+	if( mode.StartsWith(TJS_N("jpg")) && mode.length() > 3 ) {
 		opt.quality = 0;
 		for( tjs_int len = 3; len < mode.length(); len++ ) {
 			tjs_char c = mode[len];
-			if( c >= TJS_W('0') && c <= TJS_W('9') ) {
+			if( c >= TJS_N('0') && c <= TJS_N('9') ) {
 				opt.quality *= 10;
-				opt.quality += c-TJS_W('0');
+				opt.quality += c-TJS_N('0');
 			}
 		}
 		if( opt.quality <= 0 ) opt.quality = 10;
@@ -487,16 +487,16 @@ void TVPSaveAsJPG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
 				}
 				// push items
 				ttstr value = *param[0];
-				if( value == TJS_W("quality") ) {
+				if( value == TJS_N("quality") ) {
 					tjs_int64 v = param[2]->AsInteger();
 					v = v < 1 ? 1 : v > 100 ? 100 : v;
 					opt_->quality = (tjs_uint)v;
-				} else if( value == TJS_W("subsampling") ) {
+				} else if( value == TJS_N("subsampling") ) {
 					// 0 : 4:2:0, 1 : 4:2:2, 2 : 4:4:4
 					tjs_int64 v = param[2]->AsInteger();
 					v = v < 0 ? 0 : v > 2 ? 2 : v;
 					opt_->subsampling = (int)v;
-				} else if( value == TJS_W("dct") ) {
+				} else if( value == TJS_N("dct") ) {
 					tjs_int64 v = param[2]->AsInteger();
 					v = v < 0 ? 0 : v > 2 ? 2 : v;
 					switch( v ) {
@@ -504,7 +504,7 @@ void TVPSaveAsJPG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
 					case 1: opt_->dct_method = JDCT_IFAST; break;
 					case 2: opt_->dct_method = JDCT_FLOAT; break;
 					}
-				} else if( value == TJS_W("progressive") ) {
+				} else if( value == TJS_N("progressive") ) {
 					tjs_int64 v = param[2]->AsInteger();
 					if( v ) {
 						opt_->progressive = true;
@@ -626,9 +626,9 @@ void TVPLoadHeaderJPG(void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** d
 
 	*dic = TJSCreateDictionaryObject();
 	tTJSVariant val((tjs_int64)cinfo.image_width);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("width"), 0, &val, (*dic) );
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("width"), 0, &val, (*dic) );
 	val = tTJSVariant((tjs_int64)cinfo.image_height);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("height"), 0, &val, (*dic) );
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("height"), 0, &val, (*dic) );
 
 	jpeg_destroy_decompress(&cinfo);
 }

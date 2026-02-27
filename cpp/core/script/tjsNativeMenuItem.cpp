@@ -267,7 +267,7 @@ tjs_int tTJSNI_MenuItem::TrackPopup(tjs_uint32 flags, tjs_int x, tjs_int y) cons
 tTVPUniqueTagForInputEvent tTVPOnMenuItemClickInputEvent ::Tag;
 //---------------------------------------------------------------------------
 
-static const tjs_char* TVPSpecifyMenuItem = TJS_W("Please specity MenuItem class object.");
+static const tjs_char* TVPSpecifyMenuItem = TJS_N("Please specity MenuItem class object.");
 
 //---------------------------------------------------------------------------
 // tTJSNI_BaseMenuItem
@@ -406,7 +406,7 @@ iTJSDispatch2* tTJSNI_BaseMenuItem::GetChildrenArrayNoAddRef()
         {
             tTJSVariant val;
             tjs_error er;
-            er = classobj->PropGet(0, TJS_W("clear"), NULL, &val, classobj);
+            er = classobj->PropGet(0, TJS_N("clear"), NULL, &val, classobj);
             // retrieve clear method
             if (TJS_FAILED(er))
                 TVPThrowInternalError;
@@ -471,7 +471,7 @@ void tTJSNI_BaseMenuItem::OnClick(void)
         return;
 
     // fire event
-    static ttstr eventname(TJS_W("onClick"));
+    static ttstr eventname(TJS_N("onClick"));
     TVPPostEvent(Owner, Owner, eventname, 0, TVP_EPT_IMMEDIATE, 0, NULL);
     TVPDoSaveSystemVariables();
 }
@@ -503,7 +503,7 @@ iTJSDispatch2* TVPCreateMenuItemObject(iTJSDispatch2* window)
     tTJSVariant param(window);
     tTJSVariant* pparam[2] = {&param, &param};
     if (TJS_FAILED(menuitemclass.Obj->CreateNew(0, NULL, NULL, &out, 2, pparam, menuitemclass.Obj)))
-        TVPThrowExceptionMessage(TVPInternalError, TJS_W("TVPCreateMenuItemObject"));
+        TVPThrowExceptionMessage(TVPInternalError, TJS_N("TVPCreateMenuItemObject"));
 
     return out;
 }
@@ -560,7 +560,7 @@ static void UpdateMenuList() {
 class WindowMenuProperty : public tTJSDispatch {
 	tjs_error PropGet(tjs_uint32 flag, const tjs_char* membername, tjs_uint32* hint, tTJSVariant* result, iTJSDispatch2* objthis) {
 		tTJSVariant var;
-		if (TJS_FAILED(objthis->PropGet(0, TJS_W("HWND"), NULL, &var, objthis))) {
+		if (TJS_FAILED(objthis->PropGet(0, TJS_N("HWND"), NULL, &var, objthis))) {
 			return TJS_E_INVALIDOBJECT;
 		}
 		tTVInteger hWnd = var.AsInteger();
@@ -599,9 +599,9 @@ static void CreateShortCutKeyCodeTable() {
 	if (textToKeycodeMap == nullptr || keycodeToTextList == nullptr) return;
 
 	// 吉里吉里２互換用ショートカット文字列
-	SetShortCutKeyCode(TJS_W("BkSp"), VK_BACK, false);
-	SetShortCutKeyCode(TJS_W("PgUp"), VK_PRIOR, false);
-	SetShortCutKeyCode(TJS_W("PgDn"), VK_NEXT, false);
+	SetShortCutKeyCode(TJS_N("BkSp"), VK_BACK, false);
+	SetShortCutKeyCode(TJS_N("PgUp"), VK_PRIOR, false);
+	SetShortCutKeyCode(TJS_N("PgDn"), VK_NEXT, false);
 }
 
 //---------------------------------------------------------------------------
@@ -677,9 +677,9 @@ tTJSNativeClass* TVPCreateNativeClass_MenuItem()
 				val = tTJSVariant(gWindowMenuProperty);
 				gWindowMenuProperty->Release();
 				tTJSVariant win;
-				if (TJS_SUCCEEDED(global->PropGet(0, TJS_W("Window"), NULL, &win, global))) {
+				if (TJS_SUCCEEDED(global->PropGet(0, TJS_N("Window"), NULL, &win, global))) {
 					iTJSDispatch2* obj = win.AsObjectNoAddRef();
-					obj->PropSet(TJS_MEMBERENSURE, TJS_W("menu"), NULL, &val, obj);
+					obj->PropSet(TJS_MEMBERENSURE, TJS_N("menu"), NULL, &val, obj);
 					win.Clear();
 				}
 				val.Clear();
@@ -688,7 +688,7 @@ tTJSNativeClass* TVPCreateNativeClass_MenuItem()
 				iTJSDispatch2* tjsclass = TVPCreateNativeClass_MenuItem();
 				val = tTJSVariant(tjsclass);
 				tjsclass->Release();
-				global->PropSet(TJS_MEMBERENSURE, TJS_W("MenuItem"), NULL, &val, global);
+				global->PropSet(TJS_MEMBERENSURE, TJS_N("MenuItem"), NULL, &val, global);
 				//-----------------------------------------------------------------------
 
 			}
@@ -704,7 +704,7 @@ tTJSNativeClass* TVPCreateNativeClass_MenuItem()
 // tTJSNC_MenuItem
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_MenuItem::ClassID = -1;
-tTJSNC_MenuItem::tTJSNC_MenuItem() : inherited(TJS_W("MenuItem"))
+tTJSNC_MenuItem::tTJSNC_MenuItem() : inherited(TJS_N("MenuItem"))
 {
 	// registration of native members
 

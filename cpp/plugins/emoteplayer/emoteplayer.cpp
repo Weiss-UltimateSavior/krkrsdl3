@@ -2,7 +2,7 @@
 #include "emoteplayerclass.h"
 #include "tjsString.h"
 
-#define NCB_MODULE_NAME TJS_W("emoteplayer.dll")
+#define NCB_MODULE_NAME TJS_N("emoteplayer.dll")
 
 using namespace emoteplayer;
 

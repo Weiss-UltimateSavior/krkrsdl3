@@ -25,11 +25,11 @@ typedef uint32_t tjs_uint32;
 typedef int64_t tjs_int64;
 typedef uint64_t tjs_uint64;
 
-
-typedef char16_t tjs_char;
+typedef char tjs_char;
+typedef char16_t tjs_wchar;
+#define TJS_N(X) X
 #define TJS_W(X) u##X
 
-typedef char tjs_nchar;
 typedef double tjs_real;
 
 typedef int tjs_int;

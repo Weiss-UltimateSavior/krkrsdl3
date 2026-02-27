@@ -299,7 +299,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
-		if(name) *name = TJS_W("wave");
+		if(name) *name = TJS_N("wave");
 		return TJS_S_OK;
 	}
 
@@ -334,25 +334,25 @@ public:
 		tjs_uint32 bgcolor2 = 0;
 		tjs_int wavetype = 0;
 
-		if(TJS_FAILED(options->GetValue(TJS_W("time"), &tmp)))
+		if(TJS_FAILED(options->GetValue(TJS_N("time"), &tmp)))
 			return TJS_E_FAIL; // time 属性が指定されていない
 		if(tmp.Type() == tvtVoid) return TJS_E_FAIL;
 		time = (tjs_int64)tmp;
 		if(time < 2) time = 2; // あまり小さな数値を指定すると問題が起きるので
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("maxh"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("maxh"), &tmp)))
 			if(tmp.Type() != tvtVoid) maxh = (tjs_int)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("maxomega"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("maxomega"), &tmp)))
 			if(tmp.Type() != tvtVoid) maxomega = (double)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("bgcolor1"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("bgcolor1"), &tmp)))
 			if(tmp.Type() != tvtVoid) bgcolor1 = (tjs_int)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("bgcolor2"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("bgcolor2"), &tmp)))
 			if(tmp.Type() != tvtVoid) bgcolor2 = (tjs_int)tmp;
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("wavetype"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("wavetype"), &tmp)))
 			if(tmp.Type() != tvtVoid) wavetype = (tjs_int)tmp;
 
 

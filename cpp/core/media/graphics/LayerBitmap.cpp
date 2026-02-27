@@ -2459,7 +2459,7 @@ void tTVPNativeBaseBitmap::DrawGlyph(iTJSDispatch2* glyph, const tTVPRect& destr
 
 	tjs_int itemcount;
 	tTJSVariant tmp;
-	if (TJS_SUCCEEDED(glyph->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("count"), 0, &tmp, glyph)))
+	if (TJS_SUCCEEDED(glyph->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("count"), 0, &tmp, glyph)))
 		itemcount = tmp;
 	else
 		itemcount = 0;
@@ -2623,7 +2623,7 @@ void tTVPNativeBaseBitmap::DrawTextSingle(const tTVPRect& destrect,
 
 	ApplyFont();
 
-	const tjs_char* p = text.c_str();
+	std::vector<tjs_wchar> pList = decodeUTF8ToTTFe(text.c_str());
 	tTVPDrawTextData dtdata;
 	dtdata.rect = destrect;
 	dtdata.bmppitch = GetPitchBytes();
@@ -2639,7 +2639,7 @@ void tTVPNativeBaseBitmap::DrawTextSingle(const tTVPRect& destrect,
 	font.BlurWidth = shwidth;
 	font.FontHash = FontHash;
 
-	font.Character = *p;
+	font.Character = pList.size() ? pList.at(0) : 0;
 
 	font.Blured = false;
 	tTVPCharacterData* shadow = NULL;
@@ -2805,7 +2805,7 @@ void tTVPNativeBaseBitmap::DrawTextMultiple(const tTVPRect& destrect,
 
 	ApplyFont();
 
-	const tjs_char* p = text.c_str();
+	std::vector<tjs_wchar> pList = decodeUTF8ToTTFe(text.c_str());
 	tTVPDrawTextData dtdata;
 	dtdata.rect = destrect;
 	dtdata.bmppitch = GetPitchBytes();
@@ -2823,10 +2823,11 @@ void tTVPNativeBaseBitmap::DrawTextMultiple(const tTVPRect& destrect,
 
 
 	std::vector<tTVPCharacterDrawData> drawdata;
-	drawdata.reserve(text.GetLen());
+        drawdata.reserve(pList.size());
 
 	// prepare all drawn characters
-	while (*p) // while input string is remaining
+    for (std::vector<tjs_wchar>::iterator p = pList.begin(); p != pList.end();
+         p++) // while input string is remaining
 	{
 		font.Character = *p;
 
@@ -2891,8 +2892,6 @@ void tTVPNativeBaseBitmap::DrawTextMultiple(const tTVPRect& destrect,
 		}
 		if (data) data->Release();
 		if (shadow) shadow->Release();
-
-		p++;
 	}
 
 	// draw shadows first
@@ -2954,8 +2953,9 @@ void tTVPNativeBaseBitmap::GetTextSize(const ttstr& text)
 		if (PrerenderedFont)
 		{
 			tjs_uint width = 0;
-			const tjs_char* buf = text.c_str();
-			while (*buf)
+			std::vector<tjs_wchar> pList = decodeUTF8ToTTFe(text.c_str());
+            for (std::vector<tjs_wchar>::iterator buf = pList.begin();
+                    buf != pList.end(); buf++)
 			{
 				const tTVPPrerenderedCharacterItem* item =
 					PrerenderedFont->Find(*buf);
@@ -2969,7 +2969,6 @@ void tTVPNativeBaseBitmap::GetTextSize(const ttstr& text)
 					GetCurrentRasterizer()->GetTextExtent(*buf, w, h);
 					width += w;
 				}
-				buf++;
 			}
 			TextWidth = width;
 			TextHeight = std::abs(Font.Height);
@@ -2977,14 +2976,13 @@ void tTVPNativeBaseBitmap::GetTextSize(const ttstr& text)
 		else
 		{
 			tjs_uint width = 0;
-			const tjs_char* buf = text.c_str();
-
-			while (*buf)
+			std::vector<tjs_wchar> pList = decodeUTF8ToTTFe(text.c_str());
+			for (std::vector<tjs_wchar>::iterator buf = pList.begin();
+                    buf != pList.end(); buf++)
 			{
 				tjs_int w, h;
 				GetCurrentRasterizer()->GetTextExtent(*buf, w, h);
 				width += w;
-				buf++;
 			}
 			TextWidth = width;
 			TextHeight = std::abs(Font.Height);
@@ -3031,7 +3029,7 @@ double tTVPNativeBaseBitmap::GetEscHeightY(const ttstr& text)
 void tTVPNativeBaseBitmap::GetFontGlyphDrawRect(const ttstr& text, struct tTVPRect& area)
 {
 	ApplyFont();
-	GetCurrentRasterizer()->GetGlyphDrawRect(text, area);
+    GetCurrentRasterizer()->GetGlyphDrawRect(decodeUTF8ToTTFe(text.c_str()), area);
 }
 iTVPTexture2D* tTVPNativeBaseBitmap::GetTextureForRender(bool isBlendTarget, const tTVPRect* rc) {
 	if (isBlendTarget || !rc) Independ();

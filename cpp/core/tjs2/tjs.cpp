@@ -45,7 +45,7 @@ const tjs_int TJSVersionRelease = 28;
 const tjs_int TJSVersionHex =
 	TJSVersionMajor * 0x1000000 + TJSVersionMinor * 0x10000 + TJSVersionRelease;
 
-tjs_char TJSCompiledDate[] = TJS_W("" __DATE__ " " __TIME__);
+tjs_char TJSCompiledDate[] = TJS_N("" __DATE__ " " __TIME__);
 	// first empty literal string is to avoid a compile error with bcc which can not
 	// process directly L __DATE__ as a pre-processer wide literal string.
 //---------------------------------------------------------------------------
@@ -129,13 +129,13 @@ tTJS::tTJS()
 
 		// push version value to pp value
 		PPValues = new tTJSPPMap();
-		PPValues->Values.Add(ttstr(TJS_W("version")), TJSVersionHex);
+		PPValues->Values.Add(ttstr(TJS_N("version")), TJSVersionHex);
 
 		// create the GLOBAL object
 		Global = new tTJSCustomObject(TJS_GLOBAL_HASH_BITS);
 
 		if(TJSObjectHashMapEnabled())
-			TJSObjectHashSetType(Global, TJS_W("the global object"));
+			TJSObjectHashSetType(Global, TJS_N("the global object"));
 
 		// register some default classes to the GLOBAL
 		iTJSDispatch2 *dsp;
@@ -145,19 +145,19 @@ tTJS::tTJS()
 		dsp = new tTJSArrayClass(); //TJSCreateArrayClass();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Array"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_N("Array"), NULL, &val, Global);
 
 		// Dictionary
 		dsp = new tTJSDictionaryClass();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Dictionary"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_N("Dictionary"), NULL, &val, Global);
 
 		// Date
 		dsp = new tTJSNC_Date();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Date"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_N("Date"), NULL, &val, Global);
 
 		// Math
 		{
@@ -166,26 +166,26 @@ tTJS::tTJS()
 			dsp = math = new tTJSNC_Math();
 			val = tTJSVariant(dsp, NULL);
 			dsp->Release();
-			Global->PropSet(TJS_MEMBERENSURE, TJS_W("Math"), NULL, &val, Global);
+			Global->PropSet(TJS_MEMBERENSURE, TJS_N("Math"), NULL, &val, Global);
 
 			// Math.RandomGenerator
 			dsp = new tTJSNC_RandomGenerator();
 			val = tTJSVariant(dsp, NULL);
 			dsp->Release();
-			math->PropSet(TJS_MEMBERENSURE, TJS_W("RandomGenerator"), NULL, &val, math);
+			math->PropSet(TJS_MEMBERENSURE, TJS_N("RandomGenerator"), NULL, &val, math);
 		}
 
 		// Exception
 		dsp = new tTJSNC_Exception();
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("Exception"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_N("Exception"), NULL, &val, Global);
 #ifndef TJS_NO_REGEXP
 		// RegExp
 		dsp = TJSCreateRegExpClass(); // the body is implemented in tjsRegExp.cpp
 		val = tTJSVariant(dsp, NULL);
 		dsp->Release();
-		Global->PropSet(TJS_MEMBERENSURE, TJS_W("RegExp"), NULL, &val, Global);
+		Global->PropSet(TJS_MEMBERENSURE, TJS_N("RegExp"), NULL, &val, Global);
 #endif
 	}
 	catch(...)
@@ -317,7 +317,7 @@ void tTJS::OutputToConsoleWithCentering(const tjs_char *msg, tjs_uint width) con
 	{
 		tjs_char *outbuf = new tjs_char[ns + len +1];
 		tjs_char *p = outbuf;
-		while(ns--) *(p++)= TJS_W(' ');
+		while(ns--) *(p++)= TJS_N(' ');
 		TJS_strcpy(p, msg);
 		try
 		{
@@ -361,23 +361,23 @@ void tTJS::Dump(tjs_uint width) const
 {
 	// dumps all existing script block
 	tjs_char version[100];
-	TJS_snprintf(version, sizeof(version)/sizeof(tjs_char), TJS_W("TJS version %d.%d.%d (%s)"), TJSVersionMajor,
+	TJS_snprintf(version, sizeof(version)/sizeof(tjs_char), TJS_N("TJS version %d.%d.%d (%s)"), TJSVersionMajor,
 		TJSVersionMinor, TJSVersionRelease, TJSCompiledDate);
 
-	OutputToConsoleSeparator(TJS_W("#"), width);
-	OutputToConsoleWithCentering(TJS_W("TJS Context Dump"), width);
-	OutputToConsoleSeparator(TJS_W("#"), width);
+	OutputToConsoleSeparator(TJS_N("#"), width);
+	OutputToConsoleWithCentering(TJS_N("TJS Context Dump"), width);
+	OutputToConsoleSeparator(TJS_N("#"), width);
 	OutputToConsole(version);
-	OutputToConsole(TJS_W(""));
+	OutputToConsole(TJS_N(""));
 
 	if(ScriptBlocks.size())
 	{
 		std::vector<tTJSScriptBlock*>::const_iterator i;
 
 		tjs_char buf[1024];
-		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("Total %d script block(s)"), ScriptBlocks.size());
+		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("Total %d script block(s)"), ScriptBlocks.size());
 		OutputToConsole(buf);
-		OutputToConsole(TJS_W(""));
+		OutputToConsole(TJS_N(""));
 
 		tjs_uint totalcontexts = 0;
 		tjs_uint totalcodesize = 0;
@@ -392,10 +392,10 @@ void tTJS::Dump(tjs_uint width) const
 			if(name)
 				title = (*i)-> GetNameInfo();
 			else
-				title = TJS_W("(no-named script block)");
+				title = TJS_N("(no-named script block)");
 
 			tjs_char ptr[256];
-			TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_W(" 0x%p"), (*i));
+			TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_N(" 0x%p"), (*i));
 
 			title += ptr;
 
@@ -403,63 +403,63 @@ void tTJS::Dump(tjs_uint width) const
 
 			n = (*i)->GetContextCount();
 			totalcontexts += n;
-			TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("\tCount of contexts      : %d"), n);
+			TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("\tCount of contexts      : %d"), n);
 			OutputToConsole(buf);
 
 			n = (*i)->GetTotalVMCodeSize();
 			totalcodesize += n;
-			TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("\tVM code area size      : %d words"), n);
+			TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("\tVM code area size      : %d words"), n);
 			OutputToConsole(buf);
 
 			n = (*i)->GetTotalVMDataSize();
 			totaldatasize += n;
-			TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("\tVM constant data count : %d"), n);
+			TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("\tVM constant data count : %d"), n);
 			OutputToConsole(buf);
 
-			OutputToConsole(TJS_W(""));
+			OutputToConsole(TJS_N(""));
 		}
 
-		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("Total count of contexts      : %d"), totalcontexts);
+		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("Total count of contexts      : %d"), totalcontexts);
 		OutputToConsole(buf);
-		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("Total VM code area size      : %d words"), totalcodesize);
+		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("Total VM code area size      : %d words"), totalcodesize);
 		OutputToConsole(buf);
-		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("Total VM constant data count : %d"), totaldatasize);
+		TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("Total VM constant data count : %d"), totaldatasize);
 		OutputToConsole(buf);
 
-		OutputToConsole(TJS_W(""));
+		OutputToConsole(TJS_N(""));
 
 
 		for(i = ScriptBlocks.begin(); i != ScriptBlocks.end(); i++)
 		{
 
-			OutputToConsoleSeparator(TJS_W("-"), width);
+			OutputToConsoleSeparator(TJS_N("-"), width);
 			const tjs_char * name = (*i)-> GetName();
 
 			ttstr title;
 			if(name)
 				title = (*i)-> GetNameInfo();
 			else
-				title = TJS_W("(no-named script block)");
+				title = TJS_N("(no-named script block)");
 
 			tjs_char ptr[256];
-			TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_W(" 0x%p"), (*i));
+			TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_N(" 0x%p"), (*i));
 
 			title += ptr;
 
 			OutputToConsoleWithCentering(title.c_str(), width);
 
-			OutputToConsoleSeparator(TJS_W("-"), width);
+			OutputToConsoleSeparator(TJS_N("-"), width);
 
 			(*i)->Dump();
 
-			OutputToConsole(TJS_W(""));
-			OutputToConsole(TJS_W(""));
+			OutputToConsole(TJS_N(""));
+			OutputToConsole(TJS_N(""));
 		}
 	}
 	else
 	{
-		OutputToConsole(TJS_W(""));
-		OutputToConsole(TJS_W("There are no script blocks in the system."));
+		OutputToConsole(TJS_N(""));
+		OutputToConsole(TJS_N("There are no script blocks in the system."));
 	}
 }
 //---------------------------------------------------------------------------

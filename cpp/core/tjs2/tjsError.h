@@ -61,10 +61,6 @@ extern ttstr TJSNonamedException;
 	{ \
 		TJS_eTJSError(text); \
 	} \
-	catch(const char *text) \
-	{ \
-		TJS_eTJSError(text); \
-	} \
 	TJS_CONVERT_TO_TJS_EXCEPTION_ADDITIONAL
 //---------------------------------------------------------------------------
 
@@ -284,8 +280,8 @@ void TJSThrowFrom_tjs_error(tjs_error hr, const tjs_char *name = NULL);
 namespace TJS
 {
 #ifdef TJS_DECL_MESSAGE_BODY
-	#define TJS_MSG_DECL(name, msg) tTJSMessageHolder name(TJS_W(#name), msg);
-	#define TJS_MSG_DECL_NULL(name) tTJSMessageHolder name(TJS_W(#name), NULL);
+	#define TJS_MSG_DECL(name, msg) tTJSMessageHolder name(TJS_N(#name), msg);
+	#define TJS_MSG_DECL_NULL(name) tTJSMessageHolder name(TJS_N(#name), NULL);
 #else
 	#define TJS_MSG_DECL(name, msg) extern tTJSMessageHolder name;
 	#define TJS_MSG_DECL_NULL(name) extern tTJSMessageHolder name;

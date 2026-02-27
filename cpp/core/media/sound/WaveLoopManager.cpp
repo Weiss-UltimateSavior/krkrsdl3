@@ -17,7 +17,6 @@
 
 #include "tjsTypes.h"
 #include "WaveLoopManager.h"
-#include "CharacterSet.h"
 
 #include "WaveIntf.h"
 #include "SDL3/SDL.h"
@@ -976,30 +975,8 @@ bool tTVPWaveLoopManager::GetCondition(char *s, tTVPWaveLoopLinkCondition &v)
 //---------------------------------------------------------------------------
 bool tTVPWaveLoopManager::GetString(char *s, tTVPLabelStringType &v)
 {
-	// convert utf-8 string s to v
-
-	// compute output (unicode) size
-	tjs_int size = TVPUtf8ToWideCharString(s, NULL);
-	if(size == -1) return false; // not able to convert the string
-
-	// allocate output buffer
-	tjs_char *us = new tjs_char[size + 1];
-	try
-	{
-		TVPUtf8ToWideCharString(s, us);
-		us[size] = TJS_W('\0');
-
-		// convert us (an array of wchar_t) to ttstr
-		v = ttstr(us);
-
-	}
-	catch(...)
-	{
-		delete [] us;
-		throw;
-	}
-	delete [] us;
-	return true;
+	v = ttstr(s);
+    return true;
 }
 //---------------------------------------------------------------------------
 bool tTVPWaveLoopManager::GetEntityToken(char * & p, char **name, char **value)

@@ -25,8 +25,8 @@ ttstr TVPLocalExtractFilePath(const ttstr& name)
     tjs_int i = name.GetLen() - 1;
     for (; i >= 0; i--)
     {
-        if (p[i] == TJS_W(':') || p[i] == TJS_W('/') ||
-            p[i] == TJS_W('\\'))
+        if (p[i] == TJS_N(':') || p[i] == TJS_N('/') ||
+            p[i] == TJS_N('\\'))
             break;
     }
     return ttstr(p, i + 1);
@@ -61,7 +61,7 @@ tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
             ttstr dirpath = TVPLocalExtractFilePath(localname);
             const tjs_char* p = dirpath.c_str();
             tjs_int i = dirpath.GetLen();
-            if (p[i - 1] == TJS_W('/') || p[i - 1] == TJS_W('\\')) i--;
+            if (p[i - 1] == TJS_N('/') || p[i - 1] == TJS_N('\\')) i--;
             dirpath = dirpath.SubString(0, i);
             if (!TVPCheckExistentLocalFolder(dirpath) && !TVPCreateFolders(dirpath)) {
                 TVPThrowExceptionMessage(TVPCannotOpenStorage, origname);
@@ -87,12 +87,11 @@ tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
             break;
     }
 
-    tTJSNarrowStringHolder holder(localname.c_str());
-    Handle = SDL_IOFromFile(holder, mode);
+    Handle = SDL_IOFromFile(localname.c_str(), mode);
 
     if (!Handle) {
         if (access == TJS_BS_APPEND || access == TJS_BS_UPDATE) {
-            Handle = SDL_IOFromFile(holder, "rb");
+            Handle = SDL_IOFromFile(localname.c_str(), "rb");
             if (Handle) {
                 Sint64 size = SDL_GetIOSize((SDL_IOStream*)Handle);
                 if (size > 0 && size < 4 * 1024 * 1024) {
@@ -120,7 +119,7 @@ tTVPLocalFileStream::~tTVPLocalFileStream()
             ttstr filename(FileName);
             FileName.~tTJSString();
             free(this);
-            TVPThrowExceptionMessage(TJS_W("File Writing Error: %1"), filename);
+            TVPThrowExceptionMessage(TJS_N("File Writing Error: %1"), filename);
         }
         delete MemBuffer;
     }
@@ -308,7 +307,7 @@ bool TVPInputQuery(const std::string& title, const std::string& prompt, std::str
     {
         // 尝试系统字体
 #ifdef _WIN32
-        font = TTF_OpenFont("C:/Windows/Fonts/arial.ttf", 16);
+        font = TTF_OpenFont("C:/Windows/Fonts/simhei.ttf", 16);
 #elif __APPLE__
         font = TTF_OpenFont("/System/Library/Fonts/Helvetica.ttc", 16);
 #else
@@ -681,8 +680,8 @@ int TVPShowSimpleInputBox(ttstr& text,
                           const ttstr& prompt,
                           const std::vector<ttstr>&)
 {
-    std::string inputStr;
-    bool res = TVPInputQuery(caption.AsNarrowStdString(), prompt.AsNarrowStdString(), inputStr);
+    std::string inputStr = text.AsStdString();
+    bool res = TVPInputQuery(caption.AsStdString(), prompt.AsStdString(), inputStr);
     text = inputStr;
     if (res)
         return 0;
@@ -753,12 +752,210 @@ int TVPShowSimpleMessageBox(const char* pszText, const char* pszTitle, unsigned 
 
 ttstr TVPGetPlatformName()
 {
-    return "Window10";
+    const char* platform = SDL_GetPlatform();
+    return ttstr(platform);
 }
 
+#ifdef _KRKRSDL3_WINDOWS
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+#ifdef _KRKRSDL3_LINUX
+#include <sys/utsname.h>
+#include <fstream>
+#endif
+#ifdef _KRKRSDL3_ANDROID
+#include <sys/system_properties.h>
+#endif
 ttstr TVPGetOSName()
 {
-	return TVPGetPlatformName();
+#ifdef _KRKRSDL3_WINDOWS
+    std::string result = "Windows";
+    HMODULE hMod = GetModuleHandleW(L"ntdll.dll");
+    if (hMod)
+    {
+        typedef LONG(NTAPI * RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
+        RtlGetVersionPtr RtlGetVersion = (RtlGetVersionPtr)GetProcAddress(hMod, "RtlGetVersion");
+        if (RtlGetVersion)
+        {
+            RTL_OSVERSIONINFOW osvi = {sizeof(osvi)};
+            if (RtlGetVersion(&osvi) == 0)
+            {
+                if (osvi.dwMajorVersion == 10 && osvi.dwBuildNumber >= 22000)
+                {
+                    return "Windows 11";
+                }
+                switch (osvi.dwMajorVersion)
+                {
+                    case 10:
+                        return "Windows 10";
+                    case 6:
+                        switch (osvi.dwMinorVersion)
+                        {
+                            case 3:
+                                return "Windows 8.1";
+                            case 2:
+                                return "Windows 8";
+                            case 1:
+                                return "Windows 7";
+                            case 0:
+                                return "Windows Vista";
+                        }
+                        break;
+                    case 5:
+                        switch (osvi.dwMinorVersion)
+                        {
+                            case 2:
+                                return "Windows XP x64";
+                            case 1:
+                                return "Windows XP";
+                            case 0:
+                                return "Windows 2000";
+                        }
+                        break;
+                }
+                return result + " " + std::to_string(osvi.dwMajorVersion) + "." +
+                       std::to_string(osvi.dwMinorVersion);
+            }
+        }
+    }
+
+    OSVERSIONINFOW osvi = {sizeof(osvi)};
+#pragma warning(push)
+#pragma warning(disable : 4996)
+    if (GetVersionExW(&osvi))
+    {
+#pragma warning(pop)
+        if (osvi.dwMajorVersion == 10 && osvi.dwBuildNumber >= 22000)
+            return "Windows 11";
+        return result + " " + std::to_string(osvi.dwMajorVersion) + "." +
+               std::to_string(osvi.dwMinorVersion);
+    }
+    return "Windows";
+#elif defined(_KRKRSDL3_ANDROID)
+    // Android版本检测
+    char sdk_ver[PROP_VALUE_MAX];
+    char release[PROP_VALUE_MAX];
+
+    __system_property_get("ro.build.version.sdk", sdk_ver);
+    __system_property_get("ro.build.version.release", release);
+
+    std::string version = release;
+
+    // 添加Android版本名称
+    int sdk = atoi(sdk_ver);
+    switch (sdk)
+    {
+        case 34:
+            version += " (14)";
+            break;
+        case 33:
+            version += " (13)";
+            break;
+        case 32:
+            version += " (12L)";
+            break;
+        case 31:
+            version += " (12)";
+            break;
+        case 30:
+            version += " (11)";
+            break;
+        case 29:
+            version += " (10)";
+            break;
+        case 28:
+            version += " (9 Pie)";
+            break;
+        case 27:
+            version += " (8.1 Oreo)";
+            break;
+        case 26:
+            version += " (8.0 Oreo)";
+            break;
+        case 25:
+            version += " (7.1 Nougat)";
+            break;
+        case 24:
+            version += " (7.0 Nougat)";
+            break;
+        case 23:
+            version += " (6.0 Marshmallow)";
+            break;
+        case 22:
+            version += " (5.1 Lollipop)";
+            break;
+        case 21:
+            version += " (5.0 Lollipop)";
+            break;
+    }
+
+    return "Android " + version;
+
+#elif defined(_KRKRSDL3_LINUX)
+    // Linux发行版检测
+    std::string id;
+    std::string version_id;
+    std::string pretty_name;
+    std::ifstream file("/etc/os-release");
+    std::string line;
+    while (std::getline(file, line))
+    {
+        if (line.find("ID=") == 0)
+        {
+            id = line.substr(3);
+            if (!id.empty() && id.front() == '"')
+            {
+                id = id.substr(1, id.size() - 2);
+            }
+        }
+        else if (line.find("VERSION_ID=") == 0)
+        {
+            version_id = line.substr(11);
+            if (!version_id.empty() && version_id.front() == '"')
+            {
+                version_id = version_id.substr(1, version_id.size() - 2);
+            }
+        }
+        else if (line.find("PRETTY_NAME=") == 0)
+        {
+            pretty_name = line.substr(12);
+            if (!pretty_name.empty() && pretty_name.front() == '"')
+            {
+                pretty_name = pretty_name.substr(1, pretty_name.size() - 2);
+            }
+        }
+    }
+    if (!pretty_name.empty())
+    {
+        return pretty_name;
+    }
+    if (!id.empty())
+    {
+        if (id == "ubuntu")
+            return "Ubuntu " + version_id;
+        if (id == "debian")
+            return "Debian " + version_id;
+        if (id == "fedora")
+            return "Fedora " + version_id;
+        if (id == "centos")
+            return "CentOS " + version_id;
+        if (id == "rhel")
+            return "Red Hat " + version_id;
+        if (id == "arch")
+            return "Arch Linux";
+        return id + " " + version_id;
+    }
+    struct utsname buffer;
+    if (uname(&buffer) == 0)
+    {
+        return std::string(buffer.sysname) + " " + buffer.release;
+    }
+
+    return "Linux";
+#else
+    return "Unknown"
+#endif
 }
 
 void TVPShowPopMenu(tTJSNI_MenuItem* menu) {
@@ -773,4 +970,23 @@ void TVPCheckAndSendDumps(const std::string& dumpdir, const std::string& package
 void TVPOpenPatchLibUrl() {
     std::string url = "https://zeas2.github.io/Kirikiroid2_patch/patch";
     SDL_OpenURL(url.c_str());
+}
+
+std::string TVPGetDefaultFileDir()
+{
+    char* path = SDL_GetCurrentDirectory();
+    if (!path)
+    {
+        return std::string();
+    }
+    std::string result(path);
+    SDL_free(path);
+    return result;
+}
+
+std::vector<std::string> TVPGetAppStoragePath()
+{
+    std::vector<std::string> ret;
+    ret.emplace_back(TVPGetDefaultFileDir());
+    return ret;
 }

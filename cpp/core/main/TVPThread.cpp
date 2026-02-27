@@ -149,7 +149,7 @@ static tjs_int GetProcesserNum(void)
     if (!processor_num) {
         processor_num = std::thread::hardware_concurrency();
         tjs_char tmp[34];
-        TVPAddLog(ttstr(TJS_W("Detected CPU core(s): ")) + TJS_tTVInt_to_str(processor_num, tmp));
+        TVPAddLog(ttstr(TJS_N("Detected CPU core(s): ")) + TJS_tTVInt_to_str(processor_num, tmp));
     }
     return processor_num;
 }

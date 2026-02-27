@@ -1431,7 +1431,7 @@ void jpeg_idct_data(int16_t* block, uint8_t* qtbl, uint8_t* retBlock, uint32_t r
     }
 }
 
-#define NCB_MODULE_NAME TJS_W("AlphaMovie.dll")
+#define NCB_MODULE_NAME TJS_N("AlphaMovie.dll")
 
 struct AlphaMovieHeader
 {

@@ -92,7 +92,6 @@ struct tTVP_stat {
     uint64_t tvp_ctime;
 };
 
-bool TVP_stat(const tjs_char* name, tTVP_stat& s);
 bool TVP_stat(const char* name, tTVP_stat& s);
 bool TVP_utime(const char* name, time_t modtime);
 

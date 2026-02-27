@@ -1,7 +1,7 @@
 // generated from gentext.pl Messages.xlsx
 #ifndef __MSG_INTF_INC_H__
 #define __MSG_INTF_INC_H__
-#define TVP_MSG_DEFINE(name,msg) TVP_MSG_DECL_CONST(name,TJS_W(msg))
+#define TVP_MSG_DEFINE(name,msg) TVP_MSG_DECL_CONST(name,TJS_N(msg))
 TVP_MSG_DEFINE(TVPVersionInformation, "Kirikiri 2 Executable core /%1 (Compiled on %DATE% %TIME%) TJS2/%2 Copyright (C) 1997-2013 W.Dee and contributors All rights reserved.")
 TVP_MSG_DEFINE(TVPVersionInformation2, "The details of version information can be perused if -about is attached and started. ")
 TVP_MSG_DEFINE(TVPDownloadPageURL, "")
@@ -97,7 +97,7 @@ TVP_MSG_DEFINE(TVPFaildClipboardCopy, "copying to clipboard failed.")
 TVP_MSG_DEFINE(TVPInvalidUTF16ToUTF8, "Invalid UTF-16 to UTF-8")
 TVP_MSG_DEFINE(TVPInfoLoadingStartupScript, "(info) Loading startup script : ")
 TVP_MSG_DEFINE(TVPInfoStartupScriptEnded, "(info) Startup script ended.")
-TVP_MSG_DEFINE(TVPTjsCharMustBeTwoOrFour, "sizeof(tjs_char) must be 2 or 4.")
+TVP_MSG_DEFINE(TVPTjsCharMustBeTwoOrFour, "sizeof(tjs_char) must be 2.")
 TVP_MSG_DEFINE(TVPMediaNameHadAlreadyBeenRegistered, "Media name \"%1\" had already been registered")
 TVP_MSG_DEFINE(TVPMediaNameIsNotRegistered, "Media name \"%1\" is not registered")
 TVP_MSG_DEFINE(TVPInfoRebuildingAutoPath, "(info) Rebuilding Auto Path Table ...")

@@ -127,7 +127,7 @@ bool tTJSNC_ImageFunction::ClipDestPointAndSrcRect(tjs_int& dx, tjs_int& dy, tTV
 
 tjs_uint32 tTJSNC_ImageFunction::ClassID = -1;
 
-tTJSNC_ImageFunction::tTJSNC_ImageFunction() : inherited(TJS_W("ImageFunction")) {
+tTJSNC_ImageFunction::tTJSNC_ImageFunction() : inherited(TJS_N("ImageFunction")) {
 
 	// registration of native members
 

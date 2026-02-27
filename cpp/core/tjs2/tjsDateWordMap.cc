@@ -16,342 +16,342 @@
 
 switch(InputPointer[0])
 {
-case TJS_W('a'):
-case TJS_W('A'):
+case TJS_N('a'):
+case TJS_N('A'):
  switch(InputPointer[1])
  {
- case TJS_W('c'):
- case TJS_W('C'):
+ case TJS_N('c'):
+ case TJS_N('C'):
   switch(InputPointer[2])
   {
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('s'):
-   case TJS_W('S'):
+   case TJS_N('s'):
+   case TJS_N('S'):
     switch(InputPointer[4])
     {
-    case TJS_W('t'):
-    case TJS_W('T'):
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 1030; return DP_TZ; }
+    case TJS_N('t'):
+    case TJS_N('T'):
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 1030; return DP_TZ; }
      break;
     }
     break;
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 930; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 930; return DP_TZ; }
     break;
    }
    break;
   }
   break;
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -300; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -300; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('s'):
-   case TJS_W('S'):
+   case TJS_N('s'):
+   case TJS_N('S'):
     switch(InputPointer[4])
     {
-    case TJS_W('t'):
-    case TJS_W('T'):
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 1100; return DP_TZ; }
+    case TJS_N('t'):
+    case TJS_N('T'):
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 1100; return DP_TZ; }
      break;
     }
     break;
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1000; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1000; return DP_TZ; }
     break;
    }
    break;
   }
   break;
- case TJS_W('h'):
- case TJS_W('H'):
+ case TJS_N('h'):
+ case TJS_N('H'):
   switch(InputPointer[2])
   {
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = -1000; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = -1000; return DP_TZ; }
     break;
    }
    break;
   }
   break;
- case TJS_W('m'):
- case TJS_W('M'):
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 0; return DP_AM; }
+ case TJS_N('m'):
+ case TJS_N('M'):
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 0; return DP_AM; }
   break;
- case TJS_W('p'):
- case TJS_W('P'):
+ case TJS_N('p'):
+ case TJS_N('P'):
   switch(InputPointer[2])
   {
-  case TJS_W('r'):
-  case TJS_W('R'):
+  case TJS_N('r'):
+  case TJS_N('R'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 3; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 3; return DP_MONTH; }
     break;
-   case TJS_W('i'):
-   case TJS_W('I'):
+   case TJS_N('i'):
+   case TJS_N('I'):
     switch(InputPointer[4])
     {
-    case TJS_W('l'):
-    case TJS_W('L'):
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 3; return DP_MONTH; }
+    case TJS_N('l'):
+    case TJS_N('L'):
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 3; return DP_MONTH; }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 3; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 3; return DP_MONTH; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -400; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -400; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('u'):
- case TJS_W('U'):
+ case TJS_N('u'):
+ case TJS_N('U'):
   switch(InputPointer[2])
   {
-  case TJS_W('g'):
-  case TJS_W('G'):
+  case TJS_N('g'):
+  case TJS_N('G'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 7; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 7; return DP_MONTH; }
     break;
-   case TJS_W('u'):
-   case TJS_W('U'):
+   case TJS_N('u'):
+   case TJS_N('U'):
     switch(InputPointer[4])
     {
-    case TJS_W('s'):
-    case TJS_W('S'):
+    case TJS_N('s'):
+    case TJS_N('S'):
      switch(InputPointer[5])
      {
-     case TJS_W('t'):
-     case TJS_W('T'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 7; return DP_MONTH; }
+     case TJS_N('t'):
+     case TJS_N('T'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 7; return DP_MONTH; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 7; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 7; return DP_MONTH; }
    }
    break;
   }
   break;
- case TJS_W('w'):
- case TJS_W('W'):
+ case TJS_N('w'):
+ case TJS_N('W'):
   switch(InputPointer[2])
   {
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('s'):
-   case TJS_W('S'):
+   case TJS_N('s'):
+   case TJS_N('S'):
     switch(InputPointer[4])
     {
-    case TJS_W('t'):
-    case TJS_W('T'):
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 900; return DP_TZ; }
+    case TJS_N('t'):
+    case TJS_N('T'):
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 900; return DP_TZ; }
      break;
     }
     break;
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 800; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 800; return DP_TZ; }
     break;
    }
    break;
   }
   break;
  default:
-  if(!TJS_iswalpha(InputPointer[1])) { InputPointer += 1; yylex->val = -100; return DP_TZ; }
+  if(!TJS_iswalpha(&InputPointer[1])) { InputPointer += 1; yylex->val = -100; return DP_TZ; }
  }
  break;
-case TJS_W('b'):
-case TJS_W('B'):
+case TJS_N('b'):
+case TJS_N('B'):
  switch(InputPointer[1])
  {
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('t'):
- case TJS_W('T'):
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 300; return DP_TZ; }
+ case TJS_N('t'):
+ case TJS_N('T'):
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 300; return DP_TZ; }
   break;
  }
  break;
-case TJS_W('c'):
-case TJS_W('C'):
+case TJS_N('c'):
+case TJS_N('C'):
  switch(InputPointer[1])
  {
- case TJS_W('a'):
- case TJS_W('A'):
+ case TJS_N('a'):
+ case TJS_N('A'):
   switch(InputPointer[2])
   {
-  case TJS_W('d'):
-  case TJS_W('D'):
+  case TJS_N('d'):
+  case TJS_N('D'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1030; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1030; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 930; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 930; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -1000; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -1000; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('c'):
- case TJS_W('C'):
+ case TJS_N('c'):
+ case TJS_N('C'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 800; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 800; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -500; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -500; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
+  case TJS_N('t'):
+  case TJS_N('T'):
    switch(InputPointer[3])
    {
-   case TJS_W('d'):
-   case TJS_W('D'):
+   case TJS_N('d'):
+   case TJS_N('D'):
     switch(InputPointer[4])
     {
-    case TJS_W('s'):
-    case TJS_W('S'):
+    case TJS_N('s'):
+    case TJS_N('S'):
      switch(InputPointer[5])
      {
-     case TJS_W('t'):
-     case TJS_W('T'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 200; return DP_TZ; }
+     case TJS_N('t'):
+     case TJS_N('T'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 200; return DP_TZ; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -600; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -600; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('d'):
-case TJS_W('D'):
+case TJS_N('d'):
+case TJS_N('D'):
  switch(InputPointer[1])
  {
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('c'):
-  case TJS_W('C'):
+  case TJS_N('c'):
+  case TJS_N('C'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 11; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 11; return DP_MONTH; }
     break;
-   case TJS_W('e'):
-   case TJS_W('E'):
+   case TJS_N('e'):
+   case TJS_N('E'):
     switch(InputPointer[4])
     {
-    case TJS_W('m'):
-    case TJS_W('M'):
+    case TJS_N('m'):
+    case TJS_N('M'):
      switch(InputPointer[5])
      {
-     case TJS_W('b'):
-     case TJS_W('B'):
+     case TJS_N('b'):
+     case TJS_N('B'):
       switch(InputPointer[6])
       {
-      case TJS_W('e'):
-      case TJS_W('E'):
+      case TJS_N('e'):
+      case TJS_N('E'):
        switch(InputPointer[7])
        {
-       case TJS_W('r'):
-       case TJS_W('R'):
-         if(!TJS_iswalpha(InputPointer[8])) { InputPointer += 8; yylex->val = 11; return DP_MONTH; }
+       case TJS_N('r'):
+       case TJS_N('R'):
+         if(!TJS_iswalpha(&InputPointer[8])) { InputPointer += 8; yylex->val = 11; return DP_MONTH; }
         break;
        }
        break;
@@ -362,129 +362,129 @@ case TJS_W('D'):
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 11; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 11; return DP_MONTH; }
    }
    break;
   }
   break;
- case TJS_W('n'):
- case TJS_W('N'):
+ case TJS_N('n'):
+ case TJS_N('N'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('e'):
-case TJS_W('E'):
+case TJS_N('e'):
+case TJS_N('E'):
  switch(InputPointer[1])
  {
- case TJS_W('a'):
- case TJS_W('A'):
+ case TJS_N('a'):
+ case TJS_N('A'):
   switch(InputPointer[2])
   {
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1000; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1000; return DP_TZ; }
     break;
    }
    break;
   }
   break;
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -400; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -400; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
+  case TJS_N('t'):
+  case TJS_N('T'):
    switch(InputPointer[3])
    {
-   case TJS_W('d'):
-   case TJS_W('D'):
+   case TJS_N('d'):
+   case TJS_N('D'):
     switch(InputPointer[4])
     {
-    case TJS_W('s'):
-    case TJS_W('S'):
+    case TJS_N('s'):
+    case TJS_N('S'):
      switch(InputPointer[5])
      {
-     case TJS_W('t'):
-     case TJS_W('T'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 300; return DP_TZ; }
+     case TJS_N('t'):
+     case TJS_N('T'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 300; return DP_TZ; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -500; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -500; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('f'):
-case TJS_W('F'):
+case TJS_N('f'):
+case TJS_N('F'):
  switch(InputPointer[1])
  {
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('b'):
-  case TJS_W('B'):
+  case TJS_N('b'):
+  case TJS_N('B'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1; return DP_MONTH; }
     break;
-   case TJS_W('r'):
-   case TJS_W('R'):
+   case TJS_N('r'):
+   case TJS_N('R'):
     switch(InputPointer[4])
     {
-    case TJS_W('u'):
-    case TJS_W('U'):
+    case TJS_N('u'):
+    case TJS_N('U'):
      switch(InputPointer[5])
      {
-     case TJS_W('a'):
-     case TJS_W('A'):
+     case TJS_N('a'):
+     case TJS_N('A'):
       switch(InputPointer[6])
       {
-      case TJS_W('r'):
-      case TJS_W('R'):
+      case TJS_N('r'):
+      case TJS_N('R'):
        switch(InputPointer[7])
        {
-       case TJS_W('y'):
-       case TJS_W('Y'):
-         if(!TJS_iswalpha(InputPointer[8])) { InputPointer += 8; yylex->val = 1; return DP_MONTH; }
+       case TJS_N('y'):
+       case TJS_N('Y'):
+         if(!TJS_iswalpha(&InputPointer[8])) { InputPointer += 8; yylex->val = 1; return DP_MONTH; }
         break;
        }
        break;
@@ -495,178 +495,178 @@ case TJS_W('F'):
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 1; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 1; return DP_MONTH; }
    }
    break;
   }
   break;
- case TJS_W('r'):
- case TJS_W('R'):
+ case TJS_N('r'):
+ case TJS_N('R'):
   switch(InputPointer[2])
   {
-  case TJS_W('i'):
-  case TJS_W('I'):
+  case TJS_N('i'):
+  case TJS_N('I'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 5; return DP_WDAY; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 5; return DP_WDAY; }
     break;
-   case TJS_W('d'):
-   case TJS_W('D'):
+   case TJS_N('d'):
+   case TJS_N('D'):
     switch(InputPointer[4])
     {
-    case TJS_W('a'):
-    case TJS_W('A'):
+    case TJS_N('a'):
+    case TJS_N('A'):
      switch(InputPointer[5])
      {
-     case TJS_W('y'):
-     case TJS_W('Y'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 5; return DP_WDAY; }
+     case TJS_N('y'):
+     case TJS_N('Y'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 5; return DP_WDAY; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 5; return DP_WDAY; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 5; return DP_WDAY; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('w'):
- case TJS_W('W'):
+ case TJS_N('w'):
+ case TJS_N('W'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
-   break;
-  }
-  break;
- }
- break;
-case TJS_W('g'):
-case TJS_W('G'):
- switch(InputPointer[1])
- {
- case TJS_W('m'):
- case TJS_W('M'):
-  switch(InputPointer[2])
-  {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_TZ; }
-   break;
-  }
-  break;
- case TJS_W('s'):
- case TJS_W('S'):
-  switch(InputPointer[2])
-  {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 1000; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('h'):
-case TJS_W('H'):
+case TJS_N('g'):
+case TJS_N('G'):
  switch(InputPointer[1])
  {
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('m'):
+ case TJS_N('M'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -900; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_TZ; }
+   break;
+  }
+  break;
+ case TJS_N('s'):
+ case TJS_N('S'):
+  switch(InputPointer[2])
+  {
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 1000; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('i'):
-case TJS_W('I'):
+case TJS_N('h'):
+case TJS_N('H'):
  switch(InputPointer[1])
  {
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('l'):
-  case TJS_W('L'):
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -900; return DP_TZ; }
+   break;
+  }
+  break;
+ }
+ break;
+case TJS_N('i'):
+case TJS_N('I'):
+ switch(InputPointer[1])
+ {
+ case TJS_N('d'):
+ case TJS_N('D'):
+  switch(InputPointer[2])
+  {
+  case TJS_N('l'):
+  case TJS_N('L'):
    switch(InputPointer[3])
    {
-   case TJS_W('e'):
-   case TJS_W('E'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1200; return DP_TZ; }
+   case TJS_N('e'):
+   case TJS_N('E'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1200; return DP_TZ; }
     break;
-   case TJS_W('w'):
-   case TJS_W('W'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = -1200; return DP_TZ; }
+   case TJS_N('w'):
+   case TJS_N('W'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = -1200; return DP_TZ; }
     break;
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('t'):
- case TJS_W('T'):
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 330; return DP_TZ; }
+ case TJS_N('t'):
+ case TJS_N('T'):
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 330; return DP_TZ; }
   break;
  }
  break;
-case TJS_W('j'):
-case TJS_W('J'):
+case TJS_N('j'):
+case TJS_N('J'):
  switch(InputPointer[1])
  {
- case TJS_W('a'):
- case TJS_W('A'):
+ case TJS_N('a'):
+ case TJS_N('A'):
   switch(InputPointer[2])
   {
-  case TJS_W('n'):
-  case TJS_W('N'):
+  case TJS_N('n'):
+  case TJS_N('N'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 0; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 0; return DP_MONTH; }
     break;
-   case TJS_W('u'):
-   case TJS_W('U'):
+   case TJS_N('u'):
+   case TJS_N('U'):
     switch(InputPointer[4])
     {
-    case TJS_W('a'):
-    case TJS_W('A'):
+    case TJS_N('a'):
+    case TJS_N('A'):
      switch(InputPointer[5])
      {
-     case TJS_W('r'):
-     case TJS_W('R'):
+     case TJS_N('r'):
+     case TJS_N('R'):
       switch(InputPointer[6])
       {
-      case TJS_W('y'):
-      case TJS_W('Y'):
-        if(!TJS_iswalpha(InputPointer[7])) { InputPointer += 7; yylex->val = 0; return DP_MONTH; }
+      case TJS_N('y'):
+      case TJS_N('Y'):
+        if(!TJS_iswalpha(&InputPointer[7])) { InputPointer += 7; yylex->val = 0; return DP_MONTH; }
        break;
       }
       break;
@@ -675,99 +675,99 @@ case TJS_W('J'):
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_MONTH; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 900; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 900; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('t'):
- case TJS_W('T'):
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 730; return DP_TZ; }
+ case TJS_N('t'):
+ case TJS_N('T'):
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 730; return DP_TZ; }
   break;
- case TJS_W('u'):
- case TJS_W('U'):
+ case TJS_N('u'):
+ case TJS_N('U'):
   switch(InputPointer[2])
   {
-  case TJS_W('.'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 5; return DP_MONTH; }
+  case TJS_N('.'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 5; return DP_MONTH; }
    break;
-  case TJS_W('l'):
-  case TJS_W('L'):
+  case TJS_N('l'):
+  case TJS_N('L'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 6; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 6; return DP_MONTH; }
     break;
-   case TJS_W('y'):
-   case TJS_W('Y'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 6; return DP_MONTH; }
+   case TJS_N('y'):
+   case TJS_N('Y'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 6; return DP_MONTH; }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 6; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 6; return DP_MONTH; }
    }
    break;
-  case TJS_W('n'):
-  case TJS_W('N'):
+  case TJS_N('n'):
+  case TJS_N('N'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 5; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 5; return DP_MONTH; }
     break;
-   case TJS_W('e'):
-   case TJS_W('E'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 5; return DP_MONTH; }
+   case TJS_N('e'):
+   case TJS_N('E'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 5; return DP_MONTH; }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 5; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 5; return DP_MONTH; }
    }
    break;
   default:
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 5; return DP_MONTH; }
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 5; return DP_MONTH; }
   }
   break;
  }
  break;
-case TJS_W('k'):
-case TJS_W('K'):
+case TJS_N('k'):
+case TJS_N('K'):
  switch(InputPointer[1])
  {
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 900; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 900; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('l'):
-case TJS_W('L'):
+case TJS_N('l'):
+case TJS_N('L'):
  switch(InputPointer[1])
  {
- case TJS_W('i'):
- case TJS_W('I'):
+ case TJS_N('i'):
+ case TJS_N('I'):
   switch(InputPointer[2])
   {
-  case TJS_W('g'):
-  case TJS_W('G'):
+  case TJS_N('g'):
+  case TJS_N('G'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1000; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1000; return DP_TZ; }
     break;
    }
    break;
@@ -775,214 +775,214 @@ case TJS_W('L'):
   break;
  }
  break;
-case TJS_W('m'):
-case TJS_W('M'):
+case TJS_N('m'):
+case TJS_N('M'):
  switch(InputPointer[1])
  {
- case TJS_W('a'):
- case TJS_W('A'):
+ case TJS_N('a'):
+ case TJS_N('A'):
   switch(InputPointer[2])
   {
-  case TJS_W('r'):
-  case TJS_W('R'):
+  case TJS_N('r'):
+  case TJS_N('R'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 2; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 2; return DP_MONTH; }
     break;
-   case TJS_W('c'):
-   case TJS_W('C'):
+   case TJS_N('c'):
+   case TJS_N('C'):
     switch(InputPointer[4])
     {
-    case TJS_W('h'):
-    case TJS_W('H'):
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 2; return DP_MONTH; }
+    case TJS_N('h'):
+    case TJS_N('H'):
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 2; return DP_MONTH; }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 2; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 2; return DP_MONTH; }
    }
    break;
-  case TJS_W('y'):
-  case TJS_W('Y'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 4; return DP_MONTH; }
+  case TJS_N('y'):
+  case TJS_N('Y'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 4; return DP_MONTH; }
    break;
   }
   break;
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -600; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -600; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 200; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 200; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('t'):
-  case TJS_W('T'):
+  case TJS_N('t'):
+  case TJS_N('T'):
    switch(InputPointer[3])
    {
-   case TJS_W('d'):
-   case TJS_W('D'):
+   case TJS_N('d'):
+   case TJS_N('D'):
     switch(InputPointer[4])
     {
-    case TJS_W('s'):
-    case TJS_W('S'):
+    case TJS_N('s'):
+    case TJS_N('S'):
      switch(InputPointer[5])
      {
-     case TJS_W('t'):
-     case TJS_W('T'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 200; return DP_TZ; }
+     case TJS_N('t'):
+     case TJS_N('T'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 200; return DP_TZ; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    }
    break;
-  case TJS_W('w'):
-  case TJS_W('W'):
+  case TJS_N('w'):
+  case TJS_N('W'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 100; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 100; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('z'):
-  case TJS_W('Z'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+  case TJS_N('z'):
+  case TJS_N('Z'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('o'):
- case TJS_W('O'):
+ case TJS_N('o'):
+ case TJS_N('O'):
   switch(InputPointer[2])
   {
-  case TJS_W('n'):
-  case TJS_W('N'):
+  case TJS_N('n'):
+  case TJS_N('N'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1; return DP_WDAY; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1; return DP_WDAY; }
     break;
-   case TJS_W('d'):
-   case TJS_W('D'):
+   case TJS_N('d'):
+   case TJS_N('D'):
     switch(InputPointer[4])
     {
-    case TJS_W('a'):
-    case TJS_W('A'):
+    case TJS_N('a'):
+    case TJS_N('A'):
      switch(InputPointer[5])
      {
-     case TJS_W('y'):
-     case TJS_W('Y'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 1; return DP_WDAY; }
+     case TJS_N('y'):
+     case TJS_N('Y'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 1; return DP_WDAY; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 1; return DP_WDAY; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 1; return DP_WDAY; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -700; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -700; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('t'):
- case TJS_W('T'):
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 830; return DP_TZ; }
+ case TJS_N('t'):
+ case TJS_N('T'):
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 830; return DP_TZ; }
   break;
  default:
-  if(!TJS_iswalpha(InputPointer[1])) { InputPointer += 1; yylex->val = -1200; return DP_TZ; }
+  if(!TJS_iswalpha(&InputPointer[1])) { InputPointer += 1; yylex->val = -1200; return DP_TZ; }
  }
  break;
-case TJS_W('n'):
-case TJS_W('N'):
+case TJS_N('n'):
+case TJS_N('N'):
  switch(InputPointer[1])
  {
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -230; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -230; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('f'):
- case TJS_W('F'):
+ case TJS_N('f'):
+ case TJS_N('F'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -330; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -330; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('o'):
- case TJS_W('O'):
+ case TJS_N('o'):
+ case TJS_N('O'):
   switch(InputPointer[2])
   {
-  case TJS_W('r'):
-  case TJS_W('R'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+  case TJS_N('r'):
+  case TJS_N('R'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    break;
-  case TJS_W('v'):
-  case TJS_W('V'):
+  case TJS_N('v'):
+  case TJS_N('V'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 10; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 10; return DP_MONTH; }
     break;
-   case TJS_W('e'):
-   case TJS_W('E'):
+   case TJS_N('e'):
+   case TJS_N('E'):
     switch(InputPointer[4])
     {
-    case TJS_W('m'):
-    case TJS_W('M'):
+    case TJS_N('m'):
+    case TJS_N('M'):
      switch(InputPointer[5])
      {
-     case TJS_W('b'):
-     case TJS_W('B'):
+     case TJS_N('b'):
+     case TJS_N('B'):
       switch(InputPointer[6])
       {
-      case TJS_W('e'):
-      case TJS_W('E'):
+      case TJS_N('e'):
+      case TJS_N('E'):
        switch(InputPointer[7])
        {
-       case TJS_W('r'):
-       case TJS_W('R'):
-         if(!TJS_iswalpha(InputPointer[8])) { InputPointer += 8; yylex->val = 10; return DP_MONTH; }
+       case TJS_N('r'):
+       case TJS_N('R'):
+         if(!TJS_iswalpha(&InputPointer[8])) { InputPointer += 8; yylex->val = 10; return DP_MONTH; }
         break;
        }
        break;
@@ -993,89 +993,89 @@ case TJS_W('N'):
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 10; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 10; return DP_MONTH; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -330; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -330; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('t'):
- case TJS_W('T'):
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = -1100; return DP_TZ; }
+ case TJS_N('t'):
+ case TJS_N('T'):
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = -1100; return DP_TZ; }
   break;
- case TJS_W('z'):
- case TJS_W('Z'):
+ case TJS_N('z'):
+ case TJS_N('Z'):
   switch(InputPointer[2])
   {
-  case TJS_W('d'):
-  case TJS_W('D'):
+  case TJS_N('d'):
+  case TJS_N('D'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1300; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1300; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1200; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1200; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 1200; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 1200; return DP_TZ; }
    break;
   }
   break;
  default:
-  if(!TJS_iswalpha(InputPointer[1])) { InputPointer += 1; yylex->val = 100; return DP_TZ; }
+  if(!TJS_iswalpha(&InputPointer[1])) { InputPointer += 1; yylex->val = 100; return DP_TZ; }
  }
  break;
-case TJS_W('o'):
-case TJS_W('O'):
+case TJS_N('o'):
+case TJS_N('O'):
  switch(InputPointer[1])
  {
- case TJS_W('c'):
- case TJS_W('C'):
+ case TJS_N('c'):
+ case TJS_N('C'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
+  case TJS_N('t'):
+  case TJS_N('T'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 9; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 9; return DP_MONTH; }
     break;
-   case TJS_W('o'):
-   case TJS_W('O'):
+   case TJS_N('o'):
+   case TJS_N('O'):
     switch(InputPointer[4])
     {
-    case TJS_W('b'):
-    case TJS_W('B'):
+    case TJS_N('b'):
+    case TJS_N('B'):
      switch(InputPointer[5])
      {
-     case TJS_W('e'):
-     case TJS_W('E'):
+     case TJS_N('e'):
+     case TJS_N('E'):
       switch(InputPointer[6])
       {
-      case TJS_W('r'):
-      case TJS_W('R'):
-        if(!TJS_iswalpha(InputPointer[7])) { InputPointer += 7; yylex->val = 9; return DP_MONTH; }
+      case TJS_N('r'):
+      case TJS_N('R'):
+        if(!TJS_iswalpha(&InputPointer[7])) { InputPointer += 7; yylex->val = 9; return DP_MONTH; }
        break;
       }
       break;
@@ -1084,97 +1084,97 @@ case TJS_W('O'):
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 9; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 9; return DP_MONTH; }
    }
    break;
   }
   break;
  }
  break;
-case TJS_W('p'):
-case TJS_W('P'):
+case TJS_N('p'):
+case TJS_N('P'):
  switch(InputPointer[1])
  {
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -700; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -700; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('m'):
- case TJS_W('M'):
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 0; return DP_PM; }
+ case TJS_N('m'):
+ case TJS_N('M'):
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 0; return DP_PM; }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -800; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -800; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('s'):
-case TJS_W('S'):
+case TJS_N('s'):
+case TJS_N('S'):
  switch(InputPointer[1])
  {
- case TJS_W('a'):
- case TJS_W('A'):
+ case TJS_N('a'):
+ case TJS_N('A'):
   switch(InputPointer[2])
   {
-  case TJS_W('d'):
-  case TJS_W('D'):
+  case TJS_N('d'):
+  case TJS_N('D'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 1030; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 1030; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 930; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 930; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('t'):
-  case TJS_W('T'):
+  case TJS_N('t'):
+  case TJS_N('T'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 6; return DP_WDAY; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 6; return DP_WDAY; }
     break;
-   case TJS_W('u'):
-   case TJS_W('U'):
+   case TJS_N('u'):
+   case TJS_N('U'):
     switch(InputPointer[4])
     {
-    case TJS_W('r'):
-    case TJS_W('R'):
+    case TJS_N('r'):
+    case TJS_N('R'):
      switch(InputPointer[5])
      {
-     case TJS_W('d'):
-     case TJS_W('D'):
+     case TJS_N('d'):
+     case TJS_N('D'):
       switch(InputPointer[6])
       {
-      case TJS_W('a'):
-      case TJS_W('A'):
+      case TJS_N('a'):
+      case TJS_N('A'):
        switch(InputPointer[7])
        {
-       case TJS_W('y'):
-       case TJS_W('Y'):
-         if(!TJS_iswalpha(InputPointer[8])) { InputPointer += 8; yylex->val = 6; return DP_WDAY; }
+       case TJS_N('y'):
+       case TJS_N('Y'):
+         if(!TJS_iswalpha(&InputPointer[8])) { InputPointer += 8; yylex->val = 6; return DP_WDAY; }
         break;
        }
        break;
@@ -1185,48 +1185,48 @@ case TJS_W('S'):
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 6; return DP_WDAY; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 6; return DP_WDAY; }
    }
    break;
   }
   break;
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('p'):
-  case TJS_W('P'):
+  case TJS_N('p'):
+  case TJS_N('P'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 8; return DP_MONTH; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 8; return DP_MONTH; }
     break;
-   case TJS_W('t'):
-   case TJS_W('T'):
+   case TJS_N('t'):
+   case TJS_N('T'):
     switch(InputPointer[4])
     {
-    case TJS_W('.'):
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 8; return DP_MONTH; }
+    case TJS_N('.'):
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 8; return DP_MONTH; }
      break;
-    case TJS_W('e'):
-    case TJS_W('E'):
+    case TJS_N('e'):
+    case TJS_N('E'):
      switch(InputPointer[5])
      {
-     case TJS_W('m'):
-     case TJS_W('M'):
+     case TJS_N('m'):
+     case TJS_N('M'):
       switch(InputPointer[6])
       {
-      case TJS_W('b'):
-      case TJS_W('B'):
+      case TJS_N('b'):
+      case TJS_N('B'):
        switch(InputPointer[7])
        {
-       case TJS_W('e'):
-       case TJS_W('E'):
+       case TJS_N('e'):
+       case TJS_N('E'):
         switch(InputPointer[8])
         {
-        case TJS_W('r'):
-        case TJS_W('R'):
-          if(!TJS_iswalpha(InputPointer[9])) { InputPointer += 9; yylex->val = 8; return DP_MONTH; }
+        case TJS_N('r'):
+        case TJS_N('R'):
+          if(!TJS_iswalpha(&InputPointer[9])) { InputPointer += 9; yylex->val = 8; return DP_MONTH; }
          break;
         }
         break;
@@ -1237,270 +1237,270 @@ case TJS_W('S'):
      }
      break;
     default:
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 8; return DP_MONTH; }
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 8; return DP_MONTH; }
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 8; return DP_MONTH; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 8; return DP_MONTH; }
    }
    break;
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 200; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('u'):
- case TJS_W('U'):
+ case TJS_N('u'):
+ case TJS_N('U'):
   switch(InputPointer[2])
   {
-  case TJS_W('n'):
-  case TJS_W('N'):
+  case TJS_N('n'):
+  case TJS_N('N'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 0; return DP_WDAY; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 0; return DP_WDAY; }
     break;
-   case TJS_W('d'):
-   case TJS_W('D'):
+   case TJS_N('d'):
+   case TJS_N('D'):
     switch(InputPointer[4])
     {
-    case TJS_W('a'):
-    case TJS_W('A'):
+    case TJS_N('a'):
+    case TJS_N('A'):
      switch(InputPointer[5])
      {
-     case TJS_W('y'):
-     case TJS_W('Y'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 0; return DP_WDAY; }
+     case TJS_N('y'):
+     case TJS_N('Y'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 0; return DP_WDAY; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_WDAY; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_WDAY; }
    }
    break;
   }
   break;
- case TJS_W('w'):
- case TJS_W('W'):
+ case TJS_N('w'):
+ case TJS_N('W'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 100; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('t'):
-case TJS_W('T'):
+case TJS_N('t'):
+case TJS_N('T'):
  switch(InputPointer[1])
  {
- case TJS_W('h'):
- case TJS_W('H'):
+ case TJS_N('h'):
+ case TJS_N('H'):
   switch(InputPointer[2])
   {
-  case TJS_W('u'):
-  case TJS_W('U'):
+  case TJS_N('u'):
+  case TJS_N('U'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 4; return DP_WDAY; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 4; return DP_WDAY; }
     break;
-   case TJS_W('r'):
-   case TJS_W('R'):
+   case TJS_N('r'):
+   case TJS_N('R'):
     switch(InputPointer[4])
     {
-    case TJS_W('s'):
-    case TJS_W('S'):
+    case TJS_N('s'):
+    case TJS_N('S'):
      switch(InputPointer[5])
      {
-     case TJS_W('.'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 4; return DP_WDAY; }
+     case TJS_N('.'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 4; return DP_WDAY; }
       break;
-     case TJS_W('d'):
-     case TJS_W('D'):
+     case TJS_N('d'):
+     case TJS_N('D'):
       switch(InputPointer[6])
       {
-      case TJS_W('a'):
-      case TJS_W('A'):
+      case TJS_N('a'):
+      case TJS_N('A'):
        switch(InputPointer[7])
        {
-       case TJS_W('y'):
-       case TJS_W('Y'):
-         if(!TJS_iswalpha(InputPointer[8])) { InputPointer += 8; yylex->val = 4; return DP_WDAY; }
+       case TJS_N('y'):
+       case TJS_N('Y'):
+         if(!TJS_iswalpha(&InputPointer[8])) { InputPointer += 8; yylex->val = 4; return DP_WDAY; }
         break;
        }
        break;
       }
       break;
      default:
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 4; return DP_WDAY; }
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 4; return DP_WDAY; }
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 4; return DP_WDAY; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 4; return DP_WDAY; }
    }
    break;
   }
   break;
- case TJS_W('u'):
- case TJS_W('U'):
+ case TJS_N('u'):
+ case TJS_N('U'):
   switch(InputPointer[2])
   {
-  case TJS_W('e'):
-  case TJS_W('E'):
+  case TJS_N('e'):
+  case TJS_N('E'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 2; return DP_WDAY; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 2; return DP_WDAY; }
     break;
-   case TJS_W('s'):
-   case TJS_W('S'):
+   case TJS_N('s'):
+   case TJS_N('S'):
     switch(InputPointer[4])
     {
-    case TJS_W('.'):
-      if(!TJS_iswalpha(InputPointer[5])) { InputPointer += 5; yylex->val = 2; return DP_WDAY; }
+    case TJS_N('.'):
+      if(!TJS_iswalpha(&InputPointer[5])) { InputPointer += 5; yylex->val = 2; return DP_WDAY; }
      break;
-    case TJS_W('d'):
-    case TJS_W('D'):
+    case TJS_N('d'):
+    case TJS_N('D'):
      switch(InputPointer[5])
      {
-     case TJS_W('a'):
-     case TJS_W('A'):
+     case TJS_N('a'):
+     case TJS_N('A'):
       switch(InputPointer[6])
       {
-      case TJS_W('y'):
-      case TJS_W('Y'):
-        if(!TJS_iswalpha(InputPointer[7])) { InputPointer += 7; yylex->val = 2; return DP_WDAY; }
+      case TJS_N('y'):
+      case TJS_N('Y'):
+        if(!TJS_iswalpha(&InputPointer[7])) { InputPointer += 7; yylex->val = 2; return DP_WDAY; }
        break;
       }
       break;
      }
      break;
     default:
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 2; return DP_WDAY; }
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 2; return DP_WDAY; }
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 2; return DP_WDAY; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 2; return DP_WDAY; }
    }
    break;
   }
   break;
  }
  break;
-case TJS_W('u'):
-case TJS_W('U'):
+case TJS_N('u'):
+case TJS_N('U'):
  switch(InputPointer[1])
  {
- case TJS_W('t'):
- case TJS_W('T'):
+ case TJS_N('t'):
+ case TJS_N('T'):
   switch(InputPointer[2])
   {
-  case TJS_W('c'):
-  case TJS_W('C'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_TZ; }
+  case TJS_N('c'):
+  case TJS_N('C'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_TZ; }
    break;
   default:
-   if(!TJS_iswalpha(InputPointer[2])) { InputPointer += 2; yylex->val = 0; return DP_TZ; }
+   if(!TJS_iswalpha(&InputPointer[2])) { InputPointer += 2; yylex->val = 0; return DP_TZ; }
   }
   break;
  }
  break;
-case TJS_W('w'):
-case TJS_W('W'):
+case TJS_N('w'):
+case TJS_N('W'):
  switch(InputPointer[1])
  {
- case TJS_W('a'):
- case TJS_W('A'):
+ case TJS_N('a'):
+ case TJS_N('A'):
   switch(InputPointer[2])
   {
-  case TJS_W('d'):
-  case TJS_W('D'):
+  case TJS_N('d'):
+  case TJS_N('D'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 800; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 800; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('s'):
-  case TJS_W('S'):
+  case TJS_N('s'):
+  case TJS_N('S'):
    switch(InputPointer[3])
    {
-   case TJS_W('t'):
-   case TJS_W('T'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 700; return DP_TZ; }
+   case TJS_N('t'):
+   case TJS_N('T'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 700; return DP_TZ; }
     break;
    }
    break;
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -100; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -100; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 900; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 900; return DP_TZ; }
    break;
   }
   break;
- case TJS_W('e'):
- case TJS_W('E'):
+ case TJS_N('e'):
+ case TJS_N('E'):
   switch(InputPointer[2])
   {
-  case TJS_W('d'):
-  case TJS_W('D'):
+  case TJS_N('d'):
+  case TJS_N('D'):
    switch(InputPointer[3])
    {
-   case TJS_W('.'):
-     if(!TJS_iswalpha(InputPointer[4])) { InputPointer += 4; yylex->val = 3; return DP_WDAY; }
+   case TJS_N('.'):
+     if(!TJS_iswalpha(&InputPointer[4])) { InputPointer += 4; yylex->val = 3; return DP_WDAY; }
     break;
-   case TJS_W('n'):
-   case TJS_W('N'):
+   case TJS_N('n'):
+   case TJS_N('N'):
     switch(InputPointer[4])
     {
-    case TJS_W('e'):
-    case TJS_W('E'):
+    case TJS_N('e'):
+    case TJS_N('E'):
      switch(InputPointer[5])
      {
-     case TJS_W('s'):
-     case TJS_W('S'):
+     case TJS_N('s'):
+     case TJS_N('S'):
       switch(InputPointer[6])
       {
-      case TJS_W('d'):
-      case TJS_W('D'):
+      case TJS_N('d'):
+      case TJS_N('D'):
        switch(InputPointer[7])
        {
-       case TJS_W('a'):
-       case TJS_W('A'):
+       case TJS_N('a'):
+       case TJS_N('A'):
         switch(InputPointer[8])
         {
-        case TJS_W('y'):
-        case TJS_W('Y'):
-          if(!TJS_iswalpha(InputPointer[9])) { InputPointer += 9; yylex->val = 3; return DP_WDAY; }
+        case TJS_N('y'):
+        case TJS_N('Y'):
+          if(!TJS_iswalpha(&InputPointer[9])) { InputPointer += 9; yylex->val = 3; return DP_WDAY; }
          break;
         }
         break;
@@ -1513,67 +1513,67 @@ case TJS_W('W'):
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 3; return DP_WDAY; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 3; return DP_WDAY; }
    }
    break;
-  case TJS_W('t'):
-  case TJS_W('T'):
+  case TJS_N('t'):
+  case TJS_N('T'):
    switch(InputPointer[3])
    {
-   case TJS_W('d'):
-   case TJS_W('D'):
+   case TJS_N('d'):
+   case TJS_N('D'):
     switch(InputPointer[4])
     {
-    case TJS_W('s'):
-    case TJS_W('S'):
+    case TJS_N('s'):
+    case TJS_N('S'):
      switch(InputPointer[5])
      {
-     case TJS_W('t'):
-     case TJS_W('T'):
-       if(!TJS_iswalpha(InputPointer[6])) { InputPointer += 6; yylex->val = 100; return DP_TZ; }
+     case TJS_N('t'):
+     case TJS_N('T'):
+       if(!TJS_iswalpha(&InputPointer[6])) { InputPointer += 6; yylex->val = 100; return DP_TZ; }
       break;
      }
      break;
     }
     break;
    default:
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_TZ; }
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 0; return DP_TZ; }
    }
    break;
   }
   break;
- case TJS_W('s'):
- case TJS_W('S'):
+ case TJS_N('s'):
+ case TJS_N('S'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = 800; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = 800; return DP_TZ; }
    break;
   }
   break;
  }
  break;
-case TJS_W('y'):
-case TJS_W('Y'):
+case TJS_N('y'):
+case TJS_N('Y'):
  switch(InputPointer[1])
  {
- case TJS_W('d'):
- case TJS_W('D'):
+ case TJS_N('d'):
+ case TJS_N('D'):
   switch(InputPointer[2])
   {
-  case TJS_W('t'):
-  case TJS_W('T'):
-    if(!TJS_iswalpha(InputPointer[3])) { InputPointer += 3; yylex->val = -800; return DP_TZ; }
+  case TJS_N('t'):
+  case TJS_N('T'):
+    if(!TJS_iswalpha(&InputPointer[3])) { InputPointer += 3; yylex->val = -800; return DP_TZ; }
    break;
   }
   break;
  default:
-  if(!TJS_iswalpha(InputPointer[1])) { InputPointer += 1; yylex->val = 1200; return DP_TZ; }
+  if(!TJS_iswalpha(&InputPointer[1])) { InputPointer += 1; yylex->val = 1200; return DP_TZ; }
  }
  break;
-case TJS_W('z'):
-case TJS_W('Z'):
-  if(!TJS_iswalpha(InputPointer[1])) { InputPointer += 1; yylex->val = 0; return DP_TZ; }
+case TJS_N('z'):
+case TJS_N('Z'):
+  if(!TJS_iswalpha(&InputPointer[1])) { InputPointer += 1; yylex->val = 0; return DP_TZ; }
  break;
 }

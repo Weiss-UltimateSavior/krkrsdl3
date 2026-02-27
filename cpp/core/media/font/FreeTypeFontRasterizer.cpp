@@ -121,7 +121,7 @@ void FreeTypeFontRasterizer::ApplyFont( const tTVPFont& font ) {
 	LastBitmap = NULL;
 }
 //---------------------------------------------------------------------------
-void FreeTypeFontRasterizer::GetTextExtent(tjs_char ch, tjs_int &w, tjs_int &h) {
+void FreeTypeFontRasterizer::GetTextExtent(tjs_wchar ch, tjs_int &w, tjs_int &h) {
 	if( Face ) {
 		tGlyphMetrics metrics;
 		if( Face->GetGlyphSizeFromCharcode( ch, metrics) ) {
@@ -202,7 +202,7 @@ tTVPCharacterData* FreeTypeFontRasterizer::GetBitmap( const tTVPFontAndCharacter
 	return data;
 }
 //---------------------------------------------------------------------------
-void FreeTypeFontRasterizer::GetGlyphDrawRect( const ttstr & text, tTVPRect& area ) {
+void FreeTypeFontRasterizer::GetGlyphDrawRect(std::vector<tjs_wchar> text, tTVPRect& area ) {
     // アンチエイリアスとヒンティングは有効にする
 	Face->ClearOption( TVP_FACE_OPTIONS_NO_ANTIALIASING );
 	Face->ClearOption( TVP_FACE_OPTIONS_NO_HINTING );
@@ -210,9 +210,9 @@ void FreeTypeFontRasterizer::GetGlyphDrawRect( const ttstr & text, tTVPRect& are
 	area.left = area.top = area.right = area.bottom = 0;
 	tjs_int offsetx = 0;
 	tjs_int offsety = 0;
-	tjs_uint len = text.length();
+	tjs_uint len = text.size();
 	for( tjs_uint i = 0; i < len; i++ ) {
-		tjs_char ch = text[i];
+		tjs_wchar ch = text[i];
 		tjs_int ax, ay;
 		tTVPRect rt(0,0,0,0);
 		bool result = Face->GetGlyphRectFromCharcode(rt,ch,ax,ay);

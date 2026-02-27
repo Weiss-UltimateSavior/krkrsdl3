@@ -59,7 +59,7 @@ static void TVPLoadGraphicRouter(void* formatdata, void *callbackdata, tTVPGraph
 		}
 #undef CALL_LOAD_FUNC
 	}
-	TVPThrowExceptionMessage(TVPImageLoadError, TJS_W("Invalid image"));
+	TVPThrowExceptionMessage(TVPImageLoadError, TJS_N("Invalid image"));
 }
 
 static void TVPLoadHeaderRouter(void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** dic) {
@@ -86,7 +86,7 @@ static void TVPLoadHeaderRouter(void* formatdata, tTJSBinaryStream *src, iTJSDis
 		}
 #undef CALL_LOAD_FUNC
 	}
-	TVPThrowExceptionMessage(TVPImageLoadError, TJS_W("Invalid image"));
+	TVPThrowExceptionMessage(TVPImageLoadError, TJS_N("Invalid image"));
 }
 
 //---------------------------------------------------------------------------
@@ -95,15 +95,15 @@ static void TVPLoadHeaderRouter(void* formatdata, tTJSBinaryStream *src, iTJSDis
 bool TVPAcceptSaveAsBMP( void* formatdata, const ttstr & type, class iTJSDispatch2** dic )
 {
 	bool result = false;
-	if( type.StartsWith(TJS_W("bmp")) ) result = true;
-	else if( type == TJS_W(".bmp") ) result = true;
-	else if( type == TJS_W(".dib") ) result = true;
+	if( type.StartsWith(TJS_N("bmp")) ) result = true;
+	else if( type == TJS_N(".bmp") ) result = true;
+	else if( type == TJS_N(".dib") ) result = true;
 	if( result && dic ) {
 		tTJSVariant result;
 		TVPExecuteExpression(
-			TJS_W("(const)%[")
-			TJS_W("\"bpp\"=>(const)%[\"type\"=>\"select\",\"items\"=>(const)[\"32\",\"24\",\"8\"],\"desc\"=>\"bpp\",\"default\"=>0]")
-			TJS_W("]"),
+			TJS_N("(const)%[")
+			TJS_N("\"bpp\"=>(const)%[\"type\"=>\"select\",\"items\"=>(const)[\"32\",\"24\",\"8\"],\"desc\"=>\"bpp\",\"default\"=>0]")
+			TJS_N("]"),
 			NULL, &result );
 		if( result.Type() == tvtObject ) {
 			*dic = result.AsObject();
@@ -128,27 +128,27 @@ public:
 	{
 		// register some native-supported formats
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".pvr"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, nullptr, nullptr, NULL));
+			TJS_N(".pvr"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, nullptr, nullptr, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".webp"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, nullptr, nullptr, NULL));
+			TJS_N(".webp"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, nullptr, nullptr, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".bmp"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsBMP, TVPAcceptSaveAsBMP, NULL));
+			TJS_N(".bmp"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsBMP, TVPAcceptSaveAsBMP, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".dib"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsBMP, TVPAcceptSaveAsBMP, NULL));
+			TJS_N(".dib"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsBMP, TVPAcceptSaveAsBMP, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".jpeg"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsJPG, TVPAcceptSaveAsJPG, NULL));
+			TJS_N(".jpeg"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsJPG, TVPAcceptSaveAsJPG, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".jpg"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsJPG, TVPAcceptSaveAsJPG, NULL));
+			TJS_N(".jpg"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsJPG, TVPAcceptSaveAsJPG, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".jif"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsJPG, TVPAcceptSaveAsJPG, NULL));
+			TJS_N(".jif"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsJPG, TVPAcceptSaveAsJPG, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".png"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsPNG, TVPAcceptSaveAsPNG, NULL));
+			TJS_N(".png"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsPNG, TVPAcceptSaveAsPNG, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".tlg"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsTLG, TVPAcceptSaveAsTLG, NULL));
+			TJS_N(".tlg"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsTLG, TVPAcceptSaveAsTLG, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".tlg5"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsTLG, TVPAcceptSaveAsTLG, NULL));
+			TJS_N(".tlg5"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsTLG, TVPAcceptSaveAsTLG, NULL));
 		Handlers.push_back(tTVPGraphicHandlerType(
-			TJS_W(".tlg6"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsTLG, TVPAcceptSaveAsTLG, NULL));
+			TJS_N(".tlg6"), TVPLoadGraphicRouter, TVPLoadHeaderRouter, TVPSaveAsTLG, TVPAcceptSaveAsTLG, NULL));
 		ReCreateHash();
 		Avail = true;
 	}
@@ -299,7 +299,7 @@ void TVPLoadImageHeader( const ttstr & storagename, iTJSDispatch2** dic )
 	if( dic == NULL ) return;
 
 	ttstr ext = TVPExtractStorageExt(storagename);
-	if(ext == TJS_W("")) TVPThrowExceptionMessage(TVPUnknownGraphicFormat, storagename);
+	if(ext == TJS_N("")) TVPThrowExceptionMessage(TVPUnknownGraphicFormat, storagename);
 	tTVPGraphicHandlerType * handler = TVPGraphicType.Hash.Find(ext);
 	if(!handler) TVPThrowExceptionMessage(TVPUnknownGraphicFormat, storagename);
 
@@ -756,11 +756,11 @@ void TVPSaveTextureAsBMP(tTJSBinaryStream* dst, iTVPTexture2D* bmp, const ttstr 
 
 	if (bmp->GetFormat() == TVPTextureFormat::Gray)
 		pixelbytes = 1;
-	else if(mode == TJS_W("bmp32") || mode == TJS_W("bmp"))
+	else if(mode == TJS_N("bmp32") || mode == TJS_N("bmp"))
 		pixelbytes = 4;
-	else if(mode == TJS_W("bmp24"))
+	else if(mode == TJS_N("bmp24"))
 		pixelbytes = 3;
-	else if(mode == TJS_W("bmp8"))
+	else if(mode == TJS_N("bmp8"))
 		pixelbytes = 1;
 	else
 		pixelbytes = 4;
@@ -768,7 +768,7 @@ void TVPSaveTextureAsBMP(tTJSBinaryStream* dst, iTVPTexture2D* bmp, const ttstr 
 	if( meta )
 	{
 		tTJSVariant val;
-		tjs_error er = meta->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("bpp"), NULL, &val, meta);
+		tjs_error er = meta->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("bpp"), NULL, &val, meta);
 		if(TJS_SUCCEEDED(er))
 		{
 			tjs_int index = (tjs_int)val.AsInteger();
@@ -952,13 +952,13 @@ void TVPLoadHeaderBMP( void* formatdata, tTJSBinaryStream *src, iTJSDispatch2** 
 
 	*dic = TJSCreateDictionaryObject();
 	tTJSVariant val(bi.biWidth);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("width"), 0, &val, (*dic) );
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("width"), 0, &val, (*dic) );
 	val = tTJSVariant(bi.biHeight);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("height"), 0, &val, (*dic) );
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("height"), 0, &val, (*dic) );
 	val = tTJSVariant(bi.biBitCount);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("bpp"), 0, &val, (*dic) );
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("bpp"), 0, &val, (*dic) );
 	val = tTJSVariant(palsize);
-	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_W("palette"), 0, &val, (*dic) );
+	(*dic)->PropSet(TJS_MEMBERENSURE, TJS_N("palette"), 0, &val, (*dic) );
 }
 
 //---------------------------------------------------------------------------
@@ -1560,7 +1560,7 @@ void TVPPushGraphicCache( const ttstr& nname, tTVPBitmap* bmp, std::vector<tTVPG
 
 			data = new tTVPGraphicImageData();
 			data->AssignBitmap(bmp);
-			data->ProvinceName = TJS_W("");
+			data->ProvinceName = TJS_N("");
 			data->MetaInfo = meta;
 			meta = NULL;
 
@@ -1677,7 +1677,7 @@ tTVPGraphicHandlerType* TVPFindGraphicLoadHandler(ttstr &_name, ttstr *maskname,
 	} else {
 		handler = TVPGraphicType.Hash.Find(ext);
 		if (!handler) {
-			static const ttstr ext_bmp(TJS_W(".bmp"));
+			static const ttstr ext_bmp(TJS_N(".bmp"));
 			handler = TVPGraphicType.Hash.Find(ext_bmp);
 		}
 	}
@@ -1688,7 +1688,7 @@ tTVPGraphicHandlerType* TVPFindGraphicLoadHandler(ttstr &_name, ttstr *maskname,
 	if (maskname) {
 		// mask image handling ( addding _m suffix with the filename )
 		while (true) {
-			name = ttstr(_name, namelen - extlen) + TJS_W("_m") + ext;
+			name = ttstr(_name, namelen - extlen) + TJS_N("_m") + ext;
 			if (ext.IsEmpty()) {
 				// missing extension
 				// suggest registered extensions
@@ -1724,7 +1724,7 @@ tTVPGraphicHandlerType* TVPFindGraphicLoadHandler(ttstr &_name, ttstr *maskname,
 	}
 	if (provincename) {
 		// set province name
-		*provincename = ttstr(_name, namelen - extlen) + TJS_W("_p");
+		*provincename = ttstr(_name, namelen - extlen) + TJS_N("_p");
 
 		// search extensions
 		tTJSHashTable<ttstr, tTVPGraphicHandlerType>::tIterator i;
@@ -2122,7 +2122,7 @@ void TVPTouchImages(const std::vector<ttstr> & storages, tjs_int64 limit,
 
 		try
 		{
-			if(!first) statusstr += TJS_W(", ");
+			if(!first) statusstr += TJS_N(", ");
 			first = false;
 			statusstr += storages[count];
 
@@ -2131,9 +2131,9 @@ void TVPTouchImages(const std::vector<ttstr> & storages, tjs_int64 limit,
 		}
 		catch(eTJS &e)
 		{
-			statusstr += TJS_W("(error!:");
+			statusstr += TJS_N("(error!:");
 			statusstr += e.GetMessage();
-			statusstr += TJS_W(")");
+			statusstr += TJS_N(")");
 		}
 		catch(...)
 		{
@@ -2158,9 +2158,9 @@ void TVPTouchImages(const std::vector<ttstr> & storages, tjs_int64 limit,
 		TVPGraphicCache.FindAndTouchWithHash(searchdata, hash);
 	}
 
-	statusstr += TJS_W(" (elapsed ");
+	statusstr += TJS_N(" (elapsed ");
 	statusstr += ttstr((tjs_int)(TVPGetTickCount() - starttime));
-	statusstr += TJS_W("ms)");
+	statusstr += TJS_N("ms)");
 
 	TVPAddLog(statusstr);
 }
@@ -2211,7 +2211,7 @@ tjs_uint64 TVPGetGraphicCacheLimit()
 void tTVPGraphicHandlerType::Load(void* formatdata, void* callbackdata, tTVPGraphicSizeCallback sizecallback, tTVPGraphicScanLineCallback scanlinecallback,
 	tTVPMetaInfoPushCallback metainfopushcallback, tTJSBinaryStream* src, tjs_int32 keyidx, tTVPGraphicLoadMode mode)
 {
-	if (LoadHandler == NULL) TVPThrowExceptionMessage(TVPUnknownGraphicFormat, TJS_W("unknown"));
+	if (LoadHandler == NULL) TVPThrowExceptionMessage(TVPUnknownGraphicFormat, TJS_N("unknown"));
 	{
 		LoadHandler(formatdata, callbackdata, sizecallback, scanlinecallback, metainfopushcallback,
 			src, keyidx, mode);
@@ -2235,7 +2235,7 @@ void tTVPGraphicHandlerType::Save(const ttstr& storagename, const ttstr& mode, c
 }
 void tTVPGraphicHandlerType::Header(tTJSBinaryStream* src, iTJSDispatch2** dic)
 {
-	if (HeaderHandler == NULL) TVPThrowExceptionMessage(TVPUnknownGraphicFormat, TJS_W("unknown"));
+	if (HeaderHandler == NULL) TVPThrowExceptionMessage(TVPUnknownGraphicFormat, TJS_N("unknown"));
 	{
 		HeaderHandler(FormatData, src, dic);
 	}

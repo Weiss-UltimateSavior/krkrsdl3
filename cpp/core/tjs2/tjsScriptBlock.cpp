@@ -146,7 +146,7 @@ const tjs_char * tTJSScriptBlock::GetLine(tjs_int line, tjs_int *linelength) con
 {
 	if( Script == NULL ) {
 		*linelength = 10;
-		return TJS_W("Bytecode.");
+		return TJS_N("Bytecode.");
 	}
 	// note that this function DOES matter LineOffset
 	line -= LineOffset;
@@ -189,11 +189,11 @@ ttstr tTJSScriptBlock::GetLineDescriptionString(tjs_int pos) const
 	else
 	{
 		tjs_char ptr[128];
-		TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_W("0x%p"), this);
-		name = ttstr(TJS_W("anonymous@")) + ptr;
+		TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_N("0x%p"), this);
+		name = ttstr(TJS_N("anonymous@")) + ptr;
 	}
 
-	return name + TJS_W("(") + ttstr(line) + TJS_W(")");
+	return name + TJS_N("(") + ttstr(line) + TJS_N(")");
 }
 //---------------------------------------------------------------------------
 void tTJSScriptBlock::ConsoleOutput(const tjs_char *msg, void *data)
@@ -232,7 +232,7 @@ void tTJSScriptBlock::SetText(tTJSVariant *result, const tjs_char *text,
 	if(!text) return;
 	if(!text[0]) return;
 
-	TJS_D((TJS_W("Counting lines ...\n")))
+	TJS_D((TJS_N("Counting lines ...\n")))
 
 	Script = new tjs_char[TJS_strlen(text)+1];
 	TJS_strcpy(Script, text);
@@ -242,11 +242,11 @@ void tTJSScriptBlock::SetText(tTJSVariant *result, const tjs_char *text,
 	tjs_char *p = Script;
 	while(*p)
 	{
-		if(*p == TJS_W('\r') || *p == TJS_W('\n'))
+		if(*p == TJS_N('\r') || *p == TJS_N('\n'))
 		{
 			LineVector.push_back(int(ls - Script));
 			LineLengthVector.push_back(int(p - ls));
-			if(*p == TJS_W('\r') && p[1] == TJS_W('\n')) p++;
+			if(*p == TJS_N('\r') && p[1] == TJS_N('\n')) p++;
 			p++;
 			ls = p;
 		}
@@ -317,7 +317,7 @@ void tTJSScriptBlock::SetText(tTJSVariant *result, const tjs_char *text,
 			InterCodeContextList.begin();
 		while(i != InterCodeContextList.end())
 		{
-			ConsoleOutput(TJS_W(""), (void*)this);
+			ConsoleOutput(TJS_N(""), (void*)this);
 			ConsoleOutput((*i)->GetName(), (void*)this);
 			(*i)->Disassemble(ConsoleOutput, (void*)this);
 			i++;
@@ -363,7 +363,7 @@ void tTJSScriptBlock::ExecuteTopLevel( tTJSVariant *result, iTJSDispatch2 * cont
 		std::list<tTJSInterCodeContext *>::iterator i = InterCodeContextList.begin();
 		while(i != InterCodeContextList.end())
 		{
-			ConsoleOutput(TJS_W(""), (void*)this);
+			ConsoleOutput(TJS_N(""), (void*)this);
 			ConsoleOutput((*i)->GetName(), (void*)this);
 			(*i)->Disassemble(ConsoleOutput, (void*)this);
 			i++;
@@ -406,7 +406,7 @@ void tTJSScriptBlock::ExecuteTopLevelScript(tTJSVariant *result,
 		TopLevelContext->FuncCall(0, NULL, NULL, result, 0, NULL, context);
 #ifdef TJS_DEBUG_PROFILE_TIME
 		tjs_char str[100];
-		TJS_sprintf(str, TJS_W("%d"), clock() - start);
+		TJS_sprintf(str, TJS_N("%d"), clock() - start);
 		ConsoleOutput(str, (void*)this);
 #endif
 	}
@@ -483,7 +483,7 @@ ttstr tTJSScriptBlock::GetNameInfo() const
 	}
 	else
 	{
-		return ttstr(Name) + TJS_W("(line +") + ttstr(LineOffset) + TJS_W(")");
+		return ttstr(Name) + TJS_N("(line +") + ttstr(LineOffset) + TJS_N(")");
 	}
 }
 //---------------------------------------------------------------------------
@@ -493,11 +493,11 @@ void tTJSScriptBlock::Dump() const
 		InterCodeContextList.begin();
 	while(i != InterCodeContextList.end())
 	{
-		ConsoleOutput(TJS_W(""), (void*)this);
+		ConsoleOutput(TJS_N(""), (void*)this);
 		tjs_char ptr[256];
-		TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_W(" 0x%p"), (*i));
-		ConsoleOutput((ttstr(TJS_W("(")) + ttstr((*i)->GetContextTypeName()) +
-			TJS_W(") ") + ttstr((*i)->GetName()) + ptr).c_str(), (void*)this);
+		TJS_snprintf(ptr, sizeof(ptr)/sizeof(tjs_char), TJS_N(" 0x%p"), (*i));
+		ConsoleOutput((ttstr(TJS_N("(")) + ttstr((*i)->GetContextTypeName()) +
+			TJS_N(") ") + ttstr((*i)->GetName()) + ptr).c_str(), (void*)this);
 		(*i)->Disassemble(ConsoleOutput, (void*)this);
 		i++;
 	}
@@ -583,10 +583,10 @@ void tTJSScriptBlock::Compile( const tjs_char *text, bool isexpression, bool isr
 		tjs_char *ls = Script;
 		tjs_char *p = Script;
 		while( *p ) {
-			if(*p == TJS_W('\r') || *p == TJS_W('\n')) {
+			if(*p == TJS_N('\r') || *p == TJS_N('\n')) {
 				LineVector.push_back(int(ls - Script));
 				LineLengthVector.push_back(int(p - ls));
-				if(*p == TJS_W('\r') && p[1] == TJS_W('\n')) p++;
+				if(*p == TJS_N('\r') && p[1] == TJS_N('\n')) p++;
 				p++;
 				ls = p;
 			} else {

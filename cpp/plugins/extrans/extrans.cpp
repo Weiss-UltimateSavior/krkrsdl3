@@ -10,7 +10,7 @@
 #include "rotatetrans.h"
 #include "ripple.h"
 
-#define NCB_MODULE_NAME TJS_W("extrans.dll")
+#define NCB_MODULE_NAME TJS_N("extrans.dll")
 
 void InitPlugin_extrans() {
     RegisterWaveTransHandlerProvider();

@@ -140,19 +140,19 @@ tTJSVariant* tTJSBinarySerializer::ReadBasicType( const tjs_uint8* buff, const t
 	case TYPE_STRING8: {
 		if( (index+sizeof(tjs_uint8)) > size ) TJS_eTJSError( TJSReadError );
 		tjs_uint8 len = buff[index]; index++;
-		if( (index+(len*sizeof(tjs_char))) > size ) TJS_eTJSError( TJSReadError );
+		if( (index+(len*sizeof(tjs_wchar))) > size ) TJS_eTJSError( TJSReadError );
 		return ReadStringVarint( buff, len, index );
 	}
 	case TYPE_STRING16: {
 		if( (index+sizeof(tjs_uint16)) > size ) TJS_eTJSError( TJSReadError );
 		tjs_uint16 len = Read16( buff, index );
-		if( (index+(len*sizeof(tjs_char))) > size ) TJS_eTJSError( TJSReadError );
+		if( (index+(len*sizeof(tjs_wchar))) > size ) TJS_eTJSError( TJSReadError );
 		return ReadStringVarint( buff, len, index );
 	}
 	case TYPE_STRING32: {
 		if( (index+sizeof(tjs_uint32)) > size ) TJS_eTJSError( TJSReadError );
 		tjs_uint32 len = Read32( buff, index );
-		if( (index+(len*sizeof(tjs_char))) > size ) TJS_eTJSError( TJSReadError );
+		if( (index+(len*sizeof(tjs_wchar))) > size ) TJS_eTJSError( TJSReadError );
 		return ReadStringVarint( buff, len, index );
 	}
 	case TYPE_FLOAT: {
@@ -250,7 +250,7 @@ tTJSVariant* tTJSBinarySerializer::ReadBasicType( const tjs_uint8* buff, const t
 			return ReadOctetVarint( buff, len, index );
 		} else if( type >= TYPE_FIX_STRING_MIN && type <= TYPE_FIX_STRING_MAX ) {
 			tjs_int len = type - TYPE_FIX_STRING_MIN;
-			if( (len*sizeof(tjs_char)+index) > size ) TJS_eTJSError( TJSReadError );
+			if( (len*sizeof(tjs_wchar)+index) > size ) TJS_eTJSError( TJSReadError );
 			return ReadStringVarint( buff, len, index );
 		} else if( type >= TYPE_FIX_ARRAY_MIN && type <= TYPE_FIX_ARRAY_MAX ) {
 			tjs_int count = type - TYPE_FIX_ARRAY_MIN;
@@ -291,28 +291,28 @@ tTJSVariant* tTJSBinarySerializer::ReadDictionary( const tjs_uint8* buff, const 
 		case TYPE_STRING8: {
 			if( (index+sizeof(tjs_uint8)) > size ) TJS_eTJSError( TJSReadError );
 			tjs_uint8 len = buff[index]; index++;
-			if( (index+(len*sizeof(tjs_char))) > size ) TJS_eTJSError( TJSReadError );
+			if( (index+(len*sizeof(tjs_wchar))) > size ) TJS_eTJSError( TJSReadError );
 			name = ReadString( buff, len, index );
 			break;
 		}
 		case TYPE_STRING16: {
 			if( (index+sizeof(tjs_uint16)) > size ) TJS_eTJSError( TJSReadError );
 			tjs_uint16 len = Read16( buff, index );
-			if( (index+(len*sizeof(tjs_char))) > size ) TJS_eTJSError( TJSReadError );
+			if( (index+(len*sizeof(tjs_wchar))) > size ) TJS_eTJSError( TJSReadError );
 			name = ReadString( buff, len, index );
 			break;
 		}
 		case TYPE_STRING32: {
 			if( (index+sizeof(tjs_uint32)) > size ) TJS_eTJSError( TJSReadError );
 			tjs_uint32 len = Read32( buff, index );
-			if( (index+(len*sizeof(tjs_char))) > size ) TJS_eTJSError( TJSReadError );
+			if( (index+(len*sizeof(tjs_wchar))) > size ) TJS_eTJSError( TJSReadError );
 			name = ReadString( buff, len, index );
 			break;
 		}
 		default:
 			if( type >= TYPE_FIX_STRING_MIN && type <= TYPE_FIX_STRING_MAX ) {
 				tjs_int len = type - TYPE_FIX_STRING_MIN;
-				if( (len*sizeof(tjs_char)+index) > size ) TJS_eTJSError( TJSReadError );
+				if( (len*sizeof(tjs_wchar)+index) > size ) TJS_eTJSError( TJSReadError );
 				name = ReadString( buff, len, index );
 			} else { // Dictionary形式の場合、最初に文字列がこないといけない
 				 TJS_eTJSError( TJSReadError );

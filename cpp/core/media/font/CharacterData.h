@@ -90,7 +90,7 @@ struct tTVPFontAndCharacterData
 {
 	tTVPFont Font;
 	tjs_uint32 FontHash;
-	tjs_char Character;
+	tjs_wchar Character;
 	tjs_int BlurLevel;
 	tjs_int BlurWidth;
 	bool Antialiased;

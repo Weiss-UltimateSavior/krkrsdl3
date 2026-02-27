@@ -287,16 +287,17 @@ public:
                   tTVPComplexRect* updaterects = NULL)
     {
         tjs_int len = text.GetLen();
-        if (len == 0) return;
-        if (len >= 2)
-            DrawTextMultiple(
+        tjs_int chLen = utf8_char_len(text.c_str());
+        if (len == 0 || chLen > len) return;
+        if (len == chLen)
+            DrawTextSingle(
                 destrect, x, y, text,
                 color, bltmode, opa,
                 holdalpha, aa, shlevel,
                 shadowcolor, shwidth, shofsx, shofsy,
                 updaterects);
-        else    /* if len == 1 */
-            DrawTextSingle(
+        else
+            DrawTextMultiple(
                 destrect, x, y, text,
                 color, bltmode, opa,
                 holdalpha, aa, shlevel,

@@ -7,13 +7,13 @@
 
 #include "TVPColor.h"
 
-#define NCB_MODULE_NAME TJS_W("PackinOne.dll")
+#define NCB_MODULE_NAME TJS_N("PackinOne.dll")
 
 static void InitPlugin_PackinOne()
 {
     // 我们并不知道这个插件是干啥的，只能根据情况猜一个
-    ncbAutoRegister::LoadModule(TJS_W("LayerExMovie.dll"));
-    TVPExecuteScript(TJS_W("\
+    ncbAutoRegister::LoadModule(TJS_N("LayerExMovie.dll"));
+    TVPExecuteScript(TJS_N("\
 class AffineSourceMovie extends AffineSource {\
 	var _movie;\
 	var _width = 0;\

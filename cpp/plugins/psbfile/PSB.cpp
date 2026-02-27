@@ -5,7 +5,7 @@
 #include "PSBMedia.h"
 #include "Log.h"
 
-#define NCB_MODULE_NAME TJS_W("psbfile.dll")
+#define NCB_MODULE_NAME TJS_N("psbfile.dll")
 
 void psbfile_init()
 {
@@ -16,7 +16,7 @@ void psbfile_init()
         iTJSDispatch2* dsp = TVPCreateNativeClass_PsbFile();
         tTJSVariant val = tTJSVariant(dsp);
         dsp->Release();
-        global->PropSet(TJS_MEMBERENSURE, TJS_W("PSBFile"), NULL, &val, global);
+        global->PropSet(TJS_MEMBERENSURE, TJS_N("PSBFile"), NULL, &val, global);
     }
     // 注册media
     if (psbVar == nullptr)
@@ -32,7 +32,7 @@ void psbfile_done()
     iTJSDispatch2* global = TVPScriptEngine->GetGlobalNoAddRef();
     if (global)
     {
-        global->DeleteMember(0, TJS_W("PSBFile"), NULL, global);
+        global->DeleteMember(0, TJS_N("PSBFile"), NULL, global);
     }
     // 解注media
     if (psbVar != nullptr)

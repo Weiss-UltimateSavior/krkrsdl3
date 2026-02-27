@@ -33,7 +33,7 @@ tTJSNativeInstance* tTJSNC_Pad::CreateNativeInstance()
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Pad::ClassID = -1;
 //---------------------------------------------------------------------------
-tTJSNC_Pad::tTJSNC_Pad() : inherited(TJS_W("Pad"))
+tTJSNC_Pad::tTJSNC_Pad() : inherited(TJS_N("Pad"))
 {
 	// registration of native members
 
@@ -65,7 +65,7 @@ tTJSNC_Pad::tTJSNC_Pad() : inherited(TJS_W("Pad"))
 	{
 		TJS_BEGIN_NATIVE_PROP_GETTER
 		{
-			*result = TJS_W("");
+			*result = TJS_N("");
 			return TJS_S_OK;
 		}
 			TJS_END_NATIVE_PROP_GETTER
@@ -82,7 +82,7 @@ tTJSNC_Pad::tTJSNC_Pad() : inherited(TJS_W("Pad"))
 	{
 		TJS_BEGIN_NATIVE_PROP_GETTER
 		{
-			*result = TJS_W("");
+			*result = TJS_N("");
 			return TJS_S_OK;
 		}
 			TJS_END_NATIVE_PROP_GETTER
@@ -133,7 +133,7 @@ tTJSNC_Pad::tTJSNC_Pad() : inherited(TJS_W("Pad"))
 	{
 		TJS_BEGIN_NATIVE_PROP_GETTER
 		{
-			*result = TJS_W("");
+			*result = TJS_N("");
 			return TJS_S_OK;
 		}
 			TJS_END_NATIVE_PROP_GETTER
@@ -269,7 +269,7 @@ tTJSNC_Pad::tTJSNC_Pad() : inherited(TJS_W("Pad"))
 	{
 		TJS_BEGIN_NATIVE_PROP_GETTER
 		{
-			*result = TJS_W("");
+			*result = TJS_N("");
 			return TJS_S_OK;
 		}
 			TJS_END_NATIVE_PROP_GETTER
@@ -371,7 +371,7 @@ tTJSNC_Pad::tTJSNC_Pad() : inherited(TJS_W("Pad"))
 	{
 		TJS_BEGIN_NATIVE_PROP_GETTER
 		{
-			*result = TJS_W("");
+			*result = TJS_N("");
 			return TJS_S_OK;
 		}
 			TJS_END_NATIVE_PROP_GETTER

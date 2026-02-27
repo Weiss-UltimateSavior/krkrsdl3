@@ -55,7 +55,7 @@ void tTJSNI_BaseClipboard::Invalidate()
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Clipboard::ClassID = -1;
 //---------------------------------------------------------------------------
-tTJSNC_Clipboard::tTJSNC_Clipboard() : inherited(TJS_W("Clipboard"))
+tTJSNC_Clipboard::tTJSNC_Clipboard() : inherited(TJS_N("Clipboard"))
 {
 	// registration of native members
 

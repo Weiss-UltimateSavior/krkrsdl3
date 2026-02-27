@@ -26,9 +26,9 @@ ResourceManager::ResourceManager(iTJSDispatch2* kagWindow, tjs_int cacheSize)
     if (kagWindow != nullptr)
     {
         tTJSVariant val;
-        kagWindow->PropGet(0, TJS_W("width"), NULL, &val, kagWindow);
+        kagWindow->PropGet(0, TJS_N("width"), NULL, &val, kagWindow);
         sWidth = (tjs_int)val;
-        kagWindow->PropGet(0, TJS_W("height"), NULL, &val, kagWindow);
+        kagWindow->PropGet(0, TJS_N("height"), NULL, &val, kagWindow);
         sHeight = (tjs_int)val;
         _kagWindow = kagWindow;
     }
@@ -38,7 +38,7 @@ ResourceManager::ResourceManager(iTJSDispatch2* kagWindow, tjs_int cacheSize)
         // kag.poolLayer作为父类
         tTJSVariant baseLayer;
         iTJSDispatch2* kag = kagWindow;
-        if (TJS_FAILED(kag->PropGet(0, TJS_W("poolLayer"), NULL, &baseLayer, kag)) ||
+        if (TJS_FAILED(kag->PropGet(0, TJS_N("poolLayer"), NULL, &baseLayer, kag)) ||
             baseLayer.Type() != tvtObject)
         {
             SDL_Log("create motionWorkLayer failed");
@@ -52,7 +52,7 @@ ResourceManager::ResourceManager(iTJSDispatch2* kagWindow, tjs_int cacheSize)
         iTJSDispatch2* global = TVPGetScriptDispatch();
         if (global)
         {
-            global->PropSet(TJS_MEMBERENSURE, TJS_W("motionWorkLayer"), NULL, &val, global);
+            global->PropSet(TJS_MEMBERENSURE, TJS_N("motionWorkLayer"), NULL, &val, global);
             global->Release();
         }
     }
@@ -64,7 +64,7 @@ ResourceManager::~ResourceManager()
 tTJSVariant ResourceManager::load(tTJSString path)
 {
     ttstr trimPath;
-    if (path.StartsWith(TJS_W("lzfs://./")))
+    if (path.StartsWith(TJS_N("lzfs://./")))
         trimPath = path.SubString(9, path.length() - 9);
     else
         trimPath = path;
@@ -85,7 +85,7 @@ tTJSVariant ResourceManager::load(tTJSString path)
 void ResourceManager::unload(tTJSString path)
 {
     ttstr trimPath;
-    if (path.StartsWith(TJS_W("lzfs://./")))
+    if (path.StartsWith(TJS_N("lzfs://./")))
         trimPath = path.SubString(9, path.length() - 9);
     else
         trimPath = path;
@@ -248,13 +248,13 @@ void SeparateLayerAdaptor::checkDrawArea(tjs_int width, tjs_int height)
 #define setprop_t(d, p, ty) \
     { \
         tTJSVariant v(ty(p)); \
-        d->PropSet(TJS_MEMBERENSURE, TJS_W(#p), nullptr, &v, d); \
+        d->PropSet(TJS_MEMBERENSURE, TJS_N(#p), nullptr, &v, d); \
     }
 #define setprop(d, p) setprop_t(d, p, )
 #define getprop_t(d, p, ty) \
     { \
         tTJSVariant v; \
-        if (TJS_SUCCEEDED(d->PropGet(0, TJS_W(#p), nullptr, &v, d)) && v.Type() != tvtVoid) \
+        if (TJS_SUCCEEDED(d->PropGet(0, TJS_N(#p), nullptr, &v, d)) && v.Type() != tvtVoid) \
         { \
             p = ty(v); \
         } \
@@ -299,7 +299,7 @@ tTJSVariant EmotePlayer::get_variableKeys()
             tTJSVariant tmp(varItm.first);
             tTJSVariant* args[] = {&tmp};
             static tjs_uint addHint = 0;
-            array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+            array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
         }
     }
     tTJSVariant result(array, array);
@@ -338,7 +338,7 @@ void EmotePlayer::unserialize(tTJSVariant data)
 }
 void EmotePlayer::play(tTJSString name, int flag)
 {
-    //SDL_Log("play-->%s", name.AsNarrowStdString().c_str());
+    //SDL_Log("play-->%s", name.AsStdString().c_str());
     if (_currentfile != nullptr) // motionKey的启动模式
     {
         // motion
@@ -606,7 +606,7 @@ void EmotePlayer::setVariable(tTJSString name, tjs_real value)
 {
     if (_currentfile != nullptr)
     {
-        std::string tmpName = name.AsNarrowStdString();
+        std::string tmpName = name.AsStdString();
         tmpName.append(1, '\0'); // 终有一天，我会把这sb字符串给优化掉
         _currentfile->setVariable(tmpName, value, true); // 管你有没有，设了再说
     }
@@ -615,7 +615,7 @@ tjs_real EmotePlayer::getVariable(tTJSString name)
 {
     if (_currentfile != nullptr)
     {
-        std::string tmpName = name.AsNarrowStdString();
+        std::string tmpName = name.AsStdString();
         tmpName.append(1, '\0'); // 终有一天，我会把这sb字符串给优化掉
         auto varPos = _currentfile->_metadata->_varList.find(tmpName);
         if (varPos != _currentfile->_metadata->_varList.end())
@@ -716,7 +716,7 @@ bool EmotePlayer::getLoopTimeline(tTJSString name)
     {
         for (auto itm : _currentfile->_metadata->_timelineControl)
         {
-            if (strcmp(itm->label.c_str(), name.AsNarrowStdString().c_str()) == 0)
+            if (strcmp(itm->label.c_str(), name.AsStdString().c_str()) == 0)
             {
                 return itm->lastTime < 0;
             }
@@ -730,7 +730,7 @@ tjs_real EmotePlayer::getTimelineTotalFrameCount(tTJSString name)
     {
         for (auto itm : _currentfile->_metadata->_timelineControl)
         {
-            if (strcmp(itm->label.c_str(), name.AsNarrowStdString().c_str()) == 0)
+            if (strcmp(itm->label.c_str(), name.AsStdString().c_str()) == 0)
             {
                 return itm->loopEnd - itm->loopBegin + 1;
             }
@@ -750,7 +750,7 @@ tTJSVariant EmotePlayer::getMainTimelineLabelList()
                 tTJSVariant tmp(ttstr(itm->label));
                 tTJSVariant* args[] = {&tmp};
                 static tjs_uint addHint = 0;
-                array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+                array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
             }
         }
     }
@@ -770,7 +770,7 @@ tTJSVariant EmotePlayer::getDiffTimelineLabelList()
                 tTJSVariant tmp(ttstr(itm->label));
                 tTJSVariant* args[] = {&tmp};
                 static tjs_uint addHint = 0;
-                array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+                array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
             }
         }
     }
@@ -801,13 +801,13 @@ tTJSVariant EmotePlayer::getPlayingTimelineInfoList()
         {
             iTJSDispatch2* obj = TJSCreateDictionaryObject();
             tTJSVariant val = tTJSVariant(playingTimeline->label);
-            obj->PropSet(TJS_MEMBERENSURE, TJS_W("label"), NULL, &val, obj);
+            obj->PropSet(TJS_MEMBERENSURE, TJS_N("label"), NULL, &val, obj);
             tTJSVariant objItm(obj, obj);
             obj->Release();
             tTJSVariant tmp(objItm);
             tTJSVariant* args[] = {&tmp};
             static tjs_uint addHint = 0;
-            array->FuncCall(0, TJS_W("add"), &addHint, nullptr, 1, args, array);
+            array->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, array);
         }
     }
     array->Release();
@@ -819,14 +819,14 @@ tTJSVariant EmotePlayer::getVariableFrameList(tTJSString name)
     {
         iTJSDispatch2* root = _currentfile->root().AsObject();
         tTJSVariant itm;
-        if (TJS_FAILED(root->PropGet(0, TJS_W("metadata"), NULL, &itm, root)))
+        if (TJS_FAILED(root->PropGet(0, TJS_N("metadata"), NULL, &itm, root)))
         {
             SDL_Log("emotefile donot contain metadata");
             return tTJSVariant();
         }
         root->Release();
         root = itm.AsObject();
-        if (TJS_FAILED(root->PropGet(0, TJS_W("variableList"), NULL, &itm, root)))
+        if (TJS_FAILED(root->PropGet(0, TJS_N("variableList"), NULL, &itm, root)))
         {
             SDL_Log("emotefile donot contain variableList");
             return tTJSVariant();
@@ -841,11 +841,11 @@ tTJSVariant EmotePlayer::getVariableFrameList(tTJSString name)
             if (TJS_FAILED(root->PropGetByNum(TJS_MEMBERMUSTEXIST, i, &varItem, root))) break;
             iTJSDispatch2* rev = varItem.AsObjectThisNoAddRef();
             tTJSVariant labelname;
-            if (TJS_FAILED(rev->PropGet(0, TJS_W("label"), NULL, &labelname, rev)))
+            if (TJS_FAILED(rev->PropGet(0, TJS_N("label"), NULL, &labelname, rev)))
                 continue;
             if (labelname.Type() != tvtString || ttstr(labelname) != name)
                 continue;
-            if (TJS_FAILED(rev->PropGet(0, TJS_W("frameList"), NULL, &retNeed, rev)))
+            if (TJS_FAILED(rev->PropGet(0, TJS_N("frameList"), NULL, &retNeed, rev)))
                 continue;
             break;
         }

@@ -32,10 +32,10 @@ static void TVPInitBasicDrawDeviceOptions()
 
     tTJSVariant val;
     TVPZoomInterpolation = true;
-    if (TVPGetCommandLine(TJS_W("-smoothzoom"), &val))
+    if (TVPGetCommandLine(TJS_N("-smoothzoom"), &val))
     {
         ttstr str(val);
-        if (str == TJS_W("no"))
+        if (str == TJS_N("no"))
             TVPZoomInterpolation = false;
         else
             TVPZoomInterpolation = true;

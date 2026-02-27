@@ -22,7 +22,7 @@ namespace TJS
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Exception::ClassID = (tjs_uint32)-1;
 tTJSNC_Exception::tTJSNC_Exception() :
-	tTJSNativeClass(TJS_W("Exception"))
+	tTJSNativeClass(TJS_N("Exception"))
 {
 	// class constructor
 
@@ -31,16 +31,16 @@ tTJSNC_Exception::tTJSNC_Exception() :
 //---------------------------------------------------------------------------
 TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL_NO_INSTANCE(/*TJS class name*/Exception)
 {
-	tTJSVariant val = TJS_W("");
+	tTJSVariant val = TJS_N("");
 	if(TJS_PARAM_EXIST(0)) val.CopyRef(*param[0]);
 
-	static tTJSString message_name(TJS_W("message"));
+	static tTJSString message_name(TJS_N("message"));
 	objthis->PropSet(TJS_MEMBERENSURE, message_name.c_str(), message_name.GetHint(),
 		&val, objthis);
 
-	if(TJS_PARAM_EXIST(1)) val.CopyRef(*param[1]); else val = TJS_W("");
+	if(TJS_PARAM_EXIST(1)) val.CopyRef(*param[1]); else val = TJS_N("");
 
-	static tTJSString trace_name(TJS_W("trace"));
+	static tTJSString trace_name(TJS_N("trace"));
 	objthis->PropSet(TJS_MEMBERENSURE, trace_name.c_str(), trace_name.GetHint(),
 		&val, objthis);
 

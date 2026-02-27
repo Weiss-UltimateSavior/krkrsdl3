@@ -156,7 +156,7 @@ public:
 
         if (pSprite != NULL)
         {
-            if (pSprite->texture != NULL)
+            if (pSprite->texture != 0)
             {
                 krkrsdl3::SDL_GL_DepartTexture(pSprite);
                 krkrsdl3::SDL_GL_DestroyTexture(pSprite);
@@ -507,7 +507,7 @@ public:
     virtual void UpdateDrawBuffer(iTVPTexture2D* tex) override {
         if (!tex)
             return;
-        if (pSprite->texture == NULL)
+        if (pSprite->texture == 0)
             return;
 
         {
@@ -660,7 +660,7 @@ public:
             iTJSDispatch2* obj = TJSNativeInstance->GetOwnerNoAddRef();
             if (obj) {
                 tTJSVariant arg[1] = { true };
-                static ttstr eventname(TJS_W("onCloseQuery"));
+                static ttstr eventname(TJS_N("onCloseQuery"));
 
                 if (!ProgramClosing) {
                     // close action does not happen immediately

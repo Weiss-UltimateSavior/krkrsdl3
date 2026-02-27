@@ -5,7 +5,7 @@
 #include "Platform.h"
 //--------------------------------------------------------------------------- 
 
-#define NCB_MODULE_NAME TJS_W("dirlist.dll")
+#define NCB_MODULE_NAME TJS_N("dirlist.dll")
 
 
 //--------------------------------------------------------------------------- 
@@ -25,8 +25,8 @@ class tGetDirListFunction : public tTJSDispatch
 
 		ttstr dir(*param[0]);
 
-		if(dir.GetLastChar() != TJS_W('/'))
-			TVPThrowExceptionMessage(TJS_W("'/' must be specified at the end of given directory name."));
+		if(dir.GetLastChar() != TJS_N('/'))
+			TVPThrowExceptionMessage(TJS_N("'/' must be specified at the end of given directory name."));
 
 		// OSネイティブな表現に変換 
 		dir = TVPNormalizeStorageName(dir);
@@ -80,7 +80,7 @@ static void PostRegistCallback()
 	// 4 global の PropSet メソッドを用い、オブジェクトを登録する 
 	global->PropSet(
 		TJS_MEMBERENSURE, // メンバがなかった場合には作成するようにするフラグ 
-		TJS_W("getDirList"), // メンバ名 ( かならず TJS_W( ) で囲む ) 
+		TJS_N("getDirList"), // メンバ名 ( かならず TJS_N( ) で囲む ) 
 		NULL, // ヒント ( 本来はメンバ名のハッシュ値だが、NULL でもよい ) 
 		&val, // 登録する値 
 		global // コンテキスト ( global でよい ) 

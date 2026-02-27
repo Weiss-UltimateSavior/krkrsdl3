@@ -10,7 +10,7 @@ typedef void (*callbackOnMouseMoveEvent)(int, int);
 
 struct SDL_Sprite
 {
-	uint64_t texture = NULL;
+	uint64_t texture = 0;
     int xPos = 0, yPos = 0;
     float scale = 1.0;
 	int width = 0, height = 0;

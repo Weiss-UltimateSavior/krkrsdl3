@@ -1,6 +1,6 @@
 #include "ncbind/ncbind.hpp"
 
-#define NCB_MODULE_NAME TJS_W("expat.dll")
+#define NCB_MODULE_NAME TJS_N("expat.dll")
 
 //---------------------------------------------------------------------------
 void expat_init()

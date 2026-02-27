@@ -9,7 +9,7 @@
 //---------------------------------------------------------------------------
 // Message Strings
 //---------------------------------------------------------------------------
-#define TVP_MSG_DEFINE(name,msg) TVP_MSG_DECL_CONST(name,TJS_W(msg))
+#define TVP_MSG_DEFINE(name,msg) TVP_MSG_DECL_CONST(name,TJS_N(msg))
 TVP_MSG_DEFINE(TVPScriptExceptionRaised, "Script exception raised")
 TVP_MSG_DEFINE(TVPHardwareExceptionRaised, "Hardware exception raised")
 TVP_MSG_DEFINE(TVPMainCDPName, "Script Editor (Main)")

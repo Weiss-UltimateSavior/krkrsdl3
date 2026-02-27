@@ -18,7 +18,6 @@
 #include "TVPStorage.h"
 #include "TVPMsg.h"
 #include "TVPPlugin.h"
-#include "CharacterSet.h"
 #include "TransIntf.h"
 #include <vector>
 
@@ -34,22 +33,19 @@ namespace TJS { ttstr TJSMapGlobalStringMap(const ttstr& string); }
   acquire speed in compensation for ability of customizing.
 */
 //---------------------------------------------------------------------------
-// #define TJS_strchr			wcschr
-// #define TJS_strcmp			wcscmp
-//#define TJS_strncpy			wcsncpy_s
 
-const tjs_char* TVPKAGNoLine = TJS_W("Readed scenario file %1 is empty.");
-const tjs_char* TVPKAGCannotOmmitFirstLabelName = TJS_W("Can not ommit first label name in scenario.");
-//const tjs_char* TVPInternalError = TJS_W("内部エラーが発生しました: at %1 line %2");
-const tjs_char* TVPKAGMalformedSaveData = TJS_W("Malformed savedata, data may damaged.");
-const tjs_char* TVPKAGLabelNotFound = TJS_W("Label %2 not found in scenario file %1.");
-const tjs_char* TVPLabelOrScriptInMacro = TJS_W("Label in macro 'iscript' is illegal.");
-const tjs_char* TVPKAGInlineScriptNotEnd = TJS_W("Matched [endscript] or @endscript not found.");
-const tjs_char* TVPKAGSyntaxError = TJS_W("Syntax error.'[' match to ']', \" match to \", 'macro' march to 'endmacro'. Notice space and newline.");
-const tjs_char* TVPKAGCallStackUnderflow = TJS_W("'return' is not matched to any 'call' ( 'return' is unexpected )");
-const tjs_char* TVPKAGReturnLostSync = TJS_W("Lost return position due to the scenario file changed.");
-const tjs_char* TVPKAGSpecifyKAGParser = TJS_W("Please specify KAGParser object.");
-const tjs_char* TVPUnknownMacroName = TJS_W("Unknown macro \"%1\"");
+const tjs_char* TVPKAGNoLine = TJS_N("Readed scenario file %1 is empty.");
+const tjs_char* TVPKAGCannotOmmitFirstLabelName = TJS_N("Can not ommit first label name in scenario.");
+//const tjs_char* TVPInternalError = TJS_N("内部エラーが発生しました: at %1 line %2");
+const tjs_char* TVPKAGMalformedSaveData = TJS_N("Malformed savedata, data may damaged.");
+const tjs_char* TVPKAGLabelNotFound = TJS_N("Label %2 not found in scenario file %1.");
+const tjs_char* TVPLabelOrScriptInMacro = TJS_N("Label in macro 'iscript' is illegal.");
+const tjs_char* TVPKAGInlineScriptNotEnd = TJS_N("Matched [endscript] or @endscript not found.");
+const tjs_char* TVPKAGSyntaxError = TJS_N("Syntax error.'[' match to ']', \" match to \", 'macro' march to 'endmacro'. Notice space and newline.");
+const tjs_char* TVPKAGCallStackUnderflow = TJS_N("'return' is not matched to any 'call' ( 'return' is unexpected )");
+const tjs_char* TVPKAGReturnLostSync = TJS_N("Lost return position due to the scenario file changed.");
+const tjs_char* TVPKAGSpecifyKAGParser = TJS_N("Please specify KAGParser object.");
+const tjs_char* TVPUnknownMacroName = TJS_N("Unknown macro \"%1\"");
 
 #ifndef TVP_KAGPARSER_MESSAGEMAP
 #define TVP_KAGPARSER_MESSAGEMAP(name) name
@@ -117,8 +113,7 @@ void tTVPScenarioCacheItem::LoadScenario(const ttstr& name, bool isstring)
 
 		try
 		{
-			stream = TVPCreateTextStreamForRead(name, TJS_W(""));
-			//			stream = TVPCreateTextStreamForReadByEncoding(name, TJS_W(""), TJS_W("Shift_JIS"));
+			stream = TVPCreateTextStreamForRead(name, TJS_N(""));
 			ttstr tmp;
 			if (stream) {
 				stream->Read(tmp, 0);
@@ -141,10 +136,10 @@ void tTVPScenarioCacheItem::LoadScenario(const ttstr& name, bool isstring)
 	tjs_char* p = buffer_p;
 	while (*p)
 	{
-		if (*p == TJS_W('\r') || *p == TJS_W('\n'))
+		if (*p == TJS_N('\r') || *p == TJS_N('\n'))
 		{
 			count++;
-			if (*p == TJS_W('\r') && p[1] == TJS_W('\n')) p++;
+			if (*p == TJS_N('\r') && p[1] == TJS_N('\n')) p++;
 			p++;
 			ls = p;
 		}
@@ -171,13 +166,13 @@ void tTVPScenarioCacheItem::LoadScenario(const ttstr& name, bool isstring)
 	p = ls;
 	while (*p)
 	{
-		if (*p == TJS_W('\r') || *p == TJS_W('\n'))
+		if (*p == TJS_N('\r') || *p == TJS_N('\n'))
 		{
 			Lines[count].Start = ls;
 			Lines[count].Length = p - ls;
 			count++;
 			tjs_char* rp = p;
-			if (*p == TJS_W('\r') && p[1] == TJS_W('\n')) p++;
+			if (*p == TJS_N('\r') && p[1] == TJS_N('\n')) p++;
 			p++;
 			ls = p;
 			while (*ls == '\t') ls++;  // skip leading tabs
@@ -216,10 +211,10 @@ void tTVPScenarioCacheItem::EnsureLabelCache()
 		for (i = 0; i < LineCount; i++)
 		{
 			if (Lines[i].Length >= 2 &&
-				Lines[i].Start[0] == TJS_W('*'))
+				Lines[i].Start[0] == TJS_N('*'))
 			{
 				p = Lines[i].Start;
-				vl = TJS_strchr(p, TJS_W('|'));
+				vl = TJS_strchr(p, TJS_N('|'));
 				ttstr label;
 				if (vl)
 				{
@@ -245,7 +240,7 @@ void tTVPScenarioCacheItem::EnsureLabelCache()
 				{
 					// previous label name found (duplicated label)
 					data->Count++;
-					label = label + TJS_W(":") + ttstr(data->Count);
+					label = label + TJS_N(":") + ttstr(data->Count);
 				}
 
 				LabelCache.Add(label, tLabelCacheData(i, 1));
@@ -380,11 +375,11 @@ tTJSNI_KAGParser::tTJSNI_KAGParser()
 		tTJSVariant val;
 		tjs_error er;
 
-		er = dictclass->PropGet(0, TJS_W("clear"), NULL, &val, dictclass);
+		er = dictclass->PropGet(0, TJS_N("clear"), NULL, &val, dictclass);
 		if (TJS_FAILED(er)) TVPThrowInternalError;
 		DicClear = val.AsObject();
 
-		er = dictclass->PropGet(0, TJS_W("assign"), NULL, &val, dictclass);
+		er = dictclass->PropGet(0, TJS_N("assign"), NULL, &val, dictclass);
 		if (TJS_FAILED(er)) TVPThrowInternalError;
 		DicAssign = val.AsObject();
 
@@ -521,7 +516,7 @@ iTJSDispatch2* tTJSNI_KAGParser::Store()
 			dsp = TJSCreateDictionaryObject();
 			tTJSVariant tmp(dsp, dsp);
 			dsp->Release();
-			dic->PropSet(TJS_MEMBERENSURE, TJS_W("macros"), NULL,
+			dic->PropSet(TJS_MEMBERENSURE, TJS_N("macros"), NULL,
 				&tmp, dic);
 
 			tTJSVariant src(Macros, Macros);
@@ -535,7 +530,7 @@ iTJSDispatch2* tTJSNI_KAGParser::Store()
 			dsp = TJSCreateArrayObject();
 			tTJSVariant tmp(dsp, dsp);
 			dsp->Release();
-			dic->PropSet(TJS_MEMBERENSURE, TJS_W("macroArgs"), NULL,
+			dic->PropSet(TJS_MEMBERENSURE, TJS_N("macroArgs"), NULL,
 				&tmp, dic);
 
 			for (tjs_uint i = 0; i < MacroArgStackDepth; i++)
@@ -561,7 +556,7 @@ iTJSDispatch2* tTJSNI_KAGParser::Store()
 			dsp = TJSCreateArrayObject();
 			tTJSVariant tmp(dsp, dsp);
 			dsp->Release();
-			dic->PropSet(TJS_MEMBERENSURE, TJS_W("callStack"), NULL,
+			dic->PropSet(TJS_MEMBERENSURE, TJS_N("callStack"), NULL,
 				&tmp, dic);
 
 			std::vector<tCallStackData>::iterator i;
@@ -576,75 +571,75 @@ iTJSDispatch2* tTJSNI_KAGParser::Store()
 
 				tTJSVariant val;
 				val = i->Storage;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("storage"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("storage"), NULL,
 					&val, dic);
 				val = i->Label;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("label"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("label"), NULL,
 					&val, dic);
 				val = i->Offset;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("offset"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("offset"), NULL,
 					&val, dic);
 				val = i->OrgLineStr;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("orgLineStr"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("orgLineStr"), NULL,
 					&val, dic);
 				val = i->LineBuffer;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("lineBuffer"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("lineBuffer"), NULL,
 					&val, dic);
 				val = i->Pos;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("pos"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("pos"), NULL,
 					&val, dic);
 				val = (tjs_int)i->LineBufferUsing;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("lineBufferUsing"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("lineBufferUsing"), NULL,
 					&val, dic);
 				val = (tjs_int)i->MacroArgStackBase;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("macroArgStackBase"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("macroArgStackBase"), NULL,
 					&val, dic);
 				val = (tjs_int)i->MacroArgStackDepth;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("macroArgStackDepth"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("macroArgStackDepth"), NULL,
 					&val, dic);
 				val = i->ExcludeLevel;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("ExcludeLevel"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("ExcludeLevel"), NULL,
 					&val, dic);
 				val = (tjs_int)i->IfLevel;
-				dic->PropSet(TJS_MEMBERENSURE, TJS_W("IfLevel"), NULL,
+				dic->PropSet(TJS_MEMBERENSURE, TJS_N("IfLevel"), NULL,
 					&val, dic);
 
-				StoreIntStackToDic(dic, i->ExcludeLevelStack, TJS_W("ExcludeLevelStack"));
-				StoreBoolStackToDic(dic, i->IfLevelExecutedStack, TJS_W("IfLevelExecutedStack"));
+				StoreIntStackToDic(dic, i->ExcludeLevelStack, TJS_N("ExcludeLevelStack"));
+				StoreBoolStackToDic(dic, i->IfLevelExecutedStack, TJS_N("IfLevelExecutedStack"));
 			}
 		}
 
 		// store StorageName, StorageShortName ( Buffer is not stored )
 		val = StorageName;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("storageName"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("storageName"), NULL,
 			&val, dic);
 		val = StorageShortName;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("storageShortName"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("storageShortName"), NULL,
 			&val, dic);
 
 		// ( Lines and LineCount are not stored )
 
 		// store CurStorage, CurLine, CurPos
 		val = CurLine;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("curLine"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("curLine"), NULL,
 			&val, dic);
 		val = CurPos;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("curPos"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("curPos"), NULL,
 			&val, dic);
 
 		// ( CurLineStr is not stored )
 
 		// LineBuffer, LineBufferUsing
 		val = LineBuffer;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("lineBuffer"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("lineBuffer"), NULL,
 			&val, dic);
 		val = (tjs_int)LineBufferUsing;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("lineBufferUsing"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("lineBufferUsing"), NULL,
 			&val, dic);
 
 		// store CurLabel ( CurPage TagLine is not stored )
 		val = CurLabel;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("curLabel"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("curLabel"), NULL,
 			&val, dic);
 
 		// ( DebugLebel and IgnoreCR are not stored )
@@ -654,19 +649,19 @@ iTJSDispatch2* tTJSNI_KAGParser::Store()
 
 		// ExcludeLevel, IfLevel, ExcludeLevelStack, IfLevelExecutedStack
 		val = ExcludeLevel;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("ExcludeLevel"), NULL, &val, dic);
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("ExcludeLevel"), NULL, &val, dic);
 		val = IfLevel;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("IfLevel"), NULL, &val, dic);
-		StoreIntStackToDic(dic, ExcludeLevelStack, TJS_W("ExcludeLevelStack"));
-		StoreBoolStackToDic(dic, IfLevelExecutedStack, TJS_W("IfLevelExecutedStack"));
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("IfLevel"), NULL, &val, dic);
+		StoreIntStackToDic(dic, ExcludeLevelStack, TJS_N("ExcludeLevelStack"));
+		StoreBoolStackToDic(dic, IfLevelExecutedStack, TJS_N("IfLevelExecutedStack"));
 
 		// store MacroArgStackBase, MacroArgStackDepth
 		val = (tjs_int)MacroArgStackBase;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("macroArgStackBase"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("macroArgStackBase"), NULL,
 			&val, dic);
 
 		val = (tjs_int)MacroArgStackDepth;
-		dic->PropSet(TJS_MEMBERENSURE, TJS_W("macroArgStackDepth"), NULL,
+		dic->PropSet(TJS_MEMBERENSURE, TJS_N("macroArgStackDepth"), NULL,
 			&val, dic);
 
 	}
@@ -681,7 +676,7 @@ iTJSDispatch2* tTJSNI_KAGParser::Store()
 void tTJSNI_KAGParser::StoreIntStackToDic(iTJSDispatch2* dic, std::vector<tjs_int>& stack, const tjs_char* membername)
 {
 	ttstr stack_str;
-	const static tjs_char hex[] = TJS_W("0123456789abcdef");
+	const static tjs_char hex[] = TJS_N("0123456789abcdef");
 	tjs_char* p = stack_str.AllocBuffer(stack.size() * 8);
 	for (std::vector<tjs_int>::iterator it = stack.begin(); it != stack.end(); ++it)
 	{
@@ -735,7 +730,7 @@ void tTJSNI_KAGParser::RestoreBoolStackFromStr(std::vector<bool>& stack, const t
 void tTJSNI_KAGParser::StoreBoolStackToDic(iTJSDispatch2* dic, std::vector<bool>& stack, const tjs_char* membername)
 {
 	ttstr stack_str;
-	const static tjs_char bit[] = TJS_W("01");
+	const static tjs_char bit[] = TJS_N("01");
 	tjs_char* p = stack_str.AllocBuffer(stack.size());
 	for (std::vector<bool>::iterator it = stack.begin(); it != stack.end(); ++it)
 	{
@@ -758,7 +753,7 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 		// restore macros
 	{
 		val.Clear();
-		dic->PropGet(0, TJS_W("macros"), NULL, &val, dic);
+		dic->PropGet(0, TJS_N("macros"), NULL, &val, dic);
 		if (val.Type() != tvtVoid)
 		{
 			tTJSVariant* psrc = &val;
@@ -771,19 +766,19 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 		MacroArgStackDepth = 0;
 
 		val.Clear();
-		dic->PropGet(0, TJS_W("macroArgs"), NULL, &val, dic);
+		dic->PropGet(0, TJS_N("macroArgs"), NULL, &val, dic);
 		if (val.Type() != tvtVoid)
 		{
 			tTJSVariantClosure clo = val.AsObjectClosureNoAddRef();
 			tTJSVariant v;
 			tjs_int count = 0;
-			clo.PropGet(0, TJS_W("count"), NULL, &v, NULL);
+			clo.PropGet(0, TJS_N("count"), NULL, &v, NULL);
 			count = v;
 
 			ClearMacroArgs();
 
 			val.Clear();
-			dic->PropGet(0, TJS_W("macroArgStackDepth"), NULL,
+			dic->PropGet(0, TJS_N("macroArgStackDepth"), NULL,
 				&val, dic);
 			if (val.Type() != tvtVoid) MacroArgStackDepth = (tjs_uint)(tjs_int)val;
 
@@ -809,13 +804,13 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 
 		// restore call stack
 		val.Clear();
-		dic->PropGet(0, TJS_W("callStack"), NULL, &val, dic);
+		dic->PropGet(0, TJS_N("callStack"), NULL, &val, dic);
 		if (val.Type() != tvtVoid)
 		{
 			tTJSVariantClosure clo = val.AsObjectClosureNoAddRef();
 			tTJSVariant v;
 			tjs_int count = 0;
-			clo.PropGet(0, TJS_W("count"), NULL, &v, NULL);
+			clo.PropGet(0, TJS_N("count"), NULL, &v, NULL);
 			count = v;
 
 			CallStack.clear();
@@ -840,35 +835,35 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 
 				clo.PropGetByNum(0, i, &v, NULL);
 				tTJSVariantClosure dic = v.AsObjectClosureNoAddRef();
-				dic.PropGet(0, TJS_W("storage"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("storage"), NULL, &val, NULL);
 				Storage = val;
-				dic.PropGet(0, TJS_W("label"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("label"), NULL, &val, NULL);
 				Label = val;
-				dic.PropGet(0, TJS_W("offset"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("offset"), NULL, &val, NULL);
 				Offset = val;
-				dic.PropGet(0, TJS_W("orgLineStr"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("orgLineStr"), NULL, &val, NULL);
 				OrgLineStr = val;
-				dic.PropGet(0, TJS_W("lineBuffer"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("lineBuffer"), NULL, &val, NULL);
 				LineBuffer = val;
-				dic.PropGet(0, TJS_W("pos"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("pos"), NULL, &val, NULL);
 				Pos = val;
-				dic.PropGet(0, TJS_W("lineBufferUsing"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("lineBufferUsing"), NULL, &val, NULL);
 				LineBufferUsing = 0 != (tjs_int)val;
-				dic.PropGet(0, TJS_W("macroArgStackBase"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("macroArgStackBase"), NULL, &val, NULL);
 				MacroArgStackBase = (tjs_int)val;
-				dic.PropGet(0, TJS_W("macroArgStackDepth"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("macroArgStackDepth"), NULL, &val, NULL);
 				MacroArgStackDepth = (tjs_int)val;
-				dic.PropGet(0, TJS_W("ExcludeLevel"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("ExcludeLevel"), NULL, &val, NULL);
 				ExcludeLevel = val;
-				dic.PropGet(0, TJS_W("IfLevel"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("IfLevel"), NULL, &val, NULL);
 				IfLevel = val;
 
 				ttstr stack_str;
-				dic.PropGet(0, TJS_W("ExcludeLevelStack"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("ExcludeLevelStack"), NULL, &val, NULL);
 				stack_str = val;
 				RestoreIntStackFromStr(ExcludeLevelStack, stack_str);
 
-				dic.PropGet(0, TJS_W("IfLevelExecutedStack"), NULL, &val, NULL);
+				dic.PropGet(0, TJS_N("IfLevelExecutedStack"), NULL, &val, NULL);
 				stack_str = val;
 				RestoreBoolStackFromStr(IfLevelExecutedStack, stack_str);
 
@@ -881,15 +876,15 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 
 		// restore StorageName, StorageShortName, CurStorage, CurLabel
 		val.Clear();
-		dic->PropGet(0, TJS_W("storageName"), NULL,
+		dic->PropGet(0, TJS_N("storageName"), NULL,
 			&val, dic);
 		if (val.Type() != tvtVoid) StorageName = val;
 		val.Clear();
-		dic->PropGet(0, TJS_W("storageShortName"), NULL,
+		dic->PropGet(0, TJS_N("storageShortName"), NULL,
 			&val, dic);
 		if (val.Type() != tvtVoid) StorageShortName = val;
 		val.Clear();
-		dic->PropGet(0, TJS_W("curLabel"), NULL,
+		dic->PropGet(0, TJS_N("curLabel"), NULL,
 			&val, dic);
 		if (val.Type() != tvtVoid) CurLabel = val;
 
@@ -901,17 +896,17 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 
 		// ExcludeLevel, IfLevel
 		val.Clear();
-		dic->PropGet(0, TJS_W("ExcludeLevel"), NULL,
+		dic->PropGet(0, TJS_N("ExcludeLevel"), NULL,
 			&val, dic);
 		if (val.Type() != tvtVoid) ExcludeLevel = (tjs_int)val;
 		val.Clear();
-		dic->PropGet(0, TJS_W("IfLevel"), NULL,
+		dic->PropGet(0, TJS_N("IfLevel"), NULL,
 			&val, dic);
 		if (val.Type() != tvtVoid) IfLevel = (tjs_int)val;
 
 		// ExcludeLevelStack, IfLevelExecutedStack
 		val.Clear();
-		dic->PropGet(0, TJS_W("ExcludeLevelStack"), NULL, &val, dic);
+		dic->PropGet(0, TJS_N("ExcludeLevelStack"), NULL, &val, dic);
 		if (val.Type() != tvtVoid)
 		{
 			ttstr stack_str;
@@ -920,7 +915,7 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 		}
 
 		val.Clear();
-		dic->PropGet(0, TJS_W("IfLevelExecutedStack"), NULL, &val, dic);
+		dic->PropGet(0, TJS_N("IfLevelExecutedStack"), NULL, &val, dic);
 		if (val.Type() != tvtVoid)
 		{
 			ttstr stack_str;
@@ -931,7 +926,7 @@ void tTJSNI_KAGParser::Restore(iTJSDispatch2* dic)
 
 		// restore MacroArgStackBase
 		val.Clear();
-		dic->PropGet(0, TJS_W("macroArgStackBase"), NULL,
+		dic->PropGet(0, TJS_N("macroArgStackBase"), NULL,
 			&val, dic);
 		if (val.Type() != tvtVoid) MacroArgStackBase = (tjs_uint)(tjs_int)val;
 
@@ -958,7 +953,7 @@ void tTJSNI_KAGParser::LoadScenario(const ttstr& name)
 		tTJSVariant param = name;
 		tTJSVariant* pparam = &param;
 		tTJSVariant result;
-		static ttstr funcname(TJSMapGlobalStringMap(TJS_W("onScenarioLoad")));
+		static ttstr funcname(TJSMapGlobalStringMap(TJS_N("onScenarioLoad")));
 		tjs_error status = Owner->FuncCall(0, funcname.c_str(), funcname.GetHint(),
 			&result, 1, &pparam, Owner);
 
@@ -984,11 +979,11 @@ void tTJSNI_KAGParser::LoadScenario(const ttstr& name)
 
 		if (DebugLevel >= tkdlSimple)
 		{
-			//static ttstr hr(TJS_W(
+			//static ttstr hr(TJS_N(
 			//	"========================================")
-			//	TJS_W("========================================"));
+			//	TJS_N("========================================"));
 			//TVPAddLog(hr);
-			//TVPAddLog(TJS_W("Scenario loaded : ") + name);
+			//TVPAddLog(TJS_N("Scenario loaded : ") + name);
 		}
 	}
 
@@ -997,7 +992,7 @@ void tTJSNI_KAGParser::LoadScenario(const ttstr& name)
 	{
 		tTJSVariant param = StorageName;
 		tTJSVariant* pparam = &param;
-		static ttstr funcname(TJSMapGlobalStringMap(TJS_W("onScenarioLoaded")));
+		static ttstr funcname(TJSMapGlobalStringMap(TJS_N("onScenarioLoaded")));
 		Owner->FuncCall(0, funcname.c_str(), funcname.GetHint(),
 			NULL, 1, &pparam, Owner);
 	}
@@ -1046,7 +1041,7 @@ void tTJSNI_KAGParser::BreakConditionAndMacro()
 static bool inline TVPIsWS(tjs_char ch)
 {
 	// is white space ?
-	return (ch == TJS_W(' ') || ch == TJS_W('\t'));
+	return (ch == TJS_N(' ') || ch == TJS_N('\t'));
 }
 //---------------------------------------------------------------------------
 void tTJSNI_KAGParser::GoToLabel(const ttstr& name)
@@ -1065,7 +1060,7 @@ void tTJSNI_KAGParser::GoToLabel(const ttstr& name)
 	{
 		// found the label in cache
 		const tjs_char* vl;
-		vl = TJS_strchr(Lines[newline->Line].Start, TJS_W('|'));
+		vl = TJS_strchr(Lines[newline->Line].Start, TJS_N('|'));
 
 		CurLabel = Scenario->GetLabelAliasFromLine(newline->Line);
 		if (vl) CurPage = vl + 1; else CurPage.Clear();
@@ -1081,11 +1076,11 @@ void tTJSNI_KAGParser::GoToLabel(const ttstr& name)
 
 	if (DebugLevel >= tkdlSimple)
 	{
-		static ttstr hr(TJS_W(
+		static ttstr hr(TJS_N(
 			"- - - - - - - - - - - - - - - - - - - - ")
-			TJS_W("- - - - - - - - - - - - - - - - - - - - "));
+			TJS_N("- - - - - - - - - - - - - - - - - - - - "));
 		TVPAddLog(hr);
-		TVPAddLog(StorageShortName + TJS_W(" : jumped to : ") + name);
+		TVPAddLog(StorageShortName + TJS_N(" : jumped to : ") + name);
 	}
 
 	BreakConditionAndMacro();
@@ -1119,16 +1114,16 @@ bool tTJSNI_KAGParser::SkipCommentOrLabel()
 
 		const tjs_char* p = Lines[CurLine].Start;
 
-		if (p[0] == TJS_W(';'))
+		if (p[0] == TJS_N(';'))
 			continue; // comment
 
-		if (p[0] == TJS_W('*'))
+		if (p[0] == TJS_N('*'))
 		{
 			// label
 			if (RecordingMacro)
 				TVPThrowExceptionMessage(TVPLabelOrScriptInMacro);
 
-			tjs_char* vl = TJS_strchr(const_cast<tjs_char*>(p), TJS_W('|'));
+			tjs_char* vl = TJS_strchr(const_cast<tjs_char*>(p), TJS_N('|'));
 			bool pagename;
 			if (vl)
 			{
@@ -1150,7 +1145,7 @@ bool tTJSNI_KAGParser::SkipCommentOrLabel()
 				param[0] = CurLabel;
 				if (pagename) param[1] = CurPage;
 				tTJSVariant* pparam[2] = { param, param + 1 };
-				static ttstr onLabel_name(TJSMapGlobalStringMap(TJS_W("onLabel")));
+				static ttstr onLabel_name(TJSMapGlobalStringMap(TJS_N("onLabel")));
 				Owner->FuncCall(0, onLabel_name.c_str(), onLabel_name.GetHint(),
 					NULL, 2, pparam, Owner);
 			}
@@ -1158,11 +1153,11 @@ bool tTJSNI_KAGParser::SkipCommentOrLabel()
 			continue;
 		}
 
-		if ((p[0] == TJS_W('[') &&
-			(!TJS_strcmp(p, TJS_W("[iscript]")) ||
-				!TJS_strcmp(p, TJS_W("[iscript]\\")))) ||
-			(p[0] == TJS_W('@') &&
-				(!TJS_strcmp(p, TJS_W("@iscript")))))
+		if ((p[0] == TJS_N('[') &&
+			(!TJS_strcmp(p, TJS_N("[iscript]")) ||
+				!TJS_strcmp(p, TJS_N("[iscript]\\")))) ||
+			(p[0] == TJS_N('@') &&
+				(!TJS_strcmp(p, TJS_N("@iscript")))))
 		{
 			// inline TJS script
 			if (RecordingMacro)
@@ -1176,11 +1171,11 @@ bool tTJSNI_KAGParser::SkipCommentOrLabel()
 			for (; CurLine < LineCount; CurLine++)
 			{
 				p = Lines[CurLine].Start;
-				if ((p[0] == TJS_W('[') &&
-					(!TJS_strcmp(p, TJS_W("[endscript]")) ||
-						!TJS_strcmp(p, TJS_W("[endscript]\\")))) ||
-					(p[0] == TJS_W('@') &&
-						(!TJS_strcmp(p, TJS_W("@endscript")))))
+				if ((p[0] == TJS_N('[') &&
+					(!TJS_strcmp(p, TJS_N("[endscript]")) ||
+						!TJS_strcmp(p, TJS_N("[endscript]\\")))) ||
+					(p[0] == TJS_N('@') &&
+						(!TJS_strcmp(p, TJS_N("@endscript")))))
 				{
 					break;
 				}
@@ -1188,7 +1183,7 @@ bool tTJSNI_KAGParser::SkipCommentOrLabel()
 				if (ExcludeLevel == -1)
 				{
 					script += p;
-					script += TJS_W("\r\n");
+					script += TJS_N("\r\n");
 				}
 			}
 
@@ -1202,7 +1197,7 @@ bool tTJSNI_KAGParser::SkipCommentOrLabel()
 				{
 					tTJSVariant param[3] = { script, StorageShortName, script_start };
 					tTJSVariant* pparam[3] = { param, param + 1, param + 2 };
-					static ttstr onScript_name(TJSMapGlobalStringMap(TJS_W("onScript")));
+					static ttstr onScript_name(TJSMapGlobalStringMap(TJS_N("onScript")));
 					Owner->FuncCall(0, onScript_name.c_str(), onScript_name.GetHint(),
 						NULL, 3, pparam, Owner);
 				}
@@ -1221,7 +1216,7 @@ bool tTJSNI_KAGParser::SkipCommentOrLabel()
 
 	if (DebugLevel >= tkdlVerbose)
 	{
-		TVPAddLog(StorageShortName + TJS_W(" : ") + CurLineStr);
+		TVPAddLog(StorageShortName + TJS_N(" : ") + CurLineStr);
 	}
 
 	return true;
@@ -1283,7 +1278,7 @@ void tTJSNI_KAGParser::FindNearestLabel(tjs_int start, tjs_int& labelline,
 	start--;
 	while (start >= 0)
 	{
-		if (Lines[start].Start[0] == TJS_W('*'))
+		if (Lines[start].Start[0] == TJS_N('*'))
 		{
 			// label found
 			labelname = Scenario->GetLabelAliasFromLine(start);
@@ -1300,7 +1295,7 @@ void tTJSNI_KAGParser::PushCallStack()
 	// push current position information
 	if (DebugLevel >= tkdlVerbose)
 	{
-		TVPAddLog(StorageShortName + TJS_W(" : call stack depth before calling : ")
+		TVPAddLog(StorageShortName + TJS_N(" : call stack depth before calling : ")
 			+ ttstr((int)CallStack.size()));
 	}
 
@@ -1313,7 +1308,7 @@ void tTJSNI_KAGParser::PushCallStack()
 	if (Lines && CurLine < LineCount)
 		curline_content = Lines[CurLine].Start;
 	else
-		curline_content = TJS_W("");
+		curline_content = TJS_N("");
 
 	CallStack.push_back(tCallStackData(StorageName, labelname, CurLine - labelline,
 		curline_content,
@@ -1375,9 +1370,9 @@ void tTJSNI_KAGParser::PopCallStack(const ttstr& storage, const ttstr& label)
 		if (DebugLevel >= tkdlSimple)
 		{
 			ttstr label;
-			if (data.Label.IsEmpty()) label = TJS_W("(start)"); else label = data.Label;
-			TVPAddLog(StorageShortName + TJS_W(" : returned to : ") + label +
-				TJS_W(" line offset ") + ttstr(data.Offset));
+			if (data.Label.IsEmpty()) label = TJS_N("(start)"); else label = data.Label;
+			TVPAddLog(StorageShortName + TJS_N(" : returned to : ") + label +
+				TJS_N(" line offset ") + ttstr(data.Offset));
 		}
 	}
 
@@ -1391,7 +1386,7 @@ void tTJSNI_KAGParser::PopCallStack(const ttstr& storage, const ttstr& label)
 	// call function back
 	if (Owner)
 	{
-		static ttstr onAfterReturn_name(TJS_W("onAfterReturn"));
+		static ttstr onAfterReturn_name(TJS_N("onAfterReturn"));
 		Owner->FuncCall(0, onAfterReturn_name.c_str(), onAfterReturn_name.GetHint(),
 			NULL, 0, NULL, Owner);
 	}
@@ -1399,7 +1394,7 @@ void tTJSNI_KAGParser::PopCallStack(const ttstr& storage, const ttstr& label)
 
 	if (DebugLevel >= tkdlVerbose)
 	{
-		TVPAddLog(StorageShortName + TJS_W(" : call stack depth after returning : ")
+		TVPAddLog(StorageShortName + TJS_N(" : call stack depth after returning : ")
 			+ ttstr((int)CallStack.size()));
 	}
 }
@@ -1427,11 +1422,11 @@ parse_start:
 	if (!Lines) return NULL;
 
 
-	static ttstr __tag_name(TJSMapGlobalStringMap(TJS_W("tagname")));
-	static ttstr __eol_name(TJSMapGlobalStringMap(TJS_W("eol")));
-	static ttstr __storage_name(TJSMapGlobalStringMap(TJS_W("storage")));
-	static ttstr __target_name(TJSMapGlobalStringMap(TJS_W("target")));
-	static ttstr __exp_name(TJSMapGlobalStringMap(TJS_W("exp")));
+	static ttstr __tag_name(TJSMapGlobalStringMap(TJS_N("tagname")));
+	static ttstr __eol_name(TJSMapGlobalStringMap(TJS_N("eol")));
+	static ttstr __storage_name(TJSMapGlobalStringMap(TJS_N("storage")));
+	static ttstr __target_name(TJSMapGlobalStringMap(TJS_N("target")));
+	static ttstr __exp_name(TJSMapGlobalStringMap(TJS_N("exp")));
 
 	while (true)
 	{
@@ -1442,7 +1437,7 @@ parse_start:
 		{
 			// interrupt current parsing
 			// return as "interrupted" tag
-			static tTJSVariant r_val(TJS_W("interrupt"));
+			static tTJSVariant r_val(TJS_N("interrupt"));
 			DicObj->PropSetByVS(TJS_MEMBERENSURE,
 				__tag_name.AsVariantStringNoAddRef(), &r_val, DicObj);
 			Interrupted = false;
@@ -1459,12 +1454,12 @@ parse_start:
 
 		if (!IgnoreCR)
 		{
-			if ((CurLineStr[CurPos] == TJS_W('\\') &&
+			if ((CurLineStr[CurPos] == TJS_N('\\') &&
 				CurLineStr[CurPos + 1] == 0) ||
 				(CurLineStr[CurPos] == 0 && CurPos >= 3 &&
-					CurLineStr[CurPos - 3] == TJS_W('[') &&
-					CurLineStr[CurPos - 2] == TJS_W('p') && // for line ending with [p]
-					CurLineStr[CurPos - 1] == TJS_W(']')))
+					CurLineStr[CurPos - 3] == TJS_N('[') &&
+					CurLineStr[CurPos - 2] == TJS_N('p') && // for line ending with [p]
+					CurLineStr[CurPos - 1] == TJS_N(']')))
 			{
 				// line ended with '\\'
 				CurLine++;
@@ -1477,13 +1472,13 @@ parse_start:
 			{
 				// line ended ...
 				TagLine = CurLine;
-				static tTJSVariant r_val(TJS_W("r"));
-				static tTJSVariant true_val(TJS_W("true"));
+				static tTJSVariant r_val(TJS_N("r"));
+				static tTJSVariant true_val(TJS_N("true"));
 				DicObj->PropSetByVS(TJS_MEMBERENSURE,
 					__tag_name.AsVariantStringNoAddRef(), &r_val, DicObj);
 				DicObj->PropSetByVS(TJS_MEMBERENSURE,
 					__eol_name.AsVariantStringNoAddRef(), &true_val, DicObj);
-				if (RecordingMacro) RecordingMacroStr += TJS_W("[r eol=true]");
+				if (RecordingMacro) RecordingMacroStr += TJS_N("[r eol=true]");
 				CurLine++;
 				CurPos = 0;
 				LineBufferUsing = false;
@@ -1498,22 +1493,22 @@ parse_start:
 
 		tjs_char ldelim; // last delimiter
 
-		if (!LineBufferUsing && CurPos == 0 && CurLineStr[0] == TJS_W('@'))
+		if (!LineBufferUsing && CurPos == 0 && CurLineStr[0] == TJS_N('@'))
 		{
 			// line command mode
 			ldelim = 0; // tag last delimiter is a null terminater
 		}
 		else
 		{
-			if (CurLineStr[CurPos] != TJS_W('[') ||
-				CurLineStr[CurPos] == TJS_W('[') &&
-				CurLineStr[CurPos + 1] == TJS_W('['))
+			if (CurLineStr[CurPos] != TJS_N('[') ||
+				CurLineStr[CurPos] == TJS_N('[') &&
+				CurLineStr[CurPos + 1] == TJS_N('['))
 			{
 				// normal character
-				tjs_char ch = CurLineStr[CurPos];
+                int chLen = utf8_char_len(CurLineStr+CurPos);
 				TagLine = CurLine;
 
-				if (ch == 0)
+				if (chLen == 0)
 				{
 					// line ended
 					CurLine++;
@@ -1521,40 +1516,40 @@ parse_start:
 					LineBufferUsing = false;
 					continue;
 				}
-				else if (ch == TJS_W('\t'))
+				else if (chLen == 1 && CurLineStr[CurPos] == TJS_N('\t'))
 				{
 					CurPos++;
 					continue;
 				}
-				else if (ch != TJS_W('\n'))
+				else if (chLen > 0 && CurLineStr[CurPos] != TJS_N('\n'))
 				{
-					static tTJSVariant tag_val(TJS_W("ch"));
+					static tTJSVariant tag_val(TJS_N("ch"));
 					DicObj->PropSetByVS(TJS_MEMBERENSURE,
 						__tag_name.AsVariantStringNoAddRef(), &tag_val, DicObj);
-					tTJSVariant ch_val(ttstr(CurLineStr + CurPos, 1));
-					static ttstr text_name(TJSMapGlobalStringMap(TJS_W("text")));
+					tTJSVariant ch_val(ttstr(CurLineStr + CurPos, chLen));
+					static ttstr text_name(TJSMapGlobalStringMap(TJS_N("text")));
 					DicObj->PropSetByVS(TJS_MEMBERENSURE,
 						text_name.AsVariantStringNoAddRef(), &ch_val, DicObj);
 
 					if (RecordingMacro)
 					{
-						if (ch == TJS_W('['))
-							RecordingMacroStr += TJS_W("[[");
+						if (chLen == 1 && CurLineStr[CurPos] == TJS_N('['))
+							RecordingMacroStr += TJS_N("[[");
 						else
-							RecordingMacroStr += ch;
+							RecordingMacroStr += ttstr(CurLineStr + CurPos, chLen);
 					}
 				}
 				else
 				{
 					// \n  ( reline )
-					static tTJSVariant r_val(TJS_W("r"));
+					static tTJSVariant r_val(TJS_N("r"));
 					DicObj->PropSetByVS(TJS_MEMBERENSURE,
 						__tag_name.AsVariantStringNoAddRef(), &r_val, DicObj);
-					if (RecordingMacro) RecordingMacroStr += TJS_W("[r]");
+					if (RecordingMacro) RecordingMacroStr += TJS_N("[r]");
 				}
 
-				if (CurLineStr[CurPos] == TJS_W('[')) CurPos++;
-				CurPos++;
+				if (chLen == 1 && CurLineStr[CurPos] == TJS_N('[')) CurPos++;
+				CurPos += chLen;
 
 				if (!RecordingMacro && ExcludeLevel == -1)
 				{
@@ -1564,7 +1559,7 @@ parse_start:
 				continue;
 			}
 
-			ldelim = TJS_W(']');
+			ldelim = TJS_N(']');
 		}
 
 		// a tag
@@ -1608,33 +1603,33 @@ parse_start:
 		{
 			tag_checker_init = true;
 			special_tags_hash.Add(
-				ttstr(TJS_W("if")), (tjs_int)tag_if);
+				ttstr(TJS_N("if")), (tjs_int)tag_if);
 			special_tags_hash.Add(
-				ttstr(TJS_W("ignore")), (tjs_int)tag_ignore);
+				ttstr(TJS_N("ignore")), (tjs_int)tag_ignore);
 			special_tags_hash.Add(
-				ttstr(TJS_W("endif")), (tjs_int)tag_endif);
+				ttstr(TJS_N("endif")), (tjs_int)tag_endif);
 			special_tags_hash.Add(
-				ttstr(TJS_W("endignore")), (tjs_int)tag_endignore);
+				ttstr(TJS_N("endignore")), (tjs_int)tag_endignore);
 			special_tags_hash.Add(
-				ttstr(TJS_W("else")), (tjs_int)tag_else);
+				ttstr(TJS_N("else")), (tjs_int)tag_else);
 			special_tags_hash.Add(
-				ttstr(TJS_W("elsif")), (tjs_int)tag_elsif);
+				ttstr(TJS_N("elsif")), (tjs_int)tag_elsif);
 			special_tags_hash.Add(
-				ttstr(TJS_W("emb")), (tjs_int)tag_emb);
+				ttstr(TJS_N("emb")), (tjs_int)tag_emb);
 			special_tags_hash.Add(
-				ttstr(TJS_W("macro")), (tjs_int)tag_macro);
+				ttstr(TJS_N("macro")), (tjs_int)tag_macro);
 			special_tags_hash.Add(
-				ttstr(TJS_W("endmacro")), (tjs_int)tag_endmacro);
+				ttstr(TJS_N("endmacro")), (tjs_int)tag_endmacro);
 			special_tags_hash.Add(
-				ttstr(TJS_W("macropop")), (tjs_int)tag_macropop);
+				ttstr(TJS_N("macropop")), (tjs_int)tag_macropop);
 			special_tags_hash.Add(
-				ttstr(TJS_W("erasemacro")), (tjs_int)tag_erasemacro);
+				ttstr(TJS_N("erasemacro")), (tjs_int)tag_erasemacro);
 			special_tags_hash.Add(
-				ttstr(TJS_W("jump")), (tjs_int)tag_jump);
+				ttstr(TJS_N("jump")), (tjs_int)tag_jump);
 			special_tags_hash.Add(
-				ttstr(TJS_W("call")), (tjs_int)tag_call);
+				ttstr(TJS_N("call")), (tjs_int)tag_call);
 			special_tags_hash.Add(
-				ttstr(TJS_W("return")), (tjs_int)tag_return);
+				ttstr(TJS_N("return")), (tjs_int)tag_return);
 		}
 
 
@@ -1653,7 +1648,7 @@ parse_start:
 						{ \
 							if(DebugLevel >= tkdlSimple && ldelim != 0 && CurLineStr[CurPos+1] != 0) \
 							{ \
-								TVPAddLog(StorageShortName + TJS_W(" : ignore after multi-line tag : ") + (&CurLineStr[CurPos+1])); \
+								TVPAddLog(StorageShortName + TJS_N(" : ignore after multi-line tag : ") + (&CurLineStr[CurPos+1])); \
 							} \
 							CurLine = multiLine+1; \
 							CurPos = 0; \
@@ -1694,11 +1689,11 @@ parse_start:
 						RecordingMacro = false;
 						if (DebugLevel >= tkdlVerbose)
 						{
-							//TVPAddLog(TJS_W("macro : ") + RecordingMacroName +
-							//	TJS_W(" : ") + RecordingMacroStr);
+							//TVPAddLog(TJS_N("macro : ") + RecordingMacroName +
+							//	TJS_N(" : ") + RecordingMacroStr);
 						}
 
-						RecordingMacroStr += TJS_W("[macropop]");
+						RecordingMacroStr += TJS_N("[macropop]");
 						// ensure macro arguments are to be popped
 
 					// register macro
@@ -1721,9 +1716,9 @@ parse_start:
 							// line command
 							if (CurPos - tagstart >= 1)
 							{
-								RecordingMacroStr += TJS_W("[") +
+								RecordingMacroStr += TJS_N("[") +
 									ttstr(CurLineStr + tagstart + 1,
-										CurPos - tagstart - 1) + TJS_W("]");
+										CurPos - tagstart - 1) + TJS_N("]");
 							}
 						}
 
@@ -1770,7 +1765,7 @@ parse_start:
 						ttstr exp;
 						DicObj->PropGet(0, __exp_name.c_str(), __exp_name.GetHint(), &val, DicObj);
 						exp = val;
-						if (exp == TJS_W(""))
+						if (exp == TJS_N(""))
 							TVPThrowExceptionMessage(TVPKAGSyntaxError);
 						TVPExecuteExpression(exp, Owner, &val);
 
@@ -1803,7 +1798,7 @@ parse_start:
 						DicObj->PropGet(0, __exp_name.c_str(), __exp_name.GetHint(), &val, DicObj);
 						exp = val;
 						//const std::string s = exp.AsStdString();
-						if (exp == TJS_W(""))
+						if (exp == TJS_N(""))
 							TVPThrowExceptionMessage(TVPKAGSyntaxError);
 						TVPExecuteExpression(exp, Owner, &val);
 
@@ -1871,7 +1866,7 @@ parse_start:
 							ttstr exp;
 							DicObj->PropGet(0, __exp_name.c_str(), __exp_name.GetHint(), &val, DicObj);
 							exp = val;
-							if (exp == TJS_W(""))
+							if (exp == TJS_N(""))
 								TVPThrowExceptionMessage(TVPKAGSyntaxError);
 							TVPExecuteExpression(exp, Owner, &val);
 							exp = val;
@@ -1881,7 +1876,7 @@ parse_start:
 							tjs_int r_count = 0;
 							while (*p)
 							{
-								if (*p == TJS_W('[')) r_count++;
+								if (*p == TJS_N('[')) r_count++;
 								p++;
 								r_count++;
 							}
@@ -1902,10 +1897,10 @@ parse_start:
 							p = exp.c_str();
 							while (*p)
 							{
-								if (*p == TJS_W('['))
+								if (*p == TJS_N('['))
 								{
-									*d = TJS_W('['); d++;
-									*d = TJS_W('['); d++;
+									*d = TJS_N('['); d++;
+									*d = TJS_N('['); d++;
 								}
 								else
 								{
@@ -1919,7 +1914,7 @@ parse_start:
 							if (ldelim == 0 && !IgnoreCR)
 							{
 								d += curposlen;
-								*d = TJS_W('\\'); d++;
+								*d = TJS_N('\\'); d++;
 								*d = 0;
 							}
 
@@ -1946,7 +1941,7 @@ parse_start:
 							if (ldelim == 0 && !IgnoreCR)
 							{
 								d += curposlen;
-								*d = TJS_W('\\'); d++;
+								*d = TJS_N('\\'); d++;
 								*d = 0;
 							}
 
@@ -1982,7 +1977,7 @@ parse_start:
 						{
 							tTJSVariant param(DicObj, DicObj);
 							tTJSVariant* pparam = &param;
-							static ttstr event_name(TJSMapGlobalStringMap(TJS_W("onJump")));
+							static ttstr event_name(TJSMapGlobalStringMap(TJS_N("onJump")));
 							tTJSVariant res;
 							tjs_error er = Owner->FuncCall(0, event_name.c_str(),
 								event_name.GetHint(), &res, 1, &pparam, Owner);
@@ -2013,7 +2008,7 @@ parse_start:
 						{
 							tTJSVariant param(DicObj, DicObj);
 							tTJSVariant* pparam = &param;
-							static ttstr event_name(TJSMapGlobalStringMap(TJS_W("onCall")));
+							static ttstr event_name(TJSMapGlobalStringMap(TJS_N("onCall")));
 							tTJSVariant res;
 							tjs_error er = Owner->FuncCall(0, event_name.c_str(),
 								event_name.GetHint(), &res, 1, &pparam, Owner);
@@ -2047,7 +2042,7 @@ parse_start:
 						{
 							tTJSVariant param(DicObj, DicObj);
 							tTJSVariant* pparam = &param;
-							static ttstr event_name(TJSMapGlobalStringMap(TJS_W("onReturn")));
+							static ttstr event_name(TJSMapGlobalStringMap(TJS_N("onReturn")));
 							tTJSVariant res;
 							tjs_error er = Owner->FuncCall(0, event_name.c_str(),
 								event_name.GetHint(), &res, 1, &pparam, Owner);
@@ -2065,10 +2060,10 @@ parse_start:
 						if (tagkind == tag_macro)
 						{
 							tTJSVariant val;
-							DicObj->PropGet(0, TJS_W("name"), 0, &val, DicObj);
+							DicObj->PropGet(0, TJS_N("name"), 0, &val, DicObj);
 							RecordingMacroName = val;
 							RecordingMacroName.ToLowerCase();
-							if (RecordingMacroName == TJS_W(""))
+							if (RecordingMacroName == TJS_N(""))
 								TVPThrowExceptionMessage(TVPKAGSyntaxError);
 							// missing macro name
 							RecordingMacro = true; // start recording macro
@@ -2082,7 +2077,7 @@ parse_start:
 						else if (tagkind == tag_erasemacro)
 						{
 							tTJSVariant val;
-							DicObj->PropGet(0, TJS_W("name"), 0, &val, DicObj);
+							DicObj->PropGet(0, TJS_N("name"), 0, &val, DicObj);
 							ttstr macroname = val;
 							if (TJS_FAILED(
 								Macros->DeleteMember(0, macroname.c_str(), 0, Macros)))
@@ -2097,7 +2092,7 @@ parse_start:
 
 			// check multiline tag
 			if (MultiLineTagEnabled &&
-				CurLineStr[CurPos] == TJS_W('\\') &&
+				CurLineStr[CurPos] == TJS_N('\\') &&
 				CurLineStr[CurPos + 1] == 0)
 			{
 				// extract multiline
@@ -2107,7 +2102,7 @@ parse_start:
 				tjs_int          curlen = TJS_strlen(CurLineStr) - 1; // ignore "\"
 				tjs_int          nextlen = Lines[multiLine].Length - 1; // ignore ";"
 				const tjs_char* next = Lines[multiLine].Start;
-				if (next[0] != TJS_W(';'))
+				if (next[0] != TJS_N(';'))
 					TVPThrowExceptionMessage(TVP_KAGPARSER_MESSAGEMAP(TVPKAGSyntaxError));
 
 				tjs_int finallen = curlen + nextlen;
@@ -2130,7 +2125,7 @@ parse_start:
 				TVPThrowExceptionMessage(TVPKAGSyntaxError);
 
 			// attrib name
-			if (CurLineStr[CurPos] == TJS_W('*'))
+			if (CurLineStr[CurPos] == TJS_N('*'))
 			{
 				// macro entity all
 				if (!RecordingMacro)
@@ -2156,7 +2151,7 @@ parse_start:
 
 			const tjs_char* attribnamestart = CurLineStr + CurPos;
 			while (CurLineStr[CurPos] && !TVPIsWS(CurLineStr[CurPos]) &&
-				CurLineStr[CurPos] != TJS_W('=') && CurLineStr[CurPos] != ldelim)
+				CurLineStr[CurPos] != TJS_N('=') && CurLineStr[CurPos] != ldelim)
 				CurPos++;
 
 			const tjs_char* attribnameend = CurLineStr + CurPos;
@@ -2171,10 +2166,10 @@ parse_start:
 			bool macroarg = false;
 			ttstr value;
 
-			if (CurLineStr[CurPos] != TJS_W('='))
+			if (CurLineStr[CurPos] != TJS_N('='))
 			{
 				// arrtibute value omitted
-				value = TJS_W("true"); // always true
+				value = TJS_N("true"); // always true
 			}
 			else
 			{
@@ -2190,13 +2185,13 @@ parse_start:
 				// attrib value
 				tjs_char vdelim = 0; // value delimiter
 
-				if (CurLineStr[CurPos] == TJS_W('&'))
+				if (CurLineStr[CurPos] == TJS_N('&'))
 					entity = true, CurPos++;
-				else if (CurLineStr[CurPos] == TJS_W('%'))
+				else if (CurLineStr[CurPos] == TJS_N('%'))
 					macroarg = true, CurPos++;
 
-				if (CurLineStr[CurPos] == TJS_W('\"') ||
-					CurLineStr[CurPos] == TJS_W('\''))
+				if (CurLineStr[CurPos] == TJS_N('\"') ||
+					CurLineStr[CurPos] == TJS_N('\''))
 				{
 					vdelim = CurLineStr[CurPos];
 					CurPos++;
@@ -2209,7 +2204,7 @@ parse_start:
 						(CurLineStr[CurPos] != ldelim &&
 							!TVPIsWS(CurLineStr[CurPos]))))
 				{
-					if (CurLineStr[CurPos] == TJS_W('`'))
+					if (CurLineStr[CurPos] == TJS_N('`'))
 					{
 						// escaped with '`'
 						CurPos++;
@@ -2233,12 +2228,12 @@ parse_start:
 					tjs_char* vp = value.Independ();
 					tjs_char* wvp = vp;
 
-					if (!entity && *vp == TJS_W('&')) entity = true, vp++;
-					if (!macroarg && *vp == TJS_W('%')) macroarg = true, vp++;
+					if (!entity && *vp == TJS_N('&')) entity = true, vp++;
+					if (!macroarg && *vp == TJS_N('%')) macroarg = true, vp++;
 
 					while (*vp)
 					{
-						if (*vp == TJS_W('`'))
+						if (*vp == TJS_N('`'))
 						{
 							vp++;
 							if (!*vp) break;
@@ -2267,7 +2262,7 @@ parse_start:
 					iTJSDispatch2* args = GetMacroTopNoAddRef();
 					if (args)
 					{
-						tjs_char* vp = TJS_strchr(const_cast<tjs_char*>(value.c_str()), TJS_W('|'));
+						tjs_char* vp = TJS_strchr(const_cast<tjs_char*>(value.c_str()), TJS_N('|'));
 
 						if (vp)
 						{
@@ -2292,7 +2287,7 @@ parse_start:
 					ValueVariant = value;
 				}
 
-				if (attribname == TJS_W("cond"))
+				if (attribname == TJS_N("cond"))
 				{
 					// condition
 
@@ -2336,7 +2331,7 @@ static iTJSNativeInstance* Create_NI_KAGParser() {
 // tTJSNC_KAGParser : KAGParser TJS native class
 //---------------------------------------------------------------------------
 iTJSDispatch2* TVPCreateNativeClass_KAGParser() {
-	tTJSNativeClassForPlugin* classobj = TJSCreateNativeClassForPlugin(TJS_W("KAGParser"), Create_NI_KAGParser);
+	tTJSNativeClassForPlugin* classobj = TJSCreateNativeClassForPlugin(TJS_N("KAGParser"), Create_NI_KAGParser);
 	// register native methods/properties
 #undef TJS_NCM_REG_THIS
 #define TJS_NCM_REG_THIS classobj

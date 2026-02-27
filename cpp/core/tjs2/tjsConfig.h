@@ -54,11 +54,6 @@ tjs_int TJS_sprintf(tjs_char* s, const tjs_char* format, ...);
 tjs_int TJS_timezone();
 
 #define TJS_strncpy_s(d, dl, s, sl)		TJS_strncpy(d, s, sl)
-#if defined(_MSC_VER)
-#define TJS_cdecl __cdecl
-#else
-#define TJS_cdecl
-#endif
 
 #define TJS_narrowtowidelen(X) TJS_mbstowcs(NULL, (X),0) // narrow->wide (if) converted length
 #define TJS_narrowtowide TJS_mbstowcs
@@ -67,16 +62,32 @@ void TJS_debug_out(const tjs_char* format, ...);
 
 #if TJS_DEBUG_TRACE
 #define TJS_D(x)	TJS_debug_out x;
-#define TJS_F_TRACE(x) tTJSFuncTrace ___trace(TJS_W(x));
+#define TJS_F_TRACE(x) tTJSFuncTrace ___trace(TJS_N(x));
 #else
 #define TJS_D(x)
 #define TJS_F_TRACE(x)
 #endif
 
-size_t TJS_mbstowcs(tjs_char* pwcs, const tjs_nchar* s, size_t n);
-size_t TJS_wcstombs(tjs_nchar* s, const tjs_char* pwcs, size_t n);
-int TJS_mbtowc(tjs_char* pwc, const tjs_nchar* s, size_t n);
-int TJS_wctomb(tjs_nchar* s, tjs_char wc);
+size_t TJS_mbstowcs(tjs_wchar* pwcs, const tjs_char* s, size_t n);
+size_t TJS_wcstombs(tjs_char* s, const tjs_wchar* pwcs, size_t n);
+int TJS_mbtowc(tjs_wchar* pwc, const tjs_char* s, size_t n);
+int TJS_wctomb(tjs_char* s, tjs_wchar wc);
+tjs_int64 TVPWideCharToUtf8(tjs_wchar in, char* out);
+tjs_int64 TVPWideCharToUtf8String(const tjs_wchar* in, char* out, size_t max_len = 0);
+bool TVP_utf8_to_utf16(const char* in, tjs_wchar* out);
+tjs_int64 TVPUtf8ToWideCharString(const char* in, tjs_wchar* out);
+tjs_int64 TVPUtf8ToWideCharString(const char* in, tjs_uint length, tjs_wchar* out);
+std::vector<uint32_t> decodeUTF8ToTTF(const char* utf8_str);
+std::vector<tjs_wchar> decodeUTF8ToTTFe(const char* utf8_str);
+tjs_int64 utf8_char_len(const char* str);
+tjs_int64 utf8_chars_len(const char* str);
+tjs_int64 utf8_indexOf(const char* data, const char* chs, int startpos = 0);
+const char* utf8_substr(const char* data, int start, int len, int& retLen);
+void utf8_reverse(const char* data, char* outputdata);
+const char* utf8_char_get(const char* str, int idx);
+bool TJS_iswspace(const char* chs);
+bool TJS_iswdigit(const char* chs);
+tjs_int TJS_iswalpha(const char* chs);
 
 int TJS_strcmp(const tjs_char* src, const tjs_char* dst);
 int TJS_strncmp(const tjs_char* first, const tjs_char* last, size_t count);
@@ -93,12 +104,6 @@ double TJS_strtod(const tjs_char* pString, tjs_char** ppEnd);
 size_t TJS_strftime(tjs_char* wstring, size_t maxsize, const tjs_char* wformat, const tm* timeptr);
 int TJS_vsnprintf(tjs_char* string, size_t count, const tjs_char* format, va_list ap);
 tjs_int TJS_snprintf(tjs_char* s, size_t count, const tjs_char* format, ...);
-
-#ifdef _MSC_VER
-#define __STR2__(x) #x
-#define __STR1__(x) __STR2__(x)
-#define __LOC__ __FILE__ "("__STR1__(__LINE__)") : Warning Msg: "
-#endif
 
 void TJSNativeDebuggerBreak();
 void TJSSetFPUE();
@@ -141,32 +146,11 @@ public:
 	tTJSFuncTrace(tjs_char* p)
 	{
 		funcname = p;
-		TJS_debug_out(TJS_W("enter: %ls\n"), funcname);
+		TJS_debug_out(TJS_N("enter: %s\n"), funcname);
 	}
 	~tTJSFuncTrace()
 	{
-		TJS_debug_out(TJS_W("exit: %ls\n"), funcname);
-	}
-};
-//---------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------
-// tTJSNarrowStringHolder : converts wide -> narrow, and holds it until be destroyed
-//---------------------------------------------------------------------------
-struct tTJSNarrowStringHolder
-{
-	bool Allocated;
-	tjs_nchar* Buf;
-public:
-	tTJSNarrowStringHolder(const tjs_char* wide);
-
-	~tTJSNarrowStringHolder(void);
-
-	operator const tjs_nchar* ()
-	{
-		return Buf;
+		TJS_debug_out(TJS_N("exit: %s\n"), funcname);
 	}
 };
 //---------------------------------------------------------------------------

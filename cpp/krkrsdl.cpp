@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 
 #include <map>
+#include <vector>
 
 #include "TVPApplication.h"
 #include "RenderManager.h"

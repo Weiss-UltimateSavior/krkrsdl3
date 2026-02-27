@@ -240,7 +240,7 @@ void SDL_GL_DestroyTexture(SDL_Sprite* sp)
     GLuint grp[1] = {(GLuint)sp->texture};
     glDeleteTextures(1, grp);
 
-    sp->texture = NULL;
+    sp->texture = 0;
 }
 
 }

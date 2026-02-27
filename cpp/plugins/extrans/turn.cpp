@@ -528,7 +528,7 @@ public:
 			/*out*/const tjs_char ** name)
 	{
 		// このトランジションの名前を返す
-		if(name) *name = TJS_W("turn");
+		if(name) *name = TJS_N("turn");
 		return TJS_S_OK;
 	}
 
@@ -559,13 +559,13 @@ public:
 		tjs_uint64 time;
 		tjs_uint32 bgcolor = 0;
 
-		if(TJS_FAILED(options->GetValue(TJS_W("time"), &tmp)))
+		if(TJS_FAILED(options->GetValue(TJS_N("time"), &tmp)))
 			return TJS_E_FAIL; // time 属性が指定されていない
 		if(tmp.Type() == tvtVoid) return TJS_E_FAIL;
 		time = (tjs_int64)tmp;
 		if(time < 2) time = 2; // あまり小さな数値を指定すると問題が起きるので
 
-		if(TJS_SUCCEEDED(options->GetValue(TJS_W("bgcolor"), &tmp)))
+		if(TJS_SUCCEEDED(options->GetValue(TJS_N("bgcolor"), &tmp)))
 		if(tmp.Type() != tvtVoid) bgcolor = (tjs_int)tmp;
 
 		// オブジェクトを作成

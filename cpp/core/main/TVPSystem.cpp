@@ -47,7 +47,7 @@ void TVPFireOnApplicationActivateEvent(bool activate_or_deactivate)
         try
         {
                 tjs_error er;
-                er = global->PropGet(TJS_MEMBERMUSTEXIST, TJS_W("System"), NULL, &val, global);
+                er = global->PropGet(TJS_MEMBERMUSTEXIST, TJS_N("System"), NULL, &val, global);
                 if (TJS_FAILED(er)) return;
 
                 if (val.Type() != tvtObject) return;
@@ -58,8 +58,8 @@ void TVPFireOnApplicationActivateEvent(bool activate_or_deactivate)
 
                 clo.PropGet(TJS_MEMBERMUSTEXIST,
                         activate_or_deactivate ?
-                        TJS_W("onActivate") :
-                        TJS_W("onDeactivate"),
+                        TJS_N("onActivate") :
+                        TJS_N("onDeactivate"),
                         NULL, &val2, NULL);
 
                 if (val2.Type() != tvtObject) return;
@@ -127,9 +127,9 @@ static void InitRegisterData()
 {
         static bool dataInited = false;
         if (!dataInited) {
-                ttstr regfile = TVPGetAppDataPath() + TJS_W("RegisterData.tjs");
+                ttstr regfile = TVPGetAppDataPath() + TJS_N("RegisterData.tjs");
                 if (TVPIsExistentStorageNoSearch(regfile)) {
-                        TVPExecuteStorage(regfile, &RegisterData, true, TJS_W(""));
+                        TVPExecuteStorage(regfile, &RegisterData, true, TJS_N(""));
                 }
         }
 }
@@ -315,21 +315,21 @@ extern void TVPDoSaveSystemVariables()
                 iTJSDispatch2* global = TVPGetScriptDispatch();
                 if (!global) return;
                 tTJSVariant var;
-                if (global->PropGet(0, TJS_W("kag"), nullptr, &var, global) == TJS_S_OK && var.Type() == tvtObject) {
+                if (global->PropGet(0, TJS_N("kag"), nullptr, &var, global) == TJS_S_OK && var.Type() == tvtObject) {
                         iTJSDispatch2* kag = var.AsObjectNoAddRef();
-                        if (kag->PropGet(0, TJS_W("saveSystemVariables"), nullptr, &var, kag) == TJS_S_OK) {
+                        if (kag->PropGet(0, TJS_N("saveSystemVariables"), nullptr, &var, kag) == TJS_S_OK) {
                                 iTJSDispatch2* fn = var.AsObjectNoAddRef();
-                                if (fn->IsInstanceOf(0, 0, 0, TJS_W("Function"), fn)) {
+                                if (fn->IsInstanceOf(0, 0, 0, TJS_N("Function"), fn)) {
                                         tTJSVariant* args = nullptr;
                                         fn->FuncCall(0, nullptr, nullptr, nullptr, 0, &args, kag);
                                 }
                         }
                         if (TVPAutoSaveBookMark
-                                && kag->PropGet(0, TJS_W("saveBookMark"), nullptr, &var, kag) == TJS_S_OK
+                                && kag->PropGet(0, TJS_N("saveBookMark"), nullptr, &var, kag) == TJS_S_OK
                                 && var.Type() == tvtObject)
                         {
                                 iTJSDispatch2* fn = var.AsObjectNoAddRef();
-                                if (fn->IsInstanceOf(0, 0, 0, TJS_W("Function"), fn)) {
+                                if (fn->IsInstanceOf(0, 0, 0, TJS_N("Function"), fn)) {
                                         tTJSVariant num((tjs_int32)0);
                                         tTJSVariant* args = &num;
                                         fn->FuncCall(0, nullptr, nullptr, nullptr, 1, &args, kag);
@@ -787,9 +787,9 @@ static void TVPDumpCPUFlags(ttstr& line, DWORD flags, DWORD bit, tjs_char* name)
 {
         line += name;
         if (flags & bit)
-                line += TJS_W("+ ");
+                line += TJS_N("+ ");
         else
-                line += TJS_W("- ");
+                line += TJS_N("- ");
 }
 //---------------------------------------------------------------------------
 void TVPDumpOSContext(const CONTEXT& ctx)
@@ -803,23 +803,23 @@ void TVPDumpOSContext(const CONTEXT& ctx)
 
         // - context flags
         ttstr line;
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Context Flags : 0x%08X [ "), ctx.ContextFlags);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Context Flags : 0x%08X [ "), ctx.ContextFlags);
         line += buf;
         if (ctx.ContextFlags & CONTEXT_DEBUG_REGISTERS)
-                line += TJS_W("CONTEXT_DEBUG_REGISTERS ");
+                line += TJS_N("CONTEXT_DEBUG_REGISTERS ");
         if (ctx.ContextFlags & CONTEXT_FLOATING_POINT)
-                line += TJS_W("CONTEXT_FLOATING_POINT ");
+                line += TJS_N("CONTEXT_FLOATING_POINT ");
         if (ctx.ContextFlags & CONTEXT_SEGMENTS)
-                line += TJS_W("CONTEXT_SEGMENTS ");
+                line += TJS_N("CONTEXT_SEGMENTS ");
         if (ctx.ContextFlags & CONTEXT_INTEGER)
-                line += TJS_W("CONTEXT_INTEGER ");
+                line += TJS_N("CONTEXT_INTEGER ");
         if (ctx.ContextFlags & CONTEXT_CONTROL)
-                line += TJS_W("CONTEXT_CONTROL ");
+                line += TJS_N("CONTEXT_CONTROL ");
 #ifndef TJS_64BIT_OS
         if (ctx.ContextFlags & CONTEXT_EXTENDED_REGISTERS)
-                line += TJS_W("CONTEXT_EXTENDED_REGISTERS ");
+                line += TJS_N("CONTEXT_EXTENDED_REGISTERS ");
 #endif
-        line += TJS_W("]");
+        line += TJS_N("]");
 
         TVPAddLog(line);
 
@@ -827,183 +827,183 @@ void TVPDumpOSContext(const CONTEXT& ctx)
         // - debug registers
 #ifndef TJS_64BIT_OS
         TJS_snprintf(buf, BUF_SIZE,
-                TJS_W("Debug Registers   : ")
-                TJS_W("0:0x%08X  ")
-                TJS_W("1:0x%08X  ")
-                TJS_W("2:0x%08X  ")
-                TJS_W("3:0x%08X  ")
-                TJS_W("6:0x%08X  ")
-                TJS_W("7:0x%08X  "),
+                TJS_N("Debug Registers   : ")
+                TJS_N("0:0x%08X  ")
+                TJS_N("1:0x%08X  ")
+                TJS_N("2:0x%08X  ")
+                TJS_N("3:0x%08X  ")
+                TJS_N("6:0x%08X  ")
+                TJS_N("7:0x%08X  "),
                 ctx.Dr0, ctx.Dr1, ctx.Dr2, ctx.Dr3, ctx.Dr6, ctx.Dr7);
 #else
         TJS_snprintf(buf, BUF_SIZE,
-                TJS_W("Debug Registers   : ")
-                TJS_W("0:0x%016lx  ")
-                TJS_W("1:0x%016lx  ")
-                TJS_W("2:0x%016lx  ")
-                TJS_W("3:0x%016lx  ")
-                TJS_W("6:0x%016lx  ")
-                TJS_W("7:0x%016lx  "),
+                TJS_N("Debug Registers   : ")
+                TJS_N("0:0x%016lx  ")
+                TJS_N("1:0x%016lx  ")
+                TJS_N("2:0x%016lx  ")
+                TJS_N("3:0x%016lx  ")
+                TJS_N("6:0x%016lx  ")
+                TJS_N("7:0x%016lx  "),
                 ctx.Dr0, ctx.Dr1, ctx.Dr2, ctx.Dr3, ctx.Dr6, ctx.Dr7);
 #endif
         TVPAddLog(buf);
 
 
         // - Segment registers
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Segment Registers : GS:0x%04X  FS:0x%04X  ES:0x%04X  DS:0x%04X  CS:0x%04X  SS:0x%04X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Segment Registers : GS:0x%04X  FS:0x%04X  ES:0x%04X  DS:0x%04X  CS:0x%04X  SS:0x%04X"),
                 ctx.SegGs, ctx.SegFs, ctx.SegEs, ctx.SegDs, ctx.SegCs, ctx.SegSs);
         TVPAddLog(buf);
 
         // - Generic Integer Registers
 #ifdef TJS_64BIT_OS
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Integer Registers : RAX:0x%016lx  RBX:0x%016lx  RCX:0x%016lx  RDX:0x%016lx"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Integer Registers : RAX:0x%016lx  RBX:0x%016lx  RCX:0x%016lx  RDX:0x%016lx"),
                 ctx.Rax, ctx.Rbx, ctx.Rcx, ctx.Rdx);
         TVPAddLog(buf);
 
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("R8 :0x%016lx  R9 :0x%016lx  R10:0x%016lx  R11:0x%016lx"), ctx.R8, ctx.R9, ctx.R10, ctx.R11);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("R8 :0x%016lx  R9 :0x%016lx  R10:0x%016lx  R11:0x%016lx"), ctx.R8, ctx.R9, ctx.R10, ctx.R11);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("R12:0x%016lx  R13:0x%016lx  R14:0x%016lx  R15:0x%016lx"), ctx.R12, ctx.R13, ctx.R14, ctx.R15);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("R12:0x%016lx  R13:0x%016lx  R14:0x%016lx  R15:0x%016lx"), ctx.R12, ctx.R13, ctx.R14, ctx.R15);
         TVPAddLog(buf);
 #else
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Integer Registers : EAX:0x%08X  EBX:0x%08X  ECX:0x%08X  EDX:0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Integer Registers : EAX:0x%08X  EBX:0x%08X  ECX:0x%08X  EDX:0x%08X"),
                 ctx.Eax, ctx.Ebx, ctx.Ecx, ctx.Edx);
         TVPAddLog(buf);
 #endif
 
         // - Index Registers
 #ifdef TJS_64BIT_OS
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Index Registers   : RSI:0x%016lx  RDI:0x%016lx"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Index Registers   : RSI:0x%016lx  RDI:0x%016lx"),
                 ctx.Rsi, ctx.Rdi);
 #else
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Index Registers   : ESI:0x%08X  EDI:0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Index Registers   : ESI:0x%08X  EDI:0x%08X"),
                 ctx.Esi, ctx.Edi);
 #endif
         TVPAddLog(buf);
 
         // - Pointer Registers
 #ifdef TJS_64BIT_OS
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Pointer Registers : RBP:0x%016lx  RSP:0x%016lx  RIP:0x%016lx"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Pointer Registers : RBP:0x%016lx  RSP:0x%016lx  RIP:0x%016lx"),
                 ctx.Rbp, ctx.Rsp, ctx.Rip);
 #else
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Pointer Registers : EBP:0x%08X  ESP:0x%08X  EIP:0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Pointer Registers : EBP:0x%08X  ESP:0x%08X  EIP:0x%08X"),
                 ctx.Ebp, ctx.Esp, ctx.Eip);
 #endif
         TVPAddLog(buf);
 
         // - Flag Register
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("Flag Register     : 0x%08X [ "),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("Flag Register     : 0x%08X [ "),
                 ctx.EFlags);
         line = buf;
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 0), TJS_W("CF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 2), TJS_W("PF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 4), TJS_W("AF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 6), TJS_W("ZF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 7), TJS_W("SF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 8), TJS_W("TF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 9), TJS_W("IF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 10), TJS_W("DF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 11), TJS_W("OF"));
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("IO%d "), (ctx.EFlags >> 12) & 0x03);
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 0), TJS_N("CF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 2), TJS_N("PF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 4), TJS_N("AF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 6), TJS_N("ZF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 7), TJS_N("SF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 8), TJS_N("TF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 9), TJS_N("IF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 10), TJS_N("DF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 11), TJS_N("OF"));
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("IO%d "), (ctx.EFlags >> 12) & 0x03);
         line += buf;
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 14), TJS_W("NF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 16), TJS_W("RF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 17), TJS_W("VM"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 18), TJS_W("AC"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 19), TJS_W("VF"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 20), TJS_W("VP"));
-        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 21), TJS_W("ID"));
-        line += TJS_W("]");
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 14), TJS_N("NF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 16), TJS_N("RF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 17), TJS_N("VM"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 18), TJS_N("AC"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 19), TJS_N("VF"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 20), TJS_N("VP"));
+        TVPDumpCPUFlags(line, ctx.EFlags, (1 << 21), TJS_N("ID"));
+        line += TJS_N("]");
         TVPAddLog(line);
 
         // - FP registers
 
         // -- control words
 #ifdef TJS_64BIT_OS
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP Control Word : 0x%08X   FP Status Word : 0x%08X   FP Tag Word : 0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP Control Word : 0x%08X   FP Status Word : 0x%08X   FP Tag Word : 0x%08X"),
                 ctx.FltSave.ControlWord, ctx.FltSave.StatusWord, ctx.FltSave.TagWord);
         TVPAddLog(buf);
 
         // -- offsets/selectors
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP Error Offset : 0x%08X   FP Error Selector : 0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP Error Offset : 0x%08X   FP Error Selector : 0x%08X"),
                 ctx.FltSave.ErrorOffset, ctx.FltSave.ErrorSelector);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP Data Offset  : 0x%08X   FP Data Selector  : 0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP Data Offset  : 0x%08X   FP Data Selector  : 0x%08X"),
                 ctx.FltSave.DataOffset, ctx.FltSave.DataSelector);
 
         // -- registers
         long double* ptr = (long double*)&(ctx.FltSave.FloatRegisters[0]);
         for (tjs_int i = 0; i < 8; i++)
         {
-                TJS_snprintf(buf, BUF_SIZE, TJS_W("FP ST(%d) : %28.20Lg 0x%04X%016I64X"), i,
+                TJS_snprintf(buf, BUF_SIZE, TJS_N("FP ST(%d) : %28.20Lg 0x%04X%016I64X"), i,
                         ptr[i], (unsigned int)*(tjs_uint16*)(((tjs_uint8*)(ptr + i)) + 8),
                         *(tjs_uint64*)(ptr + i));
                 TVPAddLog(buf);
         }
 
         // -- Cr0NpxState
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP MX CSR   : 0x%08X"), ctx.FltSave.MxCsr);	//
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP MX CSR   : 0x%08X"), ctx.FltSave.MxCsr);	//
         TVPAddLog(buf);
 #else
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP Control Word : 0x%08X   FP Status Word : 0x%08X   FP Tag Word : 0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP Control Word : 0x%08X   FP Status Word : 0x%08X   FP Tag Word : 0x%08X"),
                 ctx.FloatSave.ControlWord, ctx.FloatSave.StatusWord, ctx.FloatSave.TagWord);
         TVPAddLog(buf);
 
         // -- offsets/selectors
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP Error Offset : 0x%08X   FP Error Selector : 0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP Error Offset : 0x%08X   FP Error Selector : 0x%08X"),
                 ctx.FloatSave.ErrorOffset, ctx.FloatSave.ErrorSelector);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP Data Offset  : 0x%08X   FP Data Selector  : 0x%08X"),
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP Data Offset  : 0x%08X   FP Data Selector  : 0x%08X"),
                 ctx.FloatSave.DataOffset, ctx.FloatSave.DataSelector);
 
         // -- registers
         long double* ptr = (long double*)&(ctx.FloatSave.RegisterArea[0]);
         for (tjs_int i = 0; i < 8; i++)
         {
-                TJS_snprintf(buf, BUF_SIZE, TJS_W("FP ST(%d) : %28.20Lg 0x%04X%016I64X"), i,
+                TJS_snprintf(buf, BUF_SIZE, TJS_N("FP ST(%d) : %28.20Lg 0x%04X%016I64X"), i,
                         ptr[i], (unsigned int)*(tjs_uint16*)(((tjs_uint8*)(ptr + i)) + 8),
                         *(tjs_uint64*)(ptr + i));
                 TVPAddLog(buf);
         }
 
         // -- Cr0NpxState
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("FP CR0 NPX State  : 0x%08X"), ctx.FloatSave.Cr0NpxState);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("FP CR0 NPX State  : 0x%08X"), ctx.FloatSave.Cr0NpxState);
         TVPAddLog(buf);
 #endif
 
         // -- SSE/SSE2 registers
 #ifdef TJS_64BIT_OS
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  0 : 0x%016lx 0x%016lx"), ctx.Xmm0.High, ctx.Xmm0.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  0 : 0x%016lx 0x%016lx"), ctx.Xmm0.High, ctx.Xmm0.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  1 : 0x%016lx 0x%016lx"), ctx.Xmm1.High, ctx.Xmm1.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  1 : 0x%016lx 0x%016lx"), ctx.Xmm1.High, ctx.Xmm1.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  2 : 0x%016lx 0x%016lx"), ctx.Xmm2.High, ctx.Xmm2.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  2 : 0x%016lx 0x%016lx"), ctx.Xmm2.High, ctx.Xmm2.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  3 : 0x%016lx 0x%016lx"), ctx.Xmm3.High, ctx.Xmm3.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  3 : 0x%016lx 0x%016lx"), ctx.Xmm3.High, ctx.Xmm3.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  4 : 0x%016lx 0x%016lx"), ctx.Xmm4.High, ctx.Xmm4.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  4 : 0x%016lx 0x%016lx"), ctx.Xmm4.High, ctx.Xmm4.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  5 : 0x%016lx 0x%016lx"), ctx.Xmm5.High, ctx.Xmm5.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  5 : 0x%016lx 0x%016lx"), ctx.Xmm5.High, ctx.Xmm5.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  6 : 0x%016lx 0x%016lx"), ctx.Xmm6.High, ctx.Xmm6.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  6 : 0x%016lx 0x%016lx"), ctx.Xmm6.High, ctx.Xmm6.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  7 : 0x%016lx 0x%016lx"), ctx.Xmm7.High, ctx.Xmm7.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  7 : 0x%016lx 0x%016lx"), ctx.Xmm7.High, ctx.Xmm7.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  8 : 0x%016lx 0x%016lx"), ctx.Xmm8.High, ctx.Xmm8.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  8 : 0x%016lx 0x%016lx"), ctx.Xmm8.High, ctx.Xmm8.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM  9 : 0x%016lx 0x%016lx"), ctx.Xmm9.High, ctx.Xmm9.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM  9 : 0x%016lx 0x%016lx"), ctx.Xmm9.High, ctx.Xmm9.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM 10 : 0x%016lx 0x%016lx"), ctx.Xmm10.High, ctx.Xmm10.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM 10 : 0x%016lx 0x%016lx"), ctx.Xmm10.High, ctx.Xmm10.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM 11 : 0x%016lx 0x%016lx"), ctx.Xmm11.High, ctx.Xmm11.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM 11 : 0x%016lx 0x%016lx"), ctx.Xmm11.High, ctx.Xmm11.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM 12 : 0x%016lx 0x%016lx"), ctx.Xmm12.High, ctx.Xmm12.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM 12 : 0x%016lx 0x%016lx"), ctx.Xmm12.High, ctx.Xmm12.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM 13 : 0x%016lx 0x%016lx"), ctx.Xmm13.High, ctx.Xmm13.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM 13 : 0x%016lx 0x%016lx"), ctx.Xmm13.High, ctx.Xmm13.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM 14 : 0x%016lx 0x%016lx"), ctx.Xmm14.High, ctx.Xmm14.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM 14 : 0x%016lx 0x%016lx"), ctx.Xmm14.High, ctx.Xmm14.Low);
         TVPAddLog(buf);
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("XMM 15 : 0x%016lx 0x%016lx"), ctx.Xmm15.High, ctx.Xmm15.Low);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("XMM 15 : 0x%016lx 0x%016lx"), ctx.Xmm15.High, ctx.Xmm15.Low);
         TVPAddLog(buf);
 
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("MXCSR : 0x%08x"), ctx.MxCsr);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("MXCSR : 0x%08x"), ctx.MxCsr);
         TVPAddLog(buf);
 #else
         if (ctx.ContextFlags & CONTEXT_EXTENDED_REGISTERS)
@@ -1035,14 +1035,14 @@ void TVPDumpOSContext(const CONTEXT& ctx)
                 {
                         xmm_t* xmm = (xmm_t*)(ctx.ExtendedRegisters + i * 16 + 0xa0);
                         TJS_snprintf(buf, BUF_SIZE,
-                                TJS_W("XMM %d : [ %15.8g %15.8g %15.8g %15.8g ] [ %24.16lg %24.16lg ] [ 0x%016I64X-0x%016I64X ]"),
+                                TJS_N("XMM %d : [ %15.8g %15.8g %15.8g %15.8g ] [ %24.16lg %24.16lg ] [ 0x%016I64X-0x%016I64X ]"),
                                 i,
                                 xmm->sD, xmm->sC, xmm->sB, xmm->sA,
                                 xmm->dB, xmm->dA,
                                 xmm->i64B, xmm->i64A);
                         TVPAddLog(buf);
                 }
-                TJS_snprintf(buf, BUF_SIZE, TJS_W("MXCSR : 0x%08X"),
+                TJS_snprintf(buf, BUF_SIZE, TJS_N("MXCSR : 0x%08X"),
                         *(DWORD*)(ctx.ExtendedRegisters + 0x18));
                 TVPAddLog(buf);
         }
@@ -1066,23 +1066,23 @@ void TVPDumpHWException()
 
         ttstr line;
 
-        line = TJS_W("Exception : ");
+        line = TJS_N("Exception : ");
 
         tjs_char* p = NULL;
         switch (d->Code)
         {
-        case  3:	p = TJS_W("Divide By Zero"); break;
-        case  4:	p = TJS_W("Range Error"); break;
-        case  5:	p = TJS_W("Integer Overflow"); break;
-        case  6:	p = TJS_W("Invalid Operation"); break;
-        case  7:	p = TJS_W("Zero Divide"); break;
-        case  8:	p = TJS_W("Overflow"); break;
-        case  9:	p = TJS_W("Underflow"); break;
-        case 10:	p = TJS_W("Invalid Cast"); break;
-        case 11:	p = TJS_W("Access Violation"); break;
-        case 12:	p = TJS_W("Privilege Violation"); break;
-        case 13:	p = TJS_W("Control C"); break;
-        case 14:	p = TJS_W("Stack Overflow"); break;
+        case  3:	p = TJS_N("Divide By Zero"); break;
+        case  4:	p = TJS_N("Range Error"); break;
+        case  5:	p = TJS_N("Integer Overflow"); break;
+        case  6:	p = TJS_N("Invalid Operation"); break;
+        case  7:	p = TJS_N("Zero Divide"); break;
+        case  8:	p = TJS_N("Overflow"); break;
+        case  9:	p = TJS_N("Underflow"); break;
+        case 10:	p = TJS_N("Invalid Cast"); break;
+        case 11:	p = TJS_N("Access Violation"); break;
+        case 12:	p = TJS_N("Privilege Violation"); break;
+        case 13:	p = TJS_N("Control C"); break;
+        case 14:	p = TJS_N("Stack Overflow"); break;
         }
 
         if (p) line += p;
@@ -1090,22 +1090,22 @@ void TVPDumpHWException()
         if (d->Code == 11)
         {
                 // EAccessViolation
-                const tjs_char* mode = TJS_W("unknown");
+                const tjs_char* mode = TJS_N("unknown");
                 if (d->AccessFlag == 0)
-                        mode = TJS_W("read");
+                        mode = TJS_N("read");
                 else if (d->AccessFlag == 1)
-                        mode = TJS_W("write");
+                        mode = TJS_N("write");
                 else if (d->AccessFlag == 8)
-                        mode = TJS_W("execute");
-                TJS_snprintf(buf, BUF_SIZE, TJS_W("(%ls access to 0x%p)"), mode, d->AccessTarget);
+                        mode = TJS_N("execute");
+                TJS_snprintf(buf, BUF_SIZE, TJS_N("(%ls access to 0x%p)"), mode, d->AccessTarget);
                 line += buf;
         }
 
-        TJS_snprintf(buf, BUF_SIZE, TJS_W("  at  EIP = 0x%p   ESP = 0x%p"), d->EIP, d->ESP);
+        TJS_snprintf(buf, BUF_SIZE, TJS_N("  at  EIP = 0x%p   ESP = 0x%p"), d->EIP, d->ESP);
         line += buf;
         if (d->Module[0])
         {
-                line += TJS_W("   in ") + ttstr(d->Module);
+                line += TJS_N("   in ") + ttstr(d->Module);
         }
 
         TVPAddLog(line);
@@ -1114,43 +1114,43 @@ void TVPDumpHWException()
         TVPDumpOSContext(d->Context);
 
         // dump codes at EIP
-        line = TJS_W("Codes at EIP : ");
+        line = TJS_N("Codes at EIP : ");
         for (tjs_int i = 0; i < d->CodesAtEIPLen; i++)
         {
-                TJS_snprintf(buf, BUF_SIZE, TJS_W("0x%02X "), d->CodesAtEIP[i]);
+                TJS_snprintf(buf, BUF_SIZE, TJS_N("0x%02X "), d->CodesAtEIP[i]);
                 line += buf;
         }
         TVPAddLog(line);
 
-        TVPAddLog(TJS_W("Stack data and data pointed by each stack data :"));
+        TVPAddLog(TJS_N("Stack data and data pointed by each stack data :"));
 
         // dump stack and data
         for (tjs_int s = 0; s < d->StackAtESPLen; s++)
         {
-                TJS_snprintf(buf, BUF_SIZE, TJS_W("0x%p (ESP+%3d) : 0x%p : "),
+                TJS_snprintf(buf, BUF_SIZE, TJS_N("0x%p (ESP+%3d) : 0x%p : "),
                         (DWORD)d->ESP + s * sizeof(tjs_uint32),
                         s * sizeof(tjs_uint32), d->StackAtESP[s]);
                 line = buf;
 
                 for (tjs_int i = 0; i < d->StackDumpsLen[s]; i++)
                 {
-                        TJS_snprintf(buf, BUF_SIZE, TJS_W("0x%02X "), d->StackDumps[s][i]);
+                        TJS_snprintf(buf, BUF_SIZE, TJS_N("0x%02X "), d->StackDumps[s][i]);
                         line += buf;
                 }
                 TVPAddLog(line);
         }
 
         // dump call trace
-        TVPAddLog(TJS_W("Call Trace :"));
+        TVPAddLog(TJS_N("Call Trace :"));
         for (tjs_int s = 0; s < d->CallTraceLen; s++)
         {
-                TJS_snprintf(buf, BUF_SIZE, TJS_W("0x%p : "),
+                TJS_snprintf(buf, BUF_SIZE, TJS_N("0x%p : "),
                         d->CallTrace[s]);
                 line = buf;
 
                 for (tjs_int i = 0; i < d->CallTraceDumpsLen[s]; i++)
                 {
-                        TJS_snprintf(buf, BUF_SIZE, TJS_W("0x%02X "), d->CallTraceDumps[s][i]);
+                        TJS_snprintf(buf, BUF_SIZE, TJS_N("0x%02X "), d->CallTraceDumps[s][i]);
                         line += buf;
                 }
                 MEMORY_BASIC_INFORMATION mbi;
@@ -1161,7 +1161,7 @@ void TVPDumpHWException()
                         if (::GetModuleFileName((HMODULE)mbi.AllocationBase, module, MAX_PATH))
                         {
                                 line += ttstr(ExtractFileName(module).c_str());
-                                TJS_snprintf(buf, BUF_SIZE, TJS_W(" base 0x%p"), mbi.AllocationBase);
+                                TJS_snprintf(buf, BUF_SIZE, TJS_N(" base 0x%p"), mbi.AllocationBase);
                                 line += buf;
                         }
                 }
@@ -1200,7 +1200,7 @@ void TVPInitializeBaseSystems()
 {
         // set system archive delimiter
         tTJSVariant v;
-        if (TVPGetCommandLine(TJS_W("-arcdelim"), &v))
+        if (TVPGetCommandLine(TJS_N("-arcdelim"), &v))
                 TVPArchiveDelimiter = ttstr(v)[0];
 
         // set default current directory
@@ -1213,9 +1213,9 @@ void TVPInitializeBaseSystems()
 
         if (load_msgmap)
         {
-                const tjs_char name_msgmap[] = TJS_W("msgmap.tjs");
+                const tjs_char name_msgmap[] = TJS_N("msgmap.tjs");
                 if (TVPIsExistentStorage(name_msgmap))
-                        TVPExecuteStorage(name_msgmap, NULL, false, TJS_W(""));
+                        TVPExecuteStorage(name_msgmap, NULL, false, TJS_N(""));
         }
 }
 //---------------------------------------------------------------------------
@@ -1236,14 +1236,14 @@ void TVPBeforeSystemInit()
 
         // set system archive delimiter after patch.tjs specified
         tTJSVariant v;
-        if (TVPGetCommandLine(TJS_W("-arcdelim"), &v))
+        if (TVPGetCommandLine(TJS_N("-arcdelim"), &v))
                 TVPArchiveDelimiter = ttstr(v)[0];
 
         if (TVPIsExistentStorageNoSearchNoNormalize(TVPProjectDir)) {
                 TVPProjectDir += TVPArchiveDelimiter;
         }
         else {
-                TVPProjectDir += TJS_W("/");
+                TVPProjectDir += TJS_N("/");
         }
         TVPSetCurrentDirectory(TVPProjectDir);
 
@@ -1323,10 +1323,10 @@ void TVPAfterSystemInit()
         // determine maximum graphic cache limit
         tTJSVariant opt;
         tjs_int64 limitmb = -1;
-        if (TVPGetCommandLine(TJS_W("-gclim"), &opt))
+        if (TVPGetCommandLine(TJS_N("-gclim"), &opt))
         {
                 ttstr str(opt);
-                if (str == TJS_W("auto"))
+                if (str == TJS_N("auto"))
                         limitmb = -1;
                 else
                         limitmb = opt.AsInteger();
@@ -1369,10 +1369,10 @@ void TVPAfterSystemInit()
 
         //	TVPGraphicCacheSystemLimit = 1*1024*1024; // DEBUG
 
-        if (TVPGetCommandLine(TJS_W("-autosave"), &opt))
+        if (TVPGetCommandLine(TJS_N("-autosave"), &opt))
         {
                 ttstr str(opt);
-                if (str == TJS_W("yes")) {
+                if (str == TJS_N("yes")) {
                         TVPAutoSaveBookMark = true;
                 }
         }
@@ -1383,40 +1383,40 @@ void TVPAfterSystemInit()
         }
         else {
                 TVPDrawThreadNum = GameSetting::software_draw_thread;
-                if (TVPGetCommandLine(TJS_W("-gsplit"), &opt))
+                if (TVPGetCommandLine(TJS_N("-gsplit"), &opt))
                 {
                         ttstr str(opt);
-                        if (str == TJS_W("no"))
+                        if (str == TJS_N("no"))
                                 TVPGraphicSplitOperationType = gsotNone;
-                        else if (str == TJS_W("int"))
+                        else if (str == TJS_N("int"))
                                 TVPGraphicSplitOperationType = gsotInterlace;
-                        else if (str == TJS_W("yes") || str == TJS_W("simple"))
+                        else if (str == TJS_N("yes") || str == TJS_N("simple"))
                                 TVPGraphicSplitOperationType = gsotSimple;
-                        else if (str == TJS_W("bidi"))
+                        else if (str == TJS_N("bidi"))
                                 TVPGraphicSplitOperationType = gsotBiDirection;
 
                 }
         }
 
         // check TVPDefaultHoldAlpha option
-        if (TVPGetCommandLine(TJS_W("-holdalpha"), &opt))
+        if (TVPGetCommandLine(TJS_N("-holdalpha"), &opt))
         {
                 ttstr str(opt);
-                if (str == TJS_W("yes") || str == TJS_W("true"))
+                if (str == TJS_N("yes") || str == TJS_N("true"))
                         TVPDefaultHoldAlpha = true;
                 else
                         TVPDefaultHoldAlpha = false;
         }
 
         // check TVPJPEGFastLoad option
-        if (TVPGetCommandLine(TJS_W("-jpegdec"), &opt)) // this specifies precision for JPEG decoding
+        if (TVPGetCommandLine(TJS_N("-jpegdec"), &opt)) // this specifies precision for JPEG decoding
         {
                 ttstr str(opt);
-                if (str == TJS_W("normal"))
+                if (str == TJS_N("normal"))
                         TVPJPEGLoadPrecision = jlpMedium;
-                else if (str == TJS_W("low"))
+                else if (str == TJS_N("low"))
                         TVPJPEGLoadPrecision = jlpLow;
-                else if (str == TJS_W("high"))
+                else if (str == TJS_N("high"))
                         TVPJPEGLoadPrecision = jlpHigh;
 
         }
@@ -1426,19 +1426,19 @@ void TVPAfterSystemInit()
 
         // timer precision
         uint32_t prectick = 1;
-        if (TVPGetCommandLine(TJS_W("-timerprec"), &opt))
+        if (TVPGetCommandLine(TJS_N("-timerprec"), &opt))
         {
                 ttstr str(opt);
-                if (str == TJS_W("high")) prectick = 1;
-                if (str == TJS_W("higher")) prectick = 5;
-                if (str == TJS_W("normal")) prectick = 10;
+                if (str == TJS_N("high")) prectick = 1;
+                if (str == TJS_N("higher")) prectick = 5;
+                if (str == TJS_N("normal")) prectick = 10;
         }
 
         // draw thread num
         tjs_int drawThreadNum = 0;
-        if (TVPGetCommandLine(TJS_W("-drawthread"), &opt)) {
+        if (TVPGetCommandLine(TJS_N("-drawthread"), &opt)) {
                 ttstr str(opt);
-                if (str == TJS_W("auto"))
+                if (str == TJS_N("auto"))
                         drawThreadNum = 0;
                 else
                         drawThreadNum = (tjs_int)opt;
@@ -1525,13 +1525,13 @@ static ttstr TVPParseCommandLineOne(const ttstr& i)
         p = o = i.c_str();
         p = TJS_strchr(p, '=');
 
-        if (p == NULL) { return i + TJS_W("=yes"); }
+        if (p == NULL) { return i + TJS_N("=yes"); }
 
         p++;
 
         ttstr optname(o, (int)(p - o));
 
-        if (*p == TJS_W('\'') || *p == TJS_W('\"'))
+        if (*p == TJS_N('\'') || *p == TJS_N('\"'))
         {
                 // as an escaped string
                 tTJSVariant v;
@@ -1576,7 +1576,7 @@ static void PushConfigFileOptions(const std::vector<std::string>* options)
         {
                 if ((*options)[j].c_str()[0] != ';') // unless comment
                         TVPProgramArguments.push_back(
-                                TVPParseCommandLineOne(TJS_W("-") + ttstr((*options)[j].c_str())));
+                                TVPParseCommandLineOne(TJS_N("-") + ttstr((*options)[j].c_str())));
         }
 }
 //---------------------------------------------------------------------------
@@ -1608,16 +1608,16 @@ static void TVPInitProgramArgumentsAndDataPath(bool stop_after_datapath_got)
             {
                 if (argument_stopped)
                 {
-                    ttstr arg_name_and_value = TJS_W("-arg") + ttstr(file_argument_count) +
-                                               TJS_W("=") + ttstr(tvp_argv[i]);
+                    ttstr arg_name_and_value = TJS_N("-arg") + ttstr(file_argument_count) +
+                                               TJS_N("=") + ttstr(tvp_argv[i]);
                     file_argument_count++;
                     TVPProgramArguments.push_back(arg_name_and_value);
                 }
                 else
                 {
-                    if (tvp_argv[i][0] == TJS_W('-'))
+                    if (tvp_argv[i][0] == TJS_N('-'))
                     {
-                        if (tvp_argv[i][1] == TJS_W('-') && tvp_argv[i][2] == 0)
+                        if (tvp_argv[i][1] == TJS_N('-') && tvp_argv[i][2] == 0)
                         {
                             // argument stopper
                             argument_stopped = true;
@@ -1625,8 +1625,8 @@ static void TVPInitProgramArgumentsAndDataPath(bool stop_after_datapath_got)
                         else
                         {
                             ttstr value(tvp_argv[i]);
-                            if (!TJS_strchr(value.c_str(), TJS_W('=')))
-                                value += TJS_W("=yes");
+                            if (!TJS_strchr(value.c_str(), TJS_N('=')))
+                                value += TJS_N("=yes");
                             TVPProgramArguments.push_back(TVPParseCommandLineOne(value));
                         }
                     }
@@ -1662,7 +1662,7 @@ static void TVPDumpOptions()
         {
                 for (i = TVPProgramArguments.begin(); i != TVPProgramArguments.end(); i++)
                 {
-                        options += TJS_W(" ");
+                        options += TJS_N(" ");
                         options += *i;
                 }
         }
@@ -1683,7 +1683,7 @@ bool TVPGetCommandLine(const tjs_char* name, tTJSVariant* value)
         {
                 if (!TJS_strncmp(i->c_str(), name, namelen))
                 {
-                        if (i->c_str()[namelen] == TJS_W('='))
+                        if (i->c_str()[namelen] == TJS_N('='))
                         {
                                 // value is specified
                                 const tjs_char* p = i->c_str() + namelen + 1;
@@ -1693,7 +1693,7 @@ bool TVPGetCommandLine(const tjs_char* name, tTJSVariant* value)
                         else if (i->c_str()[namelen] == 0)
                         {
                                 // value is not specified
-                                if (value) *value = TJS_W("yes");
+                                if (value) *value = TJS_N("yes");
                                 return true;
                         }
                 }
@@ -1711,10 +1711,10 @@ void TVPSetCommandLine(const tjs_char* name, const ttstr& value)
         {
                 if (!TJS_strncmp(i->c_str(), name, namelen))
                 {
-                        if (i->c_str()[namelen] == TJS_W('=') || i->c_str()[namelen] == 0)
+                        if (i->c_str()[namelen] == TJS_N('=') || i->c_str()[namelen] == 0)
                         {
                                 // value found
-                                *i = ttstr(i->c_str(), namelen) + TJS_W("=") + value;
+                                *i = ttstr(i->c_str(), namelen) + TJS_N("=") + value;
                                 TVPCommandLineArgumentGeneration++;
                                 if (TVPCommandLineArgumentGeneration == 0) TVPCommandLineArgumentGeneration = 1;
                                 return;
@@ -1723,7 +1723,7 @@ void TVPSetCommandLine(const tjs_char* name, const ttstr& value)
         }
 
         // value not found; insert argument into front
-        TVPProgramArguments.insert(TVPProgramArguments.begin(), ttstr(name) + TJS_W("=") + value);
+        TVPProgramArguments.insert(TVPProgramArguments.begin(), ttstr(name) + TJS_N("=") + value);
         TVPCommandLineArgumentGeneration++;
         if (TVPCommandLineArgumentGeneration == 0) TVPCommandLineArgumentGeneration = 1;
 }

@@ -4,8 +4,8 @@
 #include "UtilStreams.h"
 #include <map>
 
-#define NCB_MODULE_NAME TJS_W("varfile.dll")
-#define BASENAME TJS_W("var")
+#define NCB_MODULE_NAME TJS_N("varfile.dll")
+#define BASENAME TJS_N("var")
 
 // 辞書かどうかの判定 
 static bool isDirectory(tTJSVariant &base) {
@@ -262,7 +262,7 @@ public:
 			}
 		}
 		if (!ret) {
-			TVPThrowExceptionMessage(TJS_W("cannot open memfile:%1"), name);
+			TVPThrowExceptionMessage(TJS_N("cannot open memfile:%1"), name);
 		}
 		return ret;
 	}
@@ -304,11 +304,11 @@ protected:
 		const tjs_char *q;
 		if ((q = TJS_strchr(p, '/'))) {
 			ttstr dname = ttstr(p, q-p);
-			if (dname != TJS_W(".")) {
-				TVPThrowExceptionMessage(TJS_W("no such domain:%1"), dname);
+			if (dname != TJS_N(".")) {
+				TVPThrowExceptionMessage(TJS_N("no such domain:%1"), dname);
 			}
 		} else {
-			TVPThrowExceptionMessage(TJS_W("invalid path:%1"), name);
+			TVPThrowExceptionMessage(TJS_N("invalid path:%1"), name);
 		}
 		// パス名 
 		ttstr path = ttstr(q+1);
@@ -329,7 +329,7 @@ protected:
 				ttstr member = ttstr(p, q-p);
 				tTJSVariant value;
 				tTJSVariantClosure &o = base.AsObjectClosureNoAddRef();
-				if (((o.IsInstanceOf(0, NULL, NULL, TJS_W("Array"), NULL) == TJS_S_TRUE &&
+				if (((o.IsInstanceOf(0, NULL, NULL, TJS_N("Array"), NULL) == TJS_S_TRUE &&
 					  TJS_SUCCEEDED(o.PropGetByNum(0, (tjs_int)TJSStringToInteger(member.c_str()), &value, NULL))) ||
 					 (TJS_SUCCEEDED(o.PropGet(0, member.c_str(), NULL, &value, NULL)))) && isDirectory(value)) {
 					base = value;
@@ -383,7 +383,7 @@ static void PreRegistCallback()
         if (global)
         {
             tTJSVariant val(true);
-            global->PropSet(TJS_MEMBERENSURE, TJS_W("varfileLoaded"), NULL, &val,
+            global->PropSet(TJS_MEMBERENSURE, TJS_N("varfileLoaded"), NULL, &val,
                             global);
             global->Release();
         }

@@ -68,7 +68,7 @@ void tTJSInterCodeContext::Disassemble(
 					TJS_strcpy_maxlen(buf, src, len);
 					try
 					{
-						output_func_src(buf, TJS_W(""), curline, data);
+						output_func_src(buf, TJS_N(""), curline, data);
 					}
 					catch(...)
 					{
@@ -92,7 +92,7 @@ void tTJSInterCodeContext::Disassemble(
 			TJS_strcpy_maxlen(buf, src, len);
 			try
 			{
-				output_func_src((const tjs_char*)buf, TJS_W(""), line, data);
+				output_func_src((const tjs_char*)buf, TJS_N(""), line, data);
 			}
 			catch(...)
 			{
@@ -108,22 +108,22 @@ void tTJSInterCodeContext::Disassemble(
 		switch(CodeArea[i])
 		{
 		case VM_NOP:
-			msg.printf(TJS_W("nop"));
+			msg.printf(TJS_N("nop"));
 			size = 1;
 			break;
 
 		case VM_NF:
-			msg.printf(TJS_W("nf"));
+			msg.printf(TJS_N("nf"));
 			size = 1;
 			break;
 
 		case VM_CONST:
-			msg.printf(TJS_W("const %%%d, *%d"),
+			msg.printf(TJS_N("const %%%d, *%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]));
 			if(DataArea)
 			{
-				com.printf(TJS_W("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
+				com.printf(TJS_N("*%d = %s"), TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 					GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+2])).c_str());
 			}
 			size = 3;
@@ -132,7 +132,7 @@ void tTJSInterCodeContext::Disassemble(
 
 #define OP2_DISASM(c, x) \
 	case c: \
-		msg.printf(TJS_W(x) TJS_W(" %%%d, %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
+		msg.printf(TJS_N(x) TJS_N(" %%%d, %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 										TJS_FROM_VM_REG_ADDR(CodeArea[i+2])); \
 		size = 3; \
 		break
@@ -150,25 +150,25 @@ void tTJSInterCodeContext::Disassemble(
 
 #define OP2_DISASM(c, x) \
 	case c: \
-		msg.printf(TJS_W(x) TJS_W(" %%%d, %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
+		msg.printf(TJS_N(x) TJS_N(" %%%d, %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 									TJS_FROM_VM_REG_ADDR(CodeArea[i+2])); \
 		size = 3; \
 		break; \
 	case c+1: \
-		msg.printf(TJS_W(x) TJS_W("pd") TJS_W(" %%%d, %%%d.*%d, %%%d"), \
+		msg.printf(TJS_N(x) TJS_N("pd") TJS_N(" %%%d, %%%d.*%d, %%%d"), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+2]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+3]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+4])); \
 		if(DataArea) \
 		{ \
-			com.printf(TJS_W("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]), \
+			com.printf(TJS_N("*%d = %s"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]), \
 				GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+3])).c_str()); \
 		} \
 		size = 5; \
 		break; \
 	case c+2: \
-		msg.printf(TJS_W(x) TJS_W("pi") TJS_W(" %%%d, %%%d.%%%d, %%%d"), \
+		msg.printf(TJS_N(x) TJS_N("pi") TJS_N(" %%%d, %%%d.%%%d, %%%d"), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+2]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+3]), \
@@ -176,7 +176,7 @@ void tTJSInterCodeContext::Disassemble(
 		size = 5; \
 		break; \
 	case c+3: \
-		msg.printf(TJS_W(x) TJS_W("p") TJS_W(" %%%d, %%%d, %%%d"), \
+		msg.printf(TJS_N(x) TJS_N("p") TJS_N(" %%%d, %%%d, %%%d"), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+2]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+3])); \
@@ -202,7 +202,7 @@ void tTJSInterCodeContext::Disassemble(
 #undef OP2_DISASM
 
 #define OP1_DISASM(x) \
-	msg.printf(TJS_W(x) TJS_W(" %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1])); \
+	msg.printf(TJS_N(x) TJS_N(" %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1])); \
 	size = 2
 		// instructions that have one operand which represent a register,
 		// except for inc, dec
@@ -229,38 +229,38 @@ void tTJSInterCodeContext::Disassemble(
 #undef OP1_DISASM
 
 		case VM_CCL:
-			msg.printf(TJS_W("ccl %%%d-%%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
+			msg.printf(TJS_N("ccl %%%d-%%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]) + CodeArea[i+2] -1);
 			size = 3;
 			break;
 
 #define OP1_DISASM(c, x) \
 	case c: \
-		msg.printf(TJS_W(x) TJS_W(" %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1])); \
+		msg.printf(TJS_N(x) TJS_N(" %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1])); \
 		size = 2; \
 		break; \
 	case c+1: \
-		msg.printf(TJS_W(x) TJS_W("pd") TJS_W(" %%%d, %%%d.*%d"), \
+		msg.printf(TJS_N(x) TJS_N("pd") TJS_N(" %%%d, %%%d.*%d"), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+2]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+3])); \
 		if(DataArea) \
 		{ \
-			com.printf(TJS_W("*%d = %ls"), \
+			com.printf(TJS_N("*%d = %s"), \
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]), \
 				GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+3])).c_str()); \
 		} \
 		size = 4; \
 		break; \
 	case c+2: \
-		msg.printf(TJS_W(x) TJS_W("pi") TJS_W(" %%%d, %%%d.%%%d"), \
+		msg.printf(TJS_N(x) TJS_N("pi") TJS_N(" %%%d, %%%d.%%%d"), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+2]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+3])); \
 		size = 4; \
 		break; \
 	case c+3: \
-		msg.printf(TJS_W(x) TJS_W("p") TJS_W(" %%%d, %%%d"), \
+		msg.printf(TJS_N(x) TJS_N("p") TJS_N(" %%%d, %%%d"), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+1]), \
 			TJS_FROM_VM_REG_ADDR(CodeArea[i+2])); \
 		size = 3; \
@@ -274,7 +274,7 @@ void tTJSInterCodeContext::Disassemble(
 
 
 #define OP1A_DISASM(x) \
-	msg.printf(TJS_W(x) TJS_W(" %09d"), TJS_FROM_VM_CODE_ADDR(CodeArea[i+1]) + i); \
+	msg.printf(TJS_N(x) TJS_N(" %09d"), TJS_FROM_VM_CODE_ADDR(CodeArea[i+1]) + i); \
 	size = 2
 		// instructions that have one operand which represents code area
 		case VM_JF:		OP1A_DISASM("jf");		break;
@@ -290,10 +290,10 @@ void tTJSInterCodeContext::Disassemble(
 			// function call variants
 
 			msg.printf(
-				CodeArea[i] == VM_CALL  ?TJS_W("call %%%d, %%%d("):
-				CodeArea[i] == VM_CALLD ?TJS_W("calld %%%d, %%%d.*%d("):
-				CodeArea[i] == VM_CALLI ?TJS_W("calli %%%d, %%%d.%%%d("):
-										 TJS_W("new %%%d, %%%d("),
+				CodeArea[i] == VM_CALL  ?TJS_N("call %%%d, %%%d("):
+				CodeArea[i] == VM_CALLD ?TJS_N("calld %%%d, %%%d.*%d("):
+				CodeArea[i] == VM_CALLI ?TJS_N("calli %%%d, %%%d.%%%d("):
+										 TJS_N("new %%%d, %%%d("),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]));
@@ -310,7 +310,7 @@ void tTJSInterCodeContext::Disassemble(
 			{
 				// omit arg
 				size = st;
-				msg += TJS_W("...");
+				msg += TJS_N("...");
 			}
 			else if(num == -2)
 			{
@@ -320,20 +320,20 @@ void tTJSInterCodeContext::Disassemble(
 				size = st + num * 2;
 				for(tjs_int j = 0; j < num; j++)
 				{
-					if(!first) msg += TJS_W(", ");
+					if(!first) msg += TJS_N(", ");
 					first = false;
 					switch(CodeArea[i+st+j*2])
 					{
 					case fatNormal:
-						TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("%%%d"),
+						TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("%%%d"),
 							TJS_FROM_VM_REG_ADDR(CodeArea[i+st+j*2+1]));
 						break;
 					case fatExpand:
-						TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("%%%d*"),
+						TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("%%%d*"),
 							TJS_FROM_VM_REG_ADDR(CodeArea[i+st+j*2+1]));
 						break;
 					case fatUnnamedExpand:
-						TJS_strcpy(buf, TJS_W("*"));
+						TJS_strcpy(buf, TJS_N("*"));
 						break;
 					}
 					msg += buf;
@@ -345,19 +345,19 @@ void tTJSInterCodeContext::Disassemble(
 				size = st + num;
 				while(num--)
 				{
-					if(!first) msg += TJS_W(", ");
+					if(!first) msg += TJS_N(", ");
 					first = false;
-					TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_W("%%%d"),
+					TJS_snprintf(buf, sizeof(buf)/sizeof(tjs_char), TJS_N("%%%d"),
 						TJS_FROM_VM_REG_ADDR(CodeArea[i+c+st]));
 					c++;
 					msg += buf;
 				}
 			}
 
-			msg += TJS_W(")");
+			msg += TJS_N(")");
 			if(DataArea && CodeArea[i] == VM_CALLD)
 			{
-				com.printf(TJS_W("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]),
+				com.printf(TJS_N("*%d = %s"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]),
 					GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+3])).c_str());
 			}
 
@@ -368,14 +368,14 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_GPDS:
 			// property get direct
 			msg.printf(
-				CodeArea[i] == VM_GPD?TJS_W("gpd %%%d, %%%d.*%d"):
-									  TJS_W("gpds %%%d, %%%d.*%d"),
+				CodeArea[i] == VM_GPD?TJS_N("gpd %%%d, %%%d.*%d"):
+									  TJS_N("gpds %%%d, %%%d.*%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]));
 			if(DataArea)
 			{
-				com.printf(TJS_W("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]),
+				com.printf(TJS_N("*%d = %s"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]),
 					GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+3])).c_str());
 			}
 			size = 4;
@@ -388,16 +388,16 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_SPDS:
 			// property set direct
 			msg.printf(
-				CodeArea[i] == VM_SPD ? TJS_W("spd %%%d.*%d, %%%d"):
-				CodeArea[i] == VM_SPDE? TJS_W("spde %%%d.*%d, %%%d"):
-				CodeArea[i] == VM_SPDEH?TJS_W("spdeh %%%d.*%d, %%%d"):
-										TJS_W("spds %%%d.*%d, %%%d"),
+				CodeArea[i] == VM_SPD ? TJS_N("spd %%%d.*%d, %%%d"):
+				CodeArea[i] == VM_SPDE? TJS_N("spde %%%d.*%d, %%%d"):
+				CodeArea[i] == VM_SPDEH?TJS_N("spdeh %%%d.*%d, %%%d"):
+										TJS_N("spds %%%d.*%d, %%%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]));
 			if(DataArea)
 			{
-				com.printf(TJS_W("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
+				com.printf(TJS_N("*%d = %s"), TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 					GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+2])).c_str());
 			}
 
@@ -409,8 +409,8 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_GPIS:
 			// property get indirect
 			msg.printf(
-				CodeArea[i] == VM_GPI ?  TJS_W("gpi %%%d, %%%d.%%%d"):
-										 TJS_W("gpis %%%d, %%%d.%%%d"),
+				CodeArea[i] == VM_GPI ?  TJS_N("gpi %%%d, %%%d.%%%d"):
+										 TJS_N("gpis %%%d, %%%d.%%%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]));
@@ -423,9 +423,9 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_SPIS:
 			// property set indirect
 			msg.printf(
-				CodeArea[i] == VM_SPI  ?TJS_W("spi %%%d.%%%d, %%%d"):
-				CodeArea[i] == VM_SPIE ?TJS_W("spie %%%d.%%%d, %%%d"):
-										TJS_W("spis %%%d.%%%d, %%%d"),
+				CodeArea[i] == VM_SPI  ?TJS_N("spi %%%d.%%%d, %%%d"):
+				CodeArea[i] == VM_SPIE ?TJS_N("spie %%%d.%%%d, %%%d"):
+										TJS_N("spis %%%d.%%%d, %%%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]));
@@ -436,7 +436,7 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_SETP:
 			// property set
 			msg.printf(
-				TJS_W("setp %%%d, %%%d"),
+				TJS_N("setp %%%d, %%%d"),
 					TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 					TJS_FROM_VM_REG_ADDR(CodeArea[i+2]));
 			size = 3;
@@ -445,7 +445,7 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_GETP:
 			// property get
 			msg.printf(
-				TJS_W("getp %%%d, %%%d"),
+				TJS_N("getp %%%d, %%%d"),
 					TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 					TJS_FROM_VM_REG_ADDR(CodeArea[i+2]));
 			size = 3;
@@ -456,14 +456,14 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_TYPEOFD:
 			// member delete direct / typeof direct
 			msg.printf(
-				CodeArea[i] == VM_DELD   ?TJS_W("deld %%%d, %%%d.*%d"):
-										  TJS_W("typeofd %%%d, %%%d.*%d"),
+				CodeArea[i] == VM_DELD   ?TJS_N("deld %%%d, %%%d.*%d"):
+										  TJS_N("typeofd %%%d, %%%d.*%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]));
 			if(DataArea)
 			{
-				com.printf(TJS_W("*%d = %ls"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]),
+				com.printf(TJS_N("*%d = %s"), TJS_FROM_VM_REG_ADDR(CodeArea[i+3]),
 					GetValueComment(TJS_GET_VM_REG(DataArea, CodeArea[i+3])).c_str());
 			}
 			size = 4;
@@ -473,8 +473,8 @@ void tTJSInterCodeContext::Disassemble(
 		case VM_TYPEOFI:
 			// member delete indirect / typeof indirect
 			msg.printf(
-				CodeArea[i] == VM_DELI   ?TJS_W("deli %%%d, %%%d.%%%d"):
-										  TJS_W("typeofi %%%d, %%%d.%%%d"),
+				CodeArea[i] == VM_DELI   ?TJS_N("deli %%%d, %%%d.%%%d"):
+										  TJS_N("typeofi %%%d, %%%d.%%%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+3]));
@@ -483,19 +483,19 @@ void tTJSInterCodeContext::Disassemble(
 
 		case VM_SRV:
 			// set return value
-			msg.printf(TJS_W("srv %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]));
+			msg.printf(TJS_N("srv %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]));
 			size = 2;
 			break;
 
 		case VM_RET:
 			// return
-			msg.printf(TJS_W("ret"));
+			msg.printf(TJS_N("ret"));
 			size = 1;
 			break;
 
 		case VM_ENTRY:
 			// enter try-protected block
-			msg.printf(TJS_W("entry %09d, %%%d"),
+			msg.printf(TJS_N("entry %09d, %%%d"),
 				TJS_FROM_VM_CODE_ADDR(CodeArea[i+1]) + i,
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]));
 			size = 3;
@@ -504,47 +504,47 @@ void tTJSInterCodeContext::Disassemble(
 
 		case VM_EXTRY:
 			// exit from try-protected block
-			msg.printf(TJS_W("extry"));
+			msg.printf(TJS_N("extry"));
 			size = 1;
 			break;
 
 		case VM_THROW:
-			msg.printf(TJS_W("throw %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]));
+			msg.printf(TJS_N("throw %%%d"), TJS_FROM_VM_REG_ADDR(CodeArea[i+1]));
 			size = 2;
 			break;
 
 		case VM_CHGTHIS:
-			msg.printf(TJS_W("chgthis %%%d, %%%d"),
+			msg.printf(TJS_N("chgthis %%%d, %%%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]));
 			size = 3;
 			break;
 
 		case VM_GLOBAL:
-			msg.printf(TJS_W("global %%%d"),
+			msg.printf(TJS_N("global %%%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]));
 			size = 2;
 			break;
 
 		case VM_ADDCI:
-			msg.printf(TJS_W("addci %%%d, %%%d"),
+			msg.printf(TJS_N("addci %%%d, %%%d"),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+1]),
 				TJS_FROM_VM_REG_ADDR(CodeArea[i+2]));
 			size = 3;
 			break;
 
 		case VM_REGMEMBER:
-			msg.printf(TJS_W("regmember"));
+			msg.printf(TJS_N("regmember"));
 			size = 1;
 			break;
 
 		case VM_DEBUGGER:
-			msg.printf(TJS_W("debugger"));
+			msg.printf(TJS_N("debugger"));
 			size = 1;
 			break;
 
 		default:
-			msg.printf(TJS_W("unknown instruction %d"), CodeArea[i]);
+			msg.printf(TJS_N("unknown instruction %d"), CodeArea[i]);
 			size = 1;
 			break;
 		} /* switch */
@@ -571,10 +571,10 @@ void tTJSInterCodeContext::_output_func(const tjs_char *msg,
 	tjs_int buflen = (tjs_int)(TJS_strlen(msg) + TJS_strlen(comment) + 20);
 	tjs_char *buf = new tjs_char[buflen];
 
-	TJS_snprintf(buf, buflen, TJS_W("%08d %ls"), addr, msg);
+	TJS_snprintf(buf, buflen, TJS_N("%08d %s"), addr, msg);
 	if(comment[0])
 	{
-		TJS_strcat(buf, TJS_W("\t// "));
+		TJS_strcat(buf, TJS_N("\t// "));
 		TJS_strcat(buf, comment);
 	}
 
@@ -597,9 +597,9 @@ void tTJSInterCodeContext::_output_func_src(const tjs_char *msg,
 	tjs_int buflen = (tjs_int)(TJS_strlen(msg) + TJS_strlen(name) + 20);
 	tjs_char *buf = new tjs_char[buflen];
 	if(line >= 0)
-		TJS_snprintf(buf, buflen, TJS_W("#%ls(%d) %ls"), name, line+1, msg);
+		TJS_snprintf(buf, buflen, TJS_N("#%s(%d) %s"), name, line+1, msg);
 	else
-		TJS_snprintf(buf, buflen, TJS_W("#%ls %ls"), name, msg);
+		TJS_snprintf(buf, buflen, TJS_N("#%s %s"), name, msg);
 	try
 	{
 		of_data *dat = (of_data *)(data);

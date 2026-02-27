@@ -6,7 +6,7 @@
 // tTJSNC_AsyncTrigger
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_AsyncTrigger::ClassID = -1;
-tTJSNC_AsyncTrigger::tTJSNC_AsyncTrigger() : inherited(TJS_W("AsyncTrigger"))
+tTJSNC_AsyncTrigger::tTJSNC_AsyncTrigger() : inherited(TJS_N("AsyncTrigger"))
 {
 	// registration of native members
 

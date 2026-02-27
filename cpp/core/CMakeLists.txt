@@ -126,8 +126,6 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/tjs2/tjsUtils.cpp
     ${KRKRSDL_CORE_PATH}/tjs2/tjsVariant.cpp
     ${KRKRSDL_CORE_PATH}/tjs2/tjsVariantString.cpp
-    ${KRKRSDL_CORE_PATH}/utils/CharacterSet.cpp
-    ${KRKRSDL_CORE_PATH}/utils/MiscUtility.cpp
     ${KRKRSDL_CORE_PATH}/utils/PhaseVocoderDSP.cpp
     ${KRKRSDL_CORE_PATH}/utils/Random.cpp
     ${KRKRSDL_CORE_PATH}/utils/RealFFT.cpp

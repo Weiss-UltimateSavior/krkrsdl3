@@ -36,7 +36,7 @@ namespace PSB {
         // returns media name like "file", "http" etc.
         virtual void GetName(ttstr& name) override
         {
-            name = TJS_W("psb");
+            name = TJS_N("psb");
         }
 
         //	virtual ttstr IsCaseSensitive() = 0;

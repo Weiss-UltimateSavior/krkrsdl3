@@ -88,7 +88,7 @@ tjs_uint32 tTJSXorshift::seeds[4] = { 123456789, 362436069, 521288629, 88675123 
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Math::ClassID = (tjs_uint32)-1;
 tTJSNC_Math::tTJSNC_Math() :
-	tTJSNativeClass(TJS_W("Math"))
+	tTJSNativeClass(TJS_N("Math"))
 {
 	// constructor
 	time_t time_num;

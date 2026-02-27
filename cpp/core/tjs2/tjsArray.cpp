@@ -35,18 +35,6 @@ namespace TJS
 //---------------------------------------------------------------------------
 static tjs_int32 ClassID_Array;
 //---------------------------------------------------------------------------
-static bool inline TJS_iswspace(tjs_char ch)
-{
-	// the standard iswspace misses when non-zero page code
-	if(ch&0xff00) return false; else return 0!=isspace(ch);
-}
-//---------------------------------------------------------------------------
-static bool inline TJS_iswdigit(tjs_char ch)
-{
-	// the standard iswdigit misses when non-zero page code
-	if(ch&0xff00) return false; else return 0!=isdigit(ch);
-}
-//---------------------------------------------------------------------------
 // Utility Function(s)
 //---------------------------------------------------------------------------
 static bool IsNumber(const tjs_char *str, tjs_int &result)
@@ -58,16 +46,16 @@ static bool IsNumber(const tjs_char *str, tjs_int &result)
 	const tjs_char *orgstr = str;
 
 	if(!*str) return false;
-	while(*str && TJS_iswspace(*str)) str++;
+        while(*str && TJS_iswspace(str)) str++;
 	if(!*str) return false;
-	if(*str == TJS_W('-')) str++; // sign
-	else if(*str == TJS_W('+')) str++, orgstr = str; // sign, but skip
+	if(*str == TJS_N('-')) str++; // sign
+	else if(*str == TJS_N('+')) str++, orgstr = str; // sign, but skip
 	if(!*str) return false;
-	while(*str && TJS_iswspace(*str)) str++;
+        while(*str && TJS_iswspace(str)) str++;
 	if(!*str) return false;
-	if(!TJS_iswdigit(*str)) return false;
-	while(*str && (TJS_iswdigit(*str) || *str == '.')) str++;
-	while(*str && TJS_iswspace(*str)) str++;
+        if(!TJS_iswdigit(str)) return false;
+        while(*str && (TJS_iswdigit(str) || *str == '.')) str++;
+        while(*str && TJS_iswspace(str)) str++;
 	if(*str == 0)
 	{
 		result = TJS_atoi(orgstr);
@@ -223,7 +211,7 @@ public:
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSArrayClass::ClassID = (tjs_uint32)-1;
 tTJSArrayClass::tTJSArrayClass() :
-	tTJSNativeClass(TJS_W("Array"))
+	tTJSNativeClass(TJS_N("Array"))
 {
 	// class constructor
 
@@ -264,12 +252,12 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */load)
 		tjs_uint lines = 0;
 		while(*p)
 		{
-			if(*p == TJS_W('\r') || *p == TJS_W('\n'))
+			if(*p == TJS_N('\r') || *p == TJS_N('\n'))
 			{
 				tjs_uint l = (tjs_uint)(p - sp);
 
 				p++;
-				if(p[-1] == TJS_W('\r') && p[0] == TJS_W('\n')) p++;
+				if(p[-1] == TJS_N('\r') && p[0] == TJS_N('\n')) p++;
 
 				lines++;
 
@@ -298,12 +286,12 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */load)
 		{
 			while(*p)
 			{
-				if(*p == TJS_W('\r') || *p == TJS_W('\n'))
+				if(*p == TJS_N('\r') || *p == TJS_N('\n'))
 				{
 					tjs_uint l = (tjs_uint)(p - sp);
 
 					p++;
-					if(p[-1] == TJS_W('\r') && p[0] == TJS_W('\n')) p++;
+					if(p[-1] == TJS_N('\r') && p[0] == TJS_N('\n')) p++;
 
 					vs = TJSAllocVariantString(sp, l);
 					ni->Items[lines++] = vs;
@@ -402,9 +390,9 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */save)
 	{
 		tTJSArrayNI::tArrayItemIterator i = ni->Items.begin();
 #ifdef TJS_TEXT_OUT_CRLF
-		const static ttstr cr(TJS_W("\r\n"));
+		const static ttstr cr(TJS_N("\r\n"));
 #else
-		const static ttstr cr(TJS_W("\n"));
+		const static ttstr cr(TJS_N("\n"));
 #endif
 
 		while( i != ni->Items.end())
@@ -443,7 +431,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */saveStruct)
 	ttstr mode;
 	if(numparams >= 2 && param[1]->Type() != tvtVoid) mode = *param[1];
 
-	if( TJS_strchr(mode.c_str(), TJS_W('b')) != NULL ) {
+	if( TJS_strchr(mode.c_str(), TJS_N('b')) != NULL ) {
 		tTJSBinaryStream* stream = TJSCreateBinaryStreamForWrite(name, mode);
 		try {
 			stream->Write( tTJSBinarySerializer::HEADER, tTJSBinarySerializer::HEADER_LENGTH );
@@ -461,7 +449,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func. name */saveStruct)
 		{
 			std::vector<iTJSDispatch2 *> stack;
 			stack.push_back(objthis);
-			ni->SaveStructuredData(stack, *stream, TJS_W(""));
+			ni->SaveStructuredData(stack, *stream, TJS_N(""));
 		}
 		catch(...)
 		{
@@ -607,7 +595,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 
 	TJS_GET_NATIVE_INSTANCE(/* var. name */ni, /* var. type */tTJSArrayNI);
 
-	tjs_nchar method = '+';
+	tjs_char method = '+';
 	bool do_stable_sort = false;
 	tTJSVariantClosure closure;
 
@@ -624,7 +612,7 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/* func.name */sort)
 		{
 			// sort order letter
 			ttstr me = *param[0];
-			method = (tjs_nchar)(me.c_str()[0]);
+			method = (tjs_char)(me.c_str()[0]);
 
 			switch(method)
 			{
@@ -1096,12 +1084,12 @@ void tTJSArrayNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
                                      iTJSTextWriteStream &stream, const ttstr &indentstr)
 {
 #ifdef TJS_TEXT_OUT_CRLF
-	stream.Write(TJS_W("(const) [\r\n"));
+	stream.Write(TJS_N("(const) [\r\n"));
 #else
-	stream.Write(TJS_W("(const) [\n"));
+	stream.Write(TJS_N("(const) [\n"));
 #endif
 
-	ttstr indentstr2 = indentstr + TJS_W(" ");
+	ttstr indentstr2 = indentstr + TJS_N(" ");
 
 	tArrayItemIterator i;
 	tjs_uint c = 0;
@@ -1122,21 +1110,21 @@ void tTJSArrayNI::SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
 		}
 #ifdef TJS_TEXT_OUT_CRLF
 		if(c != Items.size() -1) // unless last
-			stream.Write(TJS_W(",\r\n"));
+			stream.Write(TJS_N(",\r\n"));
 		else
-			stream.Write(TJS_W("\r\n"));
+			stream.Write(TJS_N("\r\n"));
 #else
 		if(c != Items.size() -1) // unless last
-			stream.Write(TJS_W(",\n"));
+			stream.Write(TJS_N(",\n"));
 		else
-			stream.Write(TJS_W("\n"));
+			stream.Write(TJS_N("\n"));
 #endif
 
 		c++;
 	}
 
 	stream.Write(indentstr);
-	stream.Write(TJS_W("]"));
+	stream.Write(TJS_N("]"));
 }
 //---------------------------------------------------------------------------
 void tTJSArrayNI::SaveStructuredDataForObject(iTJSDispatch2 *dsp,
@@ -1150,7 +1138,7 @@ void tTJSArrayNI::SaveStructuredDataForObject(iTJSDispatch2 *dsp,
 		if(*i == dsp)
 		{
 			// object recursion detected
-                        stream.Write(TJS_W("null /* object recursion detected */"));
+                        stream.Write(TJS_N("null /* object recursion detected */"));
 			return;
 		}
 	}
@@ -1177,15 +1165,15 @@ void tTJSArrayNI::SaveStructuredDataForObject(iTJSDispatch2 *dsp,
 	else if(dsp != NULL)
 	{
 		// other objects
-		stream.Write(TJS_W("null /* (object) \"")); // stored as a null
+		stream.Write(TJS_N("null /* (object) \"")); // stored as a null
 		tTJSVariant val(dsp,dsp);
 		stream.Write(ttstr(val).EscapeC());
-		stream.Write(TJS_W("\" */"));
+		stream.Write(TJS_N("\" */"));
 	}
 	else
 	{
 		// null
-		stream.Write(TJS_W("null"));
+		stream.Write(TJS_N("null"));
 	}
 }
 //---------------------------------------------------------------------------

@@ -24,7 +24,7 @@ static FT_Library &TVPGetFontLibrary() {
         FT_Error error = FT_Init_FreeType(&TVPFontLibrary);
         if(error)
             TVPThrowExceptionMessage(
-                (ttstr(TJS_W("Initialize FreeType failed, error = ")) +
+                (ttstr(TJS_N("Initialize FreeType failed, error = ")) +
                  TJSIntegerToString((tjs_int)error))
                     .c_str());
         TVPInitFontNames();
@@ -45,7 +45,7 @@ static int TVPInternalEnumFonts(
     FT_Error error =
         FT_New_Memory_Face(TVPGetFontLibrary(), pBuf, buflen, 0, &fontface);
     if(error) {
-        TVPAddLog(ttstr(TJS_W("Load Font \"") + FontPath + "\" failed (" +
+        TVPAddLog(ttstr(TJS_N("Load Font \"") + FontPath + "\" failed (" +
                         TJSIntegerToString((int)error) + ")"));
         return faceCount;
     }
@@ -105,7 +105,7 @@ static int TVPInternalEnumFonts(
                 addCount = 1;
             }
             /*if (!addCount)*/ {
-                ttstr fontname((tjs_nchar *)fontface->family_name);
+                ttstr fontname((tjs_char *)fontface->family_name);
                 TVPFontNamePathInfo info;
                 info.Path = FontPath;
                 info.Index = i;
@@ -218,7 +218,7 @@ tTJSBinaryStream* TVPCreateFontStream(const ttstr &fontname)
 	if (info->Getter) {
 		return info->Getter(info);
 	}
-	return TVPCreateBinaryStreamForRead(info->Path, TJS_W(""));
+	return TVPCreateBinaryStreamForRead(info->Path, TJS_N(""));
 }
 
 //---------------------------------------------------------------------------
@@ -228,7 +228,7 @@ TVPFontNamePathInfo* TVPFindFont(const ttstr &fontname)
     TVPInitFontNames();
 
 	TVPFontNamePathInfo *info = nullptr;
-	if (!fontname.IsEmpty() && fontname[0] == TJS_W('@')) { // vertical version
+	if (!fontname.IsEmpty() && fontname[0] == TJS_N('@')) { // vertical version
 		info = TVPFontNames.Find(fontname.c_str() + 1);
 	}
 	if (!info) {
@@ -269,7 +269,7 @@ ttstr TVPGetBeingFont(ttstr fonts)
 
     bool vfont;
 
-    if(fonts.c_str()[0] == TJS_W('@')) { // for vertical writing
+    if(fonts.c_str()[0] == TJS_N('@')) { // for vertical writing
         fonts = fonts.c_str() + 1;
         vfont = true;
     } else {
@@ -279,35 +279,35 @@ ttstr TVPGetBeingFont(ttstr fonts)
     static bool force_default_font = GameSetting::force_default_font;
     if(!force_default_font) {
         bool prev_empty_name = false;
-        while(fonts != TJS_W("")) {
+        while(fonts != TJS_N("")) {
             ttstr fontname;
-            int pos = fonts.IndexOf(TJS_W(","));
+            int pos = fonts.IndexOf(TJS_N(","));
             if(pos != -1) {
                 fontname = Trim(fonts.SubString(0, pos));
                 fonts = fonts.SubString(pos + 1, -1);
             } else {
                 fontname = Trim(fonts);
-                fonts = TJS_W("");
+                fonts = TJS_N("");
             }
 
             // no existing check if previously specified font candidate is empty
             // eg. ",Fontname"
 
-            if(fontname != TJS_W("") &&
+            if(fontname != TJS_N("") &&
                (prev_empty_name || TVPFontExists(fontname))) {
-                if(vfont && fontname.c_str()[0] != TJS_W('@')) {
-                    return TJS_W("@") + fontname;
+                if(vfont && fontname.c_str()[0] != TJS_N('@')) {
+                    return TJS_N("@") + fontname;
                 } else {
                     return fontname;
                 }
             }
 
-            prev_empty_name = (fontname == TJS_W(""));
+            prev_empty_name = (fontname == TJS_N(""));
         }
     }
 
     if(vfont) {
-        return ttstr(TJS_W("@")) + TVPGetDefaultFontName();
+        return ttstr(TJS_N("@")) + TVPGetDefaultFontName();
     } else {
         return TVPGetDefaultFontName();
     }
