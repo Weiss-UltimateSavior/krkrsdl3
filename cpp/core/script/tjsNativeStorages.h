@@ -7,16 +7,15 @@
 //---------------------------------------------------------------------------
 class tTJSNC_Storages : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSNC_Storages();
-	static tjs_uint32 ClassID;
+    tTJSNC_Storages();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_Storages();
 //---------------------------------------------------------------------------
-

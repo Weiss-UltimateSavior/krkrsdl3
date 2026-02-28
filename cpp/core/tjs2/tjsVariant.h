@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TJS2 Script Engine
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // implementation of tTJSVariant
@@ -24,8 +24,6 @@ class tTJSVariantString;
 class tTJSString;
 //---------------------------------------------------------------------------
 
-
-
 /*[*/
 //---------------------------------------------------------------------------
 // tTJSVariantOctet
@@ -33,9 +31,9 @@ class tTJSString;
 
 struct tTJSVariantOctet_S
 {
-	tjs_uint Length;
-	tjs_int RefCount;
-	tjs_uint8 *Data;
+    tjs_uint Length;
+    tjs_int RefCount;
+    tjs_uint8* Data;
 };
 /*]*/
 
@@ -48,29 +46,21 @@ public:
     tTJSVariantOctet(const tTJSVariantOctet* o1, const tTJSVariantOctet* o2);
     ~tTJSVariantOctet();
 
-	void AddRef()
-	{
-		RefCount ++;
-	}
+    void AddRef() { RefCount++; }
 
-	void Release();
+    void Release();
 
-	tjs_uint GetLength() const
-	{
-		return Length;
-	}
+    tjs_uint GetLength() const { return Length; }
 
-	const tjs_uint8* GetData() const
-	{
-		return Data;
-	}
+    const tjs_uint8* GetData() const { return Data; }
 
-	tjs_int QueryPersistSize() { return sizeof(tjs_uint) + Length; }
-	void Persist(tjs_uint8 * dest)
-	{
-		*(tjs_uint*)dest = Length;
-		if(Data) TJS_octetcpy(dest + sizeof(tjs_uint), Data, Length);
-	}
+    tjs_int QueryPersistSize() { return sizeof(tjs_uint) + Length; }
+    void Persist(tjs_uint8* dest)
+    {
+        *(tjs_uint*)dest = Length;
+        if (Data)
+            TJS_octetcpy(dest + sizeof(tjs_uint), Data, Length);
+    }
 };
 /*end-of-tTJSVariantOctet*/
 //---------------------------------------------------------------------------
@@ -86,8 +76,6 @@ extern void TJSDeallocVariantOctet(tTJSVariantOctet* o);
 extern tTJSVariantString* TJSOctetToListString(const tTJSVariantOctet* oct);
 //---------------------------------------------------------------------------
 
-
-
 /*[*/
 //---------------------------------------------------------------------------
 // tTJSVariant_S
@@ -97,12 +85,12 @@ extern tTJSVariantString* TJSOctetToListString(const tTJSVariantOctet* oct);
 #endif
 enum tTJSVariantType
 {
-	tvtVoid,  // empty
-	tvtObject,
-	tvtString,
-	tvtOctet,  // octet binary data
-	tvtInteger,
-	tvtReal
+    tvtVoid, // empty
+    tvtObject,
+    tvtString,
+    tvtOctet, // octet binary data
+    tvtInteger,
+    tvtReal
 };
 #ifdef __BORLANDC__
 #pragma option pop
@@ -117,8 +105,8 @@ enum tTJSVariantType
 class iTJSDispatch2;
 struct tTJSVariantClosure_S
 {
-	iTJSDispatch2 *Object;
-	iTJSDispatch2 *ObjThis;
+    iTJSDispatch2* Object;
+    iTJSDispatch2* ObjThis;
 };
 class tTJSVariantClosure;
 
@@ -126,22 +114,22 @@ class tTJSVariantString;
 class tTJSVariantOctet;
 struct tTJSVariant_S
 {
-	//---- data members -----------------------------------------------------
+    //---- data members -----------------------------------------------------
 
-	#define tTJSVariant_BITCOPY(a,b) \
-	{\
-		*(tTJSVariant_S*)&(a) = *(tTJSVariant_S*)&(b); \
-	}
+#define tTJSVariant_BITCOPY(a, b) \
+    { \
+        *(tTJSVariant_S*)&(a) = *(tTJSVariant_S*)&(b); \
+    }
 
-	union
-	{
-		tTJSVariantClosure_S Object;
-		tTVInteger Integer;
-		tTVReal Real;
-		tTJSVariantString *String;
-		tTJSVariantOctet *Octet;
-	};
-	tTJSVariantType vt;
+    union
+    {
+        tTJSVariantClosure_S Object;
+        tTVInteger Integer;
+        tTVReal Real;
+        tTJSVariantString* String;
+        tTJSVariantOctet* Octet;
+    };
+    tTJSVariantType vt;
 };
 /*]*/
 
@@ -160,262 +148,301 @@ extern tTJSVariantClosure_S TJSNullVariantClosure;
 
 class tTJSVariantClosure : public tTJSVariantClosure_S
 {
-	// tTJSVariantClosure does not provide any function of object lifetime
-	// namagement. ( AddRef and Release are provided but tTJSVariantClosure
-	// has no responsibility for them )
+    // tTJSVariantClosure does not provide any function of object lifetime
+    // namagement. ( AddRef and Release are provided but tTJSVariantClosure
+    // has no responsibility for them )
 
 public:
-	tTJSVariantClosure() {;} // note that default constructor does nothing 
+    tTJSVariantClosure() { ; } // note that default constructor does nothing
 
-	tTJSVariantClosure(iTJSDispatch2 *obj, iTJSDispatch2 *objthis = NULL)
-	{ Object = obj, ObjThis = objthis; }
+    tTJSVariantClosure(iTJSDispatch2* obj, iTJSDispatch2* objthis = NULL)
+    {
+        Object = obj, ObjThis = objthis;
+    }
 
-	iTJSDispatch2 * SelectObjectNoAddRef()
-		{ return ObjThis ? ObjThis : Object; }
+    iTJSDispatch2* SelectObjectNoAddRef() { return ObjThis ? ObjThis : Object; }
 
 public:
+    bool operator==(const tTJSVariantClosure& rhs)
+    {
+        return Object == rhs.Object && ObjThis == rhs.ObjThis;
+    }
 
-	bool operator == (const tTJSVariantClosure &rhs)
-	{
-		return Object == rhs.Object && ObjThis == rhs.ObjThis;
-	}
+    bool operator!=(const tTJSVariantClosure& rhs) { return !this->operator==(rhs); }
 
-	bool operator != (const tTJSVariantClosure &rhs)
-	{
-		return ! this->operator ==(rhs);
-	}
+    void AddRef()
+    {
+        if (Object)
+            Object->AddRef();
+        if (ObjThis)
+            ObjThis->AddRef();
+    }
 
+    void Release()
+    {
+        if (Object)
+            Object->Release();
+        if (ObjThis)
+            ObjThis->Release();
+    }
 
-	void AddRef()
-	{
-		if(Object) Object->AddRef();
-		if(ObjThis) ObjThis->AddRef();
-	}
+    tjs_error FuncCall(tjs_uint32 flag,
+                       const tjs_char* membername,
+                       tjs_uint32* hint,
+                       tTJSVariant* result,
+                       tjs_int numparams,
+                       tTJSVariant** param,
+                       iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->FuncCall(flag, membername, hint, result, numparams, param,
+                                ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	void Release()
-	{
-		if(Object) Object->Release();
-		if(ObjThis) ObjThis->Release();
-	}
+    tjs_error FuncCallByNum(tjs_uint32 flag,
+                            tjs_int num,
+                            tTJSVariant* result,
+                            tjs_int numparams,
+                            tTJSVariant** param,
+                            iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->FuncCallByNum(flag, num, result, numparams, param,
+                                     ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
+    tjs_error PropGet(tjs_uint32 flag,
+                      const tjs_char* membername,
+                      tjs_uint32* hint,
+                      tTJSVariant* result,
+                      iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->PropGet(flag, membername, hint, result,
+                               ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
-		tTJSVariant *result,
-		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->FuncCall(flag, membername, hint, result, numparams, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error PropGetByNum(tjs_uint32 flag,
+                           tjs_int num,
+                           tTJSVariant* result,
+                           iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->PropGetByNum(flag, num, result,
+                                    ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	FuncCallByNum(tjs_uint32 flag, tjs_int num, tTJSVariant *result,
-		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->FuncCallByNum(flag, num, result, numparams, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error PropSet(tjs_uint32 flag,
+                      const tjs_char* membername,
+                      tjs_uint32* hint,
+                      const tTJSVariant* param,
+                      iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->PropSet(flag, membername, hint, param,
+                               ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
-		tTJSVariant *result,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->PropGet(flag, membername, hint, result,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error PropSetByNum(tjs_uint32 flag,
+                           tjs_int num,
+                           const tTJSVariant* param,
+                           iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->PropSetByNum(flag, num, param,
+                                    ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	PropGetByNum(tjs_uint32 flag, tjs_int num, tTJSVariant *result,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->PropGetByNum(flag, num, result,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error GetCount(tjs_int* result,
+                       const tjs_char* membername,
+                       tjs_uint32* hint,
+                       iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->GetCount(result, membername, hint,
+                                ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	PropSet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
-		const tTJSVariant *param,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->PropSet(flag, membername, hint, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error GetCountByNum(tjs_int* result, tjs_int num, iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->GetCountByNum(result, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	PropSetByNum(tjs_uint32 flag, tjs_int num, const tTJSVariant *param,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->PropSetByNum(flag, num, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error PropSetByVS(tjs_uint32 flag,
+                          tTJSVariantString* membername,
+                          const tTJSVariant* param,
+                          iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->PropSetByVS(flag, membername, param,
+                                   ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	GetCount(tjs_int *result, const tjs_char *membername, tjs_uint32 *hint,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->GetCount(result, membername, hint,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error EnumMembers(tjs_uint32 flag,
+                          tTJSVariantClosure* callback,
+                          iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->EnumMembers(flag, callback,
+                                   ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	GetCountByNum(tjs_int *result, tjs_int num, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->GetCountByNum(result, num,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error DeleteMember(tjs_uint32 flag,
+                           const tjs_char* membername,
+                           tjs_uint32* hint,
+                           iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->DeleteMember(flag, membername, hint,
+                                    ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
-		const tTJSVariant *param, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->PropSetByVS(flag, membername, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error DeleteMemberByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->DeleteMemberByNum(flag, num,
+                                         ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->EnumMembers(flag, callback,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error Invalidate(tjs_uint32 flag,
+                         const tjs_char* membername,
+                         tjs_uint32* hint,
+                         iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->Invalidate(flag, membername, hint,
+                                  ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	DeleteMember(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->DeleteMember(flag, membername, hint,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error InvalidateByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->InvalidateByNum(flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	DeleteMemberByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->DeleteMemberByNum(flag, num,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error IsValid(tjs_uint32 flag,
+                      const tjs_char* membername,
+                      tjs_uint32* hint,
+                      iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->IsValid(flag, membername, hint,
+                               ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	Invalidate(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->Invalidate(flag, membername, hint,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error IsValidByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->IsValidByNum(flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	InvalidateByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->InvalidateByNum(flag, num,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error CreateNew(tjs_uint32 flag,
+                        const tjs_char* membername,
+                        tjs_uint32* hint,
+                        iTJSDispatch2** result,
+                        tjs_int numparams,
+                        tTJSVariant** param,
+                        iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->CreateNew(flag, membername, hint, result, numparams, param,
+                                 ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	IsValid(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->IsValid(flag, membername, hint,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error CreateNewByNum(tjs_uint32 flag,
+                             tjs_int num,
+                             iTJSDispatch2** result,
+                             tjs_int numparams,
+                             tTJSVariant** param,
+                             iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->CreateNewByNum(flag, num, result, numparams, param,
+                                      ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	IsValidByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->IsValidByNum(flag, num,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    /*
+            tjs_error
+            Reserved1() { }
+    */
 
-	tjs_error
-	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
-		iTJSDispatch2 **result,
-		tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->CreateNew(flag, membername, hint, result, numparams,
-			param, ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error IsInstanceOf(tjs_uint32 flag,
+                           const tjs_char* membername,
+                           tjs_uint32* hint,
+                           const tjs_char* classname,
+                           iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->IsInstanceOf(flag, membername, hint, classname,
+                                    ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	CreateNewByNum(tjs_uint32 flag, tjs_int num, iTJSDispatch2 **result,
-		tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->CreateNewByNum(flag, num, result, numparams, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error IsInstanceOf(tjs_uint32 flag,
+                           tjs_int num,
+                           tjs_char* classname,
+                           iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->IsInstanceOfByNum(flag, num, classname,
+                                         ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-/*
-	tjs_error
-	Reserved1() { }
-*/
+    tjs_error Operation(tjs_uint32 flag,
+                        const tjs_char* membername,
+                        tjs_uint32* hint,
+                        tTJSVariant* result,
+                        const tTJSVariant* param,
+                        iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->Operation(flag, membername, hint, result, param,
+                                 ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	IsInstanceOf(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
-		const tjs_char *classname, iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->IsInstanceOf(flag, membername, hint, classname,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    tjs_error OperationByNum(tjs_uint32 flag,
+                             tjs_int num,
+                             tTJSVariant* result,
+                             const tTJSVariant* param,
+                             iTJSDispatch2* objthis) const
+    {
+        if (!Object)
+            TJSThrowNullAccess();
+        return Object->OperationByNum(flag, num, result, param,
+                                      ObjThis ? ObjThis : (objthis ? objthis : Object));
+    }
 
-	tjs_error
-	IsInstanceOf(tjs_uint32 flag, tjs_int num, tjs_char *classname,
-		iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->IsInstanceOfByNum(flag, num, classname,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
+    /*
+            tjs_error
+            Reserved2() { }
+    */
 
-	tjs_error
-	Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
-		tTJSVariant *result, const tTJSVariant *param,	iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->Operation(flag, membername, hint, result, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
-
-	tjs_error
-	OperationByNum(tjs_uint32 flag, tjs_int num, tTJSVariant *result,
-		const tTJSVariant *param,	iTJSDispatch2 *objthis) const
-	{
-		if(!Object) TJSThrowNullAccess();
-		return Object->OperationByNum(flag, num, result, param,
-			ObjThis?ObjThis:(objthis?objthis:Object));
-	}
-
-/*
-	tjs_error
-	Reserved2() { }
-*/
-
-/*
-	tjs_error
-	Reserved3() { }
-*/
-
+    /*
+            tjs_error
+            Reserved3() { }
+    */
 };
-
-
-
 
 /*]*/
 //---------------------------------------------------------------------------
@@ -426,12 +453,11 @@ extern tTJSVariantString* TJSRealToHexString(tjs_real r);
 extern tTVInteger TJSStringToInteger(const tjs_char* str);
 extern tTVReal TJSStringToReal(const tjs_char* str);
 //---------------------------------------------------------------------------
-extern void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantType to);
-extern void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantType to1,
-	tTJSVariantType to2);
+extern void TJSThrowVariantConvertError(const tTJSVariant& from, tTJSVariantType to);
+extern void TJSThrowVariantConvertError(const tTJSVariant& from,
+                                        tTJSVariantType to1,
+                                        tTJSVariantType to2);
 //---------------------------------------------------------------------------
-
-
 
 //---------------------------------------------------------------------------
 // tTJSVariant
@@ -441,728 +467,783 @@ extern void TJSThrowVariantConvertError(const tTJSVariant & from, tTJSVariantTyp
 class tTJSVariant : protected tTJSVariant_S
 {
 
-	//---- object management ------------------------------------------------
+    //---- object management ------------------------------------------------
 private:
+    void AddRefObject()
+    {
+        if (Object.Object)
+            Object.Object->AddRef();
+        if (Object.ObjThis)
+            Object.ObjThis->AddRef();
+        // does not addref the string or octet
+    }
 
-	void AddRefObject()
-	{
-		if(Object.Object) Object.Object->AddRef();
-		if(Object.ObjThis) Object.ObjThis->AddRef();
-		// does not addref the string or octet
-	}
+    void ReleaseObject()
+    {
+        iTJSDispatch2* object = Object.Object;
+        iTJSDispatch2* objthis = Object.ObjThis;
+        if (object)
+            Object.Object = NULL, object->Release();
+        if (objthis)
+            Object.ObjThis = NULL, objthis->Release();
+        // does not release the string nor octet
+    }
 
-	void ReleaseObject()
-	{
-		iTJSDispatch2 * object = Object.Object;
-		iTJSDispatch2 * objthis = Object.ObjThis;
-		if(object) Object.Object = NULL, object->Release();
-		if(objthis) Object.ObjThis = NULL, objthis->Release();
-		// does not release the string nor octet
-	}
-
-	void AddRefContent()
-	{
-		if(vt==tvtObject)
-		{
-			if(Object.Object) Object.Object->AddRef();
-			if(Object.ObjThis) Object.ObjThis->AddRef();
-		}
-		else
-		{
-			if(vt==tvtString) { if(String) String->AddRef(); }
-			else if(vt==tvtOctet) { if(Octet) Octet->AddRef(); }
-		}
-	}
-
-	void ReleaseContent()
-	{
-		if(vt==tvtObject)
-		{
-			ReleaseObject();
-		}
-		else
-		{
-			if(vt==tvtString) { if(String) String->Release(); }
-			else if(vt==tvtOctet) { if(Octet) Octet->Release(); }
-		}
-	}
-
-public:
-
-	void ChangeClosureObjThis(iTJSDispatch2* objthis)
-	{
-		if(objthis) objthis->AddRef();
-		if(vt!=tvtObject) TJSThrowVariantConvertError(*this, tvtObject);
-		if(Object.ObjThis)
-		{
-			iTJSDispatch2 * objthis = Object.ObjThis;
-			Object.ObjThis = NULL;
-			objthis->Release();
-		}
-		Object.ObjThis = objthis;
-	}
-
-	//---- constructor ------------------------------------------------------
-public:
-
-	tTJSVariant()
-	{
-		vt=tvtVoid;
-	}
-
-	tTJSVariant(const tTJSVariant& ref); // from tTJSVariant
-
-	tTJSVariant(iTJSDispatch2* ref) // from Object
-	{
-		if(ref) ref->AddRef();
-		vt=tvtObject;
-		Object.Object = ref;
-		Object.ObjThis = NULL;
-	}
-
-	tTJSVariant(iTJSDispatch2* obj, iTJSDispatch2* objthis) // from closure
-	{
-		if(obj) obj->AddRef();
-		if(objthis) objthis->AddRef();
-		vt=tvtObject;
-		Object.Object = obj;
-		Object.ObjThis = objthis;
-	}
-
-	tTJSVariant(const tjs_char* ref) //  from String
-	{
-		vt=tvtString;
-		if(ref)
-		{
-			String=TJSAllocVariantString(ref);
-		}
-		else
-		{
-			String=NULL;
-		}
-	}
-
-	tTJSVariant(const tTJSString& ref) // from tTJSString
-	{
-		vt = tvtString;
-		String = ref.AsVariantStringNoAddRef();
-		if(String) String->AddRef();
-	}
-
-	tTJSVariant(const tjs_uint8* ref, tjs_uint len) // from octet
-	{
-		vt=tvtOctet;
-		if(ref)
-		{
-			Octet = TJSAllocVariantOctet(ref, len);
-		}
-		else
-		{
-			Octet = NULL;
-		}
-	}
-
-	tTJSVariant(bool ref)
-	{
-		vt=tvtInteger;
-		Integer=(tjs_int64)(tjs_int)ref;
-	}
-
-	tTJSVariant(tjs_int32 ref)
-	{
-		vt=tvtInteger;
-		Integer=(tjs_int64)ref;
-	}
-
-	tTJSVariant(tjs_int64 ref) // from Integer64
-	{
-		vt=tvtInteger;
-		Integer=ref;
-	}
-
-	tTJSVariant(tjs_real ref) // from double
-	{
-		vt=tvtReal;
-		TJSSetFPUE();
-		Real=ref;
-	}
-
-	tTJSVariant(const tjs_uint8** src); // from persistent storage
-
-	//---- destructor -------------------------------------------------------
-
-	~tTJSVariant();
-
-	//---- type -------------------------------------------------------------
-
-	tTJSVariantType Type() { return vt; } /* for plug-in compatibility */
-        tTJSVariantType Type() const { return vt; }
-
-	//---- compare ----------------------------------------------------------
-
-	bool NormalCompare(const tTJSVariant& val2) const;
-        bool DiscernCompare(const tTJSVariant& val2) const;
-        bool DiscernCompareStrictReal(const tTJSVariant& val2) const;
-        bool GreaterThan(const tTJSVariant& val2) const;
-        bool LittlerThan(const tTJSVariant& val2) const;
-
-	bool IsInstanceOf(const tjs_char* classname) const;
-
-	//---- clear ------------------------------------------------------------
-
-	void Clear();
-
-	//---- type conversion --------------------------------------------------
-
-	iTJSDispatch2* AsObject() const
-	{
-		if(vt==tvtObject)
-		{
-			if(Object.Object) Object.Object->AddRef();
-			return Object.Object;
-		}
-
-		TJSThrowVariantConvertError(*this, tvtObject);
-
-		return NULL;
-	}
-
-	iTJSDispatch2* AsObjectNoAddRef() const
-	{
-		if(vt==tvtObject)
-			return Object.Object;
-		TJSThrowVariantConvertError(*this, tvtObject);
-		return NULL;
-	}
-
-	iTJSDispatch2* AsObjectThis() const
-	{
-		if(vt==tvtObject)
-		{
-			if(Object.ObjThis) Object.ObjThis->AddRef();
-			return Object.ObjThis;
-		}
-		TJSThrowVariantConvertError(*this, tvtObject);
-		return NULL;
-	}
-
-	iTJSDispatch2* AsObjectThisNoAddRef() const
-	{
-		if(vt==tvtObject)
-		{
-			return Object.ObjThis;
-		}
-		TJSThrowVariantConvertError(*this, tvtObject);
-		return NULL;
-	}
-
-	tTJSVariantClosure& AsObjectClosure()
-	{
-		if(vt==tvtObject)
-		{
-			AddRefObject();
-			return *(tTJSVariantClosure*)&Object;
-		}
-		TJSThrowVariantConvertError(*this, tvtObject);
-		return *(tTJSVariantClosure*)&TJSNullVariantClosure;
-	}
-
-
-	tTJSVariantClosure& AsObjectClosureNoAddRef() const
-	{
-		if(vt==tvtObject)
-		{
-			return *(tTJSVariantClosure*)&Object;
-		}
-		TJSThrowVariantConvertError(*this, tvtObject);
-		return *(tTJSVariantClosure*)&TJSNullVariantClosure;
-	}
-
-	void ToObject()
-	{
-		switch(vt)
-		{
-		case tvtObject:  break;
-		case tvtVoid:
-		case tvtString:
-		case tvtInteger:
-		case tvtReal:
-		case tvtOctet:    TJSThrowVariantConvertError(*this, tvtObject);
-		}
-
-	}
-
-	operator iTJSDispatch2*()
-	{
-		return AsObject();
-	}
-
-	tTJSVariantString* AsString() const
-	{
-		switch(vt)
-		{
-		case tvtVoid:    return NULL;
-		case tvtObject:  return TJSObjectToString(*(tTJSVariantClosure*)&Object);
-		case tvtString:  { if(String) { String->AddRef(); } return String; }
-		case tvtInteger: return TJSIntegerToString(Integer);
-		case tvtReal:    return TJSRealToString(Real);
-		case tvtOctet:   TJSThrowVariantConvertError(*this, tvtString);
-		}
-		return NULL;
-	}
-
-	tTJSVariantString* AsStringNoAddRef() const
-	{
-		switch(vt)
-		{
-		case tvtVoid:    return NULL;
-		case tvtString:  return String;
-		case tvtObject:
-		case tvtInteger:
-		case tvtReal:
-		case tvtOctet:   TJSThrowVariantConvertError(*this, tvtString);
-		}
-		return NULL;
-	}
-
-	void ToString();
-
-	const tjs_char* GetString() const
-	{
-		// returns String
-		if(vt!=tvtString) TJSThrowVariantConvertError(*this, tvtString);
+    void AddRefContent()
+    {
+        if (vt == tvtObject)
+        {
+            if (Object.Object)
+                Object.Object->AddRef();
+            if (Object.ObjThis)
+                Object.ObjThis->AddRef();
+        }
+        else
+        {
+            if (vt == tvtString)
+            {
                 if (String)
-                    return *String;
+                    String->AddRef();
+            }
+            else if (vt == tvtOctet)
+            {
+                if (Octet)
+                    Octet->AddRef();
+            }
+        }
+    }
+
+    void ReleaseContent()
+    {
+        if (vt == tvtObject)
+        {
+            ReleaseObject();
+        }
+        else
+        {
+            if (vt == tvtString)
+            {
+                if (String)
+                    String->Release();
+            }
+            else if (vt == tvtOctet)
+            {
+                if (Octet)
+                    Octet->Release();
+            }
+        }
+    }
+
+public:
+    void ChangeClosureObjThis(iTJSDispatch2* objthis)
+    {
+        if (objthis)
+            objthis->AddRef();
+        if (vt != tvtObject)
+            TJSThrowVariantConvertError(*this, tvtObject);
+        if (Object.ObjThis)
+        {
+            iTJSDispatch2* objthis = Object.ObjThis;
+            Object.ObjThis = NULL;
+            objthis->Release();
+        }
+        Object.ObjThis = objthis;
+    }
+
+    //---- constructor ------------------------------------------------------
+public:
+    tTJSVariant() { vt = tvtVoid; }
+
+    tTJSVariant(const tTJSVariant& ref); // from tTJSVariant
+
+    tTJSVariant(iTJSDispatch2* ref) // from Object
+    {
+        if (ref)
+            ref->AddRef();
+        vt = tvtObject;
+        Object.Object = ref;
+        Object.ObjThis = NULL;
+    }
+
+    tTJSVariant(iTJSDispatch2* obj, iTJSDispatch2* objthis) // from closure
+    {
+        if (obj)
+            obj->AddRef();
+        if (objthis)
+            objthis->AddRef();
+        vt = tvtObject;
+        Object.Object = obj;
+        Object.ObjThis = objthis;
+    }
+
+    tTJSVariant(const tjs_char* ref) //  from String
+    {
+        vt = tvtString;
+        if (ref)
+        {
+            String = TJSAllocVariantString(ref);
+        }
+        else
+        {
+            String = NULL;
+        }
+    }
+
+    tTJSVariant(const tTJSString& ref) // from tTJSString
+    {
+        vt = tvtString;
+        String = ref.AsVariantStringNoAddRef();
+        if (String)
+            String->AddRef();
+    }
+
+    tTJSVariant(const tjs_uint8* ref, tjs_uint len) // from octet
+    {
+        vt = tvtOctet;
+        if (ref)
+        {
+            Octet = TJSAllocVariantOctet(ref, len);
+        }
+        else
+        {
+            Octet = NULL;
+        }
+    }
+
+    tTJSVariant(bool ref)
+    {
+        vt = tvtInteger;
+        Integer = (tjs_int64)(tjs_int)ref;
+    }
+
+    tTJSVariant(tjs_int32 ref)
+    {
+        vt = tvtInteger;
+        Integer = (tjs_int64)ref;
+    }
+
+    tTJSVariant(tjs_int64 ref) // from Integer64
+    {
+        vt = tvtInteger;
+        Integer = ref;
+    }
+
+    tTJSVariant(tjs_real ref) // from double
+    {
+        vt = tvtReal;
+        TJSSetFPUE();
+        Real = ref;
+    }
+
+    tTJSVariant(const tjs_uint8** src); // from persistent storage
+
+    //---- destructor -------------------------------------------------------
+
+    ~tTJSVariant();
+
+    //---- type -------------------------------------------------------------
+
+    tTJSVariantType Type() { return vt; } /* for plug-in compatibility */
+    tTJSVariantType Type() const { return vt; }
+
+    //---- compare ----------------------------------------------------------
+
+    bool NormalCompare(const tTJSVariant& val2) const;
+    bool DiscernCompare(const tTJSVariant& val2) const;
+    bool DiscernCompareStrictReal(const tTJSVariant& val2) const;
+    bool GreaterThan(const tTJSVariant& val2) const;
+    bool LittlerThan(const tTJSVariant& val2) const;
+
+    bool IsInstanceOf(const tjs_char* classname) const;
+
+    //---- clear ------------------------------------------------------------
+
+    void Clear();
+
+    //---- type conversion --------------------------------------------------
+
+    iTJSDispatch2* AsObject() const
+    {
+        if (vt == tvtObject)
+        {
+            if (Object.Object)
+                Object.Object->AddRef();
+            return Object.Object;
+        }
+
+        TJSThrowVariantConvertError(*this, tvtObject);
+
+        return NULL;
+    }
+
+    iTJSDispatch2* AsObjectNoAddRef() const
+    {
+        if (vt == tvtObject)
+            return Object.Object;
+        TJSThrowVariantConvertError(*this, tvtObject);
+        return NULL;
+    }
+
+    iTJSDispatch2* AsObjectThis() const
+    {
+        if (vt == tvtObject)
+        {
+            if (Object.ObjThis)
+                Object.ObjThis->AddRef();
+            return Object.ObjThis;
+        }
+        TJSThrowVariantConvertError(*this, tvtObject);
+        return NULL;
+    }
+
+    iTJSDispatch2* AsObjectThisNoAddRef() const
+    {
+        if (vt == tvtObject)
+        {
+            return Object.ObjThis;
+        }
+        TJSThrowVariantConvertError(*this, tvtObject);
+        return NULL;
+    }
+
+    tTJSVariantClosure& AsObjectClosure()
+    {
+        if (vt == tvtObject)
+        {
+            AddRefObject();
+            return *(tTJSVariantClosure*)&Object;
+        }
+        TJSThrowVariantConvertError(*this, tvtObject);
+        return *(tTJSVariantClosure*)&TJSNullVariantClosure;
+    }
+
+    tTJSVariantClosure& AsObjectClosureNoAddRef() const
+    {
+        if (vt == tvtObject)
+        {
+            return *(tTJSVariantClosure*)&Object;
+        }
+        TJSThrowVariantConvertError(*this, tvtObject);
+        return *(tTJSVariantClosure*)&TJSNullVariantClosure;
+    }
+
+    void ToObject()
+    {
+        switch (vt)
+        {
+            case tvtObject:
+                break;
+            case tvtVoid:
+            case tvtString:
+            case tvtInteger:
+            case tvtReal:
+            case tvtOctet:
+                TJSThrowVariantConvertError(*this, tvtObject);
+        }
+    }
+
+    operator iTJSDispatch2*() { return AsObject(); }
+
+    tTJSVariantString* AsString() const
+    {
+        switch (vt)
+        {
+            case tvtVoid:
+                return NULL;
+            case tvtObject:
+                return TJSObjectToString(*(tTJSVariantClosure*)&Object);
+            case tvtString:
+            {
+                if (String)
+                {
+                    String->AddRef();
+                }
+                return String;
+            }
+            case tvtInteger:
+                return TJSIntegerToString(Integer);
+            case tvtReal:
+                return TJSRealToString(Real);
+            case tvtOctet:
+                TJSThrowVariantConvertError(*this, tvtString);
+        }
+        return NULL;
+    }
+
+    tTJSVariantString* AsStringNoAddRef() const
+    {
+        switch (vt)
+        {
+            case tvtVoid:
+                return NULL;
+            case tvtString:
+                return String;
+            case tvtObject:
+            case tvtInteger:
+            case tvtReal:
+            case tvtOctet:
+                TJSThrowVariantConvertError(*this, tvtString);
+        }
+        return NULL;
+    }
+
+    void ToString();
+
+    const tjs_char* GetString() const
+    {
+        // returns String
+        if (vt != tvtString)
+            TJSThrowVariantConvertError(*this, tvtString);
+        if (String)
+            return *String;
+        else
+            return NULL;
+    }
+
+    tjs_uint32* GetHint()
+    {
+        // returns String Hint
+        if (vt != tvtString)
+            TJSThrowVariantConvertError(*this, tvtString);
+        if (!String)
+            return NULL;
+        return String->GetHint();
+    }
+
+    tTJSVariantOctet* AsOctet() const
+    {
+        switch (vt)
+        {
+            case tvtVoid:
+                return NULL;
+            case tvtOctet:
+            {
+                if (Octet)
+                    Octet->AddRef();
+            }
+                return Octet;
+            case tvtString:
+            case tvtInteger:
+            case tvtReal:
+            case tvtObject:
+                TJSThrowVariantConvertError(*this, tvtOctet);
+        }
+        return NULL;
+    }
+
+    tTJSVariantOctet* AsOctetNoAddRef() const
+    {
+        switch (vt)
+        {
+            case tvtVoid:
+                return NULL;
+            case tvtOctet:
+                return Octet;
+            case tvtString:
+            case tvtInteger:
+            case tvtReal:
+            case tvtObject:
+                TJSThrowVariantConvertError(*this, tvtOctet);
+        }
+        return NULL;
+    }
+
+    void ToOctet();
+
+    tTVInteger AsInteger() const
+    {
+        switch (vt)
+        {
+            case tvtVoid:
+                return 0;
+            case tvtObject:
+                TJSThrowVariantConvertError(*this, tvtInteger);
+            case tvtString:
+                return String ? String->ToInteger() : 0;
+            case tvtInteger:
+                return Integer;
+            case tvtReal:
+                TJSSetFPUE();
+                return (tTVInteger)Real;
+            case tvtOctet:
+                TJSThrowVariantConvertError(*this, tvtInteger);
+        }
+        return 0;
+    }
+
+    void AsNumber(tTJSVariant& targ) const
+    {
+        switch (vt)
+        {
+            case tvtVoid:
+                targ = (tjs_int)0;
+                return;
+            case tvtObject:
+                TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+            case tvtString:
+                if (String)
+                    String->ToNumber(targ);
                 else
-                    return NULL;
-	}
+                    targ = 0;
+                return;
+            case tvtInteger:
+                targ = Integer;
+                return;
+            case tvtReal:
+                TJSSetFPUE();
+                targ = Real;
+                return;
+            case tvtOctet:
+                TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+        }
+        return;
+    }
 
-	tjs_uint32* GetHint()
-	{
-		// returns String Hint
-		if(vt!=tvtString) TJSThrowVariantConvertError(*this, tvtString);
-		if(!String) return NULL;
-		return String->GetHint();
-	}
+    void ToInteger();
 
-	tTJSVariantOctet* AsOctet() const
-	{
-		switch(vt)
-		{
-		case tvtVoid:    return NULL;
-		case tvtOctet:   { if(Octet) Octet->AddRef(); } return Octet;
-		case tvtString:
-		case tvtInteger:
-		case tvtReal:
-		case tvtObject:  TJSThrowVariantConvertError(*this, tvtOctet);
-		}
-		return NULL;
-	}
+    operator tTVInteger() const { return AsInteger(); }
 
-	tTJSVariantOctet* AsOctetNoAddRef() const
-	{
-		switch(vt)
-		{
-		case tvtVoid:    return NULL;
-		case tvtOctet:   return Octet;
-		case tvtString:
-		case tvtInteger:
-		case tvtReal:
-		case tvtObject:  TJSThrowVariantConvertError(*this, tvtOctet);
-		}
-		return NULL;
-	}
+    operator bool() const
+    {
+        switch (vt)
+        {
+            case tvtVoid:
+                return false;
+            // case tvtObject:		return (bool)Object.Object;
+            case tvtObject:
+                return Object.Object != NULL;
+            // case tvtString:		return (bool)AsInteger();
+            case tvtString:
+                return AsInteger() != 0;
+            case tvtOctet:
+                return 0 != Octet;
+            case tvtInteger:
+                return 0 != Integer;
+            case tvtReal:
+                TJSSetFPUE();
+                return 0 != Real;
+        }
+        return false;
+    }
 
-	void ToOctet();
+    operator tjs_int() const { return (tjs_int)AsInteger(); }
 
-	tTVInteger AsInteger() const
-	{
-		switch(vt)
-		{
-		case tvtVoid:    return 0;
-		case tvtObject:  TJSThrowVariantConvertError(*this, tvtInteger);
-		case tvtString:  return String ? String->ToInteger() : 0;
-		case tvtInteger: return Integer;
-		case tvtReal:    TJSSetFPUE(); return (tTVInteger)Real;
-		case tvtOctet:   TJSThrowVariantConvertError(*this, tvtInteger);
-		}
-		return 0;
-	}
+    tTVReal AsReal() const
+    {
+        TJSSetFPUE();
 
-	void AsNumber(tTJSVariant& targ) const
-	{
-		switch(vt)
-		{
-		case tvtVoid:    targ = (tjs_int)0; return;
-		case tvtObject:  TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
-		case tvtString:  if(String) String->ToNumber(targ);else targ = 0; return;
-		case tvtInteger: targ = Integer; return;
-		case tvtReal:    TJSSetFPUE(); targ = Real; return;
-		case tvtOctet:   TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
-		}
-		return;
-	}
+        switch (vt)
+        {
+            case tvtVoid:
+                return 0;
+            case tvtObject:
+                TJSThrowVariantConvertError(*this, tvtReal);
+            case tvtString:
+                return String ? String->ToReal() : 0;
+            case tvtInteger:
+                return (tTVReal)Integer;
+            case tvtReal:
+                return Real;
+            case tvtOctet:
+                TJSThrowVariantConvertError(*this, tvtReal);
+        }
+        return 0.0f;
+    }
 
-	void ToInteger();
+    void ToReal();
 
-	operator tTVInteger() const
-	{
-		return AsInteger();
-	}
+    operator tTVReal() const { return AsReal(); }
 
-	operator bool() const
-	{
-		switch(vt)
-		{
-		case tvtVoid:		return false;
-		//case tvtObject:		return (bool)Object.Object;
-		case tvtObject:		return Object.Object != NULL;
-		//case tvtString:		return (bool)AsInteger();
-		case tvtString:		return AsInteger() != 0;
-		case tvtOctet:		return 0!=Octet;
-		case tvtInteger:	return 0!=Integer;
-		case tvtReal:		TJSSetFPUE(); return 0!=Real;
-		}
-		return false;
-	}
+    //---- substitution -----------------------------------------------------
 
-	operator tjs_int() const
-	{
-		return (tjs_int)AsInteger();
-	}
+    tTJSVariant& operator=(const tTJSVariant& ref)
+    {
+        // from tTJSVariant
+        CopyRef(ref);
+        return *this;
+    }
+    void CopyRef(const tTJSVariant& ref);       // from reference to tTJSVariant
+    tTJSVariant& operator=(iTJSDispatch2* ref); // from Object
+    tTJSVariant& SetObject(iTJSDispatch2* ref) { return this->operator=(ref); }
+    tTJSVariant& SetObject(iTJSDispatch2* object, iTJSDispatch2* objthis);
+    tTJSVariant& operator=(tTJSVariantClosure ref); // from Object Closure
+    tTJSVariant& operator=(tTJSVariantString* ref); // from tTJSVariantString
+    tTJSVariant& operator=(tTJSVariantOctet* ref);  // from tTJSVariantOctet
+    tTJSVariant& operator=(const tTJSString& ref);  // from tTJSString
+    tTJSVariant& operator=(const tjs_char* ref);    //  from String
+    tTJSVariant& operator=(bool ref);
+    tTJSVariant& operator=(tjs_int32 ref);
+    tTJSVariant& operator=(const tTVInteger ref); // from Integer64
+    tTJSVariant& operator=(tjs_real ref);         // from double
 
-	tTVReal AsReal() const
-	{
-		TJSSetFPUE();
+    //---- operators --------------------------------------------------------
 
-		switch(vt)
-		{
-		case tvtVoid:    return 0;
-		case tvtObject:  TJSThrowVariantConvertError(*this, tvtReal);
-		case tvtString:  return String ? String->ToReal() : 0;
-		case tvtInteger: return (tTVReal)Integer;
-		case tvtReal:    return Real;
-		case tvtOctet:   TJSThrowVariantConvertError(*this, tvtReal);
-		}
-		return 0.0f;
-	}
+    tTJSVariant operator||(const tTJSVariant& rhs) const
+    {
+        return operator bool() || rhs.operator bool();
+    }
 
-	void ToReal();
+    void logicalorequal(const tTJSVariant& rhs);
 
-	operator tTVReal() const
-	{
-		return AsReal();
-	}
+    tTJSVariant operator&&(const tTJSVariant& rhs) const
+    {
+        return operator bool() && rhs.operator bool();
+    }
 
-	//---- substitution -----------------------------------------------------
+    void logicalandequal(const tTJSVariant& rhs);
 
-	tTJSVariant& operator=(const tTJSVariant& ref)
-	{
-		// from tTJSVariant
-		CopyRef(ref);
-		return *this;
-	}
-        void CopyRef(const tTJSVariant& ref); // from reference to tTJSVariant
-        tTJSVariant& operator=(iTJSDispatch2* ref); // from Object
-        tTJSVariant& SetObject(iTJSDispatch2* ref) { return this->operator=(ref); }
-        tTJSVariant& SetObject(iTJSDispatch2* object, iTJSDispatch2* objthis);
-        tTJSVariant& operator=(tTJSVariantClosure ref); // from Object Closure
-        tTJSVariant& operator=(tTJSVariantString* ref);                    // from tTJSVariantString
-        tTJSVariant& operator=(tTJSVariantOctet* ref);  // from tTJSVariantOctet
-        tTJSVariant& operator=(const tTJSString& ref);                     // from tTJSString
-        tTJSVariant& operator=(const tjs_char* ref);    //  from String
-        tTJSVariant& operator=(bool ref);
-        tTJSVariant& operator=(tjs_int32 ref);
-        tTJSVariant& operator=(const tTVInteger ref);            // from Integer64
-        tTJSVariant& operator=(tjs_real ref);         // from double
+    tTJSVariant operator|(const tTJSVariant& rhs) const
+    {
+        return (tTVInteger)(AsInteger() | rhs.AsInteger());
+    }
 
-	//---- operators --------------------------------------------------------
+    void operator|=(const tTJSVariant& rhs);
 
-	tTJSVariant operator||(const tTJSVariant& rhs) const
-	{
-		return operator bool()||rhs.operator bool();
-	}
+    tTJSVariant operator^(const tTJSVariant& rhs) const
+    {
+        return (tTVInteger)(AsInteger() ^ rhs.AsInteger());
+    }
 
-	void logicalorequal(const tTJSVariant& rhs);
+    void increment();
 
-	tTJSVariant operator&&(const tTJSVariant& rhs) const
-	{
-		return operator bool()&&rhs.operator bool();
-	}
+    void decrement();
 
-	void logicalandequal(const tTJSVariant& rhs);
+    void operator^=(const tTJSVariant& rhs);
 
-	tTJSVariant operator|(const tTJSVariant& rhs) const
-	{
-		return (tTVInteger)(AsInteger()|rhs.AsInteger());
-	}
+    tTJSVariant operator&(const tTJSVariant& rhs) const
+    {
+        return (tTVInteger)(AsInteger() & rhs.AsInteger());
+    }
 
-	void operator|=(const tTJSVariant& rhs);
+    void operator&=(const tTJSVariant& rhs);
 
-	tTJSVariant operator^(const tTJSVariant& rhs) const
-	{
-		return (tTVInteger)(AsInteger()^rhs.AsInteger());
-	}
+    tTJSVariant operator!=(const tTJSVariant& rhs) const { return !NormalCompare(rhs); }
 
-	void increment();
+    tTJSVariant operator==(const tTJSVariant& rhs) const { return NormalCompare(rhs); }
 
-	void decrement();
+    tTJSVariant operator<(const tTJSVariant& rhs) const { return GreaterThan(rhs); }
 
-	void operator^=(const tTJSVariant& rhs);
+    tTJSVariant operator>(const tTJSVariant& rhs) const { return LittlerThan(rhs); }
 
-	tTJSVariant operator&(const tTJSVariant& rhs) const
-	{
-		return (tTVInteger)(AsInteger()&rhs.AsInteger());
-	}
+    tTJSVariant operator<=(const tTJSVariant& rhs) const { return !LittlerThan(rhs); }
 
-	void operator&=(const tTJSVariant& rhs);
+    tTJSVariant operator>=(const tTJSVariant& rhs) const { return !GreaterThan(rhs); }
 
-	tTJSVariant operator!=(const tTJSVariant& rhs) const
-	{
-		return !NormalCompare(rhs);
-	}
+    tTJSVariant operator>>(const tTJSVariant& rhs) const
+    {
+        return (tTVInteger)(AsInteger() >> (tjs_int)rhs.AsInteger());
+    }
 
-	tTJSVariant operator==(const tTJSVariant& rhs) const
-	{
-		return NormalCompare(rhs);
-	}
+    void operator>>=(const tTJSVariant& rhs);
 
-	tTJSVariant operator<(const tTJSVariant& rhs) const
-	{
-		return GreaterThan(rhs);
-	}
+    tTJSVariant rbitshift(tjs_int count) const
+    {
+        return (tTVInteger)((tjs_uint64)AsInteger() >> count);
+    }
 
-	tTJSVariant operator>(const tTJSVariant& rhs) const
-	{
-		return LittlerThan(rhs);
-	}
+    void rbitshiftequal(const tTJSVariant& rhs);
 
-	tTJSVariant operator<=(const tTJSVariant& rhs) const
-	{
-		return !LittlerThan(rhs);
-	}
+    tTJSVariant operator<<(const tTJSVariant& rhs) const
+    {
+        return (tTVInteger)(AsInteger() << (tjs_int)rhs.AsInteger());
+    }
 
-	tTJSVariant operator>=(const tTJSVariant& rhs) const
-	{
-		return !GreaterThan(rhs);
-	}
+    void operator<<=(const tTJSVariant& rhs);
 
-	tTJSVariant operator>>(const tTJSVariant& rhs) const
-	{
-		return (tTVInteger)(AsInteger()>>(tjs_int)rhs.AsInteger());
-	}
+    tTJSVariant operator%(const tTJSVariant& rhs) const
+    {
+        tTVInteger r = rhs.AsInteger();
+        if (r == 0)
+            TJSThrowDivideByZero();
+        return (tTVInteger)(AsInteger() % r);
+    }
 
-	void operator>>=(const tTJSVariant& rhs);
+    void operator%=(const tTJSVariant& rhs);
 
-	tTJSVariant rbitshift(tjs_int count) const
-	{
-		return (tTVInteger)((tjs_uint64)AsInteger()>> count);
-	}
+    tTJSVariant operator/(const tTJSVariant& rhs) const
+    {
+        TJSSetFPUE();
+        tTVReal r = rhs.AsReal();
+        return (AsReal() / r);
+    }
 
-	void rbitshiftequal(const tTJSVariant& rhs);
+    void operator/=(const tTJSVariant& rhs);
 
-	tTJSVariant operator<<(const tTJSVariant& rhs) const
-	{
-		return (tTVInteger)(AsInteger()<<(tjs_int)rhs.AsInteger());
-	}
+    tTJSVariant idiv(const tTJSVariant& rhs) const
+    {
+        tTVInteger r = rhs.AsInteger();
+        if (r == 0)
+            TJSThrowDivideByZero();
+        return (tTVInteger)(AsInteger() / r);
+    }
 
-	void operator<<=(const tTJSVariant& rhs);
+    void idivequal(const tTJSVariant& rhs);
 
-	tTJSVariant operator%(const tTJSVariant& rhs) const
-	{
-		tTVInteger r = rhs.AsInteger();
-		if(r == 0) TJSThrowDivideByZero();
-		return (tTVInteger)(AsInteger()%r);
-	}
-
-	void operator%=(const tTJSVariant& rhs);
-
-	tTJSVariant operator/(const tTJSVariant& rhs) const
-	{
-		TJSSetFPUE();
-		tTVReal r = rhs.AsReal();
-		return (AsReal()/r);
-	}
-
-	void operator/=(const tTJSVariant& rhs);
-
-	tTJSVariant idiv(const tTJSVariant& rhs) const
-	{
-		tTVInteger r = rhs.AsInteger();
-		if(r == 0) TJSThrowDivideByZero();
-		return (tTVInteger)(AsInteger() / r);
-	}
-
-	void idivequal(const tTJSVariant& rhs);
-
-	tTJSVariant operator*(const tTJSVariant& rhs) const
-	{
-		tTJSVariant l(*this);
-		l *= rhs;
-		return l;
-	}
+    tTJSVariant operator*(const tTJSVariant& rhs) const
+    {
+        tTJSVariant l(*this);
+        l *= rhs;
+        return l;
+    }
 
 private:
-	void InternalMul(const tTJSVariant &rhs);
+    void InternalMul(const tTJSVariant& rhs);
+
 public:
-        void operator*=(const tTJSVariant& rhs)
-	{
-		if(vt == tvtInteger && rhs.vt == tvtInteger)
-		{
-			Integer *= rhs.Integer;
-			return;
-		}
-		InternalMul(rhs);
-	}
+    void operator*=(const tTJSVariant& rhs)
+    {
+        if (vt == tvtInteger && rhs.vt == tvtInteger)
+        {
+            Integer *= rhs.Integer;
+            return;
+        }
+        InternalMul(rhs);
+    }
 
-	void logicalnot();
+    void logicalnot();
 
-	tTJSVariant operator!() const
-	{
-		return (tjs_int)!operator bool();
-	}
+    tTJSVariant operator!() const { return (tjs_int) !operator bool(); }
 
-	void bitnot();
+    void bitnot();
 
-	tTJSVariant operator~() const
-	{
-		return (tjs_int64)~AsInteger();
-	}
+    tTJSVariant operator~() const { return (tjs_int64)~AsInteger(); }
 
-	tTJSVariant operator-(const tTJSVariant& rhs) const
-	{
-		tTJSVariant l(*this);
-		l -= rhs;
-		return l;
-	}
+    tTJSVariant operator-(const tTJSVariant& rhs) const
+    {
+        tTJSVariant l(*this);
+        l -= rhs;
+        return l;
+    }
 
-	void tonumber();
+    void tonumber();
 
-	tTJSVariant operator+() const
-	{
-		if(vt==tvtInteger || vt==tvtReal) return *this;
+    tTJSVariant operator+() const
+    {
+        if (vt == tvtInteger || vt == tvtReal)
+            return *this;
 
-		if(vt==tvtString)
-		{
-			tTJSVariant val;
-			if(String)
-		        String->ToNumber(val);
-			else
-				val = 0;
-			return val;
-		}
+        if (vt == tvtString)
+        {
+            tTJSVariant val;
+            if (String)
+                String->ToNumber(val);
+            else
+                val = 0;
+            return val;
+        }
 
-		if(vt==tvtVoid) return 0;
+        if (vt == tvtVoid)
+            return 0;
 
-		TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
-		return tTJSVariant();
-	}
+        TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+        return tTJSVariant();
+    }
 
 private:
-	void InternalChangeSign();
-public:
-        void changesign()
-	{
-		if(vt==tvtInteger)
-		{
-			Integer = -Integer;
-			return;
-		}
-		InternalChangeSign();
-	}
+    void InternalChangeSign();
 
-	tTJSVariant operator-() const
-	{
-		tTJSVariant v(*this);
-		v.changesign();
-		return v;
-	}
+public:
+    void changesign()
+    {
+        if (vt == tvtInteger)
+        {
+            Integer = -Integer;
+            return;
+        }
+        InternalChangeSign();
+    }
+
+    tTJSVariant operator-() const
+    {
+        tTJSVariant v(*this);
+        v.changesign();
+        return v;
+    }
 
 private:
-	void InternalSub(const tTJSVariant &rhs);
+    void InternalSub(const tTJSVariant& rhs);
+
 public:
-        void operator-=(const tTJSVariant& rhs)
-	{
-		if(vt == tvtInteger && rhs.vt == tvtInteger)
-		{
-			Integer -= rhs.Integer;
-			return;
-		}
+    void operator-=(const tTJSVariant& rhs)
+    {
+        if (vt == tvtInteger && rhs.vt == tvtInteger)
+        {
+            Integer -= rhs.Integer;
+            return;
+        }
         InternalSub(rhs);
-	}
+    }
 
-	tTJSVariant operator+(const tTJSVariant& rhs) const
-	{
-		if(vt==tvtString || rhs.vt==tvtString)
-		{
-			// combines as string
-			tTJSVariant val;
-			val.vt = tvtString;
-			tTJSVariantString *s1, *s2;
-			s1 = AsString();
-			s2 = rhs.AsString();
-                        val.String = TJSAllocVariantString(s1 ? (const tjs_char*)(*s1) : NULL,
-                                   s2 ? (const tjs_char*)(*s2) : NULL);
-			if(s1) s1->Release();
-			if(s2) s2->Release();
-			return val;
-		}
+    tTJSVariant operator+(const tTJSVariant& rhs) const
+    {
+        if (vt == tvtString || rhs.vt == tvtString)
+        {
+            // combines as string
+            tTJSVariant val;
+            val.vt = tvtString;
+            tTJSVariantString *s1, *s2;
+            s1 = AsString();
+            s2 = rhs.AsString();
+            val.String = TJSAllocVariantString(s1 ? (const tjs_char*)(*s1) : NULL,
+                                               s2 ? (const tjs_char*)(*s2) : NULL);
+            if (s1)
+                s1->Release();
+            if (s2)
+                s2->Release();
+            return val;
+        }
 
-		if(vt == rhs.vt)
-		{
-			if(vt==tvtOctet)
-			{
-				// combine as octet
-				tTJSVariant val;
-				val.vt = tvtOctet;
-				val.Octet = TJSAllocVariantOctet(Octet, rhs.Octet);
-				return val;
-			}
+        if (vt == rhs.vt)
+        {
+            if (vt == tvtOctet)
+            {
+                // combine as octet
+                tTJSVariant val;
+                val.vt = tvtOctet;
+                val.Octet = TJSAllocVariantOctet(Octet, rhs.Octet);
+                return val;
+            }
 
-			if(vt==tvtInteger)
-			{
-				return Integer+rhs.Integer;
-			}
-		}
+            if (vt == tvtInteger)
+            {
+                return Integer + rhs.Integer;
+            }
+        }
 
-		if(vt == tvtVoid)
-		{
-			if(rhs.vt == tvtInteger || rhs.vt == tvtReal)
-				return rhs;
-		}
+        if (vt == tvtVoid)
+        {
+            if (rhs.vt == tvtInteger || rhs.vt == tvtReal)
+                return rhs;
+        }
 
-		if(rhs.vt == tvtVoid)
-		{
-			if(vt == tvtInteger || vt == tvtReal) return *this;
-		}
+        if (rhs.vt == tvtVoid)
+        {
+            if (vt == tvtInteger || vt == tvtReal)
+                return *this;
+        }
 
+        TJSSetFPUE();
+        return AsReal() + rhs.AsReal();
+    }
 
-		TJSSetFPUE();
-		return AsReal()+rhs.AsReal();
-	}
+    void operator+=(const tTJSVariant& rhs);
 
+    //------ allocator/deallocater ------------------------------------------
+    static void* operator new(size_t size) { return new char[size]; }
+    static void operator delete(void* p) { delete[] ((char*)p); }
 
-	void operator+=(const tTJSVariant& rhs);
+    static void* operator new[](size_t size) { return new char[size]; }
+    static void operator delete[](void* p) { delete[] ((char*)p); }
 
-	//------ allocator/deallocater ------------------------------------------
-        static void* operator new(size_t size) { return new char[size]; }
-        static void operator delete(void* p) { delete[] ((char*)p); }
+    static void* operator new(size_t size, void* buf) { return buf; }
 
-	static void* operator new[](size_t size) { return new char[size]; }
-        static void operator delete[](void* p) { delete[] ((char*)p); }
+    //------ persist --------------------------------------------------------
 
-	static void* operator new(size_t size, void* buf) { return buf; }
-
-	//------ persist --------------------------------------------------------
-
-	tjs_int QueryPersistSize() const;
-	void Persist(tjs_uint8 * dest);
+    tjs_int QueryPersistSize() const;
+    void Persist(tjs_uint8* dest);
 };
 /*end-of-tTJSVariant*/
 //---------------------------------------------------------------------------
 
 } // namespace TJS
 #endif
-
-
-

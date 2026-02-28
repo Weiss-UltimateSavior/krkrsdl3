@@ -4,5 +4,5 @@
 class VorbisWaveDecoderCreator : public tTVPWaveDecoderCreator
 {
 public:
-    tTVPWaveDecoder * Create(const ttstr & storagename, const ttstr & extension);
+    tTVPWaveDecoder* Create(const ttstr& storagename, const ttstr& extension);
 };

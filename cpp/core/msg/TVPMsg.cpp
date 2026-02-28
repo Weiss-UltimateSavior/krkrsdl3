@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TVP2 ( T Visual Presenter 2 )  A script authoring tool
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TVP2 ( T Visual Presenter 2 )  A script authoring tool
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // Definition of Messages and Message Related Utilities
@@ -28,120 +28,112 @@
 // TVPFormatMessage
 //---------------------------------------------------------------------------
 /*
-	these functions do :
-	replace each %%, %1, %2 into %, p1, p2.
-	%1 must appear only once in the message string, otherwise internal
-	buffer will overflow. ( %2 must also so )
+        these functions do :
+        replace each %%, %1, %2 into %, p1, p2.
+        %1 must appear only once in the message string, otherwise internal
+        buffer will overflow. ( %2 must also so )
 */
-ttstr TVPFormatMessage(const tjs_char *msg, const ttstr & p1)
+ttstr TVPFormatMessage(const tjs_char* msg, const ttstr& p1)
 {
-	tjs_char *p;
-	tjs_char * buf = new tjs_char[TJS_strlen(msg) + p1.GetLen() + 1];
-	p = buf;
-	for(;*msg;msg++,p++)
-	{
-		if(*msg == TJS_N('%'))
-		{
-			if(msg[1] == TJS_N('%'))
-			{
-				// %%
-				*p = TJS_N('%');
-				msg++;
-				continue;
-			}
-			else if(msg[1] == TJS_N('1'))
-			{
-				// %1
-				TJS_strcpy(p, p1.c_str());
-				p += p1.GetLen();
-				p--;
-				msg++;
-				continue;
-			}
-		}
-		*p = *msg;
-	}
+    tjs_char* p;
+    tjs_char* buf = new tjs_char[TJS_strlen(msg) + p1.GetLen() + 1];
+    p = buf;
+    for (; *msg; msg++, p++)
+    {
+        if (*msg == TJS_N('%'))
+        {
+            if (msg[1] == TJS_N('%'))
+            {
+                // %%
+                *p = TJS_N('%');
+                msg++;
+                continue;
+            }
+            else if (msg[1] == TJS_N('1'))
+            {
+                // %1
+                TJS_strcpy(p, p1.c_str());
+                p += p1.GetLen();
+                p--;
+                msg++;
+                continue;
+            }
+        }
+        *p = *msg;
+    }
 
-	*p = 0;
+    *p = 0;
 
-	ttstr ret(buf);
-	delete [] buf;
-	return ret;
+    ttstr ret(buf);
+    delete[] buf;
+    return ret;
 }
-ttstr TVPFormatMessage(const tjs_char *msg, const ttstr & p1, const ttstr & p2)
+ttstr TVPFormatMessage(const tjs_char* msg, const ttstr& p1, const ttstr& p2)
 {
-	tjs_char *p;
-	tjs_char * buf =
-		new tjs_char[TJS_strlen(msg) + p1.GetLen() + p2.GetLen() + 1];
-	p = buf;
-	for(;*msg;msg++,p++)
-	{
-		if(*msg == TJS_N('%'))
-		{
-			if(msg[1] == TJS_N('%'))
-			{
-				// %%
-				*p = TJS_N('%');
-				msg++;
-				continue;
-			}
-			else if(msg[1] == TJS_N('1'))
-			{
-				// %1
-				TJS_strcpy(p, p1.c_str());
-				p += p1.GetLen();
-				p--;
-				msg++;
-				continue;
-			}
-			else if(msg[1] == TJS_N('2'))
-			{
-				// %2
-				TJS_strcpy(p, p2.c_str());
-				p += p2.GetLen();
-				p--;
-				msg++;
-				continue;
-			}
-		}
-		*p = *msg;
-	}
+    tjs_char* p;
+    tjs_char* buf = new tjs_char[TJS_strlen(msg) + p1.GetLen() + p2.GetLen() + 1];
+    p = buf;
+    for (; *msg; msg++, p++)
+    {
+        if (*msg == TJS_N('%'))
+        {
+            if (msg[1] == TJS_N('%'))
+            {
+                // %%
+                *p = TJS_N('%');
+                msg++;
+                continue;
+            }
+            else if (msg[1] == TJS_N('1'))
+            {
+                // %1
+                TJS_strcpy(p, p1.c_str());
+                p += p1.GetLen();
+                p--;
+                msg++;
+                continue;
+            }
+            else if (msg[1] == TJS_N('2'))
+            {
+                // %2
+                TJS_strcpy(p, p2.c_str());
+                p += p2.GetLen();
+                p--;
+                msg++;
+                continue;
+            }
+        }
+        *p = *msg;
+    }
 
-	*p = 0;
+    *p = 0;
 
-	ttstr ret(buf);
-	delete [] buf;
-	return ret;
+    ttstr ret(buf);
+    delete[] buf;
+    return ret;
 }
 //---------------------------------------------------------------------------
-
-
-
 
 //---------------------------------------------------------------------------
 // TVPThrowExceptionMessage
 //---------------------------------------------------------------------------
-void TVPThrowExceptionMessage(const tjs_char *msg)
+void TVPThrowExceptionMessage(const tjs_char* msg)
 {
-	throw eTJSError(msg);
+    throw eTJSError(msg);
 }
-void TVPThrowExceptionMessage(const tjs_char *msg, const ttstr & p1, tjs_int num)
+void TVPThrowExceptionMessage(const tjs_char* msg, const ttstr& p1, tjs_int num)
 {
-	throw eTJSError(TVPFormatMessage(msg, p1, ttstr(num)));
+    throw eTJSError(TVPFormatMessage(msg, p1, ttstr(num)));
 }
-void TVPThrowExceptionMessage(const tjs_char *msg, const ttstr & p1)
+void TVPThrowExceptionMessage(const tjs_char* msg, const ttstr& p1)
 {
-	throw eTJSError(TVPFormatMessage(msg, p1));
+    throw eTJSError(TVPFormatMessage(msg, p1));
 }
-void TVPThrowExceptionMessage(const tjs_char *msg, const ttstr & p1,
-	const ttstr & p2)
+void TVPThrowExceptionMessage(const tjs_char* msg, const ttstr& p1, const ttstr& p2)
 {
-	throw eTJSError(TVPFormatMessage(msg, p1, p2));
+    throw eTJSError(TVPFormatMessage(msg, p1, p2));
 }
 //---------------------------------------------------------------------------
-
-
-
 
 //---------------------------------------------------------------------------
 // version retrieving
@@ -165,72 +157,63 @@ const tjs_char* TVPCompileTime = WIDEN(__TIME__);
 static ttstr TVPReadAboutStringFromResource();
 ttstr TVPGetAboutString(void)
 {
-	TVPGetVersion();
-	tjs_char verstr[100];
-	TJS_snprintf(verstr, sizeof(verstr)/sizeof(tjs_char), TJS_N("%d.%d.%d.%d"),
-		TVPVersionMajor, TVPVersionMinor,
-		TVPVersionRelease, TVPVersionBuild);
+    TVPGetVersion();
+    tjs_char verstr[100];
+    TJS_snprintf(verstr, sizeof(verstr) / sizeof(tjs_char), TJS_N("%d.%d.%d.%d"), TVPVersionMajor,
+                 TVPVersionMinor, TVPVersionRelease, TVPVersionBuild);
 
-	tjs_char tjsverstr[100];
-	TJS_snprintf(tjsverstr, sizeof(tjsverstr)/sizeof(tjs_char), TJS_N("%d.%d.%d"),
-		TJSVersionMajor, TJSVersionMinor, TJSVersionRelease);
+    tjs_char tjsverstr[100];
+    TJS_snprintf(tjsverstr, sizeof(tjsverstr) / sizeof(tjs_char), TJS_N("%d.%d.%d"),
+                 TJSVersionMajor, TJSVersionMinor, TJSVersionRelease);
 
-	return TVPFormatMessage(TVPReadAboutStringFromResource().c_str(), verstr, tjsverstr) + TVPGetImportantLog();
+    return TVPFormatMessage(TVPReadAboutStringFromResource().c_str(), verstr, tjsverstr) +
+           TVPGetImportantLog();
 }
 //---------------------------------------------------------------------------
 ttstr TVPGetVersionInformation(void)
 {
-	TVPGetVersion();
-	tjs_char verstr[100];
-	TJS_snprintf(verstr, sizeof(verstr)/sizeof(tjs_char), TJS_N("%d.%d.%d.%d"),
-		TVPVersionMajor, TVPVersionMinor,
-		TVPVersionRelease, TVPVersionBuild);
+    TVPGetVersion();
+    tjs_char verstr[100];
+    TJS_snprintf(verstr, sizeof(verstr) / sizeof(tjs_char), TJS_N("%d.%d.%d.%d"), TVPVersionMajor,
+                 TVPVersionMinor, TVPVersionRelease, TVPVersionBuild);
 
-	tjs_char tjsverstr[100];
-	TJS_snprintf(tjsverstr, sizeof(tjsverstr)/sizeof(tjs_char), TJS_N("%d.%d.%d"),
-		TJSVersionMajor, TJSVersionMinor, TJSVersionRelease);
+    tjs_char tjsverstr[100];
+    TJS_snprintf(tjsverstr, sizeof(tjsverstr) / sizeof(tjs_char), TJS_N("%d.%d.%d"),
+                 TJSVersionMajor, TJSVersionMinor, TJSVersionRelease);
 
-	ttstr str = TVPFormatMessage(TVPVersionInformation, verstr, tjsverstr);
+    ttstr str = TVPFormatMessage(TVPVersionInformation, verstr, tjsverstr);
     str.Replace(TJS_N("%DATE%"), ttstr(TVPCompileDate));
     str.Replace(TJS_N("%TIME%"), ttstr(TVPCompileTime));
-	return ttstr(str);
+    return ttstr(str);
 }
 //---------------------------------------------------------------------------
 ttstr TVPGetVersionString()
 {
-	TVPGetVersion();
-	tjs_char verstr[100];
-	TJS_snprintf(verstr, sizeof(verstr)/sizeof(tjs_char), TJS_N("%d.%d.%d.%d"),
-		TVPVersionMajor, TVPVersionMinor,
-		TVPVersionRelease, TVPVersionBuild);
-	return ttstr(verstr);
+    TVPGetVersion();
+    tjs_char verstr[100];
+    TJS_snprintf(verstr, sizeof(verstr) / sizeof(tjs_char), TJS_N("%d.%d.%d.%d"), TVPVersionMajor,
+                 TVPVersionMinor, TVPVersionRelease, TVPVersionBuild);
+    return ttstr(verstr);
 }
 //---------------------------------------------------------------------------
-
-
-
-
-
 
 //---------------------------------------------------------------------------
 // Versoin retriving
 //---------------------------------------------------------------------------
-void TVPGetSystemVersion(tjs_int &major, tjs_int &minor,
-	tjs_int &release, tjs_int &build)
+void TVPGetSystemVersion(tjs_int& major, tjs_int& minor, tjs_int& release, tjs_int& build)
 {
-	TVPGetVersion();
-	major = TVPVersionMajor;
-	minor = TVPVersionMinor;
-	release = TVPVersionRelease;
-	build = TVPVersionBuild;
+    TVPGetVersion();
+    major = TVPVersionMajor;
+    minor = TVPVersionMinor;
+    release = TVPVersionRelease;
+    build = TVPVersionBuild;
 }
 //---------------------------------------------------------------------------
-void TVPGetTJSVersion(tjs_int &major, tjs_int &minor,
-	tjs_int &release)
+void TVPGetTJSVersion(tjs_int& major, tjs_int& minor, tjs_int& release)
 {
-	major = TJSVersionMajor;
-	minor = TJSVersionMinor;
-	release = TJSVersionRelease;
+    major = TJSVersionMajor;
+    minor = TJSVersionMinor;
+    release = TJSVersionRelease;
 }
 //---------------------------------------------------------------------------
 
@@ -239,22 +222,22 @@ void TVPGetTJSVersion(tjs_int &major, tjs_int &minor,
 //---------------------------------------------------------------------------
 void TVPGetVersion(void)
 {
-	static bool DoGet = true;
-	if (DoGet)
-	{
-		DoGet = false;
+    static bool DoGet = true;
+    if (DoGet)
+    {
+        DoGet = false;
 
-		TVPVersionMajor = 2;
-		TVPVersionMinor = 32;
-		TVPVersionRelease = 2;
-		TVPVersionBuild = 426;
-	}
+        TVPVersionMajor = 2;
+        TVPVersionMinor = 32;
+        TVPVersionRelease = 2;
+        TVPVersionBuild = 426;
+    }
 }
 
 //---------------------------------------------------------------------------
 // about string retrieving
 //---------------------------------------------------------------------------
-static ttstr TVPReadAboutStringFromResource() {
-	return TJS_N("Kirikiri2 Runtime Core version %1(TJS version %2)");
+static ttstr TVPReadAboutStringFromResource()
+{
+    return TJS_N("Kirikiri2 Runtime Core version %1(TJS version %2)");
 }
-

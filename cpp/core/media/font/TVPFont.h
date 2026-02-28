@@ -3,18 +3,19 @@
 #include "tjsHashSearch.h"
 #include "TVPFontstruc.h"
 
-void TVPGetAllFontList(std::vector<ttstr> &list);
+void TVPGetAllFontList(std::vector<ttstr>& list);
 void TVPInitFontNames();
-int TVPEnumFontsProc(const ttstr &FontPath);
-const ttstr &TVPGetDefaultFontName();
-tTJSBinaryStream* TVPCreateFontStream(const ttstr &fontname);
+int TVPEnumFontsProc(const ttstr& FontPath);
+const ttstr& TVPGetDefaultFontName();
+tTJSBinaryStream* TVPCreateFontStream(const ttstr& fontname);
 
-struct TVPFontNamePathInfo {
+struct TVPFontNamePathInfo
+{
     ttstr Path;
-	std::function<tTJSBinaryStream*(TVPFontNamePathInfo*)> Getter;
+    std::function<tTJSBinaryStream*(TVPFontNamePathInfo*)> Getter;
     int Index;
 };
-TVPFontNamePathInfo* TVPFindFont(const ttstr &name);
+TVPFontNamePathInfo* TVPFindFont(const ttstr& name);
 
 //---------------------------------------------------------------------------
 // font enumeration and existence check
@@ -22,12 +23,11 @@ TVPFontNamePathInfo* TVPFindFont(const ttstr &name);
 class tTVPttstrHash
 {
 public:
-    static tjs_uint32 Make(const ttstr &val);
+    static tjs_uint32 Make(const ttstr& val);
 };
-extern tTJSHashTable<ttstr, TVPFontNamePathInfo, tTVPttstrHash>
-    TVPFontNames;
+extern tTJSHashTable<ttstr, TVPFontNamePathInfo, tTVPttstrHash> TVPFontNames;
 
-bool TVPFontExists(const ttstr &name);
+bool TVPFontExists(const ttstr& name);
 ttstr TVPGetBeingFont(ttstr fonts);
 void TVPCreateDefaultFont();
-const tTVPFont &TVPGetDefaultFont();
+const tTVPFont& TVPGetDefaultFont();

@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TJS2 Script Engine
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // TJS Exception Class
@@ -21,9 +21,10 @@ namespace TJS
 class tTJSNC_Exception : public tTJSNativeClass
 {
 public:
-	tTJSNC_Exception();
+    tTJSNC_Exception();
+
 private:
-	static tjs_uint32 ClassID;
+    static tjs_uint32 ClassID;
 };
 //---------------------------------------------------------------------------
 } // namespace TJS

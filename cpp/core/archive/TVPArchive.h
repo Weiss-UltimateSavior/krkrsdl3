@@ -17,13 +17,15 @@
 //---------------------------------------------------------------------------
 // tTVPArchive base archive class
 //---------------------------------------------------------------------------
-class tTVPArchive {
+class tTVPArchive
+{
 private:
     tjs_uint RefCount;
 
 public:
     //-- constructor
-    tTVPArchive(const ttstr &name) {
+    tTVPArchive(const ttstr& name)
+    {
         ArchiveName = name;
         Init = false;
         RefCount = 1;
@@ -32,8 +34,9 @@ public:
 
     //-- AddRef and Release
     void AddRef() { RefCount++; }
-    void Release() {
-        if(RefCount == 1)
+    void Release()
+    {
+        if (RefCount == 1)
             delete this;
         else
             RefCount--;
@@ -46,7 +49,7 @@ public:
     // NormalizeInArchiveStorageName and the index must be sorted by its name,
     // using ttstr::operator < . this is needed by fast directory search.
 
-    virtual tTJSBinaryStream *CreateStreamByIndex(tjs_uint idx) = 0;
+    virtual tTJSBinaryStream* CreateStreamByIndex(tjs_uint idx) = 0;
 
     //-- others, implemented in this class
 private:
@@ -57,39 +60,42 @@ public:
     ttstr ArchiveName;
 
 public:
-    static void NormalizeInArchiveStorageName(ttstr &name);
+    static void NormalizeInArchiveStorageName(ttstr& name);
 
 private:
     void AddToHash();
 
 public:
-    tTJSBinaryStream *CreateStream(const ttstr &name);
-    bool IsExistent(const ttstr &name);
+    tTJSBinaryStream* CreateStream(const ttstr& name);
+    bool IsExistent(const ttstr& name);
 
-    tjs_int GetFirstIndexStartsWith(const ttstr &prefix);
+    tjs_int GetFirstIndexStartsWith(const ttstr& prefix);
     // returns first index which have 'prefix' at start of the name.
 };
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tTJSBinaryStream *TVPGetCachedArchiveHandle(void *pointer, const ttstr &name);
-void TVPReleaseCachedArchiveHandle(void *pointer, tTJSBinaryStream *stream);
-void TVPFreeArchiveHandlePoolByPointer(void *pointer);
+tTJSBinaryStream* TVPGetCachedArchiveHandle(void* pointer, const ttstr& name);
+void TVPReleaseCachedArchiveHandle(void* pointer, tTJSBinaryStream* stream);
+void TVPFreeArchiveHandlePoolByPointer(void* pointer);
 void TVPFreeArchiveHandlePool();
 void TVPShutdownArchiveHandleCache();
 //---------------------------------------------------------------------------
 
-class TArchiveStream : public tTJSBinaryStream {
-    tTVPArchive *Owner;
+class TArchiveStream : public tTJSBinaryStream
+{
+    tTVPArchive* Owner;
     tjs_int64 CurrentPos;
     tjs_uint64 StartPos, DataLength;
-    tTJSBinaryStream *_instr;
+    tTJSBinaryStream* _instr;
 
 public:
-    TArchiveStream(tTVPArchive *owner, tjs_uint64 off, tjs_uint64 len);
+    TArchiveStream(tTVPArchive* owner, tjs_uint64 off, tjs_uint64 len);
     virtual ~TArchiveStream();
-    virtual tjs_uint64 Seek(tjs_int64 offset, tjs_int whence) {
-        switch(whence) {
+    virtual tjs_uint64 Seek(tjs_int64 offset, tjs_int whence)
+    {
+        switch (whence)
+        {
             case TJS_BS_SEEK_SET:
                 CurrentPos = offset;
                 break;
@@ -102,15 +108,17 @@ public:
                 CurrentPos = offset + DataLength;
                 break;
         }
-        if(CurrentPos < 0)
+        if (CurrentPos < 0)
             CurrentPos = 0;
-        else if(CurrentPos > (tjs_int64)DataLength)
+        else if (CurrentPos > (tjs_int64)DataLength)
             CurrentPos = DataLength;
         _instr->SetPosition(CurrentPos + StartPos);
         return CurrentPos;
     }
-    virtual tjs_uint Read(void *buffer, tjs_uint read_size) {
-        if(CurrentPos + read_size >= (tjs_int64)DataLength) {
+    virtual tjs_uint Read(void* buffer, tjs_uint read_size)
+    {
+        if (CurrentPos + read_size >= (tjs_int64)DataLength)
+        {
             read_size = (tjs_uint)(DataLength - CurrentPos);
         }
 
@@ -120,15 +128,12 @@ public:
 
         return read_size;
     }
-    virtual tjs_uint Write(const void *buffer,
-                                           tjs_uint write_size) {
-        return 0;
-    }
+    virtual tjs_uint Write(const void* buffer, tjs_uint write_size) { return 0; }
     virtual const std::string GetFileName() { return ""; }
     virtual tjs_uint64 GetSize() { return DataLength; }
 };
 
 //---------------------------------------------------------------------------
-void storeFilename(ttstr &name, const char *narrowName, const ttstr &filename);
+void storeFilename(ttstr& name, const char* narrowName, const ttstr& filename);
 
 #endif

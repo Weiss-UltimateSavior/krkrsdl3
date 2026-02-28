@@ -105,7 +105,7 @@ public:
         TimelinePlayFlagDifference
     };
 
-    EmotePlayer(ResourceManager* resourceManager) : _resourceManager(resourceManager) {};
+    EmotePlayer(ResourceManager* resourceManager) : _resourceManager(resourceManager){};
     ~EmotePlayer();
 
     property_marco(playing, bool, _playing);
@@ -127,7 +127,7 @@ public:
     property_marco(tickCount, tjs_real, clockPassed);
     property_marco(speed, tjs_real, speedRatio);
     tTJSVariant get_outline() { return tTJSVariant(); }
-    void set_outline(tTJSVariant v) { /* TODO */ };
+    void set_outline(tTJSVariant v){/* TODO */};
 
     tTJSVariant serialize();
     void unserialize(tTJSVariant data);
@@ -144,8 +144,7 @@ public:
     void setColor(tjs_uint32 color);
     void setVariable(tTJSString name, tjs_real value);
     tjs_real getVariable(tTJSString name);
-    void setOuterForce(
-        tTJSString name, tjs_real ofx, tjs_real ofy);
+    void setOuterForce(tTJSString name, tjs_real ofx, tjs_real ofy);
     void setDrawAffineTranslateMatrix(
         tjs_real a, tjs_real b, tjs_real c, tjs_real d, tjs_int tx, tjs_int ty);
     void setCameraOffset(tjs_int w, tjs_int h);
@@ -182,7 +181,8 @@ private:
     emotemotion* _currmotion = nullptr;
     tjs_real clockPassed = -1.0;
     tjs_real speedRatio = 20.0;
-    bool isSelfClear = false; // true:draw使用完全copy(以实现自主clear) false:通过clear函数间接完成 其分别对应了两种emote的运行模式
+    bool isSelfClear = false; // true:draw使用完全copy(以实现自主clear) false:通过clear函数间接完成
+                              // 其分别对应了两种emote的运行模式
     // data
     void* m_BmpBits = nullptr;
     tjs_uint8* m_bmpData = nullptr;
@@ -223,38 +223,36 @@ class Player : public EmotePlayer
 public:
     Player(ResourceManager* resourceManager) : EmotePlayer(resourceManager) {}
 
-    using EmotePlayer::serialize;
-    using EmotePlayer::unserialize;
-    using EmotePlayer::play;
-    using EmotePlayer::initPhysics;
-    using EmotePlayer::progress;
-    using EmotePlayer::draw;
     using EmotePlayer::assign;
-    using EmotePlayer::setCoord;
-    using EmotePlayer::setScale;
-    using EmotePlayer::setRotate;
-    using EmotePlayer::setColor;
-    using EmotePlayer::setVariable;
-    using EmotePlayer::getVariable;
-    using EmotePlayer::setOuterForce;
-    using EmotePlayer::setDrawAffineTranslateMatrix;
-    using EmotePlayer::setCameraOffset;
-    using EmotePlayer::startWind;
-    using EmotePlayer::stopWind;
-    using EmotePlayer::skip;
-    using EmotePlayer::pass;
-    using EmotePlayer::playTimeline;
-    using EmotePlayer::stopTimeline;
-    using EmotePlayer::getTimelinePlaying;
-    using EmotePlayer::getLoopTimeline;
-    using EmotePlayer::getTimelineTotalFrameCount;
-    using EmotePlayer::getMainTimelineLabelList;
-    using EmotePlayer::getDiffTimelineLabelList;
-    using EmotePlayer::setTimelineBlendRatio;
+    using EmotePlayer::draw;
     using EmotePlayer::fadeInTimeline;
     using EmotePlayer::fadeOutTimeline;
+    using EmotePlayer::getDiffTimelineLabelList;
+    using EmotePlayer::getLoopTimeline;
+    using EmotePlayer::getMainTimelineLabelList;
     using EmotePlayer::getPlayingTimelineInfoList;
+    using EmotePlayer::getTimelinePlaying;
+    using EmotePlayer::getTimelineTotalFrameCount;
+    using EmotePlayer::getVariable;
+    using EmotePlayer::initPhysics;
+    using EmotePlayer::pass;
+    using EmotePlayer::play;
+    using EmotePlayer::playTimeline;
+    using EmotePlayer::progress;
+    using EmotePlayer::serialize;
+    using EmotePlayer::setCameraOffset;
+    using EmotePlayer::setColor;
+    using EmotePlayer::setCoord;
+    using EmotePlayer::setDrawAffineTranslateMatrix;
+    using EmotePlayer::setOuterForce;
+    using EmotePlayer::setRotate;
+    using EmotePlayer::setScale;
+    using EmotePlayer::setTimelineBlendRatio;
+    using EmotePlayer::setVariable;
+    using EmotePlayer::skip;
+    using EmotePlayer::startWind;
+    using EmotePlayer::stopTimeline;
+    using EmotePlayer::stopWind;
+    using EmotePlayer::unserialize;
 };
-};
-
-
+}; // namespace emoteplayer

@@ -1,13 +1,13 @@
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 /*
-	TVP2 ( T Visual Presenter 2 )  A script authoring tool
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TVP2 ( T Visual Presenter 2 )  A script authoring tool
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
-//--------------------------------------------------------------------------- 
-//!@file 描画デバイス管理 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
+//!@file 描画デバイス管理
+//---------------------------------------------------------------------------
 
 #include "tjsCommHead.h"
 
@@ -69,24 +69,21 @@ tTVPBasicDrawDevice::~tTVPBasicDrawDevice()
     }
 }
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::Destruct()
 {
-	delete this;
+    delete this;
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetWindowInterface(iTVPWindow* window)
 {
-	Window = window;
+    Window = window;
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::AddLayerManager(iTVPLayerManager* manager)
 {
     if (Manager != NULL)
@@ -100,10 +97,9 @@ void tTVPBasicDrawDevice::AddLayerManager(iTVPLayerManager* manager)
 
     manager->SetDesiredLayerType(ltOpaque); // ltOpaque な出力を受け取りたい
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::RemoveLayerManager(iTVPLayerManager* manager)
 {
     // Managers から manager を削除する。Releaseする。
@@ -112,442 +108,398 @@ void tTVPBasicDrawDevice::RemoveLayerManager(iTVPLayerManager* manager)
     Manager->Release();
     Manager = NULL;
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetDestRectangle(const tTVPRect& rect)
 {
-	DestRect = rect;
+    DestRect = rect;
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetClipRectangle(const tTVPRect& rect)
 {
-	
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::GetSrcSize(tjs_int& w, tjs_int& h)
 {
-    if (!Manager) return;
+    if (!Manager)
+        return;
     if (!Manager->GetPrimaryLayerSize(w, h))
     {
         w = 0;
         h = 0;
     }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::NotifyLayerResize(iTVPLayerManager* manager)
 {
     if (Manager == manager)
-		Window->NotifySrcResize();
+        Window->NotifySrcResize();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::NotifyLayerImageChange(iTVPLayerManager* manager)
 {
     if (Manager == manager)
-		Window->RequestUpdate();
+        Window->RequestUpdate();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnClick(tjs_int x, tjs_int y)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyClick(x, y);
+    Manager->NotifyClick(x, y);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnDoubleClick(tjs_int x, tjs_int y)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyDoubleClick(x, y);
+    Manager->NotifyDoubleClick(x, y);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
-void tTVPBasicDrawDevice::OnMouseDown(tjs_int x,
-                                                      tjs_int y,
-                                                      tTVPMouseButton mb,
-                                                      tjs_uint32 flags)
+//---------------------------------------------------------------------------
+void tTVPBasicDrawDevice::OnMouseDown(tjs_int x, tjs_int y, tTVPMouseButton mb, tjs_uint32 flags)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyMouseDown(x, y, mb, flags);
+    Manager->NotifyMouseDown(x, y, mb, flags);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
-void tTVPBasicDrawDevice::OnMouseUp(tjs_int x,
-                                                    tjs_int y,
-                                                    tTVPMouseButton mb,
-                                                    tjs_uint32 flags)
+//---------------------------------------------------------------------------
+void tTVPBasicDrawDevice::OnMouseUp(tjs_int x, tjs_int y, tTVPMouseButton mb, tjs_uint32 flags)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyMouseUp(x, y, mb, flags);
+    Manager->NotifyMouseUp(x, y, mb, flags);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnMouseMove(tjs_int x, tjs_int y, tjs_uint32 flags)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyMouseMove(x, y, flags);
+    Manager->NotifyMouseMove(x, y, flags);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnReleaseCapture()
 {
     if (!Manager)
         return;
 
-	Manager->ReleaseCapture();
+    Manager->ReleaseCapture();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnMouseOutOfWindow()
 {
     if (!Manager)
         return;
 
-	Manager->NotifyMouseOutOfWindow();
+    Manager->NotifyMouseOutOfWindow();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnKeyDown(tjs_uint key, tjs_uint32 shift)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyKeyDown(key, shift);
+    Manager->NotifyKeyDown(key, shift);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnKeyUp(tjs_uint key, tjs_uint32 shift)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyKeyUp(key, shift);
+    Manager->NotifyKeyUp(key, shift);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnKeyPress(tjs_char key)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyKeyPress(key);
+    Manager->NotifyKeyPress(key);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
-void tTVPBasicDrawDevice::OnMouseWheel(tjs_uint32 shift,
-                                                       tjs_int delta,
-                                                       tjs_int x,
-                                                       tjs_int y)
+//---------------------------------------------------------------------------
+void tTVPBasicDrawDevice::OnMouseWheel(tjs_uint32 shift, tjs_int delta, tjs_int x, tjs_int y)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyMouseWheel(shift, delta, x, y);
+    Manager->NotifyMouseWheel(shift, delta, x, y);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-//--------------------------------------------------------------------------- 
-void tTVPBasicDrawDevice::OnTouchDown(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id)
+//---------------------------------------------------------------------------
+void tTVPBasicDrawDevice::OnTouchDown(
+    tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyTouchDown(x, y, cx, cy, id);
+    Manager->NotifyTouchDown(x, y, cx, cy, id);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnTouchUp(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyTouchUp(x, y, cx, cy, id);
+    Manager->NotifyTouchUp(x, y, cx, cy, id);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
-void tTVPBasicDrawDevice::OnTouchMove(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id)
+//---------------------------------------------------------------------------
+void tTVPBasicDrawDevice::OnTouchMove(
+    tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyTouchMove(x, y, cx, cy, id);
+    Manager->NotifyTouchMove(x, y, cx, cy, id);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnTouchScaling(
     tjs_real startdist, tjs_real curdist, tjs_real cx, tjs_real cy, tjs_int flag)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyTouchScaling(startdist, curdist, cx, cy, flag);
+    Manager->NotifyTouchScaling(startdist, curdist, cx, cy, flag);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnTouchRotate(
     tjs_real startangle, tjs_real curangle, tjs_real dist, tjs_real cx, tjs_real cy, tjs_int flag)
 {
     if (!Manager)
         return;
 
-	Manager->NotifyTouchRotate(startangle, curangle, dist, cx, cy, flag);
+    Manager->NotifyTouchRotate(startangle, curangle, dist, cx, cy, flag);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnMultiTouch()
 {
     if (!Manager)
         return;
 
-	Manager->NotifyMultiTouch();
+    Manager->NotifyMultiTouch();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::OnDisplayRotate(
     tjs_int orientation, tjs_int rotate, tjs_int bpp, tjs_int width, tjs_int height)
 {
-	// 何もしない 
+    // 何もしない
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::RecheckInputState()
 {
     if (!Manager)
         return;
 
-	Manager->RecheckInputState();
+    Manager->RecheckInputState();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetDefaultMouseCursor(iTVPLayerManager* manager)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->SetDefaultMouseCursor();
-	}
+    {
+        Window->SetDefaultMouseCursor();
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetMouseCursor(iTVPLayerManager* manager, tjs_int cursor)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->SetMouseCursor(cursor);
-	}
+    {
+        Window->SetMouseCursor(cursor);
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
-void tTVPBasicDrawDevice::GetCursorPos(iTVPLayerManager* manager,
-                                                       tjs_int& x,
-                                                       tjs_int& y)
+//---------------------------------------------------------------------------
+void tTVPBasicDrawDevice::GetCursorPos(iTVPLayerManager* manager, tjs_int& x, tjs_int& y)
 {
     if (!Manager)
         return;
-	Window->GetCursorPos(x, y);
+    Window->GetCursorPos(x, y);
     if (Manager != manager)
-	{
-		// プライマリレイヤマネージャ以外には座標 0,0 で渡しておく 
-		 x = 0;
-		 y = 0;
-	}
+    {
+        // プライマリレイヤマネージャ以外には座標 0,0 で渡しておく
+        x = 0;
+        y = 0;
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
-void tTVPBasicDrawDevice::SetCursorPos(iTVPLayerManager* manager,
-                                                       tjs_int x,
-                                                       tjs_int y)
+//---------------------------------------------------------------------------
+void tTVPBasicDrawDevice::SetCursorPos(iTVPLayerManager* manager, tjs_int x, tjs_int y)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->SetCursorPos(x, y);
-	}
+    {
+        Window->SetCursorPos(x, y);
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::WindowReleaseCapture(iTVPLayerManager* manager)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->WindowReleaseCapture();
-	}
+    {
+        Window->WindowReleaseCapture();
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetHintText(iTVPLayerManager* manager,
-                                                      iTJSDispatch2* sender,
-                                                      const ttstr& text)
+                                      iTJSDispatch2* sender,
+                                      const ttstr& text)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->SetHintText(sender,text);
-	}
+    {
+        Window->SetHintText(sender, text);
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetAttentionPoint(iTVPLayerManager* manager,
-                                                            tTJSNI_BaseLayer* layer,
-				tjs_int l, tjs_int t)
+                                            tTJSNI_BaseLayer* layer,
+                                            tjs_int l,
+                                            tjs_int t)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->SetAttentionPoint(layer, l, t);
-	}
+    {
+        Window->SetAttentionPoint(layer, l, t);
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::DisableAttentionPoint(iTVPLayerManager* manager)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->DisableAttentionPoint();
-	}
+    {
+        Window->DisableAttentionPoint();
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetImeMode(iTVPLayerManager* manager, tTVPImeMode mode)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->SetImeMode(mode);
-	}
+    {
+        Window->SetImeMode(mode);
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::ResetImeMode(iTVPLayerManager* manager)
 {
     if (!Manager)
         return;
     if (Manager == manager)
-	{
-		Window->ResetImeMode();
-	}
+    {
+        Window->ResetImeMode();
+    }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 tTJSNI_BaseLayer* tTVPBasicDrawDevice::GetPrimaryLayer()
 {
     if (!Manager)
         return NULL;
     return Manager->GetPrimaryLayer();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 tTJSNI_BaseLayer* tTVPBasicDrawDevice::GetFocusedLayer()
 {
     if (!Manager)
         return NULL;
     return Manager->GetFocusedLayer();
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetFocusedLayer(tTJSNI_BaseLayer* layer)
 {
     if (!Manager)
         return;
     Manager->SetFocusedLayer(layer);
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::RequestInvalidation(const tTVPRect& rect)
 {
     tjs_int l = rect.left, t = rect.top, r = rect.right, b = rect.bottom;
@@ -558,10 +510,9 @@ void tTVPBasicDrawDevice::RequestInvalidation(const tTVPRect& rect)
         return;
     Manager->RequestInvalidation(tTVPRect(l, t, r, b));
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::Update()
 {
     // すべての layer manager の UpdateToDrawDevice を呼ぶ
@@ -570,10 +521,9 @@ void tTVPBasicDrawDevice::Update()
         Manager->UpdateToDrawDevice();
     }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::Show()
 {
     if (Window)
@@ -587,13 +537,13 @@ void tTVPBasicDrawDevice::Show()
         }
     }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 bool tTVPBasicDrawDevice::WaitForVBlank(tjs_int* in_vblank, tjs_int* delayed)
 {
-	return false;
+    return false;
 }
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::DumpLayerStructure()
 {
     // すべての layer manager の DumpLayerStructure を呼ぶ
@@ -602,33 +552,29 @@ void tTVPBasicDrawDevice::DumpLayerStructure()
         Manager->DumpLayerStructure();
     }
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
-
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::SetShowUpdateRect(bool b)
 {
-    
 }
 
 void tTVPBasicDrawDevice::SetWindowSize(tjs_int w, tjs_int h)
 {
-    
 }
 
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 bool tTVPBasicDrawDevice::SwitchToFullScreen(
     int window, tjs_uint w, tjs_uint h, tjs_uint bpp, tjs_uint color, bool changeresolution)
 {
-	return true;
+    return true;
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::RevertFromFullScreen(
     int window, tjs_uint w, tjs_uint h, tjs_uint bpp, tjs_uint color)
 {
-
 }
-//--------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::StartBitmapCompletion(iTVPLayerManager* manager)
@@ -636,12 +582,12 @@ void tTVPBasicDrawDevice::StartBitmapCompletion(iTVPLayerManager* manager)
 }
 //---------------------------------------------------------------------------
 void tTVPBasicDrawDevice::NotifyBitmapCompleted(iTVPLayerManager* manager,
-                                                                tjs_int x,
-                                                                tjs_int y,
-                                                                tTVPBaseTexture* bmp,
-                                                                const tTVPRect& cliprect,
-                                                                tTVPLayerType type,
-                                                                tjs_int opacity)
+                                                tjs_int x,
+                                                tjs_int y,
+                                                tTVPBaseTexture* bmp,
+                                                const tTVPRect& cliprect,
+                                                tTVPLayerType type,
+                                                tjs_int opacity)
 {
     // bits, bitmapinfo で表されるビットマップの cliprect の領域を、x, y に描画
     // する。

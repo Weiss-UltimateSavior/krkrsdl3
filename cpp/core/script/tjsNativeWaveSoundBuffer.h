@@ -7,33 +7,33 @@
 //---------------------------------------------------------------------------
 // tTVPSoundStatus
 //---------------------------------------------------------------------------
-enum tTVPSoundStatus {
+enum tTVPSoundStatus
+{
     ssUnload, // data is not specified
-    ssStop, // stop
-    ssPlay, // play
-    ssPause, // pause
-    ssReady, // ready
+    ssStop,   // stop
+    ssPlay,   // play
+    ssPause,  // pause
+    ssReady,  // ready
 };
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 // tTJSNI_BaseSoundBuffer
 //---------------------------------------------------------------------------
-class tTJSNI_BaseSoundBuffer : public tTJSNativeInstance {
+class tTJSNI_BaseSoundBuffer : public tTJSNativeInstance
+{
     typedef tTJSNativeInstance inherited;
     friend class tTVPSoundBufferTimerDispatcher;
 
 public:
     tTJSNI_BaseSoundBuffer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 protected:
-    iTJSDispatch2 *Owner; // owner object
+    iTJSDispatch2* Owner;           // owner object
     tTJSVariantClosure ActionOwner; // object to send action
-    tTVPSoundStatus Status; // status
+    tTVPSoundStatus Status;         // status
 
     // volume functions ( implement this in child classes )
     // tTJSNI_BaseSoundBuffer/tTJSNI_SoundBuffer manage this when fading the
@@ -52,7 +52,6 @@ protected:
 public:
     tTVPSoundStatus GetStatus() const { return Status; }
 
-
 public:
     tTJSVariantClosure GetActionOwnerNoAddRef() const { return ActionOwner; }
 
@@ -66,9 +65,9 @@ protected:
 private:
     bool InFading;
     tjs_int TargetVolume; // distination volume
-    tjs_int DeltaVolume; // delta volume for each interval
-    tjs_int FadeCount; // beat count over fading
-    tjs_int BlankLeft; // blank time until fading
+    tjs_int DeltaVolume;  // delta volume for each interval
+    tjs_int FadeCount;    // beat count over fading
+    tjs_int BlankLeft;    // blank time until fading
 
 public:
     void Fade(tjs_int to, tjs_int time, tjs_int blanktime);
@@ -78,13 +77,13 @@ public:
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-class tTJSNI_SoundBuffer : public tTJSNI_BaseSoundBuffer {
+class tTJSNI_SoundBuffer : public tTJSNI_BaseSoundBuffer
+{
     typedef tTJSNI_BaseSoundBuffer inherited;
 
 public:
     tTJSNI_SoundBuffer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 public:
@@ -92,7 +91,6 @@ protected:
 };
 
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 // tTJSNI_BaseWaveSoundBuffer
@@ -124,9 +122,7 @@ protected:
     iTJSDispatch2* Filters;                 // wave filters array (TJS2 array object)
 public:
     tTJSNI_BaseWaveSoundBuffer();
-    tjs_error Construct(tjs_int numparams,
-                                        tTJSVariant** param,
-                                        iTJSDispatch2* tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 protected:
@@ -156,9 +152,7 @@ class tTJSNI_WaveSoundBuffer : public tTJSNI_BaseWaveSoundBuffer
 
 public:
     tTJSNI_WaveSoundBuffer();
-    tjs_error Construct(tjs_int numparams,
-                                        tTJSVariant** param,
-                                        iTJSDispatch2* tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
     //-- buffer management ------------------------------------------------
@@ -378,9 +372,7 @@ class tTJSNI_WaveFlags : public tTJSNativeInstance
 public:
     tTJSNI_WaveFlags();
     ~tTJSNI_WaveFlags();
-    tjs_error Construct(tjs_int numparams,
-                                        tTJSVariant** param,
-                                        iTJSDispatch2* tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
     tTJSNI_WaveSoundBuffer* GetBuffer() const { return Buffer; }
@@ -409,11 +401,11 @@ iTJSDispatch2* TVPCreateWaveFlagsObject(iTJSDispatch2* buffer);
 class tTJSNC_WaveSoundBuffer : public tTJSNativeClass
 {
 public:
-	tTJSNC_WaveSoundBuffer();
-	static tjs_uint32 ClassID;
+    tTJSNC_WaveSoundBuffer();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_WaveSoundBuffer();

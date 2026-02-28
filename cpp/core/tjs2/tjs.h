@@ -26,7 +26,6 @@ extern const tjs_int TJSVersionHex;
 extern tjs_char TJSCompiledDate[];
 //---------------------------------------------------------------------------
 
-
 //---------------------------------------------------------------------------
 // Console output callback interface
 //---------------------------------------------------------------------------
@@ -38,14 +37,10 @@ public:
 };
 //---------------------------------------------------------------------------
 
-
-
 //---------------------------------------------------------------------------
 // Object Hash Size Limit ( must be larger than or equal to 0 )
 //---------------------------------------------------------------------------
 extern tjs_int TJSObjectHashBitsLimit;
-
-
 
 //---------------------------------------------------------------------------
 // global options
@@ -72,8 +67,6 @@ extern bool TJSUnaryAsteriskIgnoresPropAccess;
 // This is replaced with '&' operator since TJS2 2.4.15. Turn true for
 // gaining old compatibility.
 
-
-
 //---------------------------------------------------------------------------
 // tTJS class - "tTJS" TJS API Class
 //---------------------------------------------------------------------------
@@ -84,6 +77,7 @@ class tTJSScriptCache;
 class tTJS
 {
     friend class tTJSScriptBlock;
+
 private:
     tjs_uint RefCount; // reference count
 
@@ -133,42 +127,59 @@ public:
 
     void Dump(tjs_uint width = 80) const; // dumps all existing script block
 
-    void ExecScript(const tjs_char* script, tTJSVariant* result = NULL,
+    void ExecScript(const tjs_char* script,
+                    tTJSVariant* result = NULL,
                     iTJSDispatch2* context = NULL,
-                    const tjs_char* name = NULL, tjs_int lineofs = 0);
+                    const tjs_char* name = NULL,
+                    tjs_int lineofs = 0);
 
-    void ExecScript(const ttstr& script, tTJSVariant* result = NULL,
+    void ExecScript(const ttstr& script,
+                    tTJSVariant* result = NULL,
                     iTJSDispatch2* context = NULL,
-                    const ttstr* name = NULL, tjs_int lineofs = 0);
+                    const ttstr* name = NULL,
+                    tjs_int lineofs = 0);
 
-    void EvalExpression(const tjs_char* expression, tTJSVariant* result,
+    void EvalExpression(const tjs_char* expression,
+                        tTJSVariant* result,
                         iTJSDispatch2* context = NULL,
-                        const tjs_char* name = NULL, tjs_int lineofs = 0);
+                        const tjs_char* name = NULL,
+                        tjs_int lineofs = 0);
 
-    void EvalExpression(const ttstr& expression, tTJSVariant* result,
+    void EvalExpression(const ttstr& expression,
+                        tTJSVariant* result,
                         iTJSDispatch2* context = NULL,
-                        const ttstr* name = NULL, tjs_int lineofs = 0);
+                        const ttstr* name = NULL,
+                        tjs_int lineofs = 0);
 
     void SetPPValue(const tjs_char* name, const tjs_int32 value);
     tjs_int32 GetPPValue(const tjs_char* name);
 
     void DoGarbageCollection();
 
-           // for Bytecode
-    void LoadByteCode(const tjs_uint8* buff, size_t len, tTJSVariant* result = NULL,
-                      iTJSDispatch2* context = NULL, const tjs_char* name = NULL);
+    // for Bytecode
+    void LoadByteCode(const tjs_uint8* buff,
+                      size_t len,
+                      tTJSVariant* result = NULL,
+                      iTJSDispatch2* context = NULL,
+                      const tjs_char* name = NULL);
 
-    bool LoadByteCode(class tTJSBinaryStream* stream, tTJSVariant* result = NULL,
-                      iTJSDispatch2* context = NULL, const tjs_char* name = NULL);
+    bool LoadByteCode(class tTJSBinaryStream* stream,
+                      tTJSVariant* result = NULL,
+                      iTJSDispatch2* context = NULL,
+                      const tjs_char* name = NULL);
 
-           // for Binary Dictionay Array
+    // for Binary Dictionay Array
     static bool LoadBinaryDictionayArray(class tTJSBinaryStream* stream, tTJSVariant* result);
 
-    void CompileScript(const tjs_char* script, class tTJSBinaryStream* output, bool isresultneeded = false, bool outputdebug = false, bool isexpression = false, const tjs_char* name = NULL, tjs_int lineofs = 0);
+    void CompileScript(const tjs_char* script,
+                       class tTJSBinaryStream* output,
+                       bool isresultneeded = false,
+                       bool outputdebug = false,
+                       bool isexpression = false,
+                       const tjs_char* name = NULL,
+                       tjs_int lineofs = 0);
 };
 //---------------------------------------------------------------------------
-
-
 
 /*[*/
 //---------------------------------------------------------------------------
@@ -201,8 +212,6 @@ extern class tTJSBinaryStream* (*TJSCreateBinaryStreamForWrite)(const tTJSString
                                                                 const tTJSString& modestr);
 //---------------------------------------------------------------------------
 
-
-
 /*]*/
 /*[*/
 //---------------------------------------------------------------------------
@@ -213,7 +222,7 @@ extern class tTJSBinaryStream* (*TJSCreateBinaryStreamForWrite)(const tTJSString
 #define TJS_BS_APPEND 2
 #define TJS_BS_UPDATE 3
 
-#define TJS_BS_DELETE_ON_CLOSE	0x10
+#define TJS_BS_DELETE_ON_CLOSE 0x10
 
 #define TJS_BS_ACCESS_MASK 0x0f
 #define TJS_BS_OPTION_MASK 0xf0
@@ -223,11 +232,7 @@ extern class tTJSBinaryStream* (*TJSCreateBinaryStreamForWrite)(const tTJSString
 #define TJS_BS_SEEK_END 2
 //---------------------------------------------------------------------------
 
-
-
 /*]*/
-
-
 
 //---------------------------------------------------------------------------
 // tTJSBinaryStream base stream class
@@ -269,5 +274,4 @@ public:
     tjs_uint8 ReadI8LE();
 };
 //---------------------------------------------------------------------------
-};
-
+}; // namespace TJS

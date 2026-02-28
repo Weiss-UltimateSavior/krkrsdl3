@@ -105,8 +105,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 	${KRKRSDL_CORE_PATH}/script
 	${KRKRSDL_CORE_PATH}/tjs2
 	${KRKRSDL_CORE_PATH}/utils
+    ${KRKRSDL_CORE_PATH}/utils/math
+    ${KRKRSDL_CORE_PATH}/utils/simd
 	${KRKRSDL_ENVIRON_PATH}
-	${KRKRSDL_ENVIRON_PATH}/math
 	${KRKRSDL_PLUGINS_PATH}
 )
 
@@ -171,11 +172,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
 find_package(SDL3_ttf CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf::SDL3_ttf)
 
+find_package(hwy CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE hwy::hwy)
+
 find_package(blend2d CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE blend2d::blend2d)
 
 if(ANDROID)
-    
     # egl
     target_link_libraries(${PROJECT_NAME} PRIVATE EGL GLESv3)
 elseif(LINUX)

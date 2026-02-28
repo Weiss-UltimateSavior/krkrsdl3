@@ -316,7 +316,7 @@ bool CDVDVideoCodecFFmpeg::GetPicture(DVDVideoPicture* pDvdVideoPicture)
     return false;
 }
 
-#define RINT(x) ((x) >= 0 ? ((int)((x) + 0.5)) : ((int)((x) - 0.5)))
+#define RINT(x) ((x) >= 0 ? ((int)((x) + 0.5)) : ((int)((x)-0.5)))
 bool CDVDVideoCodecFFmpeg::SetPictureParams(DVDVideoPicture* pDvdVideoPicture)
 {
     while (m_pCodecContext->coded_width > 0 && m_pCodecContext->coded_height > 0)
@@ -360,8 +360,10 @@ bool CDVDVideoCodecFFmpeg::SetPictureParams(DVDVideoPicture* pDvdVideoPicture)
     pDvdVideoPicture->pts = DVD_NOPTS_VALUE;
     pDvdVideoPicture->iRepeatPicture = 0.5 * m_pFrame->repeat_pict;
     pDvdVideoPicture->iFlags = DVP_FLAG_ALLOCATED;
-    pDvdVideoPicture->iFlags |= (m_pFrame->flags & AV_FRAME_FLAG_INTERLACED) ? DVP_FLAG_INTERLACED : 0;
-    pDvdVideoPicture->iFlags |= (m_pFrame->flags & AV_FRAME_FLAG_TOP_FIELD_FIRST) ? DVP_FLAG_TOP_FIELD_FIRST : 0;
+    pDvdVideoPicture->iFlags |=
+        (m_pFrame->flags & AV_FRAME_FLAG_INTERLACED) ? DVP_FLAG_INTERLACED : 0;
+    pDvdVideoPicture->iFlags |=
+        (m_pFrame->flags & AV_FRAME_FLAG_TOP_FIELD_FIRST) ? DVP_FLAG_TOP_FIELD_FIRST : 0;
 
     pDvdVideoPicture->chroma_position = m_pCodecContext->chroma_sample_location;
     pDvdVideoPicture->color_primaries = m_pCodecContext->color_primaries;

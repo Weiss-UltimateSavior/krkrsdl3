@@ -6,20 +6,20 @@
 //---------------------------------------------------------------------------
 // tTJSNI_BasicDrawDevice
 //---------------------------------------------------------------------------
-class tTJSNI_BasicDrawDevice : public tTJSNativeInstance {
+class tTJSNI_BasicDrawDevice : public tTJSNativeInstance
+{
     typedef tTJSNativeInstance inherited;
 
-    tTVPBasicDrawDevice *Device;
+    tTVPBasicDrawDevice* Device;
 
 public:
     tTJSNI_BasicDrawDevice();
     ~tTJSNI_BasicDrawDevice();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
-    void Invalidate(); 
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
+    void Invalidate();
 
 public:
-    tTVPBasicDrawDevice *GetDevice() const { return Device; }
+    tTVPBasicDrawDevice* GetDevice() const { return Device; }
     enum tDrawerType
     {
         dtNone,    //!< drawer なし
@@ -35,17 +35,17 @@ public:
 };
 //---------------------------------------------------------------------------
 
-
 //---------------------------------------------------------------------------
 // tTJSNC_BasicDrawDevice
 //---------------------------------------------------------------------------
-class tTJSNC_BasicDrawDevice : public tTJSNativeClass {
+class tTJSNC_BasicDrawDevice : public tTJSNativeClass
+{
 public:
     tTJSNC_BasicDrawDevice();
 
     static tjs_uint32 ClassID;
 
 private:
-    iTJSNativeInstance *CreateNativeInstance();
+    iTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------

@@ -1475,7 +1475,6 @@ void DrawDeviceD3D_init()
 
 void DrawDeviceD3D_done()
 {
-
 }
 
 NCB_PRE_REGIST_CALLBACK(DrawDeviceD3D_init);

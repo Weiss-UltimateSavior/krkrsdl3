@@ -21,9 +21,10 @@ NS_KRMOVIE_BEGIN
 void CSelectionStreams::Clear(AVMediaType type)
 {
     std::lock_guard<std::recursive_mutex> lock(m_section);
-    auto new_end =
-        std::remove_if(m_Streams.begin(), m_Streams.end(), [type](const SelectionStream& stream)
-                       { return (type == AVMEDIA_TYPE_UNKNOWN || stream.type == type); });
+    auto new_end = std::remove_if(m_Streams.begin(), m_Streams.end(),
+                                  [type](const SelectionStream& stream) {
+                                      return (type == AVMEDIA_TYPE_UNKNOWN || stream.type == type);
+                                  });
     m_Streams.erase(new_end, m_Streams.end());
 }
 

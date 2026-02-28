@@ -6,8 +6,6 @@
 #include <vector>
 #include <stdio.h>
 
-#include <opencv2/opencv.hpp>
-
 #define NCB_MODULE_NAME TJS_N("layerExDraw.dll")
 
 static std::vector<BLFontDataCore> bl_font_data_vec;
@@ -18,7 +16,7 @@ static std::vector<ttstr> bl_font_face_name; // 方便一点吧
 void initGdiPlus()
 {
 
-      // Initialize GDI+.
+    // Initialize GDI+.
 }
 
 // GDI+ 初期化
@@ -38,7 +36,7 @@ void deInitGdiPlus()
  * @param name ファイル名
  * @return 画像情報
  */
-BLImage loadImage(const tjs_char *name) // 以后应该要让krkr内核进行图像解码
+BLImage loadImage(const tjs_char* name) // 以后应该要让krkr内核进行图像解码
 {
     BLImage image;
     BLResult ret = BL_SUCCESS;
@@ -46,7 +44,8 @@ BLImage loadImage(const tjs_char *name) // 以后应该要让krkr内核进行图
     if (filename.length())
     {
         tTJSBinaryStream* in = TVPCreateBinaryStreamForRead(filename, TJS_N(""));
-        if (in) {
+        if (in)
+        {
             tjs_uint8* fileData = new tjs_uint8[in->GetSize()];
             in->ReadBuffer(fileData, in->GetSize());
             ret = image.readFromData(fileData, in->GetSize());
@@ -65,12 +64,12 @@ BLImage loadImage(const tjs_char *name) // 以后应该要让krkr内核进行图
  * プライベートフォントの追加
  * @param fontFileName フォントファイル名
  */
-void
-GdiPlus::addPrivateFont(const tjs_char *fontFileName)
+void GdiPlus::addPrivateFont(const tjs_char* fontFileName)
 {
     ttstr filename = TVPGetPlacedPath(fontFileName);
     tTJSBinaryStream* in = NULL;
-    if (filename.length()) {
+    if (filename.length())
+    {
         in = TVPCreateBinaryStreamForRead(filename, TJS_N(""));
     }
     else
@@ -87,7 +86,7 @@ GdiPlus::addPrivateFont(const tjs_char *fontFileName)
             }
         }
 
-               // 实在没有就强行换字体吧
+        // 实在没有就强行换字体吧
         if (!in)
         {
             in = GetResourceStream("DroidSansFallback.ttf");
@@ -102,7 +101,7 @@ GdiPlus::addPrivateFont(const tjs_char *fontFileName)
         blFontDataInit(&bl_font_data);
         BLResult stat =
             blFontDataCreateFromData(&bl_font_data, fileData, in->GetSize(), NULL, NULL);
-        //delete[] fileData;
+        // delete[] fileData;
         delete in;
         if (stat != BL_SUCCESS)
         {
@@ -131,12 +130,11 @@ GdiPlus::addPrivateFont(const tjs_char *fontFileName)
  * フォント一覧の取得
  * @param privateOnly true ならプライベートフォントのみ取得
  */
-tTJSVariant
-GdiPlus::getFontList(bool privateOnly)
+tTJSVariant GdiPlus::getFontList(bool privateOnly)
 {
     iTJSDispatch2* array = TJSCreateArrayObject();
 
-           // 获取系统字体 直接用TVPFont的数据即可
+    // 获取系统字体 直接用TVPFont的数据即可
     if (!privateOnly)
     {
         std::vector<ttstr> ret;
@@ -151,7 +149,7 @@ GdiPlus::getFontList(bool privateOnly)
         }
     }
 
-           // BLFontManager已保存字体
+    // BLFontManager已保存字体
     for (int i = 0; i < bl_font_face_name.size(); i++)
     {
         if (bl_font_face_name.at(i).length())
@@ -173,7 +171,14 @@ GdiPlus::getFontList(bool privateOnly)
 /**
  * コンストラクタ
  */
-FontInfo::FontInfo() : emSize(12), style(0), gdiPlusUnsupportedFont(false), forceSelfPathDraw(false), propertyModified(true) {}
+FontInfo::FontInfo()
+  : emSize(12),
+    style(0),
+    gdiPlusUnsupportedFont(false),
+    forceSelfPathDraw(false),
+    propertyModified(true)
+{
+}
 
 /**
  * コンストラクタ
@@ -181,7 +186,10 @@ FontInfo::FontInfo() : emSize(12), style(0), gdiPlusUnsupportedFont(false), forc
  * @param emSize フォントのサイズ
  * @param style フォントスタイル
  */
-FontInfo::FontInfo(const tjs_char *familyName, tjs_real emSize, tjs_int style) : gdiPlusUnsupportedFont(false), forceSelfPathDraw(false), propertyModified(true)
+FontInfo::FontInfo(const tjs_char* familyName, tjs_real emSize, tjs_int style)
+  : gdiPlusUnsupportedFont(false),
+    forceSelfPathDraw(false),
+    propertyModified(true)
 {
     setFamilyName(familyName);
     setEmSize(emSize);
@@ -191,7 +199,7 @@ FontInfo::FontInfo(const tjs_char *familyName, tjs_real emSize, tjs_int style) :
 /**
  * コピーコンストラクタ
  */
-FontInfo::FontInfo(const FontInfo &orig)
+FontInfo::FontInfo(const FontInfo& orig)
 {
     familyName = orig.familyName;
     emSize = orig.emSize;
@@ -209,20 +217,17 @@ FontInfo::~FontInfo()
 /**
  * フォント情報のクリア
  */
-void
-FontInfo::clear()
+void FontInfo::clear()
 {
     familyName = "";
     gdiPlusUnsupportedFont = false;
     propertyModified = true;
 }
 
-
 /**
  * フォントの指定
  */
-void
-FontInfo::setFamilyName(const tjs_char *familyName)
+void FontInfo::setFamilyName(const tjs_char* familyName)
 {
     propertyModified = true;
     clear();
@@ -238,27 +243,23 @@ FontInfo::setFamilyName(const tjs_char *familyName)
     }
 }
 
-void
-FontInfo::setForceSelfPathDraw(bool state)
+void FontInfo::setForceSelfPathDraw(bool state)
 {
     forceSelfPathDraw = state;
     this->setFamilyName(familyName.c_str());
 }
 
-bool
-FontInfo::getForceSelfPathDraw(void) const
+bool FontInfo::getForceSelfPathDraw(void) const
 {
     return forceSelfPathDraw;
 }
 
-bool
-FontInfo::getSelfPathDraw(void) const
+bool FontInfo::getSelfPathDraw(void) const
 {
     return forceSelfPathDraw || gdiPlusUnsupportedFont;
 }
 
-void
-FontInfo::updateSizeParams(void) const
+void FontInfo::updateSizeParams(void) const
 {
     if (!propertyModified)
         return;
@@ -301,38 +302,31 @@ FontInfo::updateSizeParams(void) const
     }
 }
 
-tjs_real
-FontInfo::getAscent() const
+tjs_real FontInfo::getAscent() const
 {
     this->updateSizeParams();
     return ascent;
 }
 
-
-tjs_real
-FontInfo::getDescent() const
+tjs_real FontInfo::getDescent() const
 {
     this->updateSizeParams();
     return descent;
 }
 
-tjs_real
-FontInfo::getAscentLeading() const
+tjs_real FontInfo::getAscentLeading() const
 {
     this->updateSizeParams();
     return ascentLeading;
 }
 
-
-tjs_real
-FontInfo::getDescentLeading() const
+tjs_real FontInfo::getDescentLeading() const
 {
     this->updateSizeParams();
     return descentLeading;
 }
 
-tjs_real
-FontInfo::getLineSpacing() const
+tjs_real FontInfo::getLineSpacing() const
 {
     this->updateSizeParams();
     return lineSpacing;
@@ -359,12 +353,13 @@ BLFont FontInfo::getBLFont() const
     return _font;
 }
 
-
 // --------------------------------------------------------
 // アピアランス情報
 // --------------------------------------------------------
 
-Appearance::Appearance() {}
+Appearance::Appearance()
+{
+}
 
 Appearance::~Appearance()
 {
@@ -384,31 +379,29 @@ Appearance* Appearance::Clone() const
 /**
  * 情報のクリア
  */
-void
-Appearance::clear()
+void Appearance::clear()
 {
     drawInfos.clear();
 
-           // customLineCapsも削除
-    //std::vector<CustomLineCap*>::const_iterator i = customLineCaps.begin();
-    //while (i != customLineCaps.end()) {
+    // customLineCapsも削除
+    // std::vector<CustomLineCap*>::const_iterator i = customLineCaps.begin();
+    // while (i != customLineCaps.end()) {
     //	delete *i;
     //	i++;
-    //}
-    //customLineCaps.clear();
+    // }
+    // customLineCaps.clear();
 }
-
 
 // --------------------------------------------------------
 // 各型変換処理
 // --------------------------------------------------------
 
-extern bool IsArray(const tTJSVariant &var);
+extern bool IsArray(const tTJSVariant& var);
 
 /**
  * 座標情報の生成
  */
-extern PointF getPoint(const tTJSVariant &var);
+extern PointF getPoint(const tTJSVariant& var);
 
 /**
  * 点の配列を取得
@@ -417,9 +410,11 @@ static void getPoints(const tTJSVariant& var, std::vector<PointF>& points)
 {
     ncbPropAccessor info(var);
     int c = info.GetArrayCount();
-    for (int i=0;i<c;i++) {
+    for (int i = 0; i < c; i++)
+    {
         tTJSVariant p;
-        if (info.checkVariant(i, p)) {
+        if (info.checkVariant(i, p))
+        {
             points.push_back(getPoint(p));
         }
     }
@@ -428,7 +423,8 @@ static void getPoints(const tTJSVariant& var, std::vector<PointF>& points)
 static void getPoints(ncbPropAccessor& info, int n, std::vector<PointF>& points)
 {
     tTJSVariant var;
-    if (info.checkVariant(n, var)) {
+    if (info.checkVariant(n, var))
+    {
         getPoints(var, points);
     }
 }
@@ -436,7 +432,8 @@ static void getPoints(ncbPropAccessor& info, int n, std::vector<PointF>& points)
 static void getPoints(ncbPropAccessor& info, const tjs_char* n, std::vector<PointF>& points)
 {
     tTJSVariant var;
-    if (info.checkVariant(n, var)) {
+    if (info.checkVariant(n, var))
+    {
         getPoints(var, points);
     }
 }
@@ -446,7 +443,7 @@ static void getPoints(ncbPropAccessor& info, const tjs_char* n, std::vector<Poin
 /**
  * 矩形情報の生成
  */
-static RectF getRect(tTJSVariant &var);
+static RectF getRect(tTJSVariant& var);
 
 /**
  * 矩形の配列を取得
@@ -455,9 +452,11 @@ static void getRects(const tTJSVariant& var, std::vector<RectF>& rects)
 {
     ncbPropAccessor info(var);
     int c = info.GetArrayCount();
-    for (int i=0;i<c;i++) {
+    for (int i = 0; i < c; i++)
+    {
         tTJSVariant p;
-        if (info.checkVariant(i, p)) {
+        if (info.checkVariant(i, p))
+        {
             rects.push_back(getRect(p));
         }
     }
@@ -468,11 +467,12 @@ static void getRects(const tTJSVariant& var, std::vector<RectF>& rects)
 /**
  * 実数の配列を取得
  */
-static void getReals(const tTJSVariant &var, std::vector<tjs_real> &points)
+static void getReals(const tTJSVariant& var, std::vector<tjs_real>& points)
 {
     ncbPropAccessor info(var);
     int c = info.GetArrayCount();
-    for (int i=0;i<c;i++) {
+    for (int i = 0; i < c; i++)
+    {
         points.push_back((tjs_real)info.getRealValue(i));
     }
 }
@@ -480,7 +480,8 @@ static void getReals(const tTJSVariant &var, std::vector<tjs_real> &points)
 static void getReals(ncbPropAccessor& info, int n, std::vector<tjs_real>& points)
 {
     tTJSVariant var;
-    if (info.checkVariant(n, var)) {
+    if (info.checkVariant(n, var))
+    {
         getReals(var, points);
     }
 }
@@ -488,7 +489,8 @@ static void getReals(ncbPropAccessor& info, int n, std::vector<tjs_real>& points
 static void getReals(ncbPropAccessor& info, const tjs_char* n, std::vector<tjs_real>& points)
 {
     tTJSVariant var;
-    if (info.checkVariant(n, var)) {
+    if (info.checkVariant(n, var))
+    {
         getReals(var, points);
     }
 }
@@ -502,7 +504,8 @@ static void getColors(const tTJSVariant& var, std::vector<tjs_uint32>& colors)
 {
     ncbPropAccessor info(var);
     int c = info.GetArrayCount();
-    for (int i=0;i<c;i++) {
+    for (int i = 0; i < c; i++)
+    {
         colors.push_back((tjs_uint32)info.getIntValue(i));
     }
 }
@@ -510,7 +513,8 @@ static void getColors(const tTJSVariant& var, std::vector<tjs_uint32>& colors)
 static void getColors(ncbPropAccessor& info, int n, std::vector<tjs_uint32>& colors)
 {
     tTJSVariant var;
-    if (info.checkVariant(n, var)) {
+    if (info.checkVariant(n, var))
+    {
         getColors(var, colors);
     }
 }
@@ -518,7 +522,8 @@ static void getColors(ncbPropAccessor& info, int n, std::vector<tjs_uint32>& col
 static void getColors(ncbPropAccessor& info, const tjs_char* n, std::vector<tjs_uint32>& colors)
 {
     tTJSVariant var;
-    if (info.checkVariant(n, var)) {
+    if (info.checkVariant(n, var))
+    {
         getColors(var, colors);
     }
 }
@@ -541,73 +546,94 @@ static RectF calculateBounds(const std::vector<PointF>& points)
     return bounds;
 }
 
-template <class T>
-void commonBrushParameter(ncbPropAccessor &info, T *brush)
+template<class T>
+void commonBrushParameter(ncbPropAccessor& info, T* brush)
 {
     tTJSVariant var;
     // SetBlend
-    if (info.checkVariant(TJS_N("blend"), var)) {
+    if (info.checkVariant(TJS_N("blend"), var))
+    {
         std::vector<tjs_real> factors;
         std::vector<tjs_real> positions;
         ncbPropAccessor binfo(var);
-        if (IsArray(var)) {
+        if (IsArray(var))
+        {
             getReals(binfo, 0, factors);
             getReals(binfo, 1, positions);
-        } else {
+        }
+        else
+        {
             getReals(binfo, TJS_N("blendFactors"), factors);
             getReals(binfo, TJS_N("blendPositions"), positions);
         }
         int count = (int)factors.size();
-        if ((int)positions.size() > count) {
+        if ((int)positions.size() > count)
+        {
             count = (int)positions.size();
         }
-        if (count > 0) {
+        if (count > 0)
+        {
             brush->SetBlend(&factors[0], &positions[0], count);
         }
     }
     // SetBlendBellShape
-    if (info.checkVariant(TJS_N("blendBellShape"), var)) {
+    if (info.checkVariant(TJS_N("blendBellShape"), var))
+    {
         ncbPropAccessor sinfo(var);
-        if (IsArray(var)) {
+        if (IsArray(var))
+        {
             brush->SetBlendBellShape((tjs_real)sinfo.getRealValue(0),
                                      (tjs_real)sinfo.getRealValue(1));
-        } else {
+        }
+        else
+        {
             brush->SetBlendBellShape((tjs_real)info.getRealValue(TJS_N("focus")),
                                      (tjs_real)info.getRealValue(TJS_N("scale")));
         }
     }
     // SetBlendTriangularShape
-    if (info.checkVariant(TJS_N("blendTriangularShape"), var)) {
+    if (info.checkVariant(TJS_N("blendTriangularShape"), var))
+    {
         ncbPropAccessor sinfo(var);
-        if (IsArray(var)) {
+        if (IsArray(var))
+        {
             brush->SetBlendTriangularShape((tjs_real)sinfo.getRealValue(0),
                                            (tjs_real)sinfo.getRealValue(1));
-        } else {
+        }
+        else
+        {
             brush->SetBlendTriangularShape((tjs_real)info.getRealValue(TJS_N("focus")),
                                            (tjs_real)info.getRealValue(TJS_N("scale")));
         }
     }
     // SetGammaCorrection
-    if (info.checkVariant(TJS_N("useGammaCorrection"), var)) {
+    if (info.checkVariant(TJS_N("useGammaCorrection"), var))
+    {
         brush->SetGammaCorrection((bool)var);
     }
     // SetInterpolationColors
-    if (info.checkVariant(TJS_N("interpolationColors"), var)) {
+    if (info.checkVariant(TJS_N("interpolationColors"), var))
+    {
         std::vector<tjs_uint32> colors;
         std::vector<tjs_real> positions;
         ncbPropAccessor binfo(var);
-        if (IsArray(var)) {
+        if (IsArray(var))
+        {
             getColors(binfo, 0, colors);
             getReals(binfo, 1, positions);
-        } else {
+        }
+        else
+        {
             getColors(binfo, TJS_N("presetColors"), colors);
             getReals(binfo, TJS_N("blendPositions"), positions);
         }
         int count = (int)colors.size();
-        if ((int)positions.size() > count) {
+        if ((int)positions.size() > count)
+        {
             count = (int)positions.size();
         }
-        if (count > 0) {
+        if (count > 0)
+        {
             brush->SetInterpolationColors(&colors[0], &positions[0], count);
         }
     }
@@ -719,14 +745,18 @@ BLImage createHatchPattern(HatchStyle style, BLRgba32 foreColor, BLRgba32 backCo
 }
 BLBrush* createBrush(const tTJSVariant colorOrBrush)
 {
-    if (colorOrBrush.Type() != tvtObject) {
+    if (colorOrBrush.Type() != tvtObject)
+    {
         // 纯色
         return new BLBrush((tjs_int)colorOrBrush);
-    } else {
+    }
+    else
+    {
         // 種別ごとに作り分ける
         ncbPropAccessor info(colorOrBrush);
         BrushType type = (BrushType)info.getIntValue(TJS_N("type"), BrushTypeSolidColor);
-        switch (type) {
+        switch (type)
+        {
             case BrushTypeSolidColor:
                 return new BLBrush(info.getIntValue(TJS_N("color"), 0xFFFFFFFF));
             case BrushTypeHatchFill:
@@ -773,8 +803,8 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                     if (info.checkVariant(TJS_N("dstRect"), dstRectVar))
                     {
                         RectF dstRect = getRect(dstRectVar);
-                        if (dstRect.x != 0 || dstRect.y != 0 ||
-                            dstRect.w != image.width() || dstRect.h != image.height())
+                        if (dstRect.x != 0 || dstRect.y != 0 || dstRect.w != image.width() ||
+                            dstRect.h != image.height())
                         {
 
                             BLMatrix2D matrix;
@@ -796,11 +826,11 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                 if ((int)points.size() == 0)
                     TVPThrowExceptionMessage(TJS_N("must set poins"));
 
-                       // TODO
-                       // WrapMode wrapMode = (WrapMode)info.getIntValue(L"wrapMode", WrapModeTile);
+                // TODO
+                // WrapMode wrapMode = (WrapMode)info.getIntValue(L"wrapMode", WrapModeTile);
 
-                       // 共通パラメータ TODO
-                       // commonBrushParameter(info, pbrush);
+                // 共通パラメータ TODO
+                // commonBrushParameter(info, pbrush);
 
                 if (!points.empty())
                 {
@@ -820,7 +850,7 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                     // SetCenterPoint
                     if (info.checkVariant(TJS_N("centerPoint"), var))
                     {
-                      // TODO
+                        // TODO
                     }
                     // SetSurroundColors
                     if (info.checkVariant(TJS_N("surroundColors"), var))
@@ -835,7 +865,7 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                     // SetFocusScales
                     if (info.checkVariant(TJS_N("focusScales"), var))
                     {
-                      // TODO
+                        // TODO
                     }
                     return new BLBrush(gradient);
                 }
@@ -846,7 +876,8 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                 BLGradient gradient(BL_GRADIENT_TYPE_LINEAR);
 
                 tTJSVariant var;
-                if (info.checkVariant(TJS_N("point1"), var) && info.checkVariant(TJS_N("point2"), var))
+                if (info.checkVariant(TJS_N("point1"), var) &&
+                    info.checkVariant(TJS_N("point2"), var))
                 {
                     PointF p1 = getPoint(var);
                     info.checkVariant(TJS_N("point2"), var);
@@ -863,18 +894,21 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
                     float cy = rect.y + rect.h / 2;
                     float length = std::sqrt(rect.w * rect.w + rect.h * rect.h) / 2;
 
-                    gradient.setValues(BLLinearGradientValues(cx - std::cos(rad) * length, cy - std::sin(rad) * length,
-                                                              cx + std::cos(rad) * length, cy + std::sin(rad) * length));
+                    gradient.setValues(BLLinearGradientValues(
+                        cx - std::cos(rad) * length, cy - std::sin(rad) * length,
+                        cx + std::cos(rad) * length, cy + std::sin(rad) * length));
                 }
                 else
                 {
                     TVPThrowExceptionMessage(TJS_N("must set point1,2 or rect"));
                 }
 
-                gradient.addStop(0.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color1"), 0)));
-                gradient.addStop(1.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color2"), 0)));
+                gradient.addStop(
+                    0.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color1"), 0)));
+                gradient.addStop(
+                    1.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color2"), 0)));
 
-                       // 共通パラメータ TODO
+                // 共通パラメータ TODO
                 // commonBrushParameter(info, pbrush);
 
                 return new BLBrush(gradient);
@@ -893,8 +927,7 @@ BLBrush* createBrush(const tTJSVariant colorOrBrush)
  * @param ox 表示オフセットX
  * @param oy 表示オフセットY
  */
-void
-Appearance::addBrush(tTJSVariant colorOrBrush, tjs_real ox, tjs_real oy)
+void Appearance::addBrush(tTJSVariant colorOrBrush, tjs_real ox, tjs_real oy)
 {
     drawInfos.push_back(DrawInfo(ox, oy, createBrush(colorOrBrush), 1));
 }
@@ -906,53 +939,68 @@ Appearance::addBrush(tTJSVariant colorOrBrush, tjs_real ox, tjs_real oy)
  * @param ox 表示オフセットX
  * @param oy 表示オフセットY
  */
-void
-Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real ox, tjs_real oy)
+void Appearance::addPen(tTJSVariant colorOrBrush,
+                        tTJSVariant widthOrOption,
+                        tjs_real ox,
+                        tjs_real oy)
 {
     BLPen* pen = nullptr;
     tjs_real width = 1.0;
-    if (colorOrBrush.Type() == tvtObject) {
-        BLBrush *brush = createBrush(colorOrBrush);
+    if (colorOrBrush.Type() == tvtObject)
+    {
+        BLBrush* brush = createBrush(colorOrBrush);
         pen = new BLPen(brush, width);
         delete brush;
-    } else {
+    }
+    else
+    {
         pen = new BLPen((tjs_uint32)(tjs_int)colorOrBrush, width);
     }
-    if (widthOrOption.Type() != tvtObject) {
+    if (widthOrOption.Type() != tvtObject)
+    {
         pen->strokeWidth = ((tjs_real)(tjs_real)widthOrOption);
-    } else {
+    }
+    else
+    {
         ncbPropAccessor info(widthOrOption);
         tjs_real penWidth = 1.0;
         tTJSVariant var;
 
-               // SetWidth
-        if (info.checkVariant(TJS_N("width"), var)) {
+        // SetWidth
+        if (info.checkVariant(TJS_N("width"), var))
+        {
             penWidth = (tjs_real)(tjs_real)var;
         }
         pen->strokeWidth = penWidth;
 
-               // SetAlignment
-        if (info.checkVariant(TJS_N("alignment"), var)) {
+        // SetAlignment
+        if (info.checkVariant(TJS_N("alignment"), var))
+        {
             // TODO
         }
         // SetCompoundArray
-        if (info.checkVariant(TJS_N("compoundArray"), var)) {
+        if (info.checkVariant(TJS_N("compoundArray"), var))
+        {
             // TODO
         }
 
-               // SetDashCap
-        if (info.checkVariant(TJS_N("dashCap"), var)) {
+        // SetDashCap
+        if (info.checkVariant(TJS_N("dashCap"), var))
+        {
             // TODO
         }
         // SetDashOffset
-        if (info.checkVariant(TJS_N("dashOffset"), var)) {
+        if (info.checkVariant(TJS_N("dashOffset"), var))
+        {
             pen->strokeOptions.dashOffset = (tjs_real)(tjs_real)var;
         }
 
-               // SetDashStyle
-               // SetDashPattern
-        if (info.checkVariant(TJS_N("dashStyle"), var)) {
-            if (IsArray(var)) {
+        // SetDashStyle
+        // SetDashPattern
+        if (info.checkVariant(TJS_N("dashStyle"), var))
+        {
+            if (IsArray(var))
+            {
                 std::vector<tjs_real> reals;
                 getReals(var, reals);
                 BLArray<double> bla;
@@ -961,7 +1009,9 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
                     bla.append(reals.at(i));
                 }
                 pen->strokeOptions.dashArray = bla;
-            } else {
+            }
+            else
+            {
                 DashStyle dashStyle = (DashStyle)(tjs_int)var;
                 BLArray<double> bla;
                 switch (dashStyle)
@@ -998,9 +1048,10 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
             }
         }
 
-               // SetStartCap
-               // SetCustomStartCap
-        if (info.checkVariant(TJS_N("startCap"), var)) {
+        // SetStartCap
+        // SetCustomStartCap
+        if (info.checkVariant(TJS_N("startCap"), var))
+        {
             BLStrokeCap retCap;
             BLPath custom;
             if (getLineCap(var, retCap, custom, penWidth))
@@ -1015,8 +1066,8 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
             }
         }
 
-               // SetEndCap
-               // SetCustomEndCap
+        // SetEndCap
+        // SetCustomEndCap
         if (info.checkVariant(TJS_N("endCap"), var))
         {
             BLStrokeCap retCap;
@@ -1033,8 +1084,9 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
             }
         }
 
-               // SetLineJoin
-        if (info.checkVariant(TJS_N("lineJoin"), var)) {
+        // SetLineJoin
+        if (info.checkVariant(TJS_N("lineJoin"), var))
+        {
             LineJoin lineJoin = (LineJoin)(tjs_int)var;
             switch (lineJoin)
             {
@@ -1064,8 +1116,9 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
             pen->strokeOptions.join = (LineJoin)(tjs_int)var;
         }
 
-               // SetMiterLimit
-        if (info.checkVariant(TJS_N("miterLimit"), var)) {
+        // SetMiterLimit
+        if (info.checkVariant(TJS_N("miterLimit"), var))
+        {
             pen->strokeOptions.miterLimit = (tjs_real)(tjs_real)var;
         }
     }
@@ -1074,7 +1127,8 @@ Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real
 
 bool Appearance::getLineCap(tTJSVariant& in, BLStrokeCap& cap, BLPath& custom, tjs_real pw)
 {
-    switch (in.Type()) {
+    switch (in.Type())
+    {
         case tvtVoid:
         case tvtInteger:
         {
@@ -1114,8 +1168,10 @@ bool Appearance::getLineCap(tTJSVariant& in, BLStrokeCap& cap, BLPath& custom, t
             ncbPropAccessor info(in);
             tjs_real width = pw, height = pw;
             tTJSVariant var;
-            if (info.checkVariant(TJS_N("width"),  var)) width  = ((tjs_real)(tjs_real)var) * pw;
-            if (info.checkVariant(TJS_N("height"), var)) height = ((tjs_real)(tjs_real)var) * pw;
+            if (info.checkVariant(TJS_N("width"), var))
+                width = ((tjs_real)(tjs_real)var) * pw;
+            if (info.checkVariant(TJS_N("height"), var))
+                height = ((tjs_real)(tjs_real)var) * pw;
             bool filled = (bool)info.getIntValue(TJS_N("filled"), 1);
             tjs_real middleInset = 0;
             if (info.checkVariant(TJS_N("middleInset"), var)) // TODO
@@ -1136,7 +1192,8 @@ bool Appearance::getLineCap(tTJSVariant& in, BLStrokeCap& cap, BLPath& custom, t
             }
         }
         break;
-        default: return false;
+        default:
+            return false;
     }
     return true;
 }
@@ -1174,7 +1231,12 @@ void Path::closeFigure()
  * @param startAngle 時計方向円弧開始位置
  * @param sweepAngle 描画角度
  */
-void Path::drawArc(tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_real startAngle, tjs_real sweepAngle)
+void Path::drawArc(tjs_real x,
+                   tjs_real y,
+                   tjs_real width,
+                   tjs_real height,
+                   tjs_real startAngle,
+                   tjs_real sweepAngle)
 {
     float startRad = startAngle * M_PI / 180.0f;
     float sweepRad = sweepAngle * M_PI / 180.0f;
@@ -1197,7 +1259,14 @@ void Path::drawArc(tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_
  * @param x4
  * @param y4
  */
-void Path::drawBezier(tjs_real x1, tjs_real y1, tjs_real x2, tjs_real y2, tjs_real x3, tjs_real y3, tjs_real x4, tjs_real y4)
+void Path::drawBezier(tjs_real x1,
+                      tjs_real y1,
+                      tjs_real x2,
+                      tjs_real y2,
+                      tjs_real x3,
+                      tjs_real y3,
+                      tjs_real x4,
+                      tjs_real y4)
 {
     if (!figureStarted)
     {
@@ -1258,7 +1327,7 @@ void Path::drawClosedCurve2(tTJSVariant points, tjs_real tension)
     if (ps.size() < 2)
         return;
 
-           // 计算Cardinal spline控制点
+    // 计算Cardinal spline控制点
     for (size_t i = 0; i < ps.size(); i++)
     {
         PointF p0 = ps[(i + ps.size() - 1) % ps.size()];
@@ -1266,7 +1335,7 @@ void Path::drawClosedCurve2(tTJSVariant points, tjs_real tension)
         PointF p2 = ps[(i + 1) % ps.size()];
         PointF p3 = ps[(i + 2) % ps.size()];
 
-               // Cardinal spline公式
+        // Cardinal spline公式
         PointF cp1 = p1 + (p2 - p0) * tension / 3.0;
         PointF cp2 = p2 - (p3 - p1) * tension / 3.0;
 
@@ -1351,7 +1420,12 @@ void Path::drawCurve3(tTJSVariant points, int offset, int numberOfSegments, tjs_
  * @param startAngle 時計方向円弧開始位置
  * @param sweepAngle 描画角度
  */
-void Path::drawPie(tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_real startAngle, tjs_real sweepAngle)
+void Path::drawPie(tjs_real x,
+                   tjs_real y,
+                   tjs_real width,
+                   tjs_real height,
+                   tjs_real startAngle,
+                   tjs_real sweepAngle)
 {
     float rx = width / 2.0f;
     float ry = height / 2.0f;
@@ -1362,19 +1436,19 @@ void Path::drawPie(tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_
     float sweepRad = sweepAngle * M_PI / 180.0f;
     float endRad = startRad + sweepRad;
 
-           // 移动到中心
+    // 移动到中心
     path.moveTo(cx, cy);
     figureStarted = true;
 
-           // 画到起始点
+    // 画到起始点
     float startX = cx + rx * cos(startRad);
     float startY = cy + ry * sin(startRad);
     path.lineTo(startX, startY);
 
-           // 画圆弧
+    // 画圆弧
     path.arcTo(cx, cy, rx, ry, startRad, sweepRad);
 
-           // 回到中心并闭合
+    // 回到中心并闭合
     path.lineTo(cx, cy);
     path.close();
 }
@@ -1505,10 +1579,10 @@ void Path::drawRectangles(tTJSVariant rects)
 // フォント描画系
 // --------------------------------------------------------
 
-void
-LayerExDraw::updateRect(RectF &rect)
+void LayerExDraw::updateRect(RectF& rect)
 {
-    if (updateWhenDraw) {
+    if (updateWhenDraw)
+    {
         // 更新処理
         tTVPRect rc(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
         _this->Update(rc);
@@ -1519,9 +1593,20 @@ LayerExDraw::updateRect(RectF &rect)
  * コンストラクタ
  */
 LayerExDraw::LayerExDraw(DispatchT obj)
-  : layerExBase_GL(obj), width(-1), height(-1), pitch(0), buffer(NULL), bitmap(NULL), context(NULL),metaGraphics(NULL),
-    clipLeft(-1), clipTop(-1), clipWidth(-1), clipHeight(-1),
-    smoothingMode(SmoothingModeAntiAlias), textRenderingHint(TextRenderingHintAntiAlias),
+  : layerExBase_GL(obj),
+    width(-1),
+    height(-1),
+    pitch(0),
+    buffer(NULL),
+    bitmap(NULL),
+    context(NULL),
+    metaGraphics(NULL),
+    clipLeft(-1),
+    clipTop(-1),
+    clipWidth(-1),
+    clipHeight(-1),
+    smoothingMode(SmoothingModeAntiAlias),
+    textRenderingHint(TextRenderingHintAntiAlias),
     updateWhenDraw(true)
 {
     viewTransform.reset();
@@ -1541,41 +1626,31 @@ LayerExDraw::~LayerExDraw()
         delete bitmap;
 }
 
-void
-LayerExDraw::reset()
+void LayerExDraw::reset()
 {
     layerExBase_GL::reset();
-    if (!(context &&
-          width  == _width &&
-          height == _height &&
-          pitch  == _pitch &&
-          buffer == _buffer)) {
-        if(context) delete context;
-        if(bitmap) delete bitmap;
-        width  = _width;
+    if (!(context && width == _width && height == _height && pitch == _pitch && buffer == _buffer))
+    {
+        if (context)
+            delete context;
+        if (bitmap)
+            delete bitmap;
+        width = _width;
         height = _height;
-        pitch  = _pitch;
+        pitch = _pitch;
         buffer = _buffer;
         bitmap = new BLImage;
         bitmap->createFromData(width, height, BL_FORMAT_PRGB32, buffer, pitch);
         context = new BLContext;
         context->setCompOp(BL_COMP_OP_SRC_OVER);
 
-               //cv::Mat rgba(height, width, CV_8UC4, buffer, pitch);
-               //std::string title("orgImg");
-               //cvName = std::to_string(cnt);
-               //title.append(cvName);
-               //cv::imshow(title, rgba);
-               //cnt++;
-
         clipWidth = clipHeight = -1;
     }
-    if (_clipLeft != clipLeft ||
-        _clipTop  != clipTop  ||
-        _clipWidth != clipWidth ||
-        _clipHeight != clipHeight) {
+    if (_clipLeft != clipLeft || _clipTop != clipTop || _clipWidth != clipWidth ||
+        _clipHeight != clipHeight)
+    {
         clipLeft = _clipLeft;
-        clipTop  = _clipTop;
+        clipTop = _clipTop;
         clipWidth = _clipWidth;
         clipHeight = _clipHeight;
         BLRect clipRect(clipLeft, clipTop, clipWidth, clipHeight);
@@ -1583,8 +1658,7 @@ LayerExDraw::reset()
     }
 }
 
-void
-LayerExDraw::updateViewTransform()
+void LayerExDraw::updateViewTransform()
 {
     calcTransform.reset();
     calcTransform.transform(transform);
@@ -1606,36 +1680,31 @@ void LayerExDraw::setViewTransform(const GdipMatrix* trans)
     }
 }
 
-void
-LayerExDraw::resetViewTransform()
+void LayerExDraw::resetViewTransform()
 {
     viewTransform.reset();
     updateViewTransform();
 }
 
-void
-LayerExDraw::rotateViewTransform(tjs_real angle)
+void LayerExDraw::rotateViewTransform(tjs_real angle)
 {
     viewTransform = BLMatrix2D::makeRotation(angle);
     updateViewTransform();
 }
 
-void
-LayerExDraw::scaleViewTransform(tjs_real sx, tjs_real sy)
+void LayerExDraw::scaleViewTransform(tjs_real sx, tjs_real sy)
 {
     viewTransform = BLMatrix2D::makeScaling(sx, sy);
     updateViewTransform();
 }
 
-void
-LayerExDraw::translateViewTransform(tjs_real dx, tjs_real dy)
+void LayerExDraw::translateViewTransform(tjs_real dx, tjs_real dy)
 {
     viewTransform = BLMatrix2D::makeTranslation(dx, dy);
     updateViewTransform();
 }
 
-void
-LayerExDraw::updateTransform()
+void LayerExDraw::updateTransform()
 {
     calcTransform.reset();
     calcTransform.transform(transform);
@@ -1656,29 +1725,25 @@ void LayerExDraw::setTransform(const GdipMatrix* trans)
     }
 }
 
-void
-LayerExDraw::resetTransform()
+void LayerExDraw::resetTransform()
 {
     transform.reset();
     updateTransform();
 }
 
-void
-LayerExDraw::rotateTransform(tjs_real angle)
+void LayerExDraw::rotateTransform(tjs_real angle)
 {
     transform = BLMatrix2D::makeRotation(angle);
     updateTransform();
 }
 
-void
-LayerExDraw::scaleTransform(tjs_real sx, tjs_real sy)
+void LayerExDraw::scaleTransform(tjs_real sx, tjs_real sy)
 {
     transform = BLMatrix2D::makeScaling(sx, sy);
     updateTransform();
 }
 
-void
-LayerExDraw::translateTransform(tjs_real dx, tjs_real dy)
+void LayerExDraw::translateTransform(tjs_real dx, tjs_real dy)
 {
     transform = BLMatrix2D::makeTranslation(dx, dy);
     updateTransform();
@@ -1694,13 +1759,13 @@ void LayerExDraw::clear(tjs_uint32 argb)
     context->setFillStyle(BLRgba32(argb));
     context->fillAll();
     context->end();
-    if (metaGraphics) {
+    if (metaGraphics)
+    {
         createRecord();
         metaGraphics->bgColor = BLRgba32(argb);
     }
     _this->Update();
 }
-
 
 /**
  * パスの描画
@@ -1719,13 +1784,13 @@ static RectF transformRect(const BLMatrix2D& matrix, const RectF& rect)
                           BLPoint(rect.x, rect.y + rect.h),
                           BLPoint(rect.x + rect.w, rect.y + rect.h)};
 
-           // 变换所有点
+    // 变换所有点
     for (int i = 0; i < 4; i++)
     {
         matrix.mapPoint(corners[i]);
     }
 
-           // 计算变换后的边界
+    // 计算变换后的边界
     tjs_real minX = corners[0].x;
     tjs_real maxX = corners[0].x;
     tjs_real minY = corners[0].y;
@@ -1751,15 +1816,13 @@ static RectF transformRect(const BLMatrix2D& matrix, const RectF& rect)
  * @param app 表示表現
  * @param path 描画するパス
  */
-RectF
-LayerExDraw::getPathExtents(const Appearance *app, const BLPath *path)
+RectF LayerExDraw::getPathExtents(const Appearance* app, const BLPath* path)
 {
     // TODO
     return RectF();
 }
 
-void
-LayerExDraw::draw(BLImage *ctx, const BLPen *pen, const BLMatrix2D *matrix, const BLPath *path)
+void LayerExDraw::draw(BLImage* ctx, const BLPen* pen, const BLMatrix2D* matrix, const BLPath* path)
 {
     if (!context || !ctx || !pen)
         return;
@@ -1772,7 +1835,7 @@ LayerExDraw::draw(BLImage *ctx, const BLPen *pen, const BLMatrix2D *matrix, cons
         context->applyTransform(*matrix);
     }
     // 设置描边选项
-    //context->setStrokeOptions(pen->strokeOptions);
+    // context->setStrokeOptions(pen->strokeOptions);
     context->setStrokeWidth(pen->strokeWidth);
     // 设置描边样式
     if (pen->brush) // TODO 不知道有啥用
@@ -1793,12 +1856,14 @@ LayerExDraw::draw(BLImage *ctx, const BLPen *pen, const BLMatrix2D *matrix, cons
         context->strokePath(pen->endCap);
     }
 
-           // 结束
+    // 结束
     context->end();
 }
 
-void
-LayerExDraw::fill(BLImage *ctx, const BLBrush *brush, const BLMatrix2D *matrix, const BLPath *path)
+void LayerExDraw::fill(BLImage* ctx,
+                       const BLBrush* brush,
+                       const BLMatrix2D* matrix,
+                       const BLPath* path)
 {
     if (!context || !ctx || !brush)
         return;
@@ -1836,8 +1901,7 @@ LayerExDraw::fill(BLImage *ctx, const BLBrush *brush, const BLMatrix2D *matrix, 
  * @param path 描画するパス
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::_drawPath(const Appearance *app, const BLPath *path)
+RectF LayerExDraw::_drawPath(const Appearance* app, const BLPath* path)
 {
     RectF bounds;
     if (!context || !app || !path || path->empty())
@@ -1871,10 +1935,6 @@ LayerExDraw::_drawPath(const Appearance *app, const BLPath *path)
             fill(bitmap, brush, &drawMatrix, path);
         }
     }
-    //cv::Mat rgba(height, width, CV_8UC4, buffer, pitch);
-    //std::string title("afterImg");
-    //title.append(cvName);
-    //cv::imshow(title, rgba);
 
     updateRect(bounds);
     return bounds;
@@ -1890,8 +1950,13 @@ LayerExDraw::_drawPath(const Appearance *app, const BLPath *path)
  * @param sweepAngle 描画角度
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawArc(const Appearance *app, tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_real startAngle, tjs_real sweepAngle)
+RectF LayerExDraw::drawArc(const Appearance* app,
+                           tjs_real x,
+                           tjs_real y,
+                           tjs_real width,
+                           tjs_real height,
+                           tjs_real startAngle,
+                           tjs_real sweepAngle)
 {
     BLPath path;
     float rx = width / 2.0f;
@@ -1920,8 +1985,15 @@ LayerExDraw::drawArc(const Appearance *app, tjs_real x, tjs_real y, tjs_real wid
  * @param y4
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawBezier(const Appearance *app, tjs_real x1, tjs_real y1, tjs_real x2, tjs_real y2, tjs_real x3, tjs_real y3, tjs_real x4, tjs_real y4)
+RectF LayerExDraw::drawBezier(const Appearance* app,
+                              tjs_real x1,
+                              tjs_real y1,
+                              tjs_real x2,
+                              tjs_real y2,
+                              tjs_real x3,
+                              tjs_real y3,
+                              tjs_real x4,
+                              tjs_real y4)
 {
     BLPath path;
     path.moveTo(x1, y1);
@@ -1936,8 +2008,7 @@ LayerExDraw::drawBezier(const Appearance *app, tjs_real x1, tjs_real y1, tjs_rea
  * @param points 点の配列
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawBeziers(const Appearance *app, tTJSVariant points)
+RectF LayerExDraw::drawBeziers(const Appearance* app, tTJSVariant points)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
@@ -1965,8 +2036,7 @@ LayerExDraw::drawBeziers(const Appearance *app, tTJSVariant points)
  * @param points 点の配列
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawClosedCurve(const Appearance *app, tTJSVariant points)
+RectF LayerExDraw::drawClosedCurve(const Appearance* app, tTJSVariant points)
 {
     return drawClosedCurve2(app, points, 0.5f);
 }
@@ -1978,8 +2048,7 @@ LayerExDraw::drawClosedCurve(const Appearance *app, tTJSVariant points)
  * @pram tension tension
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawClosedCurve2(const Appearance *app, tTJSVariant points, tjs_real tension)
+RectF LayerExDraw::drawClosedCurve2(const Appearance* app, tTJSVariant points, tjs_real tension)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
@@ -2015,8 +2084,7 @@ LayerExDraw::drawClosedCurve2(const Appearance *app, tTJSVariant points, tjs_rea
  * @param points 点の配列
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawCurve(const Appearance *app, tTJSVariant points)
+RectF LayerExDraw::drawCurve(const Appearance* app, tTJSVariant points)
 {
     return drawCurve3(app, points, 0, -1, 0.5f);
 }
@@ -2028,8 +2096,7 @@ LayerExDraw::drawCurve(const Appearance *app, tTJSVariant points)
  * @parma tension tension
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawCurve2(const Appearance *app, tTJSVariant points, tjs_real tension)
+RectF LayerExDraw::drawCurve2(const Appearance* app, tTJSVariant points, tjs_real tension)
 {
     return drawCurve3(app, points, 0, -1, tension);
 }
@@ -2043,8 +2110,8 @@ LayerExDraw::drawCurve2(const Appearance *app, tTJSVariant points, tjs_real tens
  * @param tension tension
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawCurve3(const Appearance *app, tTJSVariant points, int offset, int numberOfSegments, tjs_real tension)
+RectF LayerExDraw::drawCurve3(
+    const Appearance* app, tTJSVariant points, int offset, int numberOfSegments, tjs_real tension)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
@@ -2087,8 +2154,13 @@ LayerExDraw::drawCurve3(const Appearance *app, tTJSVariant points, int offset, i
  * @param sweepAngle 描画角度
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawPie(const Appearance *app, tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_real startAngle, tjs_real sweepAngle)
+RectF LayerExDraw::drawPie(const Appearance* app,
+                           tjs_real x,
+                           tjs_real y,
+                           tjs_real width,
+                           tjs_real height,
+                           tjs_real startAngle,
+                           tjs_real sweepAngle)
 {
     BLPath path;
     float rx = width / 2.0f;
@@ -2115,8 +2187,8 @@ LayerExDraw::drawPie(const Appearance *app, tjs_real x, tjs_real y, tjs_real wid
  * @param height
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawEllipse(const Appearance *app, tjs_real x, tjs_real y, tjs_real width, tjs_real height)
+RectF LayerExDraw::drawEllipse(
+    const Appearance* app, tjs_real x, tjs_real y, tjs_real width, tjs_real height)
 {
     BLPath path;
     BLEllipse ellipse(x + width / 2, y + height / 2, width / 2, height / 2);
@@ -2134,8 +2206,8 @@ LayerExDraw::drawEllipse(const Appearance *app, tjs_real x, tjs_real y, tjs_real
  * @param y2 終点Y座標
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawLine(const Appearance *app, tjs_real x1, tjs_real y1, tjs_real x2, tjs_real y2)
+RectF LayerExDraw::drawLine(
+    const Appearance* app, tjs_real x1, tjs_real y1, tjs_real x2, tjs_real y2)
 {
     BLPath path;
     path.moveTo(x1, y1);
@@ -2150,8 +2222,7 @@ LayerExDraw::drawLine(const Appearance *app, tjs_real x1, tjs_real y1, tjs_real 
  * @param points 点の配列
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawLines(const Appearance *app, tTJSVariant points)
+RectF LayerExDraw::drawLines(const Appearance* app, tTJSVariant points)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
@@ -2176,8 +2247,7 @@ LayerExDraw::drawLines(const Appearance *app, tTJSVariant points)
  * @param points 点の配列
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawPolygon(const Appearance *app, tTJSVariant points)
+RectF LayerExDraw::drawPolygon(const Appearance* app, tTJSVariant points)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
@@ -2206,8 +2276,8 @@ LayerExDraw::drawPolygon(const Appearance *app, tTJSVariant points)
  * @param height
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawRectangle(const Appearance *app, tjs_real x, tjs_real y, tjs_real width, tjs_real height)
+RectF LayerExDraw::drawRectangle(
+    const Appearance* app, tjs_real x, tjs_real y, tjs_real width, tjs_real height)
 {
     BLPath path;
     path.addRect(BLRect(x, y, width, height));
@@ -2221,8 +2291,7 @@ LayerExDraw::drawRectangle(const Appearance *app, tjs_real x, tjs_real y, tjs_re
  * @param rects 矩形情報の配列
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawRectangles(const Appearance *app, tTJSVariant rects)
+RectF LayerExDraw::drawRectangles(const Appearance* app, tTJSVariant rects)
 {
     std::vector<RectF> rs;
     getRects(rects, rs);
@@ -2245,8 +2314,8 @@ LayerExDraw::drawRectangles(const Appearance *app, tTJSVariant rects)
  * @param text 描画テキスト
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawPathString(const FontInfo *font, const Appearance *app, tjs_real x, tjs_real y, const tjs_char *text)
+RectF LayerExDraw::drawPathString(
+    const FontInfo* font, const Appearance* app, tjs_real x, tjs_real y, const tjs_char* text)
 {
     BLFont blFont = font->getBLFont();
     if (blFont.empty())
@@ -2270,15 +2339,15 @@ LayerExDraw::drawPathString(const FontInfo *font, const Appearance *app, tjs_rea
  * @param text 描画テキスト
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawString(const FontInfo *font, const Appearance *app, tjs_real x, tjs_real y, const tjs_char *text)
+RectF LayerExDraw::drawString(
+    const FontInfo* font, const Appearance* app, tjs_real x, tjs_real y, const tjs_char* text)
 {
     RectF bounds;
     BLFont blFont = font->getBLFont();
     if (blFont.empty())
         return RectF();
 
-           // 开始
+    // 开始
     context->begin(*bitmap);
     // 设置矩阵
     context->setTransform(calcTransform);
@@ -2290,7 +2359,7 @@ LayerExDraw::drawString(const FontInfo *font, const Appearance *app, tjs_real x,
 
         if (metaGraphics)
         {
-          // unsupport
+            // unsupport
         }
 
         if (drawInfo.type == 1)
@@ -2335,8 +2404,7 @@ LayerExDraw::drawString(const FontInfo *font, const Appearance *app, tjs_real x,
  * @param text 描画テキスト
  * @return 描画領域情報
  */
-RectF
-LayerExDraw::measureString(const FontInfo *font, const tjs_char *text)
+RectF LayerExDraw::measureString(const FontInfo* font, const tjs_char* text)
 {
     BLFont blFont = font->getBLFont();
     if (blFont.empty())
@@ -2358,8 +2426,7 @@ LayerExDraw::measureString(const FontInfo *font, const tjs_char *text)
  * @param text 描画テキスト
  * @return 領域情報の辞書 left, top, width, height
  */
-RectF
-LayerExDraw::measureStringInternal(const FontInfo *font, const tjs_char *text)
+RectF LayerExDraw::measureStringInternal(const FontInfo* font, const tjs_char* text)
 {
     return measureString(font, text);
 }
@@ -2371,8 +2438,7 @@ LayerExDraw::measureStringInternal(const FontInfo *font, const tjs_char *text)
  * @param src コピー元画像
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawImage(tjs_real x, tjs_real y, GdipImage *src)
+RectF LayerExDraw::drawImage(tjs_real x, tjs_real y, GdipImage* src)
 {
     return drawImageRect(x, y, src, 0, 0, src->_core.width(), src->_core.height());
 }
@@ -2388,8 +2454,13 @@ LayerExDraw::drawImage(tjs_real x, tjs_real y, GdipImage *src)
  * @param sheight  元矩形の縦幅
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawImageRect(tjs_real dleft, tjs_real dtop, GdipImage *src, tjs_real sleft, tjs_real stop, tjs_real swidth, tjs_real sheight)
+RectF LayerExDraw::drawImageRect(tjs_real dleft,
+                                 tjs_real dtop,
+                                 GdipImage* src,
+                                 tjs_real sleft,
+                                 tjs_real stop,
+                                 tjs_real swidth,
+                                 tjs_real sheight)
 {
     return drawImageAffine(src, sleft, stop, swidth, sheight, true, 1, 0, 0, 1, dleft, dtop);
 }
@@ -2407,10 +2478,18 @@ LayerExDraw::drawImageRect(tjs_real dleft, tjs_real dtop, GdipImage *src, tjs_re
  * @param sheight  元矩形の縦幅
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawImageStretch(tjs_real dleft, tjs_real dtop, tjs_real dwidth, tjs_real dheight, GdipImage *src, tjs_real sleft, tjs_real stop, tjs_real swidth, tjs_real sheight)
+RectF LayerExDraw::drawImageStretch(tjs_real dleft,
+                                    tjs_real dtop,
+                                    tjs_real dwidth,
+                                    tjs_real dheight,
+                                    GdipImage* src,
+                                    tjs_real sleft,
+                                    tjs_real stop,
+                                    tjs_real swidth,
+                                    tjs_real sheight)
 {
-    return drawImageAffine(src, sleft, stop, swidth, sheight, true, dwidth/swidth, 0, 0, dheight/sheight, dleft, dtop);
+    return drawImageAffine(src, sleft, stop, swidth, sheight, true, dwidth / swidth, 0, 0,
+                           dheight / sheight, dleft, dtop);
 }
 
 /**
@@ -2422,8 +2501,18 @@ LayerExDraw::drawImageStretch(tjs_real dleft, tjs_real dtop, tjs_real dwidth, tj
  * @param affine アフィンパラメータの種類(true:変換行列, false:座標指定),
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawImageAffine(GdipImage *src, tjs_real sleft, tjs_real stop, tjs_real swidth, tjs_real sheight, bool affine, tjs_real A, tjs_real B, tjs_real C, tjs_real D, tjs_real E, tjs_real F)
+RectF LayerExDraw::drawImageAffine(GdipImage* src,
+                                   tjs_real sleft,
+                                   tjs_real stop,
+                                   tjs_real swidth,
+                                   tjs_real sheight,
+                                   bool affine,
+                                   tjs_real A,
+                                   tjs_real B,
+                                   tjs_real C,
+                                   tjs_real D,
+                                   tjs_real E,
+                                   tjs_real F)
 {
     RectF bounds;
 
@@ -2455,8 +2544,8 @@ LayerExDraw::drawImageAffine(GdipImage *src, tjs_real sleft, tjs_real stop, tjs_
         context->end();
         if (metaGraphics)
         {
-          // unsupport
-          // 下次换一个位图系统吧，buffer图还是不太行
+            // unsupport
+            // 下次换一个位图系统吧，buffer图还是不太行
         }
     }
     else if (src->type == 1)
@@ -2498,8 +2587,7 @@ LayerExDraw::drawImageAffine(GdipImage *src, tjs_real sleft, tjs_real stop, tjs_
     return bounds;
 }
 
-void
-LayerExDraw::createRecord()
+void LayerExDraw::createRecord()
 {
     destroyRecord();
     if (!metaGraphics)
@@ -2525,40 +2613,44 @@ bool LayerExDraw::redrawRecord()
 /**
  * デストラクタ
  */
-void
-LayerExDraw::destroyRecord()
+void LayerExDraw::destroyRecord()
 {
-    if (metaGraphics) {
+    if (metaGraphics)
+    {
         delete metaGraphics;
         metaGraphics = NULL;
     }
 }
 
-
 /**
  * @param record 描画内容を記録するかどうか
  */
-void
-LayerExDraw::setRecord(bool record)
+void LayerExDraw::setRecord(bool record)
 {
-    if (record) {
-        if (!metaGraphics) {
+    if (record)
+    {
+        if (!metaGraphics)
+        {
             createRecord();
         }
-    } else {
-        if (metaGraphics) {
+    }
+    else
+    {
+        if (metaGraphics)
+        {
             destroyRecord();
         }
     }
 }
 
-bool
-LayerExDraw::redraw(GdipImage *image)
+bool LayerExDraw::redraw(GdipImage* image)
 {
-    if (image) {
+    if (image)
+    {
         RectF bounds = image->GetBounds();
         BLRect ret(bounds.x, bounds.y, bounds.w, bounds.h);
-        if (metaGraphics) {
+        if (metaGraphics)
+        {
             // unsupport
         }
         context->begin(*bitmap);
@@ -2578,14 +2670,14 @@ LayerExDraw::redraw(GdipImage *image)
  * 記録内容を Image として取得
  * @return 成功したら true
  */
-GdipImage *
-LayerExDraw::getRecordImage()
+GdipImage* LayerExDraw::getRecordImage()
 {
     GdipImage* image = NULL;
     if (metaGraphics)
     {
         image = new GdipImage(*metaGraphics);
-        if (image) {
+        if (image)
+        {
             redraw(image);
         }
     }
@@ -2597,11 +2689,11 @@ LayerExDraw::getRecordImage()
  * @param filename 保存ファイル名
  * @return 成功したら true
  */
-bool
-LayerExDraw::saveRecord(const tjs_char *filename)
+bool LayerExDraw::saveRecord(const tjs_char* filename)
 {
     bool ret = false;
-    if (bitmap) {
+    if (bitmap)
+    {
         BLArray<uint8_t> bmpdata;
         BLImageCodec codc;
         ttstr ext = TVPExtractStorageExt(filename);
@@ -2617,27 +2709,26 @@ LayerExDraw::saveRecord(const tjs_char *filename)
             }
         }
         // 再描画処理
-        GdipImage *image = getRecordImage();
-        if (image) {
+        GdipImage* image = getRecordImage();
+        if (image)
+        {
             delete image;
         }
     }
     return ret;
 }
 
-
 /**
  * 記録内容の読み込み
  * @param filename 読み込みファイル名
  * @return 成功したら true
  */
-bool
-LayerExDraw::loadRecord(const tjs_char *filename)
+bool LayerExDraw::loadRecord(const tjs_char* filename)
 {
     bool ret = false;
     // TODO
-    //Image *image;
-    //if (filename && (image = loadImage(filename))) {
+    // Image *image;
+    // if (filename && (image = loadImage(filename))) {
     //	createRecord();
     //	ret =  redraw(image);
     //	delete image;
@@ -2652,10 +2743,12 @@ LayerExDraw::loadRecord(const tjs_char *filename)
  * @param path グリフを書き出すパス
  * @param glyph 描画するグリフ
  */
-void
-LayerExDraw::getGlyphOutline(const FontInfo *fontInfo, PointF &offset, BLPath *path, tjs_uint glyph)
+void LayerExDraw::getGlyphOutline(const FontInfo* fontInfo,
+                                  PointF& offset,
+                                  BLPath* path,
+                                  tjs_uint glyph)
 {
-  // TODO
+    // TODO
 }
 
 /*
@@ -2665,10 +2758,9 @@ LayerExDraw::getGlyphOutline(const FontInfo *fontInfo, PointF &offset, BLPath *p
  * @param path グリフを書き出すパス
  * @param text 描画するテキスト
  */
-void
-LayerExDraw::getTextOutline(const FontInfo *fontInfo, PointF &offset, BLPath *path, ttstr text)
+void LayerExDraw::getTextOutline(const FontInfo* fontInfo, PointF& offset, BLPath* path, ttstr text)
 {
-  //TODO
+    // TODO
 }
 
 /**
@@ -2677,8 +2769,7 @@ LayerExDraw::getTextOutline(const FontInfo *fontInfo, PointF &offset, BLPath *pa
  * @param text 描画テキスト
  * @return 更新領域情報の辞書 left, top, width, height
  */
-RectF
-LayerExDraw::measureString2(const FontInfo *font, const tjs_char *text)
+RectF LayerExDraw::measureString2(const FontInfo* font, const tjs_char* text)
 {
     // TODO
     return RectF();
@@ -2690,8 +2781,7 @@ LayerExDraw::measureString2(const FontInfo *font, const tjs_char *text)
  * @param text 描画テキスト
  * @return 更新領域情報の辞書 left, top, width, height
  */
-RectF
-LayerExDraw::measureStringInternal2(const FontInfo *font, const tjs_char *text)
+RectF LayerExDraw::measureStringInternal2(const FontInfo* font, const tjs_char* text)
 {
     // TODO
     return RectF();
@@ -2706,8 +2796,8 @@ LayerExDraw::measureStringInternal2(const FontInfo *font, const tjs_char *text)
  * @param text 描画テキスト
  * @return 更新領域情報
  */
-RectF
-LayerExDraw::drawPathString2(const FontInfo *font, const Appearance *app, tjs_real x, tjs_real y, const tjs_char *text)
+RectF LayerExDraw::drawPathString2(
+    const FontInfo* font, const Appearance* app, tjs_real x, tjs_real y, const tjs_char* text)
 {
     // TODO
     return RectF();
@@ -2717,8 +2807,8 @@ LayerExDraw::drawPathString2(const FontInfo *font, const Appearance *app, tjs_re
 /**
  * ログ出力用
  */
-//void
-//message_log(const char* format, ...)
+// void
+// message_log(const char* format, ...)
 //{
 //	va_list args;
 //	va_start(args, format);
@@ -2726,13 +2816,13 @@ LayerExDraw::drawPathString2(const FontInfo *font, const Appearance *app, tjs_re
 //	_vsnprintf_s(msg, 1024, _TRUNCATE, format, args);
 //	TVPAddLog(ttstr(msg));
 //	va_end(args);
-//}
+// }
 
 /**
  * エラーログ出力用
  */
-//void
-//error_log(const char* format, ...)
+// void
+// error_log(const char* format, ...)
 //{
 //	va_list args;
 //	va_start(args, format);
@@ -2740,7 +2830,7 @@ LayerExDraw::drawPathString2(const FontInfo *font, const Appearance *app, tjs_re
 //	_vsnprintf_s(msg, 1024, _TRUNCATE, format, args);
 //	TVPAddImportantLog(ttstr(msg));
 //	va_end(args);
-//}
+// }
 
 // ----------------------------------------------------------------
 // 実体型の登録
@@ -2748,28 +2838,29 @@ LayerExDraw::drawPathString2(const FontInfo *font, const Appearance *app, tjs_re
 // ----------------------------------------------------------------
 
 // 両方自前コンバータ
-#define NCB_SET_CONVERTOR_BOTH(type, convertor)\
-NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true);\
+#define NCB_SET_CONVERTOR_BOTH(type, convertor) \
+    NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true); \
     NCB_TYPECONV_DSTMAP_SET(type, convertor<type>, true)
 
 // SRCだけ自前コンバータ
-#define NCB_SET_CONVERTOR_SRC(type, convertor)\
-    NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true);\
+#define NCB_SET_CONVERTOR_SRC(type, convertor) \
+    NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true); \
     NCB_TYPECONV_DSTMAP_SET(type, ncbNativeObjectBoxing::Unboxing, true)
 
 // DSTだけ自前コンバータ
-#define NCB_SET_CONVERTOR_DST(type, convertor)\
-    NCB_TYPECONV_SRCMAP_SET(type, ncbNativeObjectBoxing::Boxing,   true); \
+#define NCB_SET_CONVERTOR_DST(type, convertor) \
+    NCB_TYPECONV_SRCMAP_SET(type, ncbNativeObjectBoxing::Boxing, true); \
     NCB_TYPECONV_DSTMAP_SET(type, convertor<type>, true)
 
-    /**
-     * 配列かどうかの判定
-     * @param var VARIANT
-     * @return 配列なら true
-     */
-    bool IsArray(const tTJSVariant& var)
+/**
+ * 配列かどうかの判定
+ * @param var VARIANT
+ * @return 配列なら true
+ */
+bool IsArray(const tTJSVariant& var)
 {
-    if (var.Type() == tvtObject) {
+    if (var.Type() == tvtObject)
+    {
         iTJSDispatch2* obj = var.AsObjectNoAddRef();
         return obj->IsInstanceOf(0, NULL, NULL, TJS_N("Array"), obj) == TJS_S_TRUE;
     }
@@ -2778,22 +2869,37 @@ NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true);\
 
 // メンバ変数をプロパティとして登録
 #define NCB_MEMBER_PROPERTY(name, type, membername) \
-struct AutoProp_ ## name { \
-        static void ProxySet(Class *inst, type value) { inst->membername = value; } \
-        static type ProxyGet(Class *inst) {      return inst->membername; } }; \
-    NCB_PROPERTY_PROXY(name,AutoProp_ ## name::ProxyGet, AutoProp_ ## name::ProxySet)
+    struct AutoProp_##name \
+    { \
+        static void ProxySet(Class* inst, type value) \
+        { \
+            inst->membername = value; \
+        } \
+        static type ProxyGet(Class* inst) \
+        { \
+            return inst->membername; \
+        } \
+    }; \
+    NCB_PROPERTY_PROXY(name, AutoProp_##name::ProxyGet, AutoProp_##name::ProxySet)
 
 // ポインタ引数型の getter を変換登録
 #define NCB_ARG_PROPERTY_RO(name, type, methodname) \
-    struct AutoProp_ ## name { \
-        static type ProxyGet(Class *inst) { type var; inst->methodname(var); return var; } }; \
-    Property(TJS_N(# name), &AutoProp_ ## name::ProxyGet, (int)0, Proxy)
+    struct AutoProp_##name \
+    { \
+        static type ProxyGet(Class* inst) \
+        { \
+            type var; \
+            inst->methodname(var); \
+            return var; \
+        } \
+    }; \
+    Property(TJS_N(#name), &AutoProp_##name::ProxyGet, (int)0, Proxy)
 
-           // ------------------------------------------------------
-           // 型コンバータ登録
-           // ------------------------------------------------------
+// ------------------------------------------------------
+// 型コンバータ登録
+// ------------------------------------------------------
 
-    NCB_TYPECONV_CAST_INTEGER(Status);
+NCB_TYPECONV_CAST_INTEGER(Status);
 NCB_TYPECONV_CAST_INTEGER(MatrixOrder);
 NCB_TYPECONV_CAST_INTEGER(ImageType);
 NCB_TYPECONV_CAST_INTEGER(RotateFlipType);
@@ -2801,39 +2907,48 @@ NCB_TYPECONV_CAST_INTEGER(SmoothingMode);
 NCB_TYPECONV_CAST_INTEGER(TextRenderingHint);
 
 // ------------------------------------------------------- PointF
-template <class T>
-struct PointFConvertor {
+template<class T>
+struct PointFConvertor
+{
     typedef ncbInstanceAdaptor<T> AdaptorT;
-    template <typename ANYT>
-    void operator ()(ANYT& adst, const tTJSVariant& src) {
-        if (src.Type() == tvtObject) {
+    template<typename ANYT>
+    void operator()(ANYT& adst, const tTJSVariant& src)
+    {
+        if (src.Type() == tvtObject)
+        {
             T* obj = AdaptorT::GetNativeInstance(src.AsObjectNoAddRef());
-            if (obj) {
+            if (obj)
+            {
                 dst = *obj;
             }
-            else {
+            else
+            {
                 ncbPropAccessor info(src);
-                if (IsArray(src)) {
-                    dst = PointF((tjs_real)info.getRealValue(0),
-                                 (tjs_real)info.getRealValue(1));
+                if (IsArray(src))
+                {
+                    dst = PointF((tjs_real)info.getRealValue(0), (tjs_real)info.getRealValue(1));
                 }
-                else {
+                else
+                {
                     dst = PointF((tjs_real)info.getRealValue(TJS_N("x")),
                                  (tjs_real)info.getRealValue(TJS_N("y")));
                 }
             }
         }
-        else {
+        else
+        {
             dst = T();
         }
         adst = ncbTypeConvertor::ToTarget<ANYT>::Get(&dst);
     }
+
 private:
     T dst;
 };
 
 NCB_SET_CONVERTOR_DST(PointF, PointFConvertor);
-NCB_REGISTER_SUBCLASS_DELAY(PointF) {
+NCB_REGISTER_SUBCLASS_DELAY(PointF)
+{
     NCB_CONSTRUCTOR((tjs_real, tjs_real));
     NCB_MEMBER_PROPERTY(x, tjs_real, x);
     NCB_MEMBER_PROPERTY(y, tjs_real, y);
@@ -2849,25 +2964,30 @@ PointF getPoint(const tTJSVariant& var)
 }
 
 // ------------------------------------------------------- RectF
-template <class T>
-struct RectFConvertor {
+template<class T>
+struct RectFConvertor
+{
     typedef ncbInstanceAdaptor<T> AdaptorT;
-    template <typename ANYT>
-    void operator ()(ANYT& adst, const tTJSVariant& src) {
-        if (src.Type() == tvtObject) {
+    template<typename ANYT>
+    void operator()(ANYT& adst, const tTJSVariant& src)
+    {
+        if (src.Type() == tvtObject)
+        {
             T* obj = AdaptorT::GetNativeInstance(src.AsObjectNoAddRef());
-            if (obj) {
+            if (obj)
+            {
                 dst = *obj;
             }
-            else {
+            else
+            {
                 ncbPropAccessor info(src);
-                if (IsArray(src)) {
-                    dst = RectF((tjs_real)info.getRealValue(0),
-                                (tjs_real)info.getRealValue(1),
-                                (tjs_real)info.getRealValue(2),
-                                (tjs_real)info.getRealValue(3));
+                if (IsArray(src))
+                {
+                    dst = RectF((tjs_real)info.getRealValue(0), (tjs_real)info.getRealValue(1),
+                                (tjs_real)info.getRealValue(2), (tjs_real)info.getRealValue(3));
                 }
-                else {
+                else
+                {
                     dst = RectF((tjs_real)info.getRealValue(TJS_N("x")),
                                 (tjs_real)info.getRealValue(TJS_N("y")),
                                 (tjs_real)info.getRealValue(TJS_N("width")),
@@ -2875,11 +2995,13 @@ struct RectFConvertor {
                 }
             }
         }
-        else {
+        else
+        {
             dst = T();
         }
         adst = ncbTypeConvertor::ToTarget<ANYT>::Get(&dst);
     }
+
 private:
     T dst;
 };
@@ -2893,7 +3015,8 @@ static RectF getRect(tTJSVariant& var)
 }
 
 NCB_SET_CONVERTOR_DST(RectF, RectFConvertor);
-NCB_REGISTER_SUBCLASS_DELAY(RectF) {
+NCB_REGISTER_SUBCLASS_DELAY(RectF)
+{
     NCB_CONSTRUCTOR((tjs_real, tjs_real, tjs_real, tjs_real));
     NCB_MEMBER_PROPERTY(x, tjs_real, x);
     NCB_MEMBER_PROPERTY(y, tjs_real, y);
@@ -2922,98 +3045,112 @@ NCB_REGISTER_SUBCLASS_DELAY(RectF) {
 /**
  * GDI+オブジェクトのラッピング用テンプレートクラス
  */
-template <class T>
-class GdipWrapper {
+template<class T>
+class GdipWrapper
+{
     typedef T GdipClassT;
     typedef GdipWrapper<GdipClassT> WrapperT;
+
 protected:
     GdipClassT* obj;
+
 public:
     // デフォルトコンストラクタ
-    GdipWrapper() : obj(NULL) {
-    }
+    GdipWrapper() : obj(NULL) {}
 
-           // 関数の帰り値としてのオブジェクト生成時用。
+    // 関数の帰り値としてのオブジェクト生成時用。
     // そのまま渡されたポインタを使う
-    GdipWrapper(GdipClassT* obj) : obj(obj) {
-    }
+    GdipWrapper(GdipClassT* obj) : obj(obj) {}
 
-           // コピーコンストラクタ
-           // 内蔵オブジェクトは Cloneする
-    GdipWrapper(const GdipWrapper& orig) : obj(NULL) {
-        if (orig.obj) {
+    // コピーコンストラクタ
+    // 内蔵オブジェクトは Cloneする
+    GdipWrapper(const GdipWrapper& orig) : obj(NULL)
+    {
+        if (orig.obj)
+        {
             obj = orig.obj->Clone();
         }
     }
 
-           // デストラクタ
-    ~GdipWrapper() {
-        if (obj) {
+    // デストラクタ
+    ~GdipWrapper()
+    {
+        if (obj)
+        {
             delete obj;
         }
     }
 
     GdipClassT* getGdipObject() { return obj; }
 
-    void setGdipObject(GdipClassT* src) {
-        if (obj) {
+    void setGdipObject(GdipClassT* src)
+    {
+        if (obj)
+        {
             delete obj;
         }
         obj = src;
     }
 
-    struct BridgeFunctor {
-        GdipClassT* operator()(WrapperT* p) const {
-            return p->getGdipObject();
-        }
+    struct BridgeFunctor
+    {
+        GdipClassT* operator()(WrapperT* p) const { return p->getGdipObject(); }
     };
 
-    template <class CastT>
-    struct CastBridgeFunctor {
-        CastT* operator()(WrapperT* p) const {
-            return (CastT*)p->getGdipObject();
-        }
+    template<class CastT>
+    struct CastBridgeFunctor
+    {
+        CastT* operator()(WrapperT* p) const { return (CastT*)p->getGdipObject(); }
     };
-
 };
 
 /**
  * GDI+オブジェクトをラッピングしたクラス用のコンバータ（汎用）
  */
-template <class T>
-struct GdipTypeConvertor {
+template<class T>
+struct GdipTypeConvertor
+{
     typedef typename ncbTypeConvertor::Stripper<T>::Type GdipClassT;
     typedef T* GdipClassP;
     typedef GdipWrapper<GdipClassT> WrapperT;
     typedef ncbInstanceAdaptor<WrapperT> AdaptorT;
+
 protected:
     GdipClassT* result; // 結果の一時保持用
 public:
     GdipTypeConvertor() : result(NULL) {}
     ~GdipTypeConvertor() { delete result; }
 
-    void operator ()(GdipClassP& dst, const tTJSVariant& src) {
+    void operator()(GdipClassP& dst, const tTJSVariant& src)
+    {
         WrapperT* obj;
-        if (src.Type() == tvtObject && (obj = AdaptorT::GetNativeInstance(src.AsObjectNoAddRef()))) {
+        if (src.Type() == tvtObject && (obj = AdaptorT::GetNativeInstance(src.AsObjectNoAddRef())))
+        {
             dst = obj->getGdipObject();
         }
-        else {
+        else
+        {
             dst = NULL;
         }
     }
 
-    void operator ()(tTJSVariant& dst, const GdipClassP& src) {
-        if (src != NULL) {
+    void operator()(tTJSVariant& dst, const GdipClassP& src)
+    {
+        if (src != NULL)
+        {
             iTJSDispatch2* adpobj = AdaptorT::CreateAdaptor(new WrapperT(src));
-            if (adpobj) {
+            if (adpobj)
+            {
                 dst = tTJSVariant(adpobj, adpobj);
                 adpobj->Release();
             }
-            else {
+            else
+            {
                 dst = NULL;
             }
         }
-        else {
+        else
+        {
             dst.Clear();
         }
     }
@@ -3022,78 +3159,115 @@ public:
 // コンバータ登録用登録用マクロ
 
 #define NCB_GDIP_CONVERTOR(type) \
-NCB_SET_CONVERTOR(type*, GdipTypeConvertor<type>);\
+    NCB_SET_CONVERTOR(type*, GdipTypeConvertor<type>); \
     NCB_SET_CONVERTOR(const type*, GdipTypeConvertor<const type>)
 
 #define NCB_GDIP_CONVERTOR2(type, convertor) \
-    NCB_SET_CONVERTOR(type*, convertor<type>);\
+    NCB_SET_CONVERTOR(type*, convertor<type>); \
     NCB_SET_CONVERTOR(const type*, convertor<const type>)
 
 // ラッピング処理用
-#define NCB_REGISTER_GDIP_SUBCLASS(Class) NCB_GDIP_CONVERTOR(Class);NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) { typedef Class GdipClass;
-#define NCB_REGISTER_GDIP_SUBCLASS2(Class, Convertor) NCB_GDIP_CONVERTOR2(Class, Convertor);NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) { typedef Class GdipClass;
-#define NCB_GDIP_METHOD(name)  Method(TJS_N(# name), &GdipClass::name, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
-#define NCB_GDIP_MCAST(ret, method, args) static_cast<ret (GdipClass::*) args>(&GdipClass::method)
-#define NCB_GDIP_METHOD2(name, ret, method, args) Method(TJS_N(# name), NCB_GDIP_MCAST(ret, method, args), Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
-#define NCB_GDIP_PROPERTY(name,get,set)  Property(TJS_N(# name), &GdipClass::get, &GdipClass::set, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_REGISTER_GDIP_SUBCLASS(Class) \
+    NCB_GDIP_CONVERTOR(Class); \
+    NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) \
+    { \
+        typedef Class GdipClass;
+#define NCB_REGISTER_GDIP_SUBCLASS2(Class, Convertor) \
+    NCB_GDIP_CONVERTOR2(Class, Convertor); \
+    NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) \
+    { \
+        typedef Class GdipClass;
+#define NCB_GDIP_METHOD(name) \
+    Method(TJS_N(#name), &GdipClass::name, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_GDIP_MCAST(ret, method, args) static_cast<ret(GdipClass::*) args>(&GdipClass::method)
+#define NCB_GDIP_METHOD2(name, ret, method, args) \
+    Method(TJS_N(#name), NCB_GDIP_MCAST(ret, method, args), \
+           Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_GDIP_PROPERTY(name, get, set) \
+    Property(TJS_N(#name), &GdipClass::get, &GdipClass::set, \
+             Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 // XXX うまくうごかない
-#define NCB_GDIP_PROPERTY_RO(name,get)  Property(TJS_N(# name), &GdipClass::get, (int)0, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+#define NCB_GDIP_PROPERTY_RO(name, get) \
+    Property(TJS_N(#name), &GdipClass::get, (int)0, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 #define NCB_GDIP_MEMBER_PROPERTY(name, type, membername) \
-    struct AutoProp_ ## name { \
-        static void ProxySet(GdipClass *inst, type value) { inst->membername = value; } \
-        static type ProxyGet(GdipClass *inst) {      return inst->membername; } }; \
-    Property(TJS_N(#name), AutoProp_ ## name::ProxyGet, AutoProp_ ## name::ProxySet, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
+    struct AutoProp_##name \
+    { \
+        static void ProxySet(GdipClass* inst, type value) \
+        { \
+            inst->membername = value; \
+        } \
+        static type ProxyGet(GdipClass* inst) \
+        { \
+            return inst->membername; \
+        } \
+    }; \
+    Property(TJS_N(#name), AutoProp_##name::ProxyGet, AutoProp_##name::ProxySet, \
+             Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 
+// ------------------------------------------------------- Matrix
 
-           // ------------------------------------------------------- Matrix
-
-    template <class T>
-    struct MatrixConvertor : public GdipTypeConvertor<T> {
-    void operator ()(T*& dst, const tTJSVariant& src) {
+template<class T>
+struct MatrixConvertor : public GdipTypeConvertor<T>
+{
+    void operator()(T*& dst, const tTJSVariant& src)
+    {
         typename MatrixConvertor::WrapperT* obj;
-        if (src.Type() == tvtObject) {
-            if ((obj = MatrixConvertor::AdaptorT::GetNativeInstance(src.AsObjectNoAddRef()))) {
+        if (src.Type() == tvtObject)
+        {
+            if ((obj = MatrixConvertor::AdaptorT::GetNativeInstance(src.AsObjectNoAddRef())))
+            {
                 dst = obj->getGdipObject();
             }
-            else {
+            else
+            {
                 ncbPropAccessor info(src);
-                if (IsArray(src)) {
-                    this->result = new GdipMatrix(BLMatrix2D((tjs_real)info.getRealValue(0),
-                                                             (tjs_real)info.getRealValue(1),
-                                                             (tjs_real)info.getRealValue(2),
-                                                             (tjs_real)info.getRealValue(3),
-                                                             (tjs_real)info.getRealValue(4),
-                                                             (tjs_real)info.getRealValue(5)));
+                if (IsArray(src))
+                {
+                    this->result = new GdipMatrix(
+                        BLMatrix2D((tjs_real)info.getRealValue(0), (tjs_real)info.getRealValue(1),
+                                   (tjs_real)info.getRealValue(2), (tjs_real)info.getRealValue(3),
+                                   (tjs_real)info.getRealValue(4), (tjs_real)info.getRealValue(5)));
                 }
-                else {
-                    this->result = new GdipMatrix(BLMatrix2D((tjs_real)info.getRealValue(TJS_N("m11")),
-                                                             (tjs_real)info.getRealValue(TJS_N("m12")),
-                                                             (tjs_real)info.getRealValue(TJS_N("m21")),
-                                                             (tjs_real)info.getRealValue(TJS_N("m22")),
-                                                             (tjs_real)info.getRealValue(TJS_N("dx")),
-                                                             (tjs_real)info.getRealValue(TJS_N("dy"))));
+                else
+                {
+                    this->result =
+                        new GdipMatrix(BLMatrix2D((tjs_real)info.getRealValue(TJS_N("m11")),
+                                                  (tjs_real)info.getRealValue(TJS_N("m12")),
+                                                  (tjs_real)info.getRealValue(TJS_N("m21")),
+                                                  (tjs_real)info.getRealValue(TJS_N("m22")),
+                                                  (tjs_real)info.getRealValue(TJS_N("dx")),
+                                                  (tjs_real)info.getRealValue(TJS_N("dy"))));
                 }
                 dst = this->result;
             }
         }
-        else {
+        else
+        {
             dst = NULL;
         }
     }
 };
 
-static tjs_error
-MatrixFactory(GdipWrapper<GdipMatrix>** result, tjs_int numparams, tTJSVariant** params, iTJSDispatch2* objthis)
+static tjs_error MatrixFactory(GdipWrapper<GdipMatrix>** result,
+                               tjs_int numparams,
+                               tTJSVariant** params,
+                               iTJSDispatch2* objthis)
 {
     BLMatrix2D* matrix = NULL;
     RectF* rect = NULL;
     PointF* point = NULL;
-    if (numparams == 0) {
+    if (numparams == 0)
+    {
         matrix = new BLMatrix2D();
     }
     else if (numparams == 2 &&
-             (params[0]->Type() == tvtObject && (rect = ncbInstanceAdaptor<RectF>::GetNativeInstance(params[0]->AsObjectNoAddRef()))) &&
-             (params[1]->Type() == tvtObject && (point = ncbInstanceAdaptor<PointF>::GetNativeInstance(params[0]->AsObjectNoAddRef())))) {
+             (params[0]->Type() == tvtObject &&
+              (rect =
+                   ncbInstanceAdaptor<RectF>::GetNativeInstance(params[0]->AsObjectNoAddRef()))) &&
+             (params[1]->Type() == tvtObject &&
+              (point =
+                   ncbInstanceAdaptor<PointF>::GetNativeInstance(params[0]->AsObjectNoAddRef()))))
+    {
         ncbPropAccessor rectObj(*params[0]);
         ncbPropAccessor pointsObj(*params[1]);
         RectF srcRect = getRect(*params[0]);
@@ -3143,15 +3317,14 @@ MatrixFactory(GdipWrapper<GdipMatrix>** result, tjs_int numparams, tTJSVariant**
             matrix = new BLMatrix2D();
         }
     }
-    else if (numparams == 6) {
-        matrix = new BLMatrix2D((tjs_real)params[0]->AsReal(),
-                                (tjs_real)params[1]->AsReal(),
-                                (tjs_real)params[2]->AsReal(),
-                                (tjs_real)params[3]->AsReal(),
-                                (tjs_real)params[4]->AsReal(),
-                                (tjs_real)params[5]->AsReal());
+    else if (numparams == 6)
+    {
+        matrix = new BLMatrix2D((tjs_real)params[0]->AsReal(), (tjs_real)params[1]->AsReal(),
+                                (tjs_real)params[2]->AsReal(), (tjs_real)params[3]->AsReal(),
+                                (tjs_real)params[4]->AsReal(), (tjs_real)params[5]->AsReal());
     }
-    else {
+    else
+    {
         return TJS_E_INVALIDPARAM;
     }
     *result = new GdipWrapper<GdipMatrix>(new GdipMatrix(BLMatrix2D(*matrix)));
@@ -3175,7 +3348,8 @@ NCB_GDIP_METHOD(RotateAt);
 NCB_GDIP_METHOD(Scale);
 NCB_GDIP_METHOD(Shear);
 NCB_GDIP_METHOD(Translate);
-};
+}
+;
 
 // ------------------------------------------------------- Image
 
@@ -3183,48 +3357,63 @@ NCB_GDIP_METHOD(Translate);
  * イメージ用コンバータ
  * 文字列からも変更可能
  */
-template <class T>
-struct ImageConvertor : public GdipTypeConvertor<T> {
-    void operator ()(T*& dst, const tTJSVariant& src) {
-        if (src.Type() == tvtObject) {
+template<class T>
+struct ImageConvertor : public GdipTypeConvertor<T>
+{
+    void operator()(T*& dst, const tTJSVariant& src)
+    {
+        if (src.Type() == tvtObject)
+        {
             typename ImageConvertor::WrapperT* obj;
-            if ((obj = ImageConvertor::AdaptorT::GetNativeInstance(src.AsObjectNoAddRef()))) {
+            if ((obj = ImageConvertor::AdaptorT::GetNativeInstance(src.AsObjectNoAddRef())))
+            {
                 dst = obj->getGdipObject();
             }
-            else {
-                LayerExDraw* layer = ncbInstanceAdaptor<LayerExDraw>::GetNativeInstance(src.AsObjectNoAddRef());
-                if (layer) {
+            else
+            {
+                LayerExDraw* layer =
+                    ncbInstanceAdaptor<LayerExDraw>::GetNativeInstance(src.AsObjectNoAddRef());
+                if (layer)
+                {
                     dst = *layer;
                 }
-                else {
+                else
+                {
                     dst = NULL;
                 }
             }
         }
-        else if (src.Type() == tvtString) { // 文字列から生成
+        else if (src.Type() == tvtString)
+        { // 文字列から生成
             dst = this->result = new GdipImage(loadImage(src.GetString()));
         }
-        else {
+        else
+        {
             dst = NULL;
         }
     }
 };
 
-
-static tjs_error
-ImageFactory(GdipWrapper<GdipImage>** result, tjs_int numparams, tTJSVariant** params, iTJSDispatch2* objthis)
+static tjs_error ImageFactory(GdipWrapper<GdipImage>** result,
+                              tjs_int numparams,
+                              tTJSVariant** params,
+                              iTJSDispatch2* objthis)
 {
-    if (numparams == 0) {
+    if (numparams == 0)
+    {
         *result = new GdipWrapper<GdipImage>();
         return TJS_S_OK;
     }
-    else if (numparams > 0 && params[0]->Type() == tvtString) {
+    else if (numparams > 0 && params[0]->Type() == tvtString)
+    {
         BLImage image = loadImage(params[0]->GetString());
-        if (!image.empty()) {
+        if (!image.empty())
+        {
             *result = new GdipWrapper<GdipImage>(new GdipImage(image));
             return TJS_S_OK;
         }
-        else {
+        else
+        {
             TVPThrowExceptionMessage(TJS_N("cannot open:%1"), *params[0]);
         }
     }
@@ -3234,10 +3423,12 @@ ImageFactory(GdipWrapper<GdipImage>** result, tjs_int numparams, tTJSVariant** p
 static void ImageLoad(GdipWrapper<GdipImage>* obj, const tjs_char* filename)
 {
     GdipImage* image = new GdipImage(loadImage(filename));
-    if (image) {
+    if (image)
+    {
         obj->setGdipObject(image);
     }
-    else {
+    else
+    {
         TVPThrowExceptionMessage(TJS_N("cannot open:%1"), ttstr(filename));
     }
 }
@@ -3248,13 +3439,16 @@ static tTJSVariant ImageClone(GdipWrapper<GdipImage>* obj)
     typedef ncbInstanceAdaptor<WrapperT> AdaptorT;
     tTJSVariant ret;
     GdipImage* src = obj->getGdipObject()->Clone();
-    if (src) {
+    if (src)
+    {
         iTJSDispatch2* adpobj = AdaptorT::CreateAdaptor(new WrapperT(src));
-        if (adpobj) {
+        if (adpobj)
+        {
             ret = tTJSVariant(adpobj, adpobj);
             adpobj->Release();
         }
-        else {
+        else
+        {
             delete src;
         }
     }
@@ -3268,11 +3462,13 @@ static tTJSVariant ImageBounds(GdipWrapper<GdipImage>* obj)
     RectF src = obj->getGdipObject()->GetBounds();
     RectF* bounds = new RectF(src);
     iTJSDispatch2* adpobj = AdaptorT::CreateAdaptor(bounds);
-    if (adpobj) {
+    if (adpobj)
+    {
         ret = tTJSVariant(adpobj, adpobj);
         adpobj->Release();
     }
-    else {
+    else
+    {
         delete bounds;
     }
     return ret;
@@ -3292,13 +3488,15 @@ NCB_GDIP_METHOD(GetType);
 NCB_GDIP_METHOD(GetVerticalResolution);
 NCB_GDIP_METHOD(GetWidth);
 NCB_GDIP_METHOD(RotateFlip);
-};
+}
+;
 
 // ------------------------------------------------------
 // 自前記述クラス登録
 // ------------------------------------------------------
 
-NCB_REGISTER_SUBCLASS(FontInfo) {
+NCB_REGISTER_SUBCLASS(FontInfo)
+{
     NCB_CONSTRUCTOR((const tjs_char*, tjs_real, tjs_int));
     NCB_PROPERTY(familyName, getFamilyName, setFamilyName);
     NCB_PROPERTY(emSize, getEmSize, setEmSize);
@@ -3311,7 +3509,8 @@ NCB_REGISTER_SUBCLASS(FontInfo) {
     NCB_PROPERTY_RO(lineSpacing, getLineSpacing);
 };
 
-NCB_REGISTER_SUBCLASS(Appearance) {
+NCB_REGISTER_SUBCLASS(Appearance)
+{
     NCB_CONSTRUCTOR(());
     NCB_METHOD(clear);
     NCB_METHOD(addBrush);
@@ -3348,7 +3547,7 @@ NCB_REGISTER_CLASS(GdiPlus)
 {
     // enums
 
-           // Status
+    // Status
     ENUM(Ok);
     ENUM(GenericError);
     ENUM(InvalidParameter);
@@ -3520,11 +3719,11 @@ NCB_REGISTER_CLASS(GdiPlus)
     ENUM(TextRenderingHintAntiAlias);
     ENUM(TextRenderingHintClearTypeGridFit);
 
-           // statics
+    // statics
     NCB_METHOD(addPrivateFont);
     NCB_METHOD(getFontList);
 
-           // classes
+    // classes
     NCB_SUBCLASS_NAME(PointF);
     NCB_SUBCLASS_NAME(RectF);
 
@@ -3536,44 +3735,56 @@ NCB_REGISTER_CLASS(GdiPlus)
     NCB_SUBCLASS(Path, Path);
 }
 
-NCB_GET_INSTANCE_HOOK(LayerExDraw)
+NCB_GET_INSTANCE_HOOK(LayerExDraw){
+    // インスタンスゲッタ
+    NCB_INSTANCE_GETTER(objthis){
+        // objthis を iTJSDispatch2* 型の引数とする
+        ClassT* obj = GetNativeInstance(objthis); // ネイティブインスタンスポインタ取得
+if (!obj)
 {
- // インスタンスゲッタ
- NCB_INSTANCE_GETTER(objthis) { // objthis を iTJSDispatch2* 型の引数とする
-                              ClassT* obj = GetNativeInstance(objthis);	// ネイティブインスタンスポインタ取得
-if (!obj) {
-    obj = new ClassT(objthis);				// ない場合は生成する
-    SetNativeInstance(objthis, obj);		// objthis に obj をネイティブインスタンスとして登録する
+    obj = new ClassT(objthis); // ない場合は生成する
+    SetNativeInstance(objthis, obj); // objthis に obj をネイティブインスタンスとして登録する
 }
 obj->reset();
 return obj;
 }
 // デストラクタ（実際のメソッドが呼ばれた後に呼ばれる）
-~NCB_GET_INSTANCE_HOOK_CLASS() {
+~NCB_GET_INSTANCE_HOOK_CLASS()
+{
 }
-};
+}
+;
 
-#define LAYEREX_METHOD(type,name)  Method(TJS_N(# name), &Type::name, Bridge<LayerExDraw::BridgeFunctor<type>>())
+#define LAYEREX_METHOD(type, name) \
+    Method(TJS_N(#name), &Type::name, Bridge<LayerExDraw::BridgeFunctor<type>>())
 
 /**
  * Image はラッピングする必要があるので rawcallback で対応
  */
-static tjs_error GetRecordImage(tTJSVariant* result, tjs_int numparams,
-               tTJSVariant** param, iTJSDispatch2* objthis)
+static tjs_error GetRecordImage(tTJSVariant* result,
+                                tjs_int numparams,
+                                tTJSVariant** param,
+                                iTJSDispatch2* objthis)
 {
     LayerExDraw* obj = ncbInstanceAdaptor<LayerExDraw>::GetNativeInstance(objthis, true);
-    if (result) result->Clear();
-    if (obj) {
+    if (result)
+        result->Clear();
+    if (obj)
+    {
         GdipImage* image = obj->getRecordImage();
-        if (image) {
+        if (image)
+        {
             typedef GdipWrapper<GdipImage> WrapperT;
             WrapperT* wrap = new WrapperT(image);
             iTJSDispatch2* adpobj = ncbInstanceAdaptor<WrapperT>::CreateAdaptor(wrap);
-            if (adpobj) {
-                if (result) *result = tTJSVariant(adpobj, adpobj);
+            if (adpobj)
+            {
+                if (result)
+                    *result = tTJSVariant(adpobj, adpobj);
                 adpobj->Release();
             }
-            else {
+            else
+            {
                 delete wrap;
                 delete image;
             }
@@ -3583,7 +3794,8 @@ static tjs_error GetRecordImage(tTJSVariant* result, tjs_int numparams,
 }
 
 // フックつきアタッチ
-NCB_ATTACH_CLASS_WITH_HOOK(LayerExDraw, Layer) {
+NCB_ATTACH_CLASS_WITH_HOOK(LayerExDraw, Layer)
+{
     NCB_PROPERTY(updateWhenDraw, getUpdateWhenDraw, setUpdateWhenDraw);
     NCB_PROPERTY(smoothingMode, getSmoothingMode, setSmoothingMode);
     NCB_PROPERTY(textRenderingHint, getTextRenderingHint, setTextRenderingHint);
@@ -3638,4 +3850,3 @@ NCB_ATTACH_CLASS_WITH_HOOK(LayerExDraw, Layer) {
 
 NCB_PRE_REGIST_CALLBACK(initGdiPlus);
 NCB_POST_UNREGIST_CALLBACK(deInitGdiPlus);
-

@@ -144,9 +144,13 @@ NCB_REGISTER_CLASS(Motion)
     NCB_SUBCLASS(SeparateLayerAdaptor, SeparateLayerAdaptor);
 }
 
-static void emoteplayer_init() { }
-    
-static void emoteplayer_done() { }
+static void emoteplayer_init()
+{
+}
+
+static void emoteplayer_done()
+{
+}
 
 NCB_PRE_REGIST_CALLBACK(emoteplayer_init);
 NCB_POST_UNREGIST_CALLBACK(emoteplayer_done);

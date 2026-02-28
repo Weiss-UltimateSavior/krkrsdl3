@@ -7,12 +7,12 @@
 class tTJSNC_Debug : public tTJSNativeClass
 {
 public:
-	tTJSNC_Debug();
+    tTJSNC_Debug();
 
-	static tjs_uint32 ClassID;
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_Debug();

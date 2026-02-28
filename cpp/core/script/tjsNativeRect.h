@@ -3,7 +3,8 @@
 #include "tjsNative.h"
 #include "ComplexRect.h"
 
-class tTJSNI_Rect : public tTJSNativeInstance {
+class tTJSNI_Rect : public tTJSNativeInstance
+{
     typedef tTJSNativeInstance inherited;
 
 protected:
@@ -11,13 +12,12 @@ protected:
 
 public:
     tTJSNI_Rect();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 public:
-    tTVPRect &Get() { return Rect; }
-    const tTVPRect &Get() const { return Rect; }
+    tTVPRect& Get() { return Rect; }
+    const tTVPRect& Get() const { return Rect; }
 
     void SetWidth(tjs_int width) { Rect.set_width(width); }
     tjs_int GetWidth() const { return Rect.get_width(); }
@@ -26,11 +26,10 @@ public:
 
     void SetOffset(tjs_int x, tjs_int y) { Rect.set_offsets(x, y); }
     void AddOffset(tjs_int x, tjs_int y) { Rect.add_offsets(x, y); }
-    void SetSize(tjs_int width, tjs_int height) {
-        Rect.set_size(width, height);
-    }
+    void SetSize(tjs_int width, tjs_int height) { Rect.set_size(width, height); }
     void Clear() { Rect.clear(); }
-    void Set(tjs_int left, tjs_int top, tjs_int right, tjs_int bottom) {
+    void Set(tjs_int left, tjs_int top, tjs_int right, tjs_int bottom)
+    {
         Rect.left = left;
         Rect.top = top;
         Rect.right = right;
@@ -38,37 +37,29 @@ public:
     }
 
     bool IsEmpty() const { return Rect.is_empty(); }
-    bool Clip(const tTJSNI_Rect &r) { return Rect.clip(r.Rect); }
-    bool Union(const tTJSNI_Rect &r) {
-        return TVPUnionRect(&Rect, Rect, r.Rect);
+    bool Clip(const tTJSNI_Rect& r) { return Rect.clip(r.Rect); }
+    bool Union(const tTJSNI_Rect& r) { return TVPUnionRect(&Rect, Rect, r.Rect); }
+    bool Intersects(const tTJSNI_Rect& r) const { return Rect.intersects_with(r.Rect); }
+    bool Included(const tTJSNI_Rect& r) const { return Rect.included_in(r.Rect); }
+    bool Included(tjs_int x, tjs_int y) const
+    {
+        return (x >= Rect.left && x < Rect.right) && (y >= Rect.top && y < Rect.bottom);
     }
-    bool Intersects(const tTJSNI_Rect &r) const {
-        return Rect.intersects_with(r.Rect);
-    }
-    bool Included(const tTJSNI_Rect &r) const {
-        return Rect.included_in(r.Rect);
-    }
-    bool Included(tjs_int x, tjs_int y) const {
-        return (x >= Rect.left && x < Rect.right) &&
-            (y >= Rect.top && y < Rect.bottom);
-    }
-    bool Equal(const tTJSNI_Rect &r) { return Rect == r.Rect; }
+    bool Equal(const tTJSNI_Rect& r) { return Rect == r.Rect; }
 };
 
-extern iTJSDispatch2 *TVPCreateRectObject(tjs_int left, tjs_int top,
-                                          tjs_int right, tjs_int bottom);
-
+extern iTJSDispatch2* TVPCreateRectObject(tjs_int left, tjs_int top, tjs_int right, tjs_int bottom);
 
 class tTJSNC_Rect : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSNC_Rect();
-	static tjs_uint32 ClassID;
+    tTJSNC_Rect();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 
 extern tTJSNativeClass* TVPCreateNativeClass_Rect();

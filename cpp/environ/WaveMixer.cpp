@@ -107,8 +107,7 @@ public:
             return false;
         }
 
-        sdl_audio_device =
-            SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
+        sdl_audio_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
 
         _stream = SDL_CreateAudioStream(&spec, NULL);
         if (!_stream)
@@ -225,9 +224,9 @@ public:
     virtual tjs_uint GetLatencySamples() override { return 0; }
     virtual float GetLatencySeconds() override { return 0; }
 
-    virtual void SetPosition(float x, float y, float z)  override
+    virtual void SetPosition(float x, float y, float z) override
     {
-      // not implemented
+        // not implemented
     }
 };
 

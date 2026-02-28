@@ -12,7 +12,8 @@
 
 #define NCB_MODULE_NAME TJS_N("extrans.dll")
 
-void InitPlugin_extrans() {
+void InitPlugin_extrans()
+{
     RegisterWaveTransHandlerProvider();
     RegisterMosaicTransHandlerProvider();
     RegisterTurnTransHandlerProvider();
@@ -20,7 +21,8 @@ void InitPlugin_extrans() {
     RegisterRippleTransHandlerProvider();
 }
 
-void DonePlugin_extrans() {
+void DonePlugin_extrans()
+{
     UnregisterWaveTransHandlerProvider();
     UnregisterMosaicTransHandlerProvider();
     UnregisterTurnTransHandlerProvider();

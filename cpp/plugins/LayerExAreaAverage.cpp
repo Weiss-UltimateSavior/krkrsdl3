@@ -18,9 +18,9 @@ typedef tjs_int fixdot;
 struct layerExAreaAverage
 {
     static tjs_error stretchCopyAA(tTJSVariant* result,
-                                                   tjs_int numparams,
-                                                   tTJSVariant** param,
-                                                   iTJSDispatch2* objthis)
+                                   tjs_int numparams,
+                                   tTJSVariant** param,
+                                   iTJSDispatch2* objthis)
     {
         if (numparams < 9)
             return TJS_E_BADPARAMCOUNT;

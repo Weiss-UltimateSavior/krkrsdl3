@@ -77,8 +77,8 @@ tTJSVariant ResourceManager::load(tTJSString path)
     file->setSeed(_decryptkey);
     file->setFun(_decryptClo);
     file->load(trimPath);
-    
-    //motionKey是唯一可区分的表示符，我们用其作为标志
+
+    // motionKey是唯一可区分的表示符，我们用其作为标志
     cacheData.insert(std::pair<ttstr, emotefile*>(TVPGetPlacedPath(trimPath), file));
     return file->root();
 }
@@ -92,7 +92,7 @@ void ResourceManager::unload(tTJSString path)
     auto it = cacheData.find(TVPGetPlacedPath(trimPath));
     if (it != cacheData.end())
     {
-        if(it->second != nullptr)
+        if (it->second != nullptr)
             delete it->second;
         cacheData.erase(it);
     }
@@ -190,7 +190,7 @@ void SeparateLayerAdaptor::checkDrawArea(tjs_int width, tjs_int height)
         glGenFramebuffers(1, &fbo);
     if (superfbo == 0 || glIsFramebuffer(superfbo) != GL_TRUE)
         glGenFramebuffers(1, &superfbo);
-    
+
     // 基础fbo
     if (_width != width || _height != height)
     {
@@ -338,7 +338,7 @@ void EmotePlayer::unserialize(tTJSVariant data)
 }
 void EmotePlayer::play(tTJSString name, int flag)
 {
-    //SDL_Log("play-->%s", name.AsStdString().c_str());
+    // SDL_Log("play-->%s", name.AsStdString().c_str());
     if (_currentfile != nullptr) // motionKey的启动模式
     {
         // motion
@@ -432,7 +432,7 @@ void EmotePlayer::clear(iTJSDispatch2* layer, tjs_uint32 neutralColor)
     else
     {
         if (layer->NativeInstanceSupport(TJS_NIS_GETINSTANCE, tTJSNC_Layer::ClassID,
-                                           (iTJSNativeInstance**)&ths) < 0)
+                                         (iTJSNativeInstance**)&ths) < 0)
             return;
         withoutAdaptor = true;
     }
@@ -441,20 +441,20 @@ void EmotePlayer::clear(iTJSDispatch2* layer, tjs_uint32 neutralColor)
 
     if (withoutAdaptor)
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    else
-        if (self && self->fbo)
-            glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
+    else if (self && self->fbo)
+        glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 void EmotePlayer::progress(tjs_real mstime)
 {
-    //SDL_Log("progress-->%f %f", mstime, clockPassed);
+    // SDL_Log("progress-->%f %f", mstime, clockPassed);
     if (_isStop)
         return;
     if (_currentfile != nullptr && _currmotion != nullptr && clockPassed > -1.0 &&
         _limitArea.width != _limitArea.originX && _limitArea.height != _limitArea.originY)
     {
-        if(_playing) clockPassed += mstime / speedRatio;
+        if (_playing)
+            clockPassed += mstime / speedRatio;
         std::vector<emoteRender> empty;
         empty.push_back(_renderMethod);
         // mirror
@@ -468,9 +468,9 @@ void EmotePlayer::progress(tjs_real mstime)
             // 更新控制参数
             _currentfile->updateEyeControl(clockPassed, true);
             _currentfile->updateTimelineControl(clockPassed, true);
-            //物理玩不明白，就不开起来污染眼睛了
+            // 物理玩不明白，就不开起来污染眼睛了
             //_currentfile->updatePhysics(clockPassed);
-            // 将子对象画到自己身上
+            //  将子对象画到自己身上
             _currmotion->progress(0, empty, _limitArea);
         }
         else
@@ -483,7 +483,8 @@ void EmotePlayer::progress(tjs_real mstime)
                 _allplaying = false;
             }
             // 对于motion限制最后时间并结束
-            if (_currentfile->isMotion && _currmotion->loopTime < 0 && clockPassed > _currmotion->syncTime)
+            if (_currentfile->isMotion && _currmotion->loopTime < 0 &&
+                clockPassed > _currmotion->syncTime)
             {
                 clockPassed = _currmotion->syncTime;
                 _animating = false;
@@ -537,34 +538,34 @@ void EmotePlayer::draw(iTJSDispatch2* objthis)
             // read
             glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, m_bmpData);
             tjs_uint8* buff = (tjs_uint8*)ths->GetMainImagePixelBufferForWrite();
-            //for (size_t i = 0; i < _width * _height; i++)
+            // for (size_t i = 0; i < _width * _height; i++)
             //{
-            //    if (m_bmpData[4 * i] == 0x00 && m_bmpData[4 * i + 1] == 0x00 &&
-            //        m_bmpData[4 * i + 2] == 0x00 && m_bmpData[4 * i + 3] != 0xFF)
-            //    {
-            //        memset(buff + 4 * i, 0, 4);
-            //    }
-            //    else if (m_bmpData[4 * i + 3] > 0x00)
-            //    {
-            //        memcpy(buff + 4 * i, m_bmpData + 4 * i, 3);
-            //        buff[4 * i + 3] = 0xFF;
-            //    }
-            //    else
-            //    {
-            //        memcpy(buff + 4 * i, m_bmpData + 4 * i, 4);
-            //    }
-            //    
-            //}
+            //     if (m_bmpData[4 * i] == 0x00 && m_bmpData[4 * i + 1] == 0x00 &&
+            //         m_bmpData[4 * i + 2] == 0x00 && m_bmpData[4 * i + 3] != 0xFF)
+            //     {
+            //         memset(buff + 4 * i, 0, 4);
+            //     }
+            //     else if (m_bmpData[4 * i + 3] > 0x00)
+            //     {
+            //         memcpy(buff + 4 * i, m_bmpData + 4 * i, 3);
+            //         buff[4 * i + 3] = 0xFF;
+            //     }
+            //     else
+            //     {
+            //         memcpy(buff + 4 * i, m_bmpData + 4 * i, 4);
+            //     }
+            //
+            // }
             memcpy(buff, m_bmpData, _width * _height * 4);
             ths->Update();
 
-            //cv::Mat rgba(_height, _width, CV_8UC4, buff);
-            //char buffs[100];
-            //sprintf(buffs, "%p", this);
-            //std::string name = buffs;
-            //cv::Mat bgra;
-            //cv::cvtColor(rgba, bgra, cv::COLOR_RGBA2BGRA);
-            //cv::imshow(name, bgra);
+            // cv::Mat rgba(_height, _width, CV_8UC4, buff);
+            // char buffs[100];
+            // sprintf(buffs, "%p", this);
+            // std::string name = buffs;
+            // cv::Mat bgra;
+            // cv::cvtColor(rgba, bgra, cv::COLOR_RGBA2BGRA);
+            // cv::imshow(name, bgra);
         }
     }
 }
@@ -625,8 +626,7 @@ tjs_real EmotePlayer::getVariable(tTJSString name)
     }
     return 0.0;
 }
-void EmotePlayer::setOuterForce(
-    tTJSString name, tjs_real ofx, tjs_real ofy)
+void EmotePlayer::setOuterForce(tTJSString name, tjs_real ofx, tjs_real ofy)
 {
     SDL_Log("EmotePlayer::setOuterForce TODO");
 }
@@ -635,10 +635,8 @@ void EmotePlayer::setDrawAffineTranslateMatrix(
 {
     if (_currentfile != nullptr)
     {
-        _affineTrans = glm::mat4(a, -c, 0.0f, 0.0f,
-                                -b, d, 0.0f, 0.0f,
-                                0.0f, 0.0f, 1.0f, 0.0f,
-                                tx, ty, 0.0f, 1.0f);
+        _affineTrans = glm::mat4(a, -c, 0.0f, 0.0f, -b, d, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, tx,
+                                 ty, 0.0f, 1.0f);
         updateTransMat();
     }
 }
@@ -778,8 +776,10 @@ tTJSVariant EmotePlayer::getDiffTimelineLabelList()
     array->Release();
     return result;
 }
-void EmotePlayer::setTimelineBlendRatio(
-    tTJSString name, tjs_real ratio, tjs_real time, tjs_real easing)
+void EmotePlayer::setTimelineBlendRatio(tTJSString name,
+                                        tjs_real ratio,
+                                        tjs_real time,
+                                        tjs_real easing)
 {
     SDL_Log("EmotePlayer::setTimelineBlendRatio TODO");
 }
@@ -838,7 +838,8 @@ tTJSVariant EmotePlayer::getVariableFrameList(tTJSString name)
         for (tjs_uint32 i = 0; i < _currentfile->_metadata->_varList.size(); i++)
         {
             tTJSVariant varItem;
-            if (TJS_FAILED(root->PropGetByNum(TJS_MEMBERMUSTEXIST, i, &varItem, root))) break;
+            if (TJS_FAILED(root->PropGetByNum(TJS_MEMBERMUSTEXIST, i, &varItem, root)))
+                break;
             iTJSDispatch2* rev = varItem.AsObjectThisNoAddRef();
             tTJSVariant labelname;
             if (TJS_FAILED(rev->PropGet(0, TJS_N("label"), NULL, &labelname, rev)))
@@ -849,7 +850,7 @@ tTJSVariant EmotePlayer::getVariableFrameList(tTJSString name)
                 continue;
             break;
         }
-        
+
         root->Release();
         return retNeed;
     }
@@ -874,10 +875,9 @@ void EmotePlayer::setOpenGLDrawArea(tjs_int width, tjs_int height)
     GLuint newfbotexture = createEmptyTexture(width, height);
     GLuint newfbodepthtexture = createEmptyDepthTexture(width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, newfbotexture,
-                            0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                            newfbodepthtexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, newfbotexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, newfbodepthtexture,
+                           0);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
         SDL_Log("Framebuffer不完整!");
@@ -886,10 +886,10 @@ void EmotePlayer::setOpenGLDrawArea(tjs_int width, tjs_int height)
     GLuint newsuperfbotexture = createEmptyTexture(width, height);
     GLuint newsuperfbodepthtexture = createEmptyDepthTexture(width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, superfbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                            newsuperfbotexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, newsuperfbotexture,
+                           0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                            newsuperfbodepthtexture, 0);
+                           newsuperfbodepthtexture, 0);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
         SDL_Log("Framebuffer不完整!");

@@ -61,9 +61,7 @@ bool PSBHeader::parsePSBHeader(TJS::tTJSBinaryStream* stream)
     return true;
 }
 
-bool parsePSBArray(std::vector<tjs_uint32>* target,
-                          tjs_int8 n,
-                          TJS::tTJSBinaryStream* stream)
+bool parsePSBArray(std::vector<tjs_uint32>* target, tjs_int8 n, TJS::tTJSBinaryStream* stream)
 {
     if (n < 0 || n > 8)
     {
@@ -90,4 +88,4 @@ bool parsePSBArray(std::vector<tjs_uint32>* target,
     }
     return true;
 }
-}
+} // namespace PSB

@@ -2,7 +2,8 @@
 
 #include "WaveIntf.h"
 
-class OpusWaveDecoderCreator : public tTVPWaveDecoderCreator {
+class OpusWaveDecoderCreator : public tTVPWaveDecoderCreator
+{
 public:
-    tTVPWaveDecoder *Create(const ttstr &storagename, const ttstr &extension);
+    tTVPWaveDecoder* Create(const ttstr& storagename, const ttstr& extension);
 };

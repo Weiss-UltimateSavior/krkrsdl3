@@ -24,12 +24,13 @@ public:
      * @param cycle 周期指定(msec)
      * @param time 現在時刻
      */
-    void copyRaster(tTJSVariant layer, int maxh, int lines, int cycle, tjs_int64 time) {
+    void copyRaster(tTJSVariant layer, int maxh, int lines, int cycle, tjs_int64 time)
+    {
         // レイヤ画像情報
         tjs_int width, height, pitch;
         unsigned char* buffer;
         {
-            iTJSDispatch2 *layerobj = layer.AsObjectNoAddRef();
+            iTJSDispatch2* layerobj = layer.AsObjectNoAddRef();
             tTJSVariant var;
             layerobj->PropGet(0, TJS_N("imageWidth"), NULL, &var, layerobj);
             width = (tjs_int)var;
@@ -41,36 +42,43 @@ public:
             pitch = (tjs_int)var;
         }
 
-        if (_width != width || _height != height) {
+        if (_width != width || _height != height)
+        {
             return;
         }
 
-               // 角速度計算
+        // 角速度計算
         double omega = 2 * M_PI / lines;
 
-        //double tt = sin((3.14159265358979/2.0) * time / cycle);
-        //tjs_int CurH = (tjs_int)(tt * maxh);
+        // double tt = sin((3.14159265358979/2.0) * time / cycle);
+        // tjs_int CurH = (tjs_int)(tt * maxh);
         tjs_int CurH = (tjs_int)maxh;
 
         // 初期パラメータを計算
-        double rad = - omega * time / cycle * (height/2);
+        double rad = -omega * time / cycle * (height / 2);
 
         // ラインごとに処理
         tjs_int n;
-        for (n = 0; n < height; n++, rad += omega) {
+        for (n = 0; n < height; n++, rad += omega)
+        {
             tjs_int d = (tjs_int)(sin(rad) * CurH);
-            if (d >= 0) {
+            if (d >= 0)
+            {
                 int w = width - d;
-                const tjs_uint32 *src = (const tjs_uint32*)(buffer + n * pitch);
-                tjs_uint32 *dest = (tjs_uint32 *)(_buffer + n * _pitch) + d;
-                for (tjs_int i=0;i<w;i++) {
+                const tjs_uint32* src = (const tjs_uint32*)(buffer + n * pitch);
+                tjs_uint32* dest = (tjs_uint32*)(_buffer + n * _pitch) + d;
+                for (tjs_int i = 0; i < w; i++)
+                {
                     *dest++ = *src++;
                 }
-            } else {
+            }
+            else
+            {
                 int w = width + d;
-                const tjs_uint32 *src = (const tjs_uint32*)(buffer + n * pitch) - d;
-                tjs_uint32 *dest = (tjs_uint32 *)(_buffer + n * _pitch);
-                for (tjs_int i=0;i<w;i++) {
+                const tjs_uint32* src = (const tjs_uint32*)(buffer + n * pitch) - d;
+                tjs_uint32* dest = (tjs_uint32*)(_buffer + n * _pitch);
+                for (tjs_int i = 0; i < w; i++)
+                {
                     *dest++ = *src++;
                 }
             }
@@ -82,25 +90,28 @@ public:
 
 // ----------------------------------- クラスの登録
 
-NCB_GET_INSTANCE_HOOK(layerExRaster)
+NCB_GET_INSTANCE_HOOK(layerExRaster){
+    // インスタンスゲッタ
+    NCB_INSTANCE_GETTER(objthis){
+        // objthis を iTJSDispatch2* 型の引数とする
+        ClassT* obj = GetNativeInstance(objthis); // ネイティブインスタンスポインタ取得
+if (!obj)
 {
- // インスタンスゲッタ
- NCB_INSTANCE_GETTER(objthis) { // objthis を iTJSDispatch2* 型の引数とする
-                              ClassT* obj = GetNativeInstance(objthis);	// ネイティブインスタンスポインタ取得
-if (!obj) {
-    obj = new ClassT(objthis);				// ない場合は生成する
-    SetNativeInstance(objthis, obj);		// objthis に obj をネイティブインスタンスとして登録する
+    obj = new ClassT(objthis); // ない場合は生成する
+    SetNativeInstance(objthis, obj); // objthis に obj をネイティブインスタンスとして登録する
 }
 obj->reset();
 return obj;
 }
 // デストラクタ（実際のメソッドが呼ばれた後に呼ばれる）
-~NCB_GET_INSTANCE_HOOK_CLASS () {
+~NCB_GET_INSTANCE_HOOK_CLASS()
+{
 }
-};
-
+}
+;
 
 // フックつきアタッチ
-NCB_ATTACH_CLASS_WITH_HOOK(layerExRaster, Layer) {
+NCB_ATTACH_CLASS_WITH_HOOK(layerExRaster, Layer)
+{
     NCB_METHOD(copyRaster);
 }

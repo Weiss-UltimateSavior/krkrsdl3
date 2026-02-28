@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TVP2 ( T Visual Presenter 2 )  A script authoring tool
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TVP2 ( T Visual Presenter 2 )  A script authoring tool
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // Phase Vocoder Filter
@@ -15,74 +15,70 @@
 #include "WaveLoopManager.h"
 #include "WaveIntf.h"
 
-
 class tRisaPhaseVocoderDSP;
-
 
 //---------------------------------------------------------------------------
 // tTJSNI_PhaseVocoder
 //---------------------------------------------------------------------------
-class tTJSNI_PhaseVocoder :
-	public tTJSNativeInstance, public iTVPBasicWaveFilter, public tTVPSampleAndLabelSource
+class tTJSNI_PhaseVocoder : public tTJSNativeInstance,
+                            public iTVPBasicWaveFilter,
+                            public tTVPSampleAndLabelSource
 {
-	typedef tTJSNativeInstance inherited;
+    typedef tTJSNativeInstance inherited;
 
 public:
-	tTJSNI_PhaseVocoder();
-	~tTJSNI_PhaseVocoder();
-	tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-			iTJSDispatch2 *tjs_obj);
-	void Invalidate();
+    tTJSNI_PhaseVocoder();
+    ~tTJSNI_PhaseVocoder();
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
+    void Invalidate();
 
 private:
-	int Window; // window size
-	int Overlap; // overlap scale
-	float Pitch; // pitch scale
-	float Time; // time scale
+    int Window;  // window size
+    int Overlap; // overlap scale
+    float Pitch; // pitch scale
+    float Time;  // time scale
 
 public:
-	int GetWindow() const { return Window; }
-	void SetWindow(int window);
-	int GetOverlap() const { return Overlap; }
-	void SetOverlap(int overlap);
-	float GetPitch() const { return Pitch; }
-	void SetPitch(float pitch) { Pitch = pitch; }
-	float GetTime() const { return Time; }
-	void SetTime(float time) { Time = time; }
-
-
-private:
-	tTVPSampleAndLabelSource * Recreate(tTVPSampleAndLabelSource * source);
-		 // from iTVPBasicWaveFilter
-	void Clear(void); // from iTVPBasicWaveFilter
-	void Reset(void); // from iTVPBasicWaveFilter
-	void Update(void); // from iTVPBasicWaveFilter
+    int GetWindow() const { return Window; }
+    void SetWindow(int window);
+    int GetOverlap() const { return Overlap; }
+    void SetOverlap(int overlap);
+    float GetPitch() const { return Pitch; }
+    void SetPitch(float pitch) { Pitch = pitch; }
+    float GetTime() const { return Time; }
+    void SetTime(float time) { Time = time; }
 
 private:
-	tTVPSampleAndLabelSource * Source; // source filter
+    tTVPSampleAndLabelSource* Recreate(tTVPSampleAndLabelSource* source);
+    // from iTVPBasicWaveFilter
+    void Clear(void);  // from iTVPBasicWaveFilter
+    void Reset(void);  // from iTVPBasicWaveFilter
+    void Update(void); // from iTVPBasicWaveFilter
 
-	tRisaPhaseVocoderDSP * PhaseVocoder; // Phase Vocoder DSP instance
-	char * FormatConvertBuffer; // buffer for converting PCM formats internally
-	size_t FormatConvertBufferSize;
+private:
+    tTVPSampleAndLabelSource* Source; // source filter
 
-	tTVPWaveFormat InputFormat;
-	tTVPWaveFormat OutputFormat;
+    tRisaPhaseVocoderDSP* PhaseVocoder; // Phase Vocoder DSP instance
+    char* FormatConvertBuffer;          // buffer for converting PCM formats internally
+    size_t FormatConvertBufferSize;
 
-	tTVPWaveSegmentQueue InputSegments;
-	tTVPWaveSegmentQueue OutputSegments;
+    tTVPWaveFormat InputFormat;
+    tTVPWaveFormat OutputFormat;
 
-	void Fill(float * dest, tjs_uint samples, tjs_uint &written,
-		tTVPWaveSegmentQueue & segments);
+    tTVPWaveSegmentQueue InputSegments;
+    tTVPWaveSegmentQueue OutputSegments;
 
-	void Decode(void *dest, tjs_uint samples, tjs_uint &written,
-		tTVPWaveSegmentQueue & segments); // from tTVPSampleAndLabelSource
+    void Fill(float* dest, tjs_uint samples, tjs_uint& written, tTVPWaveSegmentQueue& segments);
 
-	const tTVPWaveFormat & GetFormat() const { return OutputFormat; }
-			// from tTVPSampleAndLabelSource
+    void Decode(void* dest,
+                tjs_uint samples,
+                tjs_uint& written,
+                tTVPWaveSegmentQueue& segments); // from tTVPSampleAndLabelSource
+
+    const tTVPWaveFormat& GetFormat() const { return OutputFormat; }
+    // from tTVPSampleAndLabelSource
 };
 //---------------------------------------------------------------------------
-
-
 
 //---------------------------------------------------------------------------
 // tTJSNC_PhaseVocoder
@@ -90,14 +86,13 @@ private:
 class tTJSNC_PhaseVocoder : public tTJSNativeClass
 {
 public:
-	tTJSNC_PhaseVocoder();
+    tTJSNC_PhaseVocoder();
 
-	static tjs_uint32 ClassID;
+    static tjs_uint32 ClassID;
 
 private:
-	iTJSNativeInstance *CreateNativeInstance();
+    iTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 
 #endif
-

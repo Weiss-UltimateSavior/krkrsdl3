@@ -200,7 +200,7 @@ public:
      */
     IReader() { isError = false; }
 
-    virtual ~IReader() {};
+    virtual ~IReader(){};
 
     /**
      * エラー処理
@@ -738,7 +738,7 @@ public:
                 break;
         }
     }
-    virtual ~IWriter() {};
+    virtual ~IWriter(){};
     virtual void write(const tjs_char* str) = 0;
     virtual void write(tjs_char ch) = 0;
     virtual void write(tTVReal) = 0;
@@ -777,7 +777,7 @@ public:
     /**
      * コンストラクタ
      */
-    IStringWriter(int newlinetype = 0) : IWriter(newlinetype) {};
+    IStringWriter(int newlinetype = 0) : IWriter(newlinetype){};
 
     virtual void write(const tjs_char* str) { buf += str; }
 
@@ -951,10 +951,10 @@ static void addMethod(iTJSDispatch2* dispatch, const tjs_char* methodName, tTJSD
     tTJSVariant var = tTJSVariant(method);
     method->Release();
     dispatch->PropSet(TJS_MEMBERENSURE, // メンバがなかった場合には作成するようにするフラグ
-                      methodName,       // メンバ名 ( かならず TJS_N( ) で囲む )
-                      NULL,             // ヒント ( 本来はメンバ名のハッシュ値だが、NULL でもよい )
-                      &var,             // 登録する値
-                      dispatch          // コンテキスト
+                      methodName, // メンバ名 ( かならず TJS_N( ) で囲む )
+                      NULL, // ヒント ( 本来はメンバ名のハッシュ値だが、NULL でもよい )
+                      &var,    // 登録する値
+                      dispatch // コンテキスト
     );
 }
 
@@ -1007,12 +1007,12 @@ class tEvalJSON : public tTJSDispatch
 protected:
 public:
     tjs_error FuncCall(tjs_uint32 flag,
-                                       const tjs_char* membername,
-                                       tjs_uint32* hint,
-                                       tTJSVariant* result,
-                                       tjs_int numparams,
-                                       tTJSVariant** param,
-                                       iTJSDispatch2* objthis)
+                       const tjs_char* membername,
+                       tjs_uint32* hint,
+                       tTJSVariant* result,
+                       tjs_int numparams,
+                       tTJSVariant** param,
+                       iTJSDispatch2* objthis)
     {
 
         if (membername)
@@ -1035,12 +1035,12 @@ class tEvalJSONStorage : public tTJSDispatch
 protected:
 public:
     tjs_error FuncCall(tjs_uint32 flag,
-                                       const tjs_char* membername,
-                                       tjs_uint32* hint,
-                                       tTJSVariant* result,
-                                       tjs_int numparams,
-                                       tTJSVariant** param,
-                                       iTJSDispatch2* objthis)
+                       const tjs_char* membername,
+                       tjs_uint32* hint,
+                       tTJSVariant* result,
+                       tjs_int numparams,
+                       tTJSVariant** param,
+                       iTJSDispatch2* objthis)
     {
 
         if (membername)
@@ -1126,14 +1126,14 @@ protected:
 
 public:
     DictMemberDispCaller(IWriter* writer) : writer(writer) { first = true; };
-    virtual tjs_error FuncCall( // function invocation
-        tjs_uint32 flag,                        // calling flag
-        const tjs_char* membername,             // member name ( NULL for a default member )
-        tjs_uint32* hint,                       // hint for the member name (in/out)
-        tTJSVariant* result,                    // result
-        tjs_int numparams,                      // number of parameters
-        tTJSVariant** param,                    // parameters
-        iTJSDispatch2* objthis                  // object as "this"
+    virtual tjs_error FuncCall(     // function invocation
+        tjs_uint32 flag,            // calling flag
+        const tjs_char* membername, // member name ( NULL for a default member )
+        tjs_uint32* hint,           // hint for the member name (in/out)
+        tTJSVariant* result,        // result
+        tjs_int numparams,          // number of parameters
+        tTJSVariant** param,        // parameters
+        iTJSDispatch2* objthis      // object as "this"
     )
     {
         if (numparams > 1)
@@ -1267,12 +1267,12 @@ class tSaveJSON : public tTJSDispatch
 protected:
 public:
     tjs_error FuncCall(tjs_uint32 flag,
-                                       const tjs_char* membername,
-                                       tjs_uint32* hint,
-                                       tTJSVariant* result,
-                                       tjs_int numparams,
-                                       tTJSVariant** param,
-                                       iTJSDispatch2* objthis)
+                       const tjs_char* membername,
+                       tjs_uint32* hint,
+                       tTJSVariant* result,
+                       tjs_int numparams,
+                       tTJSVariant** param,
+                       iTJSDispatch2* objthis)
     {
         if (numparams < 2)
             return TJS_E_BADPARAMCOUNT;
@@ -1291,12 +1291,12 @@ class tToJSONString : public tTJSDispatch
 protected:
 public:
     tjs_error FuncCall(tjs_uint32 flag,
-                                       const tjs_char* membername,
-                                       tjs_uint32* hint,
-                                       tTJSVariant* result,
-                                       tjs_int numparams,
-                                       tTJSVariant** param,
-                                       iTJSDispatch2* objthis)
+                       const tjs_char* membername,
+                       tjs_uint32* hint,
+                       tTJSVariant* result,
+                       tjs_int numparams,
+                       tTJSVariant** param,
+                       iTJSDispatch2* objthis)
     {
         if (numparams < 1)
             return TJS_E_BADPARAMCOUNT;

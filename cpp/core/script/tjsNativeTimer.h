@@ -6,21 +6,21 @@
 //---------------------------------------------------------------------------
 // tTJSNI_BaseTimer
 //---------------------------------------------------------------------------
-class tTJSNI_BaseTimer : public tTJSNativeInstance {
+class tTJSNI_BaseTimer : public tTJSNativeInstance
+{
     typedef tTJSNativeInstance inherited;
 
 protected:
-    iTJSDispatch2 *Owner;
+    iTJSDispatch2* Owner;
     tTJSVariantClosure ActionOwner; // object to send action
-    tjs_uint16 Counter; // serial number for event tag
-    tjs_int Capacity; // max queue size for this timer object
+    tjs_uint16 Counter;             // serial number for event tag
+    tjs_int Capacity;               // max queue size for this timer object
     ttstr ActionName;
     tTVPAsyncTriggerMode Mode; // trigger mode
 
 public:
     tTJSNI_BaseTimer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 protected:
@@ -30,7 +30,7 @@ protected:
 
 public:
     tTJSVariantClosure GetActionOwnerNoAddRef() const { return ActionOwner; }
-    ttstr &GetActionName() { return ActionName; }
+    ttstr& GetActionName() { return ActionName; }
 
     tjs_int GetCapacity() const { return Capacity; }
     void SetCapacity(tjs_int c) { Capacity = c; }
@@ -44,7 +44,8 @@ public:
 // tTJSNI_Timer : Timer Native Instance
 //---------------------------------------------------------------------------
 class tTVPTimerThread;
-class tTJSNI_Timer : public tTJSNI_BaseTimer {
+class tTJSNI_Timer : public tTJSNI_BaseTimer
+{
     typedef tTJSNI_BaseTimer inherited;
     friend class tTVPTimerThread;
 
@@ -55,8 +56,7 @@ class tTJSNI_Timer : public tTJSNI_BaseTimer {
 
 public:
     tTJSNI_Timer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
     void InternalSetInterval(tjs_uint64 n) { Interval = n; }
@@ -88,24 +88,24 @@ private:
 //---------------------------------------------------------------------------
 class tTJSNC_Timer : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSNC_Timer();
-	static tjs_uint32 ClassID;
+    tTJSNC_Timer();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
-	/*
-		implement this in each platform.
-		this must return a proper instance of tTJSNI_Timer.
-	*/
+    tTJSNativeInstance* CreateNativeInstance();
+    /*
+            implement this in each platform.
+            this must return a proper instance of tTJSNI_Timer.
+    */
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_Timer();
 /*
-	implement this in each platform.
-	this must return a proper instance of tTJSNI_Timer.
-	usually simple returns: new tTJSNC_Timer();
+        implement this in each platform.
+        this must return a proper instance of tTJSNI_Timer.
+        usually simple returns: new tTJSNC_Timer();
 */
 //---------------------------------------------------------------------------

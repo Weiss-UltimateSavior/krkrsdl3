@@ -12,22 +12,29 @@
 #include "TVPScript.h"
 #include "TickCount.h"
 
-static const tjs_char * const LAYER_BLEND_MODES[] = {
-    TJS_N("opaque"), TJS_N("alpha"), TJS_N("add"), TJS_N("sub"), TJS_N("mul"),
-    TJS_N("dodge"), TJS_N("darken"), TJS_N("lighten"), TJS_N("screen"), TJS_N("addalpha"),
-    TJS_N("psnormal"), TJS_N("psadd"), TJS_N("pssub"), TJS_N("psmul"), TJS_N("psscreen"), TJS_N("psoverlay"),
-    TJS_N("pshlight"), TJS_N("psslight"), TJS_N("psdodge"), TJS_N("psdodge5"), TJS_N("psburn"), TJS_N("pslighten"),
-    TJS_N("psdarken"), TJS_N("psdiff"), TJS_N("psdiff5"), TJS_N("psexcl"), TJS_N("opaque"), NULL
-};
-bool TVPAcceptSaveAsTLG(void* formatdata, const ttstr & type, class iTJSDispatch2** dic )
+static const tjs_char* const LAYER_BLEND_MODES[] = {
+    TJS_N("opaque"),   TJS_N("alpha"),     TJS_N("add"),      TJS_N("sub"),
+    TJS_N("mul"),      TJS_N("dodge"),     TJS_N("darken"),   TJS_N("lighten"),
+    TJS_N("screen"),   TJS_N("addalpha"),  TJS_N("psnormal"), TJS_N("psadd"),
+    TJS_N("pssub"),    TJS_N("psmul"),     TJS_N("psscreen"), TJS_N("psoverlay"),
+    TJS_N("pshlight"), TJS_N("psslight"),  TJS_N("psdodge"),  TJS_N("psdodge5"),
+    TJS_N("psburn"),   TJS_N("pslighten"), TJS_N("psdarken"), TJS_N("psdiff"),
+    TJS_N("psdiff5"),  TJS_N("psexcl"),    TJS_N("opaque"),   NULL};
+bool TVPAcceptSaveAsTLG(void* formatdata, const ttstr& type, class iTJSDispatch2** dic)
 {
     bool result = false;
-    if( type.StartsWith(TJS_N("tlg")) ) result = true;
-    else if( type == TJS_N(".tlg") ) result = true;
-    else if( type == TJS_N(".tlg5") ) result = true;
-    else if( type == TJS_N(".tlg6") ) result = true;
-    if( result && dic ) {
-        // mode : select text : opaque, alpha, add, sub, mul, dodge, darken, lighten, screen, addalpha
+    if (type.StartsWith(TJS_N("tlg")))
+        result = true;
+    else if (type == TJS_N(".tlg"))
+        result = true;
+    else if (type == TJS_N(".tlg5"))
+        result = true;
+    else if (type == TJS_N(".tlg6"))
+        result = true;
+    if (result && dic)
+    {
+        // mode : select text : opaque, alpha, add, sub, mul, dodge, darken, lighten, screen,
+        // addalpha
         //        psnormal, psadd, pssub, psmul, psscreen, psoverlay, pshlight, psslight, psdodge
         //        psdodge5, psburn, pslighten, psdarken, psdiff, psdiff5, psexcl, opaque
         // offs_x : integer
@@ -35,19 +42,25 @@ bool TVPAcceptSaveAsTLG(void* formatdata, const ttstr & type, class iTJSDispatch
         // offs_unit : select text : pixel
         tTJSVariant result;
         TVPExecuteExpression(
-            TJS_N("(const)%[")
-            TJS_N("\"mode\"=>(const)%[\"type\"=>\"select text\",\"items\"=>")
-            TJS_N("(const)[\"opaque\", \"alpha\", \"add\", \"sub\", \"mul\", \"dodge\", \"darken\", \"lighten\", \"screen\", \"addalpha\",")
-            TJS_N("\"psnormal\", \"psadd\", \"pssub\", \"psmul\", \"psscreen\", \"psoverlay\", \"pshlight\", \"psslight\", \"psdodge\",")
-            TJS_N("\"psdodge5\", \"psburn\", \"pslighten\", \"psdarken\", \"psdiff\", \"psdiff5\", \"psexcl\", \"opaque\"],")
-            TJS_N("\"desc\"=>\"blending mode\",\"default\"=>\"alpha\"],")
+            TJS_N("(const)%[") TJS_N("\"mode\"=>(const)%[\"type\"=>\"select text\",\"items\"=>")
+                TJS_N("(const)[\"opaque\", \"alpha\", \"add\", \"sub\", \"mul\", \"dodge\", "
+                      "\"darken\", \"lighten\", \"screen\", \"addalpha\",")
+                    TJS_N("\"psnormal\", \"psadd\", \"pssub\", \"psmul\", \"psscreen\", "
+                          "\"psoverlay\", \"pshlight\", \"psslight\", \"psdodge\",")
+                        TJS_N("\"psdodge5\", \"psburn\", \"pslighten\", \"psdarken\", \"psdiff\", "
+                              "\"psdiff5\", \"psexcl\", \"opaque\"],")
+                            TJS_N("\"desc\"=>\"blending mode\",\"default\"=>\"alpha\"],")
 
-            TJS_N("\"offs_x\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>\"offset x\",\"default\"=>0],")
-            TJS_N("\"offs_y\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>\"offset y\",\"default\"=>0],")
-            TJS_N("\"offs_unit\"=>(const)%[\"type\"=>\"select text\",\"items\"=>(const)[\"pixel\"],\"desc\"=>\"offset unit\",\"default\"=>\"pixel\"]")
-            TJS_N("]"),
-            NULL, &result );
-        if( result.Type() == tvtObject ) {
+                                TJS_N("\"offs_x\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>"
+                                      "\"offset x\",\"default\"=>0],")
+                                    TJS_N("\"offs_y\"=>(const)%[\"type\"=>\"integer\",\"desc\"=>"
+                                          "\"offset y\",\"default\"=>0],")
+                                        TJS_N("\"offs_unit\"=>(const)%[\"type\"=>\"select "
+                                              "text\",\"items\"=>(const)[\"pixel\"],\"desc\"=>"
+                                              "\"offset unit\",\"default\"=>\"pixel\"]") TJS_N("]"),
+            NULL, &result);
+        if (result.Type() == tvtObject)
+        {
             *dic = result.AsObject();
         }
     }
@@ -59,28 +72,69 @@ bool TVPAcceptSaveAsTLG(void* formatdata, const ttstr & type, class iTJSDispatch
 
 // golomb bit length table is compressed, so we need to
 // decompress it.
-static char TVPTLG6GolombBitLengthTable[TVP_TLG6_GOLOMB_N_COUNT*2*128][TVP_TLG6_GOLOMB_N_COUNT];
+static char TVPTLG6GolombBitLengthTable[TVP_TLG6_GOLOMB_N_COUNT * 2 * 128][TVP_TLG6_GOLOMB_N_COUNT];
 static bool TVPTLG6GolombTableInit = false;
 static short int TVPTLG6GolombCompressed[TVP_TLG6_GOLOMB_N_COUNT][9] = {
-    {3,7,15,27,63,108,223,448,130,},
-    {3,5,13,24,51,95,192,384,257,},
-    {2,5,12,21,39,86,155,320,384,},
-    {2,3,9,18,33,61,129,258,511,},
+    {
+        3,
+        7,
+        15,
+        27,
+        63,
+        108,
+        223,
+        448,
+        130,
+    },
+    {
+        3,
+        5,
+        13,
+        24,
+        51,
+        95,
+        192,
+        384,
+        257,
+    },
+    {
+        2,
+        5,
+        12,
+        21,
+        39,
+        86,
+        155,
+        320,
+        384,
+    },
+    {
+        2,
+        3,
+        9,
+        18,
+        33,
+        61,
+        129,
+        258,
+        511,
+    },
     // Tuned by W.Dee, 2004/03/25
 };
 
 void TVPTLG6InitGolombTable()
 {
-    if(TVPTLG6GolombTableInit) return;
-    for(int n = 0; n < TVP_TLG6_GOLOMB_N_COUNT; n++)
+    if (TVPTLG6GolombTableInit)
+        return;
+    for (int n = 0; n < TVP_TLG6_GOLOMB_N_COUNT; n++)
     {
         int a = 0;
-        for(int i = 0; i < 9; i++)
+        for (int i = 0; i < 9; i++)
         {
-            for(int j = 0; j < TVPTLG6GolombCompressed[n][i]; j++)
+            for (int j = 0; j < TVPTLG6GolombCompressed[n][i]; j++)
                 TVPTLG6GolombBitLengthTable[a++][n] = (char)i;
         }
-        assert(a == TVP_TLG6_GOLOMB_N_COUNT*2*128);
+        assert(a == TVP_TLG6_GOLOMB_N_COUNT * 2 * 128);
         // THIS MUST NOT BE EXECUETED!
         // (this is for compressed table data check)
     }
@@ -89,18 +143,17 @@ void TVPTLG6InitGolombTable()
 
 // TLG6.0 bitstream output implementation
 
-
 class TLG6BitStream
 {
-    int BufferBitPos; // bit position of output buffer
-    long BufferBytePos; // byte position of output buffer
-    tTJSBinaryStream * OutStream; // output stream
-    unsigned char *Buffer; // output buffer
-    long BufferCapacity; // output buffer capacity
+    int BufferBitPos;            // bit position of output buffer
+    long BufferBytePos;          // byte position of output buffer
+    tTJSBinaryStream* OutStream; // output stream
+    unsigned char* Buffer;       // output buffer
+    long BufferCapacity;         // output buffer capacity
 
 public:
-    TLG6BitStream(tTJSBinaryStream * outstream) :
-        OutStream(outstream),
+    TLG6BitStream(tTJSBinaryStream* outstream)
+      : OutStream(outstream),
         BufferBitPos(0),
         BufferBytePos(0),
         Buffer(NULL),
@@ -108,10 +161,7 @@ public:
     {
     }
 
-    ~TLG6BitStream()
-    {
-        Flush();
-    }
+    ~TLG6BitStream() { Flush(); }
 
 public:
     int GetBitPos() const { return BufferBitPos; }
@@ -119,9 +169,10 @@ public:
 
     void Flush()
     {
-        if(Buffer && (BufferBitPos || BufferBytePos))
+        if (Buffer && (BufferBitPos || BufferBytePos))
         {
-            if(BufferBitPos) BufferBytePos ++;
+            if (BufferBitPos)
+                BufferBytePos++;
             OutStream->Write(Buffer, BufferBytePos);
             BufferBytePos = 0;
             BufferBitPos = 0;
@@ -135,25 +186,27 @@ public:
 
     void Put1Bit(bool b)
     {
-        if(BufferBytePos == BufferCapacity)
+        if (BufferBytePos == BufferCapacity)
         {
             // need more bytes
             long org_cap = BufferCapacity;
             BufferCapacity += 0x1000;
-            if(Buffer)
-                Buffer = (unsigned char *)realloc(Buffer, BufferCapacity);
+            if (Buffer)
+                Buffer = (unsigned char*)realloc(Buffer, BufferCapacity);
             else
-                Buffer = (unsigned char *)malloc(BufferCapacity);
-            if(!Buffer) TVPThrowExceptionMessage( TVPTlgInsufficientMemory );
+                Buffer = (unsigned char*)malloc(BufferCapacity);
+            if (!Buffer)
+                TVPThrowExceptionMessage(TVPTlgInsufficientMemory);
             memset(Buffer + org_cap, 0, BufferCapacity - org_cap);
         }
 
-        if(b) Buffer[BufferBytePos] |= 1 << BufferBitPos;
-        BufferBitPos ++;
-        if(BufferBitPos == 8)
+        if (b)
+            Buffer[BufferBytePos] |= 1 << BufferBitPos;
+        BufferBitPos++;
+        if (BufferBitPos == 8)
         {
             BufferBitPos = 0;
-            BufferBytePos ++;
+            BufferBytePos++;
         }
     }
 
@@ -164,16 +217,16 @@ public:
         int t = v;
         t >>= 1;
         int cnt = 0;
-        while(t)
+        while (t)
         {
             Put1Bit(0);
             t >>= 1;
-            cnt ++;
+            cnt++;
         }
         Put1Bit(1);
-        while(cnt--)
+        while (cnt--)
         {
-            Put1Bit(v&1);
+            Put1Bit(v & 1);
             v >>= 1;
         }
     }
@@ -190,12 +243,12 @@ public:
         // and so on.
         // v must be larger than 0.
 
-        v --;
-        while(v)
+        v--;
+        while (v)
         {
             v >>= 1;
             Put1Bit(0);
-            Put1Bit(v&1);
+            Put1Bit(v & 1);
         }
         Put1Bit(1);
     }
@@ -204,7 +257,7 @@ public:
     {
         int needbits = 1;
         v >>= 1;
-        while(v)
+        while (v)
         {
             needbits += 2;
             v >>= 1;
@@ -215,15 +268,24 @@ public:
     static int GetGammaBitLength(int v)
     {
         // Get bit length where v is to be encoded as a gamma code.
-        if(v<=1) return 1;    //                   1
-        if(v<=3) return 3;    //                 x10
-        if(v<=7) return 5;    //               xx100
-        if(v<=15) return 7;   //             xxx1000
-        if(v<=31) return 9;   //          x xxx10000
-        if(v<=63) return 11;  //        xxx xx100000
-        if(v<=127) return 13; //      xxxxx x1000000
-        if(v<=255) return 15; //    xxxxxxx 10000000
-        if(v<=511) return 17; //   xxxxxxx1 00000000
+        if (v <= 1)
+            return 1; //                   1
+        if (v <= 3)
+            return 3; //                 x10
+        if (v <= 7)
+            return 5; //               xx100
+        if (v <= 15)
+            return 7; //             xxx1000
+        if (v <= 31)
+            return 9; //          x xxx10000
+        if (v <= 63)
+            return 11; //        xxx xx100000
+        if (v <= 127)
+            return 13; //      xxxxx x1000000
+        if (v <= 255)
+            return 15; //    xxxxxxx 10000000
+        if (v <= 511)
+            return 17; //   xxxxxxx1 00000000
         return GetGammaBitLengthGeneric(v);
     }
 
@@ -231,10 +293,11 @@ public:
     {
         // Put signed value into the bit pool, as length of "len".
         // v must not be zero. abs(v) must be less than 257.
-        if(v > 0) v--;
-        while(len --)
+        if (v > 0)
+            v--;
+        while (len--)
         {
-            Put1Bit(v&1);
+            Put1Bit(v & 1);
             v >>= 1;
         }
     }
@@ -243,30 +306,40 @@ public:
     {
         // Get bit (minimum) length where v is to be encoded as a non-zero signed value.
         // v must not be zero. abs(v) must be less than 257.
-        if(v == 0) return 0;
-        if(v < 0) v = -v;
-        if(v <= 1) return 1;
-        if(v <= 2) return 2;
-        if(v <= 4) return 3;
-        if(v <= 8) return 4;
-        if(v <= 16) return 5;
-        if(v <= 32) return 6;
-        if(v <= 64) return 7;
-        if(v <= 128) return 8;
-        if(v <= 256) return 9;
+        if (v == 0)
+            return 0;
+        if (v < 0)
+            v = -v;
+        if (v <= 1)
+            return 1;
+        if (v <= 2)
+            return 2;
+        if (v <= 4)
+            return 3;
+        if (v <= 8)
+            return 4;
+        if (v <= 16)
+            return 5;
+        if (v <= 32)
+            return 6;
+        if (v <= 64)
+            return 7;
+        if (v <= 128)
+            return 8;
+        if (v <= 256)
+            return 9;
         return 10;
     }
 
     void PutValue(long v, int len)
     {
         // put value "v" as length of "len"
-        while(len --)
+        while (len--)
         {
-            Put1Bit(v&1);
+            Put1Bit(v & 1);
             v >>= 1;
         }
     }
-
 };
 #define MAX_COLOR_COMPONENTS 4
 
@@ -276,11 +349,10 @@ public:
 #define H_BLOCK_SIZE 8
 
 //------------------------------ FOR DEBUG
-//#define FILTER_TEST
-//#define WRITE_ENTROPY_VALUES
-//#define WRITE_VSTXT
+// #define FILTER_TEST
+// #define WRITE_ENTROPY_VALUES
+// #define WRITE_VSTXT
 //------------------------------
-
 
 /*
         shift-jis
@@ -502,77 +574,84 @@ public:
 
 //---------------------------------------------------------------------------
 #ifdef WRITE_VSTXT
-FILE *vstxt = fopen("vs.txt", "wt");
+FILE* vstxt = fopen("vs.txt", "wt");
 #endif
 #define GOLOMB_GIVE_UP_BYTES 4
-void CompressValuesGolomb(TLG6BitStream &bs, char *buf, int size)
+void CompressValuesGolomb(TLG6BitStream& bs, char* buf, int size)
 {
     // golomb encoding, -- http://oku.edu.mie-u.ac.jp/~okumura/compression/golomb/
 
-           // run-length golomb method
-    bs.PutValue(buf[0]?1:0, 1); // initial value state
+    // run-length golomb method
+    bs.PutValue(buf[0] ? 1 : 0, 1); // initial value state
 
     int count;
 
     int n = TVP_TLG6_GOLOMB_N_COUNT - 1; // 個数のカウンタ
-    int a = 0; // 予測誤差の絶対値の和
+    int a = 0;                           // 予測誤差の絶対値の和
 
     count = 0;
-    for(int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++)
     {
-        if(buf[i])
+        if (buf[i])
         {
             // write zero count
-            if(count) bs.PutGamma(count);
+            if (count)
+                bs.PutGamma(count);
 
-                   // count non-zero values
+            // count non-zero values
             count = 0;
             int ii;
-            for(ii = i; ii < size; ii++)
+            for (ii = i; ii < size; ii++)
             {
-                if(buf[ii]) count++; else break;
+                if (buf[ii])
+                    count++;
+                else
+                    break;
             }
 
-                   // write non-zero count
+            // write non-zero count
             bs.PutGamma(count);
 
-                   // write non-zero values
-            for(; i < ii; i++)
+            // write non-zero values
+            for (; i < ii; i++)
             {
                 int e = buf[i];
 #ifdef WRITE_VSTXT
                 fprintf(vstxt, "%d ", e);
 #endif
                 int k = TVPTLG6GolombBitLengthTable[a][n];
-                int m = ((e >= 0) ? 2*e : -2*e-1) - 1;
+                int m = ((e >= 0) ? 2 * e : -2 * e - 1) - 1;
                 int store_limit = bs.GetBytePos() + GOLOMB_GIVE_UP_BYTES;
                 bool put1 = true;
-                for(int c = (m >> k); c > 0; c--)
+                for (int c = (m >> k); c > 0; c--)
                 {
-                    if(store_limit == bs.GetBytePos())
+                    if (store_limit == bs.GetBytePos())
                     {
                         bs.PutValue(m >> k, 8);
 #ifdef WRITE_VSTXT
-                        fprintf(vstxt, "[ %d ] ", m>>k);
+                        fprintf(vstxt, "[ %d ] ", m >> k);
 #endif
                         put1 = false;
                         break;
                     }
                     bs.Put1Bit(0);
                 }
-                if(store_limit == bs.GetBytePos())
+                if (store_limit == bs.GetBytePos())
                 {
                     bs.PutValue(m >> k, 8);
 #ifdef WRITE_VSTXT
-                    fprintf(vstxt, "[ %d ] ", m>>k);
+                    fprintf(vstxt, "[ %d ] ", m >> k);
 #endif
                     put1 = false;
                 }
-                if(put1) bs.Put1Bit(1);
+                if (put1)
+                    bs.Put1Bit(1);
                 bs.PutValue(m, k);
-                a += (m>>1);
-                if (--n < 0) {
-                    a >>= 1; n = TVP_TLG6_GOLOMB_N_COUNT - 1;
+                a += (m >> 1);
+                if (--n < 0)
+                {
+                    a >>= 1;
+                    n = TVP_TLG6_GOLOMB_N_COUNT - 1;
                 }
             }
 
@@ -586,35 +665,30 @@ void CompressValuesGolomb(TLG6BitStream &bs, char *buf, int size)
         else
         {
             // zero
-            count ++;
+            count++;
         }
     }
 
-    if(count) bs.PutGamma(count);
+    if (count)
+        bs.PutGamma(count);
 }
 //---------------------------------------------------------------------------
 class TryCompressGolomb
 {
     int TotalBits; // total bit count
-    int Count; // running count
+    int Count;     // running count
     int N;
     int A;
     bool LastNonZero;
 
 public:
-    TryCompressGolomb()
-    {
-        Reset();
-    }
+    TryCompressGolomb() { Reset(); }
 
-    TryCompressGolomb(const TryCompressGolomb &ref)
-    {
-        Copy(ref);
-    }
+    TryCompressGolomb(const TryCompressGolomb& ref) { Copy(ref); }
 
     ~TryCompressGolomb() { ; }
 
-    void Copy(const TryCompressGolomb &ref)
+    void Copy(const TryCompressGolomb& ref)
     {
         TotalBits = ref.TotalBits;
         Count = ref.Count;
@@ -632,42 +706,44 @@ public:
         LastNonZero = false;
     }
 
-    int Try(char *buf, int size)
+    int Try(char* buf, int size)
     {
-        for(int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
-            if(buf[i])
+            if (buf[i])
             {
                 // write zero count
-                if(!LastNonZero)
+                if (!LastNonZero)
                 {
-                    if(Count)
-                        TotalBits +=
-                            TLG6BitStream::GetGammaBitLength(Count);
+                    if (Count)
+                        TotalBits += TLG6BitStream::GetGammaBitLength(Count);
 
-                           // count non-zero values
+                    // count non-zero values
                     Count = 0;
                 }
 
-                       // write non-zero values
-                for(; i < size; i++)
+                // write non-zero values
+                for (; i < size; i++)
                 {
                     int e = buf[i];
-                    if(!e) break;
-                    Count ++;
+                    if (!e)
+                        break;
+                    Count++;
                     int k = TVPTLG6GolombBitLengthTable[A][N];
-                    int m = ((e >= 0) ? 2*e : -2*e-1) - 1;
-                    int unexp_bits = (m>>k);
-                    if(unexp_bits >= (GOLOMB_GIVE_UP_BYTES*8-8/2))
-                        unexp_bits = (GOLOMB_GIVE_UP_BYTES*8-8/2)+8;
+                    int m = ((e >= 0) ? 2 * e : -2 * e - 1) - 1;
+                    int unexp_bits = (m >> k);
+                    if (unexp_bits >= (GOLOMB_GIVE_UP_BYTES * 8 - 8 / 2))
+                        unexp_bits = (GOLOMB_GIVE_UP_BYTES * 8 - 8 / 2) + 8;
                     TotalBits += unexp_bits + 1 + k;
-                    A += (m>>1);
-                    if (--N < 0) {
-                        A >>= 1; N = TVP_TLG6_GOLOMB_N_COUNT - 1;
+                    A += (m >> 1);
+                    if (--N < 0)
+                    {
+                        A >>= 1;
+                        N = TVP_TLG6_GOLOMB_N_COUNT - 1;
                     }
                 }
 
-                       // write non-zero count
+                // write non-zero count
 
                 i--;
                 LastNonZero = true;
@@ -675,16 +751,16 @@ public:
             else
             {
                 // zero
-                if(LastNonZero)
+                if (LastNonZero)
                 {
-                    if(Count)
+                    if (Count)
                     {
                         TotalBits += TLG6BitStream::GetGammaBitLength(Count);
                         Count = 0;
                     }
                 }
 
-                Count ++;
+                Count++;
                 LastNonZero = false;
             }
         }
@@ -693,7 +769,7 @@ public:
 
     int Flush()
     {
-        if(Count)
+        if (Count)
         {
             TotalBits += TLG6BitStream::GetGammaBitLength(Count);
             Count = 0;
@@ -703,278 +779,248 @@ public:
 };
 //---------------------------------------------------------------------------
 #define DO_FILTER \
-len -= 4; \
-    for(d = 0; d < len; d+=4) \
-{ FILTER_FUNC(0); FILTER_FUNC(1); FILTER_FUNC(2); FILTER_FUNC(3); } \
+    len -= 4; \
+    for (d = 0; d < len; d += 4) \
+    { \
+        FILTER_FUNC(0); \
+        FILTER_FUNC(1); \
+        FILTER_FUNC(2); \
+        FILTER_FUNC(3); \
+    } \
     len += 4; \
-    for(; d < len; d++) \
-{ FILTER_FUNC(0); }
+    for (; d < len; d++) \
+    { \
+        FILTER_FUNC(0); \
+    }
 
-void ApplyColorFilter(char * bufb, char * bufg, char * bufr, int len, int code)
+void ApplyColorFilter(char* bufb, char* bufg, char* bufr, int len, int code)
 {
     int d;
     unsigned char t;
-    switch(code)
+    switch (code)
     {
         case 0:
             break;
         case 1:
-#define FILTER_FUNC(n) \
-            bufr[d+n] -= bufg[d+n], \
-                                        bufb[d+n] -= bufg[d+n];
+#define FILTER_FUNC(n) bufr[d + n] -= bufg[d + n], bufb[d + n] -= bufg[d + n];
             DO_FILTER
-                break;
+            break;
         case 2:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufg[d],
-                    bufg[d] -= bufb[d];
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufg[d], bufg[d] -= bufb[d];
             break;
         case 3:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufg[d],
-                    bufg[d] -= bufr[d];
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufg[d], bufg[d] -= bufr[d];
             break;
         case 4:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufg[d],
-                    bufg[d] -= bufb[d],
-                    bufb[d] -= bufr[d];
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufg[d], bufg[d] -= bufb[d], bufb[d] -= bufr[d];
             break;
         case 5:
-            for( d = 0; d < len; d++)
-                bufg[d] -= bufb[d],
-                    bufb[d] -= bufr[d];
+            for (d = 0; d < len; d++)
+                bufg[d] -= bufb[d], bufb[d] -= bufr[d];
             break;
         case 6:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufb[d+n] -= bufg[d+n];
+#define FILTER_FUNC(n) bufb[d + n] -= bufg[d + n];
             DO_FILTER
-                break;
+            break;
         case 7:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufg[d+n] -= bufb[d+n];
+#define FILTER_FUNC(n) bufg[d + n] -= bufb[d + n];
             DO_FILTER
-                break;
+            break;
         case 8:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufr[d+n] -= bufg[d+n];
+#define FILTER_FUNC(n) bufr[d + n] -= bufg[d + n];
             DO_FILTER
-                break;
+            break;
         case 9:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufg[d],
-                    bufg[d] -= bufr[d],
-                    bufr[d] -= bufb[d];
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufg[d], bufg[d] -= bufr[d], bufr[d] -= bufb[d];
             break;
         case 10:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufg[d+n] -= bufr[d+n], \
-                                        bufb[d+n] -= bufr[d+n];
+#define FILTER_FUNC(n) bufg[d + n] -= bufr[d + n], bufb[d + n] -= bufr[d + n];
             DO_FILTER
-                break;
+            break;
         case 11:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufr[d+n] -= bufb[d+n], \
-                                        bufg[d+n] -= bufb[d+n];
+#define FILTER_FUNC(n) bufr[d + n] -= bufb[d + n], bufg[d + n] -= bufb[d + n];
             DO_FILTER
-                break;
+            break;
         case 12:
-            for( d = 0; d < len; d++)
-                bufg[d] -= bufr[d],
-                    bufr[d] -= bufb[d];
+            for (d = 0; d < len; d++)
+                bufg[d] -= bufr[d], bufr[d] -= bufb[d];
             break;
         case 13:
-            for( d = 0; d < len; d++)
-                bufg[d] -= bufr[d],
-                    bufr[d] -= bufb[d],
-                    bufb[d] -= bufg[d];
+            for (d = 0; d < len; d++)
+                bufg[d] -= bufr[d], bufr[d] -= bufb[d], bufb[d] -= bufg[d];
             break;
         case 14:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufb[d],
-                    bufb[d] -= bufg[d],
-                    bufg[d] -= bufr[d];
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufb[d], bufb[d] -= bufg[d], bufg[d] -= bufr[d];
             break;
         case 15:
 #undef FILTER_FUNC
 #define FILTER_FUNC(n) \
-            t = bufb[d+n]<<1; \
-                bufr[d+n] -= t, \
-                                  bufg[d+n] -= t;
+    t = bufb[d + n] << 1; \
+    bufr[d + n] -= t, bufg[d + n] -= t;
             DO_FILTER
-                break;
+            break;
         case 16:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufg[d+n] -= bufr[d+n];
+#define FILTER_FUNC(n) bufg[d + n] -= bufr[d + n];
             DO_FILTER
-                break;
+            break;
         case 17:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufb[d],
-                    bufb[d] -= bufg[d];
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufb[d], bufb[d] -= bufg[d];
             break;
         case 18:
-            for( d = 0; d < len; d++)
+            for (d = 0; d < len; d++)
                 bufr[d] -= bufb[d];
             break;
         case 19:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufr[d],
-                    bufr[d] -= bufg[d];
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufr[d], bufr[d] -= bufg[d];
             break;
         case 20:
-            for( d = 0; d < len; d++)
+            for (d = 0; d < len; d++)
                 bufb[d] -= bufr[d];
             break;
         case 21:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufg[d]>>1;
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufg[d] >> 1;
             break;
         case 22:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufg[d+n] -= bufb[d+n]>>1;
+#define FILTER_FUNC(n) bufg[d + n] -= bufb[d + n] >> 1;
             DO_FILTER
-                break;
+            break;
         case 23:
-            for( d = 0; d < len; d++)
-                bufg[d] -= bufb[d],
-                    bufb[d] -= bufr[d],
-                    bufr[d] -= bufg[d];
+            for (d = 0; d < len; d++)
+                bufg[d] -= bufb[d], bufb[d] -= bufr[d], bufr[d] -= bufg[d];
             break;
         case 24:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufr[d],
-                    bufr[d] -= bufg[d],
-                    bufg[d] -= bufb[d];
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufr[d], bufr[d] -= bufg[d], bufg[d] -= bufb[d];
             break;
         case 25:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufg[d+n] -= bufr[d+n]>>1;
+#define FILTER_FUNC(n) bufg[d + n] -= bufr[d + n] >> 1;
             DO_FILTER
-                break;
+            break;
         case 26:
 #undef FILTER_FUNC
-#define FILTER_FUNC(n) \
-            bufr[d+n] -= bufg[d+n]>>1;
+#define FILTER_FUNC(n) bufr[d + n] -= bufg[d + n] >> 1;
             DO_FILTER
-                break;
+            break;
         case 27:
 #undef FILTER_FUNC
 #define FILTER_FUNC(n) \
-            t = bufr[d+n]>>1; \
-                bufg[d+n] -= t, \
-                                  bufb[d+n] -= t;
+    t = bufr[d + n] >> 1; \
+    bufg[d + n] -= t, bufb[d + n] -= t;
             DO_FILTER
-                break;
+            break;
         case 28:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufb[d]>>1;
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufb[d] >> 1;
             break;
         case 29:
 #undef FILTER_FUNC
 #define FILTER_FUNC(n) \
-            t = bufg[d+n]>>1; \
-                bufr[d+n] -= t, \
-                                  bufb[d+n] -= t;
+    t = bufg[d + n] >> 1; \
+    bufr[d + n] -= t, bufb[d + n] -= t;
             DO_FILTER
-                break;
+            break;
         case 30:
 #undef FILTER_FUNC
 #define FILTER_FUNC(n) \
-            t = bufb[d+n]>>1; \
-                bufr[d+n] -= t, \
-                                  bufg[d+n] -= t;
+    t = bufb[d + n] >> 1; \
+    bufr[d + n] -= t, bufg[d + n] -= t;
             DO_FILTER
-                break;
+            break;
         case 31:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufr[d]>>1;
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufr[d] >> 1;
             break;
         case 32:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufb[d]<<1;
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufb[d] << 1;
             break;
         case 33:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufg[d]<<1;
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufg[d] << 1;
             break;
         case 34:
 #undef FILTER_FUNC
 #define FILTER_FUNC(n) \
-            t = bufr[d+n]<<1; \
-                bufg[d+n] -= t, \
-                                  bufb[d+n] -= t;
+    t = bufr[d + n] << 1; \
+    bufg[d + n] -= t, bufb[d + n] -= t;
             DO_FILTER
-                break;
+            break;
         case 35:
-            for( d = 0; d < len; d++)
-                bufg[d] -= bufb[d]<<1;
+            for (d = 0; d < len; d++)
+                bufg[d] -= bufb[d] << 1;
             break;
         case 36:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufg[d]<<1;
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufg[d] << 1;
             break;
         case 37:
-            for( d = 0; d < len; d++)
-                bufr[d] -= bufg[d]<<1,
-                    bufb[d] -= bufg[d]<<1;
+            for (d = 0; d < len; d++)
+                bufr[d] -= bufg[d] << 1, bufb[d] -= bufg[d] << 1;
             break;
         case 38:
-            for( d = 0; d < len; d++)
-                bufg[d] -= bufr[d]<<1;
+            for (d = 0; d < len; d++)
+                bufg[d] -= bufr[d] << 1;
             break;
         case 39:
-            for( d = 0; d < len; d++)
-                bufb[d] -= bufr[d]<<1;
+            for (d = 0; d < len; d++)
+                bufb[d] -= bufr[d] << 1;
             break;
-
     }
-
 }
 //---------------------------------------------------------------------------
-int DetectColorFilter(char *b, char *g, char *r, int size, int &outsize)
+int DetectColorFilter(char* b, char* g, char* r, int size, int& outsize)
 {
 #ifndef FILTER_TEST
     int minbits = -1;
     int mincode = -1;
 
-    char bbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
-    char gbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
-    char rbuf[H_BLOCK_SIZE*W_BLOCK_SIZE];
+    char bbuf[H_BLOCK_SIZE * W_BLOCK_SIZE];
+    char gbuf[H_BLOCK_SIZE * W_BLOCK_SIZE];
+    char rbuf[H_BLOCK_SIZE * W_BLOCK_SIZE];
     TryCompressGolomb bc, gc, rc;
 
-    for(int code = 0; code < FILTER_TRY_COUNT; code++)   // 17..27 are currently not used
+    for (int code = 0; code < FILTER_TRY_COUNT; code++) // 17..27 are currently not used
     {
         // copy bbuf, gbuf, rbuf into b, g, r.
-        memcpy(bbuf, b, sizeof(char)*size);
-        memcpy(gbuf, g, sizeof(char)*size);
-        memcpy(rbuf, r, sizeof(char)*size);
+        memcpy(bbuf, b, sizeof(char) * size);
+        memcpy(gbuf, g, sizeof(char) * size);
+        memcpy(rbuf, r, sizeof(char) * size);
 
-               // copy compressor
+        // copy compressor
         bc.Reset();
         gc.Reset();
         rc.Reset();
 
-               // Apply color filter
+        // Apply color filter
         ApplyColorFilter(bbuf, gbuf, rbuf, size, code);
 
-               // try to compress
+        // try to compress
         int bits;
-        bits  = (bc.Try(bbuf, size), bc.Flush());
-        if(minbits != -1 && minbits < bits) continue;
+        bits = (bc.Try(bbuf, size), bc.Flush());
+        if (minbits != -1 && minbits < bits)
+            continue;
         bits += (gc.Try(gbuf, size), gc.Flush());
-        if(minbits != -1 && minbits < bits) continue;
+        if (minbits != -1 && minbits < bits)
+            continue;
         bits += (rc.Try(rbuf, size), rc.Flush());
 
-        if(minbits == -1 || minbits > bits)
+        if (minbits == -1 || minbits > bits)
         {
             minbits = bits, mincode = code;
         }
@@ -989,7 +1035,8 @@ int DetectColorFilter(char *b, char *g, char *r, int size, int &outsize)
     int f = filter;
 
     filter++;
-    if(filter >= FILTER_TRY_COUNT) filter = 0;
+    if (filter >= FILTER_TRY_COUNT)
+        filter = 0;
 
     outsize = 0;
 
@@ -997,7 +1044,7 @@ int DetectColorFilter(char *b, char *g, char *r, int size, int &outsize)
 #endif
 }
 //---------------------------------------------------------------------------
-static void WriteInt32(long num, tTJSBinaryStream *out)
+static void WriteInt32(long num, tTJSBinaryStream* out)
 {
     char buf[4];
     buf[0] = num & 0xff;
@@ -1007,14 +1054,14 @@ static void WriteInt32(long num, tTJSBinaryStream *out)
     out->WriteBuffer(buf, 4);
 }
 //---------------------------------------------------------------------------
-static void TLG6InitializeColorFilterCompressor(SlideCompressor &c)
+static void TLG6InitializeColorFilterCompressor(SlideCompressor& c)
 {
     unsigned char code[4096];
     unsigned char dum[4096];
-    unsigned char *p = code;
-    for(int i = 0; i < 32; i++)
+    unsigned char* p = code;
+    for (int i = 0; i < 32; i++)
     {
-        for(int j = 0; j < 16; j++)
+        for (int j = 0; j < 16; j++)
         {
             p[0] = p[1] = p[2] = p[3] = i;
             p += 4;
@@ -1028,31 +1075,37 @@ static void TLG6InitializeColorFilterCompressor(SlideCompressor &c)
 }
 //---------------------------------------------------------------------------
 // int ftfreq[256] = {0};
-void SaveTLG6( tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24 )
+void SaveTLG6(tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24)
 {
-    tTJSBinaryStream *out = stream;
+    tTJSBinaryStream* out = stream;
 
-           // DWORD medstart, medend;
+    // DWORD medstart, medend;
     tjs_uint reordertick;
 #ifdef WRITE_ENTROPY_VALUES
-    FILE *vs = fopen("vs.bin", "wb");
+    FILE* vs = fopen("vs.bin", "wb");
 #endif
 
     int colors;
 
     TVPTLG6InitGolombTable();
 
-           // check pixel format
-    if( bmp->Is32BPP() ) {
-        if( is24 ) colors = 3;
-        else colors = 4;
-    } else {
+    // check pixel format
+    if (bmp->Is32BPP())
+    {
+        if (is24)
+            colors = 3;
+        else
+            colors = 4;
+    }
+    else
+    {
         colors = 1;
     }
     int stride = colors;
-    if( stride == 3 ) stride = 4;
+    if (stride == 3)
+        stride = 4;
 
-           // output stream header
+    // output stream header
     {
         out->WriteBuffer("TLG6.0\x00raw\x1a\x00", 11);
         out->WriteBuffer(&colors, 1);
@@ -1066,15 +1119,17 @@ void SaveTLG6( tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24 )
         WriteInt32(height, out);
     }
 
-           // compress
+    // compress
     long max_bit_length = 0;
 
-    unsigned char *buf[MAX_COLOR_COMPONENTS];
-    for(int i = 0; i < MAX_COLOR_COMPONENTS; i++) buf[i] = NULL;
-    char *block_buf[MAX_COLOR_COMPONENTS];
-    for(int i = 0; i < MAX_COLOR_COMPONENTS; i++) block_buf[i] = NULL;
-    unsigned char *filtertypes = NULL;
-    tTVPMemoryStream *memstream = NULL;
+    unsigned char* buf[MAX_COLOR_COMPONENTS];
+    for (int i = 0; i < MAX_COLOR_COMPONENTS; i++)
+        buf[i] = NULL;
+    char* block_buf[MAX_COLOR_COMPONENTS];
+    for (int i = 0; i < MAX_COLOR_COMPONENTS; i++)
+        block_buf[i] = NULL;
+    unsigned char* filtertypes = NULL;
+    tTVPMemoryStream* memstream = NULL;
 
     try
     {
@@ -1082,53 +1137,56 @@ void SaveTLG6( tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24 )
 
         TLG6BitStream bs(memstream);
 
-               //		int buf_size = bmp->Width * bmp->Height;
+        //		int buf_size = bmp->Width * bmp->Height;
 
-               // allocate buffer
-        for(int c = 0; c < colors; c++)
+        // allocate buffer
+        for (int c = 0; c < colors; c++)
         {
-            buf[c] = new unsigned char [W_BLOCK_SIZE * H_BLOCK_SIZE * 3];
-            block_buf[c] = new char [H_BLOCK_SIZE * bmp->GetWidth()];
+            buf[c] = new unsigned char[W_BLOCK_SIZE * H_BLOCK_SIZE * 3];
+            block_buf[c] = new char[H_BLOCK_SIZE * bmp->GetWidth()];
         }
         int w_block_count = (int)((bmp->GetWidth() - 1) / W_BLOCK_SIZE) + 1;
         int h_block_count = (int)((bmp->GetHeight() - 1) / H_BLOCK_SIZE) + 1;
-        filtertypes = new unsigned char [w_block_count * h_block_count];
+        filtertypes = new unsigned char[w_block_count * h_block_count];
 
         int fc = 0;
-        for(int y = 0; y < (int)bmp->GetHeight(); y += H_BLOCK_SIZE)
+        for (int y = 0; y < (int)bmp->GetHeight(); y += H_BLOCK_SIZE)
         {
             int ylim = y + H_BLOCK_SIZE;
-            if(ylim > (int)bmp->GetHeight()) ylim = bmp->GetHeight();
+            if (ylim > (int)bmp->GetHeight())
+                ylim = bmp->GetHeight();
             int gwp = 0;
             int xp = 0;
-            for(int x = 0; x < (int)bmp->GetWidth(); x += W_BLOCK_SIZE, xp++)
+            for (int x = 0; x < (int)bmp->GetWidth(); x += W_BLOCK_SIZE, xp++)
             {
                 int xlim = x + W_BLOCK_SIZE;
-                if(xlim > (int)bmp->GetWidth()) xlim = bmp->GetWidth();
+                if (xlim > (int)bmp->GetWidth())
+                    xlim = bmp->GetWidth();
                 int bw = xlim - x;
 
-                int p0size; // size of MED method (p=0)
+                int p0size;   // size of MED method (p=0)
                 int minp = 0; // most efficient method (0:MED, 1:AVG)
-                int ft; // filter type
-                int wp; // write point
-                for(int p = 0; p < 2; p++)
+                int ft;       // filter type
+                int wp;       // write point
+                for (int p = 0; p < 2; p++)
                 {
-                    int dbofs = (p+1) * (H_BLOCK_SIZE * W_BLOCK_SIZE);
+                    int dbofs = (p + 1) * (H_BLOCK_SIZE * W_BLOCK_SIZE);
 
-                           // do med(when p=0) or take average of upper and left pixel(p=1)
-                    for(int c = 0; c < colors; c++)
+                    // do med(when p=0) or take average of upper and left pixel(p=1)
+                    for (int c = 0; c < colors; c++)
                     {
                         int wp = 0;
-                        for(int yy = y; yy < ylim; yy++)
+                        for (int yy = y; yy < ylim; yy++)
                         {
-                            const unsigned char * sl = x*stride +
-                                                      c + (const unsigned char *)bmp->GetScanLine(yy);
-                            const unsigned char * usl;
-                            if(yy >= 1)
-                                usl = x*stride + c + (const unsigned char *)bmp->GetScanLine(yy-1);
+                            const unsigned char* sl =
+                                x * stride + c + (const unsigned char*)bmp->GetScanLine(yy);
+                            const unsigned char* usl;
+                            if (yy >= 1)
+                                usl =
+                                    x * stride + c + (const unsigned char*)bmp->GetScanLine(yy - 1);
                             else
                                 usl = NULL;
-                            for(int xx = x; xx < xlim; xx++)
+                            for (int xx = x; xx < xlim; xx++)
                             {
                                 unsigned char pa = xx > 0 ? sl[-stride] : 0;
                                 unsigned char pb = usl ? *usl : 0;
@@ -1136,86 +1194,86 @@ void SaveTLG6( tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24 )
 
                                 unsigned char py;
 
-                                       //								py = 0;
-                                if(p == 0)
+                                //								py =
+                                //0;
+                                if (p == 0)
                                 {
                                     unsigned char pc = (xx > 0 && usl) ? usl[-stride] : 0;
-                                    unsigned char min_a_b = pa>pb?pb:pa;
-                                    unsigned char max_a_b = pa<pb?pb:pa;
+                                    unsigned char min_a_b = pa > pb ? pb : pa;
+                                    unsigned char max_a_b = pa < pb ? pb : pa;
 
-                                    if(pc >= max_a_b)
+                                    if (pc >= max_a_b)
                                         py = min_a_b;
-                                    else if(pc < min_a_b)
+                                    else if (pc < min_a_b)
                                         py = max_a_b;
                                     else
                                         py = pa + pb - pc;
                                 }
                                 else
                                 {
-                                    py = (pa+pb+1)>>1;
+                                    py = (pa + pb + 1) >> 1;
                                 }
 
                                 buf[c][wp] = (unsigned char)(px - py);
 
                                 wp++;
                                 sl += stride;
-                                if(usl) usl += stride;
+                                if (usl)
+                                    usl += stride;
                             }
                         }
                     }
 
-                           // reordering
-                           // Transfer the data into block_buf (block buffer).
-                           // Even lines are stored forward (left to right),
-                           // Odd lines are stored backward (right to left).
+                    // reordering
+                    // Transfer the data into block_buf (block buffer).
+                    // Even lines are stored forward (left to right),
+                    // Odd lines are stored backward (right to left).
 
                     wp = 0;
                     tjs_uint32 reorderstart = TVPGetRoughTickCount32();
-                    for(int yy = y; yy < ylim; yy++)
+                    for (int yy = y; yy < ylim; yy++)
                     {
                         int ofs;
-                        if(!(xp&1))
-                            ofs = (yy - y)*bw;
+                        if (!(xp & 1))
+                            ofs = (yy - y) * bw;
                         else
                             ofs = (ylim - yy - 1) * bw;
                         bool dir; // false for forward, true for backward
-                        if(!((ylim-y)&1))
+                        if (!((ylim - y) & 1))
                         {
                             // vertical line count per block is even
-                            dir = ((yy&1) ^ (xp&1)) ? true : false;
+                            dir = ((yy & 1) ^ (xp & 1)) ? true : false;
                         }
                         else
                         {
                             // otherwise;
-                            if(xp & 1)
+                            if (xp & 1)
                             {
-                                dir = (yy&1);
+                                dir = (yy & 1);
                             }
                             else
                             {
-                                dir = ((yy&1) ^ (xp&1)) ? true : false;
+                                dir = ((yy & 1) ^ (xp & 1)) ? true : false;
                             }
                         }
 
-                        if(!dir)
+                        if (!dir)
                         {
                             // forward
-                            for(int xx = 0; xx < bw; xx++)
+                            for (int xx = 0; xx < bw; xx++)
                             {
-                                for(int c = 0; c < colors; c++)
-                                    buf[c][wp + dbofs] =
-                                        buf[c][ofs + xx];
+                                for (int c = 0; c < colors; c++)
+                                    buf[c][wp + dbofs] = buf[c][ofs + xx];
                                 wp++;
                             }
                         }
                         else
                         {
                             // backward
-                            for(int xx = bw - 1; xx >= 0; xx--)
+                            for (int xx = bw - 1; xx >= 0; xx--)
                             {
-                                for(int c = 0; c < colors; c++)
-                                    buf[c][wp + dbofs] =
-                                        buf[c][ofs + xx];
+                                for (int c = 0; c < colors; c++)
+                                    buf[c][wp + dbofs] = buf[c][ofs + xx];
                                 wp++;
                             }
                         }
@@ -1223,57 +1281,55 @@ void SaveTLG6( tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24 )
                     reordertick += TVPGetRoughTickCount32() - reorderstart;
                 }
 
-
-                for(int p = 0; p < 2; p++)
+                for (int p = 0; p < 2; p++)
                 {
-                    int dbofs = (p+1) * (H_BLOCK_SIZE * W_BLOCK_SIZE);
+                    int dbofs = (p + 1) * (H_BLOCK_SIZE * W_BLOCK_SIZE);
                     // detect color filter
                     int size = 0;
                     int ft_;
-                    if(colors >= 3)
-                        ft_ = DetectColorFilter(
-                            reinterpret_cast<char*>(buf[0] + dbofs),
-                            reinterpret_cast<char*>(buf[1] + dbofs),
-                            reinterpret_cast<char*>(buf[2] + dbofs), wp, size);
+                    if (colors >= 3)
+                        ft_ = DetectColorFilter(reinterpret_cast<char*>(buf[0] + dbofs),
+                                                reinterpret_cast<char*>(buf[1] + dbofs),
+                                                reinterpret_cast<char*>(buf[2] + dbofs), wp, size);
                     else
                         ft_ = 0;
 
-                           // select efficient mode of p (MED or average)
-                    if(p == 0)
+                    // select efficient mode of p (MED or average)
+                    if (p == 0)
                     {
                         p0size = size;
                         ft = ft_;
                     }
                     else
                     {
-                        if(p0size >= size)
+                        if (p0size >= size)
                             minp = 1, ft = ft_;
                     }
                 }
 
-                       // Apply most efficient color filter / prediction method
+                // Apply most efficient color filter / prediction method
                 wp = 0;
-                int dbofs = (minp + 1)  * (H_BLOCK_SIZE * W_BLOCK_SIZE);
-                for(int yy = y; yy < ylim; yy++)
+                int dbofs = (minp + 1) * (H_BLOCK_SIZE * W_BLOCK_SIZE);
+                for (int yy = y; yy < ylim; yy++)
                 {
-                    for(int xx = 0; xx < bw; xx++)
+                    for (int xx = 0; xx < bw; xx++)
                     {
-                        for(int c = 0; c < colors; c++)
+                        for (int c = 0; c < colors; c++)
                             block_buf[c][gwp + wp] = buf[c][wp + dbofs];
                         wp++;
                     }
                 }
 
-                ApplyColorFilter(block_buf[0] + gwp,
-                                 block_buf[1] + gwp, block_buf[2] + gwp, wp, ft);
+                ApplyColorFilter(block_buf[0] + gwp, block_buf[1] + gwp, block_buf[2] + gwp, wp,
+                                 ft);
 
-                filtertypes[fc++] = (ft<<1) + minp;
+                filtertypes[fc++] = (ft << 1) + minp;
                 //				ftfreq[ft]++;
                 gwp += wp;
             }
 
-                   // compress values (entropy coding)
-            for(int c = 0; c < colors; c++)
+            // compress values (entropy coding)
+            for (int c = 0; c < colors; c++)
             {
                 int method;
                 CompressValuesGolomb(bs, block_buf[c], gwp);
@@ -1282,31 +1338,30 @@ void SaveTLG6( tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24 )
                 fwrite(block_buf[c], 1, gwp, vs);
 #endif
                 long bitlength = bs.GetBitLength();
-                if(bitlength & 0xc0000000)
-                    TVPThrowExceptionMessage( TVPTlgTooLargeBitLength );
+                if (bitlength & 0xc0000000)
+                    TVPThrowExceptionMessage(TVPTlgTooLargeBitLength);
                 // two most significant bits of bitlength are
                 // entropy coding method;
                 // 00 means Golomb method,
                 // 01 means Gamma method (implemented but not used),
                 // 10 means modified LZSS method (not yet implemented),
                 // 11 means raw (uncompressed) data (not yet implemented).
-                if(max_bit_length < bitlength) max_bit_length = bitlength;
+                if (max_bit_length < bitlength)
+                    max_bit_length = bitlength;
                 bitlength |= (method << 30);
                 WriteInt32(bitlength, memstream);
                 bs.Flush();
             }
-
         }
 
-
-               // write max bit length
+        // write max bit length
         WriteInt32(max_bit_length, out);
 
-               // output filter types
+        // output filter types
         {
             SlideCompressor comp;
             TLG6InitializeColorFilterCompressor(comp);
-            unsigned char *outbuf = new unsigned char[fc * 2];
+            unsigned char* outbuf = new unsigned char[fc * 2];
             try
             {
                 long outlen;
@@ -1314,70 +1369,92 @@ void SaveTLG6( tTJSBinaryStream* stream, const iTVPBaseBitmap* bmp, bool is24 )
                 WriteInt32(outlen, out);
                 out->WriteBuffer(outbuf, outlen);
             }
-            catch(...)
+            catch (...)
             {
-                delete [] outbuf;
+                delete[] outbuf;
                 throw;
             }
-            delete [] outbuf;
-
+            delete[] outbuf;
         }
 
-               // copy memory stream to output stream
-        out->WriteBuffer( memstream->GetInternalBuffer(), (tjs_uint)memstream->GetSize() );
+        // copy memory stream to output stream
+        out->WriteBuffer(memstream->GetInternalBuffer(), (tjs_uint)memstream->GetSize());
     }
-    catch(...)
+    catch (...)
     {
-        for(int i = 0; i < MAX_COLOR_COMPONENTS; i++)
+        for (int i = 0; i < MAX_COLOR_COMPONENTS; i++)
         {
-            if(buf[i]) delete [] (buf[i]);
-            if(block_buf[i]) delete [] (block_buf[i]);
+            if (buf[i])
+                delete[] (buf[i]);
+            if (block_buf[i])
+                delete[] (block_buf[i]);
         }
-        if(filtertypes) delete [] filtertypes;
-        if(memstream) delete memstream;
+        if (filtertypes)
+            delete[] filtertypes;
+        if (memstream)
+            delete memstream;
         throw;
     }
 
-    for(int i = 0; i < MAX_COLOR_COMPONENTS; i++)
+    for (int i = 0; i < MAX_COLOR_COMPONENTS; i++)
     {
-        if(buf[i]) delete [] (buf[i]);
-        if(block_buf[i]) delete [] (block_buf[i]);
+        if (buf[i])
+            delete[] (buf[i]);
+        if (block_buf[i])
+            delete[] (block_buf[i]);
     }
-    if(filtertypes) delete [] filtertypes;
-    if(memstream) delete memstream;
+    if (filtertypes)
+        delete[] filtertypes;
+    if (memstream)
+        delete memstream;
 
 #ifdef WRITE_ENTROPY_VALUES
     fclose(vs);
 #endif
 }
 //---------------------------------------------------------------------------
-extern void SaveTLG5( tTJSBinaryStream* stream, const iTVPBaseBitmap* image, bool is24 );
+extern void SaveTLG5(tTJSBinaryStream* stream, const iTVPBaseBitmap* image, bool is24);
 //---------------------------------------------------------------------------
-void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap* image, const ttstr & mode, iTJSDispatch2* meta )
+void TVPSaveAsTLG(void* formatdata,
+                  tTJSBinaryStream* dst,
+                  const iTVPBaseBitmap* image,
+                  const ttstr& mode,
+                  iTJSDispatch2* meta)
 {
     std::vector<std::string> tags;
-    if( meta ) {
-        struct MetaDictionaryEnumCallback : public tTJSDispatch {
+    if (meta)
+    {
+        struct MetaDictionaryEnumCallback : public tTJSDispatch
+        {
             std::vector<std::string>& Tags;
-            MetaDictionaryEnumCallback( std::vector<std::string>& tags ) : Tags(tags) {}
-            tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
-                                               tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
-                                               tTJSVariant **param, iTJSDispatch2 *objthis) {
+            MetaDictionaryEnumCallback(std::vector<std::string>& tags) : Tags(tags) {}
+            tjs_error FuncCall(tjs_uint32 flag,
+                               const tjs_char* membername,
+                               tjs_uint32* hint,
+                               tTJSVariant* result,
+                               tjs_int numparams,
+                               tTJSVariant** param,
+                               iTJSDispatch2* objthis)
+            {
                 // called from tTJSCustomObject::EnumMembers
-                if(numparams < 3) return TJS_E_BADPARAMCOUNT;
+                if (numparams < 3)
+                    return TJS_E_BADPARAMCOUNT;
 
-                       // hidden members are not processed
+                // hidden members are not processed
                 tjs_uint32 flags = (tjs_int)*param[1];
-                if(flags & TJS_HIDDENMEMBER) {
-                    if(result) *result = (tjs_int)1;
+                if (flags & TJS_HIDDENMEMBER)
+                {
+                    if (result)
+                        *result = (tjs_int)1;
                     return TJS_S_OK;
                 }
                 // push items
                 ttstr value = *param[0];
-                Tags.push_back( value.AsStdString() );
+                Tags.push_back(value.AsStdString());
                 value = *param[2];
-                Tags.push_back( value.AsStdString() );
-                if(result) *result = (tjs_int)1;
+                Tags.push_back(value.AsStdString());
+                if (result)
+                    *result = (tjs_int)1;
                 return TJS_S_OK;
             }
         } callback(tags);
@@ -1386,37 +1463,48 @@ void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
     }
 
     bool istls6 = false;
-    if( mode.StartsWith( TJS_N("tlg5") ) ) {
+    if (mode.StartsWith(TJS_N("tlg5")))
+    {
         istls6 = false;
-    } else if( mode.StartsWith( TJS_N("tlg6") ) ) {
+    }
+    else if (mode.StartsWith(TJS_N("tlg6")))
+    {
         istls6 = true;
-    } else {
-        istls6 = false;	// default : TLG5
+    }
+    else
+    {
+        istls6 = false; // default : TLG5
     }
 
     tjs_uint height = image->GetHeight();
     tjs_uint width = image->GetWidth();
-    if( height == 0 || width == 0 ) TVPThrowInternalError;
+    if (height == 0 || width == 0)
+        TVPThrowInternalError;
 
-           // open stream
-    tTJSBinaryStream *stream = dst;
-    try {
-        if( tags.size() ) {
+    // open stream
+    tTJSBinaryStream* stream = dst;
+    try
+    {
+        if (tags.size())
+        {
             // write TLG0.0 Structured Data Stream header
             stream->WriteBuffer("TLG0.0\x00sds\x1a\x00", 11);
             tjs_uint rawlenpos = (tjs_uint)stream->GetPosition();
             stream->WriteBuffer("0000", 4);
 
-                   // write raw TLG stream
-            if( istls6 ) {
-                SaveTLG6( stream, image, mode == TJS_N("tlg624") );
-            } else {
-                SaveTLG5( stream, image, mode == TJS_N("tlg524") );
+            // write raw TLG stream
+            if (istls6)
+            {
+                SaveTLG6(stream, image, mode == TJS_N("tlg624"));
+            }
+            else
+            {
+                SaveTLG5(stream, image, mode == TJS_N("tlg524"));
             }
 
-                   // write raw data size
+            // write raw data size
             tjs_uint pos_save = (tjs_uint)stream->GetPosition();
-            stream->SetPosition( rawlenpos );
+            stream->SetPosition(rawlenpos);
             tjs_uint size = pos_save - rawlenpos - 4;
             unsigned char bin[4]; // buffer for writing 32bit integer as little endian format
             bin[0] = size & 0xff;
@@ -1424,21 +1512,23 @@ void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
             bin[2] = (size >> 16) & 0xff;
             bin[3] = (size >> 24) & 0xff;
             stream->WriteBuffer(bin, 4);
-            stream->SetPosition( pos_save );
+            stream->SetPosition(pos_save);
 
-                   // write "tags" chunk name
+            // write "tags" chunk name
             stream->WriteBuffer("tags", 4);
 
-                   // build tag data
+            // build tag data
             std::stringstream tag;
-            for( tjs_uint i = 0; i < (tags.size()-1); i+=2 ) {
+            for (tjs_uint i = 0; i < (tags.size() - 1); i += 2)
+            {
                 std::string name = tags[i];
-                if( name.empty() ) continue;
-                std::string value = tags[i+1];
+                if (name.empty())
+                    continue;
+                std::string value = tags[i + 1];
                 tag << name.length() << ":" << name << "=" << value.length() << ":" << value << ",";
             }
 
-                   // write chunk size
+            // write chunk size
             std::string tagstr = tag.str();
             size = (tjs_uint)tagstr.length();
             bin[0] = size & 0xff;
@@ -1447,16 +1537,23 @@ void TVPSaveAsTLG(void* formatdata, tTJSBinaryStream* dst, const iTVPBaseBitmap*
             bin[3] = (size >> 24) & 0xff;
             stream->WriteBuffer(bin, 4);
 
-                   // write chunk data
-            stream->WriteBuffer( tagstr.c_str(), (tjs_uint)tagstr.length() );
-        } else {
-            if( istls6 ) {
-                SaveTLG6( stream, image, mode == TJS_N("tlg624") );
-            } else {
-                SaveTLG5( stream, image, mode == TJS_N("tlg524") );
+            // write chunk data
+            stream->WriteBuffer(tagstr.c_str(), (tjs_uint)tagstr.length());
+        }
+        else
+        {
+            if (istls6)
+            {
+                SaveTLG6(stream, image, mode == TJS_N("tlg624"));
+            }
+            else
+            {
+                SaveTLG5(stream, image, mode == TJS_N("tlg524"));
             }
         }
-    } catch(...) {
+    }
+    catch (...)
+    {
         throw;
     }
 }

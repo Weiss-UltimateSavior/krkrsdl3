@@ -26,14 +26,15 @@ tTVPThread::tTVPThread()
     Suspended = true;
 
     Handle = SDL_CreateThread(StartProc, "TVPThread", this);
-    if (!Handle) {
+    if (!Handle)
+    {
         TVPThrowInternalError;
     }
 }
 //---------------------------------------------------------------------------
 tTVPThread::~tTVPThread()
 {
-    if(!Terminated)
+    if (!Terminated)
         Terminate();
 }
 //---------------------------------------------------------------------------
@@ -50,10 +51,13 @@ void tTVPThread::StopThread()
 //---------------------------------------------------------------------------
 void tTVPThread::Sleep(unsigned int milliseconds)
 {
-    if(IsCurrentThread()) {
+    if (IsCurrentThread())
+    {
         std::unique_lock<std::mutex> lock(_mutex);
         _cond.wait_for(lock, std::chrono::milliseconds(milliseconds));
-    } else {
+    }
+    else
+    {
         std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
     }
 }
@@ -68,7 +72,8 @@ int tTVPThread::StartProc(void* arg)
     tTVPThread* _this = static_cast<tTVPThread*>(arg);
 
     // 等待恢复
-    if (_this->Suspended) {
+    if (_this->Suspended)
+    {
         std::unique_lock<std::mutex> lk(_this->_mutex);
         _this->_cond.wait(lk);
     }
@@ -103,12 +108,6 @@ void tTVPThread::Resume()
 }
 //---------------------------------------------------------------------------
 
-
-
-
-
-
-
 //---------------------------------------------------------------------------
 // tTVPThreadEvent
 //---------------------------------------------------------------------------
@@ -124,17 +123,17 @@ bool tTVPThreadEvent::WaitFor(tjs_uint timeout)
     // returns true if the event is set, otherwise (when timed out) returns false.
 
     std::unique_lock<std::mutex> lk(Mutex);
-    if (timeout != 0) {
-        return Handle.wait_for(lk, std::chrono::milliseconds(timeout)) !=
-               std::cv_status::timeout;
+    if (timeout != 0)
+    {
+        return Handle.wait_for(lk, std::chrono::milliseconds(timeout)) != std::cv_status::timeout;
     }
-    else {
+    else
+    {
         Handle.wait(lk);
         return true;
     }
 }
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 tjs_int TVPDrawThreadNum = 1;
@@ -146,7 +145,8 @@ static tjs_int TVPThreadTaskNum, TVPThreadTaskCount;
 static tjs_int GetProcesserNum(void)
 {
     static tjs_int processor_num = 0;
-    if (!processor_num) {
+    if (!processor_num)
+    {
         processor_num = std::thread::hardware_concurrency();
         tjs_char tmp[34];
         TVPAddLog(ttstr(TJS_N("Detected CPU core(s): ")) + TJS_tTVInt_to_str(processor_num, tmp));
@@ -156,7 +156,7 @@ static tjs_int GetProcesserNum(void)
 
 tjs_int TVPGetProcessorNum(void)
 {
-        return GetProcesserNum();
+    return GetProcesserNum();
 }
 
 //---------------------------------------------------------------------------
@@ -170,10 +170,13 @@ tjs_int TVPGetThreadNum(void)
 //---------------------------------------------------------------------------
 void TVPExecThreadTask(int numThreads, TVP_THREAD_TASK_FUNC func)
 {
-    if (numThreads == 1) {
+    if (numThreads == 1)
+    {
         func(0);
         return;
     }
+
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < numThreads; ++i)
         func(i);
 }
@@ -184,7 +187,8 @@ std::vector<std::function<void()>> _OnThreadExitedEvents;
 
 void TVPOnThreadExited()
 {
-    for (const auto& ev : _OnThreadExitedEvents) {
+    for (const auto& ev : _OnThreadExitedEvents)
+    {
         ev();
     }
 }

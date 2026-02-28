@@ -118,7 +118,7 @@ bool tTJSNI_PsbFile::load(const ttstr& filePath)
         filePtr->SetPosition(_header.offsetEncrypt);
         PSB::parsePSBArray(
             &nameIndexes, filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
-                           filePtr);
+            filePtr);
         // Load Names
         namesCache.reserve(nameIndexes.size());
         for (int i = 0; i < namesCache.size(); i++)
@@ -145,13 +145,10 @@ bool tTJSNI_PsbFile::load(const ttstr& filePath)
     {
         filePtr->SetPosition(_header.offsetNames);
         PSB::parsePSBArray(
-            &charset,
-            filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
-            filePtr
-            );
+            &charset, filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
+            filePtr);
         PSB::parsePSBArray(
-            &namesData,
-            filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
+            &namesData, filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
             filePtr);
         PSB::parsePSBArray(
             &nameIndexes, filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
@@ -180,11 +177,11 @@ bool tTJSNI_PsbFile::load(const ttstr& filePath)
     filePtr->SetPosition(_header.offsetChunkOffsets);
     PSB::parsePSBArray(&chunkOffsets,
                        filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
-        filePtr);
+                       filePtr);
     filePtr->SetPosition(_header.offsetChunkLengths);
     PSB::parsePSBArray(&chunkLengths,
                        filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
-        filePtr);
+                       filePtr);
 
     if (_header.version >= 4)
     {
@@ -217,14 +214,12 @@ tTJSVariant tTJSNI_PsbFile::root()
 tjs_uint32 tTJSNI_PsbFile::readListInfo(std::vector<tjs_uint32>* target)
 {
     PSB::parsePSBArray(
-        target,
-        filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1,
-        filePtr);
+        target, filePtr->ReadI8LE() - static_cast<tjs_int8>(PSB::PSBObjType::ArrayN1) + 1, filePtr);
     return filePtr->GetPosition();
 }
 
 void tTJSNI_PsbFile::refreshListInfo(std::vector<tjs_uint32>* target1,
-                                           std::vector<tjs_uint32>* target2)
+                                     std::vector<tjs_uint32>* target2)
 {
     target2->reserve(target1->size());
     tjs_uint32 basePose = filePtr->GetPosition();
@@ -243,7 +238,8 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
     switch (auto type = static_cast<PSB::PSBObjType>(typeByte))
     {
         case PSB::PSBObjType::None:
-            return tTJSVariant();;
+            return tTJSVariant();
+            ;
         case PSB::PSBObjType::Null:
             return tTJSVariant();
         case PSB::PSBObjType::False:
@@ -393,7 +389,9 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
                 delete[] buffer;
                 return ret;
             }
-            catch (...) { }
+            catch (...)
+            {
+            }
             return tTJSVariant();
         }
         case PSB::PSBObjType::ExtraChunkN1:
@@ -472,91 +470,89 @@ tTJSVariant tTJSNI_PsbFile::readAllObjs(const ttstr& key, tjs_uint32 _objOffset)
 // tTJSNC_PsbFile : PsbFile TJS native class
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_PsbFile::ClassID = (tjs_uint32)-1;
-tTJSNC_PsbFile::tTJSNC_PsbFile() : tTJSNativeClass(TJS_N("PSBFile"))
+tTJSNC_PsbFile::tTJSNC_PsbFile()
+  : tTJSNativeClass(TJS_N("PSBFile")){
+        TJS_BEGIN_NATIVE_MEMBERS(PSBFile)
+        //----------------------------------------------------------------------
+        // finalize/methods
+        //----------------------------------------------------------------------
+        TJS_DECL_EMPTY_FINALIZE_METHOD
+            //----------------------------------------------------------------------
+            // constructor/methods
+            //----------------------------------------------------------------------
+            TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(_this, tTJSNI_PsbFile, PSBFile){
+                if (numparams == 0) return TJS_S_OK;
+else if (numparams == 1 && param[0]->Type() == tvtString)
 {
-    TJS_BEGIN_NATIVE_MEMBERS(PSBFile)
-    //----------------------------------------------------------------------
-    // finalize/methods
-    //----------------------------------------------------------------------
-    TJS_DECL_EMPTY_FINALIZE_METHOD
-    //----------------------------------------------------------------------
-    // constructor/methods
-    //----------------------------------------------------------------------
-    TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(_this, tTJSNI_PsbFile, PSBFile)
+    ttstr path = *param[0];
+    if (_this->load(path))
     {
-        if (numparams == 0) return TJS_S_OK;
-        else if (numparams == 1 && param[0]->Type() == tvtString)
-        {
-            ttstr path = *param[0];
-            if (_this->load(path))
-            {
-                if (result)
-                    *result = true;
-            }
-            else
-            {
-                if (result)
-                    *result = false;
-            }
-        }
-        else
-        {
-            return TJS_E_BADPARAMCOUNT;
-        }
-        return TJS_S_OK;
+        if (result)
+            *result = true;
     }
-    TJS_END_NATIVE_CONSTRUCTOR_DECL(PSBFile)
-    //----------------------------------------------------------------------
-    //-- methods
-    //----------------------------------------------------------------------
-    TJS_BEGIN_NATIVE_METHOD_DECL(load)
+    else
     {
-        TJS_GET_NATIVE_INSTANCE(_this, tTJSNI_PsbFile);
-        if (numparams != 1)
-        {
-            return TJS_E_BADPARAMCOUNT;
-        }
-        if (param[0]->Type() == tvtString)
-        {
-            ttstr path = *param[0];
-            if (_this->load(path))
-            {
-                if (result)
-                    *result = tTJSVariant(true);
-            }
-            else
-            {
-                if (result)
-                    *result = tTJSVariant(false);
-            }
-        }
-        else if (param[0]->Type() == tvtOctet)
-        {
-            TVPConsoleLog("PSBFile::load stream no implement!");
-        }
-        else
-        {
-            return TJS_E_INVALIDPARAM;
-        }
-        return TJS_S_OK;
+        if (result)
+            *result = false;
     }
-    TJS_END_NATIVE_METHOD_DECL(load)
-    //----------------------------------------------------------------------
-    // properties
-    //----------------------------------------------------------------------
-    TJS_BEGIN_NATIVE_PROP_DECL(root) {
-        TJS_BEGIN_NATIVE_PROP_GETTER {
-            TJS_GET_NATIVE_INSTANCE(_this, tTJSNI_PsbFile);
+}
+else
+{
+    return TJS_E_BADPARAMCOUNT;
+}
+return TJS_S_OK;
+}
+TJS_END_NATIVE_CONSTRUCTOR_DECL(PSBFile)
+//----------------------------------------------------------------------
+//-- methods
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(load)
+{
+    TJS_GET_NATIVE_INSTANCE(_this, tTJSNI_PsbFile);
+    if (numparams != 1)
+    {
+        return TJS_E_BADPARAMCOUNT;
+    }
+    if (param[0]->Type() == tvtString)
+    {
+        ttstr path = *param[0];
+        if (_this->load(path))
+        {
             if (result)
-                *result = _this->root();
-            return TJS_S_OK;
+                *result = tTJSVariant(true);
         }
-        TJS_END_NATIVE_PROP_GETTER
-        TJS_DENY_NATIVE_PROP_SETTER
+        else
+        {
+            if (result)
+                *result = tTJSVariant(false);
+        }
     }
-    TJS_END_NATIVE_PROP_DECL(root)
-    //----------------------------------------------------------------------
-    TJS_END_NATIVE_MEMBERS
+    else if (param[0]->Type() == tvtOctet)
+    {
+        TVPConsoleLog("PSBFile::load stream no implement!");
+    }
+    else
+    {
+        return TJS_E_INVALIDPARAM;
+    }
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(load)
+//----------------------------------------------------------------------
+// properties
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(root){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(_this, tTJSNI_PsbFile);
+if (result)
+    *result = _this->root();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+TJS_DENY_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(root)
+//----------------------------------------------------------------------
+TJS_END_NATIVE_MEMBERS
 }
 
 tTJSNativeInstance* tTJSNC_PsbFile::CreateNativeInstance()

@@ -6,13 +6,13 @@
 //---------------------------------------------------------------------------
 // tTJSNI_BaseCDDASoundBuffer
 //---------------------------------------------------------------------------
-class tTJSNI_BaseCDDASoundBuffer : public tTJSNI_SoundBuffer {
+class tTJSNI_BaseCDDASoundBuffer : public tTJSNI_SoundBuffer
+{
     typedef tTJSNI_SoundBuffer inherited;
 
 public:
     tTJSNI_BaseCDDASoundBuffer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 protected:
@@ -23,34 +23,34 @@ public:
 //---------------------------------------------------------------------------
 // tTVPCDDAVolumeControlType
 //---------------------------------------------------------------------------
-enum tTVPCDDAVolumeControlType {
+enum tTVPCDDAVolumeControlType
+{
     cvctMixer, // use sound card's mixer
     cvctDirect // direct control for CD-ROM drive
 };
 extern tTVPCDDAVolumeControlType TVPCDDAVolumeControlType;
 //---------------------------------------------------------------------------
 
-
 //---------------------------------------------------------------------------
 // CD_AUDIO_VOLUME_DATA
 //---------------------------------------------------------------------------
-struct CD_AUDIO_VOLUME_DATA {
+struct CD_AUDIO_VOLUME_DATA
+{
     unsigned long dwUnitNo;
     unsigned long dwVolume;
 };
 //---------------------------------------------------------------------------
 
-
 //---------------------------------------------------------------------------
 // tTJSNI_CDDASoundBuffer : CDDA Native Instance
 //---------------------------------------------------------------------------
-class tTJSNI_CDDASoundBuffer : public tTJSNI_BaseCDDASoundBuffer {
+class tTJSNI_CDDASoundBuffer : public tTJSNI_BaseCDDASoundBuffer
+{
     typedef tTJSNI_BaseCDDASoundBuffer inherited;
 
 public:
     tTJSNI_CDDASoundBuffer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 #ifdef ENABLE_CDDA
@@ -65,7 +65,7 @@ private:
     bool Looping;
 
 public:
-    void Open(const ttstr &storage);
+    void Open(const ttstr& storage);
     void Close();
     MCIERROR StartPlay();
     MCIERROR StopPlay();
@@ -77,7 +77,6 @@ public:
 
 protected:
     void TimerBeatHandler(); // override
-
 
     //-- volume stuff -----------------------------------------------------
 private:
@@ -111,13 +110,12 @@ protected:
 class tTJSNC_CDDASoundBuffer : public tTJSNativeClass
 {
 public:
-	tTJSNC_CDDASoundBuffer();
-	static tjs_uint32 ClassID;
+    tTJSNC_CDDASoundBuffer();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_CDDASoundBuffer();
 //---------------------------------------------------------------------------
-

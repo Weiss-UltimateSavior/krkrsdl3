@@ -23,59 +23,75 @@
         to input/output text files.
 */
 
-extern "C" int sjis_mbtowc(unsigned short *wc, const unsigned char *s);
-extern "C" int gbk_mbtowc(unsigned short *wc, const unsigned char *s);
+extern "C" int sjis_mbtowc(unsigned short* wc, const unsigned char* s);
+extern "C" int gbk_mbtowc(unsigned short* wc, const unsigned char* s);
 
-static int utf8_mbtowc(unsigned short *pwc, const unsigned char *s) {
+static int utf8_mbtowc(unsigned short* pwc, const unsigned char* s)
+{
     unsigned char c = s[0];
 
-    if (c < 0x80) {
+    if (c < 0x80)
+    {
         *pwc = c;
         return 1;
-    } else if (c < 0xc2) {
+    }
+    else if (c < 0xc2)
+    {
         return -1;
-    } else if (c < 0xe0) {
+    }
+    else if (c < 0xe0)
+    {
         if (!((s[1] ^ 0x80) < 0x40))
             return -1;
-        *pwc = ((unsigned short)(c & 0x1f) << 6)
-               | (unsigned short)(s[1] ^ 0x80);
+        *pwc = ((unsigned short)(c & 0x1f) << 6) | (unsigned short)(s[1] ^ 0x80);
         return 2;
-    } else if (c < 0xf0) {
-        if (!((s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40
-              && (c >= 0xe1 || s[1] >= 0xa0)))
+    }
+    else if (c < 0xf0)
+    {
+        if (!((s[1] ^ 0x80) < 0x40 && (s[2] ^ 0x80) < 0x40 && (c >= 0xe1 || s[1] >= 0xa0)))
             return -1;
-        *pwc = ((unsigned short)(c & 0x0f) << 12)
-               | ((unsigned short)(s[1] ^ 0x80) << 6)
-               | (unsigned short)(s[2] ^ 0x80);
+        *pwc = ((unsigned short)(c & 0x0f) << 12) | ((unsigned short)(s[1] ^ 0x80) << 6) |
+               (unsigned short)(s[2] ^ 0x80);
         return 3;
-    } else
+    }
+    else
         return -1;
 }
 
-int(*mbtowc_for_text_stream)(unsigned short *wc, const unsigned char *s) = nullptr;
+int (*mbtowc_for_text_stream)(unsigned short* wc, const unsigned char* s) = nullptr;
 
-static size_t _TextStream_mbstowcs(int(*func_mbtowc)(unsigned short *, const unsigned char *), tjs_wchar *pwcs, const tjs_char *s, size_t n)
+static size_t _TextStream_mbstowcs(int (*func_mbtowc)(unsigned short*, const unsigned char*),
+                                   tjs_wchar* pwcs,
+                                   const tjs_char* s,
+                                   size_t n)
 {
-    if(!s) return -1;
-    if(pwcs && n == 0) return 0;
+    if (!s)
+        return -1;
+    if (pwcs && n == 0)
+        return 0;
 
     size_t count = 0;
     int cl;
-    if(!pwcs) {
-        while(*s) {
+    if (!pwcs)
+    {
+        while (*s)
+        {
             unsigned short wc;
             cl = func_mbtowc(&wc, (const unsigned char*)s);
-            if(cl <= 0)
+            if (cl <= 0)
                 return -1;
             s += cl;
             ++count;
         }
-    } else {
-        while(*s && n > 0) {
-            cl = func_mbtowc((unsigned short *)pwcs, (const unsigned char*)s);
-            if(cl <= 0)
+    }
+    else
+    {
+        while (*s && n > 0)
+        {
+            cl = func_mbtowc((unsigned short*)pwcs, (const unsigned char*)s);
+            if (cl <= 0)
                 return -1;
-            n --;
+            n--;
             s += cl;
             pwcs++;
             ++count;
@@ -84,20 +100,25 @@ static size_t _TextStream_mbstowcs(int(*func_mbtowc)(unsigned short *, const uns
     return count;
 }
 
-static size_t TextStream_mbstowcs(tjs_wchar *pwcs, const tjs_char *s, size_t n) {
-    if (mbtowc_for_text_stream) {
+static size_t TextStream_mbstowcs(tjs_wchar* pwcs, const tjs_char* s, size_t n)
+{
+    if (mbtowc_for_text_stream)
+    {
         return _TextStream_mbstowcs(mbtowc_for_text_stream, pwcs, s, n);
     }
     // trying every encoding available
     size_t ret = _TextStream_mbstowcs(sjis_mbtowc, pwcs, s, n);
-    if (ret == (size_t)-1) {
+    if (ret == (size_t)-1)
+    {
         ret = _TextStream_mbstowcs(utf8_mbtowc, pwcs, s, n);
-        if (ret != (size_t)-1) {
+        if (ret != (size_t)-1)
+        {
             mbtowc_for_text_stream = utf8_mbtowc;
             return ret;
         }
         ret = _TextStream_mbstowcs(gbk_mbtowc, pwcs, s, n);
-        if (ret != (size_t)-1) {
+        if (ret != (size_t)-1)
+        {
             mbtowc_for_text_stream = gbk_mbtowc;
             return ret;
         }
@@ -106,8 +127,9 @@ static size_t TextStream_mbstowcs(tjs_wchar *pwcs, const tjs_char *s, size_t n) 
 }
 
 static ttstr enc_utf8 = TJS_N("utf8"), enc_utf8_2 = TJS_N("utf-8"), enc_utf16 = TJS_N("utf16"),
-    enc_utf16_2 = TJS_N("utf-16"), enc_gbk = TJS_N("gbk"), enc_jis = TJS_N("sjis"),
-    enc_jis_2 = TJS_N("shiftjis"), enc_jis_3 = TJS_N("shift_jis"), enc_jis_4 = TJS_N("shift-jis");
+             enc_utf16_2 = TJS_N("utf-16"), enc_gbk = TJS_N("gbk"), enc_jis = TJS_N("sjis"),
+             enc_jis_2 = TJS_N("shiftjis"), enc_jis_3 = TJS_N("shift_jis"),
+             enc_jis_4 = TJS_N("shift-jis");
 
 static ttstr DefaultReadEncoding = TJS_N("UTF-8");
 //---------------------------------------------------------------------------
@@ -119,11 +141,11 @@ static ttstr DefaultReadEncoding = TJS_N("UTF-8");
 */
 class tTVPTextReadStream : public iTJSTextReadStream
 {
-    tTJSBinaryStream * Stream;
+    tTJSBinaryStream* Stream;
     bool DirectLoad;
-    tjs_char *Buffer;
+    tjs_char* Buffer;
     size_t BufferLen;
-    tjs_char *BufferPtr;
+    tjs_char* BufferPtr;
     tjs_int CryptMode;
 
 public:
@@ -142,7 +164,7 @@ public:
         DirectLoad = false;
         CryptMode = -1;
 
-               // check o mode
+        // check o mode
         Stream = _stream;
 
         tjs_uint64 ofs = 0;
@@ -166,7 +188,7 @@ public:
             Stream->SetPosition(ofs);
         }
 
-               // check first of the file - whether the file is unicode
+        // check first of the file - whether the file is unicode
         try
         {
             tjs_uint8 mark[3] = {0, 0};
@@ -298,14 +320,14 @@ public:
             throw;
         }
     }
-    tTVPTextReadStream(const ttstr  & name, const ttstr & modestr)
+    tTVPTextReadStream(const ttstr& name, const ttstr& modestr)
     {
-      // following syntax of modestr is currently supported.
-      // oN: read from binary offset N (in bytes)
+        // following syntax of modestr is currently supported.
+        // oN: read from binary offset N (in bytes)
 
 #ifndef TVP_NO_CHECK_WIDE_CHAR_SIZE
-        if(sizeof(tjs_wchar)  != 2)
-            TVPThrowExceptionMessage( TVPTheHostIsNotA16BitUnicodeSystem );
+        if (sizeof(tjs_wchar) != 2)
+            TVPThrowExceptionMessage(TVPTheHostIsNotA16BitUnicodeSystem);
 #endif
 
         Stream = NULL;
@@ -313,54 +335,54 @@ public:
         DirectLoad = false;
         CryptMode = -1;
 
-               // check o mode
+        // check o mode
         Stream = TVPCreateStream(name, TJS_BS_READ);
 
         tjs_uint64 ofs = 0;
-        const tjs_char * o_ofs;
+        const tjs_char* o_ofs;
         o_ofs = TJS_strchr(modestr.c_str(), TJS_N('o'));
-        if(o_ofs != NULL)
+        if (o_ofs != NULL)
         {
             // seek to offset
             o_ofs++;
             tjs_char buf[256];
             int i;
-            for(i = 0; i < 255; i++)
+            for (i = 0; i < 255; i++)
             {
-                if(o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
+                if (o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
                     buf[i] = o_ofs[i];
-                else break;
+                else
+                    break;
             }
             buf[i] = 0;
             ofs = ttstr(buf).AsInteger();
             Stream->SetPosition(ofs);
         }
 
-               // check first of the file - whether the file is unicode
+        // check first of the file - whether the file is unicode
         try
         {
-            tjs_uint8 mark[3] = {0,0};
+            tjs_uint8 mark[3] = {0, 0};
             Stream->Read(mark, 3);
-            if(mark[0] == 0xff && mark[1] == 0xfe)
+            if (mark[0] == 0xff && mark[1] == 0xfe)
             {
                 // unicode
                 Stream->SetPosition(ofs + 2);
                 DirectLoad = true;
             }
-            else if(mark[0] == 0xfe && mark[1] == 0xfe)
+            else if (mark[0] == 0xfe && mark[1] == 0xfe)
             {
                 // ciphered text or compressed
                 tjs_uint8 mode = mark[2];
-                if(mode != 0 && mode != 1 && mode != 2)
+                if (mode != 0 && mode != 1 && mode != 2)
                     TVPThrowExceptionMessage(TVPUnsupportedCipherMode, name);
                 // currently only mode0 and mode1, and compressed (mode2) are supported
                 CryptMode = mode;
                 DirectLoad = CryptMode != 2;
 
                 Stream->Read(mark, 2); // original bom code comes here (is not compressed)
-                if(mark[0] != 0xff || mark[1] != 0xfe)
+                if (mark[0] != 0xff || mark[1] != 0xfe)
                     TVPThrowExceptionMessage(TVPUnsupportedCipherMode, name);
-
 
                 if (CryptMode == 2)
                 {
@@ -373,7 +395,8 @@ public:
                     // too large stream
                     unsigned long destlen;
                     tjs_uint8* nbuf = new tjs_uint8[(unsigned long)compressed + 1];
-                    tjs_uint16* unbuf = new tjs_uint16[(destlen = (unsigned long)uncompressed) / 2 + 1];
+                    tjs_uint16* unbuf =
+                        new tjs_uint16[(destlen = (unsigned long)uncompressed) / 2 + 1];
                     try
                     {
                         Stream->ReadBuffer(nbuf, (unsigned long)compressed);
@@ -464,26 +487,29 @@ public:
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
-            delete Stream; Stream = NULL;
+            delete Stream;
+            Stream = NULL;
             throw;
         }
     }
 
-
     ~tTVPTextReadStream()
     {
-        if(Stream) delete Stream;
-        if(Buffer) delete [] Buffer;
+        if (Stream)
+            delete Stream;
+        if (Buffer)
+            delete[] Buffer;
     }
 
-    tjs_uint Read(tTJSString & targ, tjs_uint size)
+    tjs_uint Read(tTJSString& targ, tjs_uint size)
     {
-        if(DirectLoad)
+        if (DirectLoad)
         {
-            if(size == 0) size = static_cast<tjs_uint>(Stream->GetSize() - Stream->GetPosition());
-            if(!size)
+            if (size == 0)
+                size = static_cast<tjs_uint>(Stream->GetSize() - Stream->GetPosition());
+            if (!size)
             {
                 targ.Clear();
                 return 0;
@@ -492,29 +518,30 @@ public:
             tjs_uint read = Stream->Read(buf, size * 2); // 2 = BMP unicode size
             read /= 2;
 #if TJS_HOST_IS_BIG_ENDIAN
-                        // re-order input
-            for(tjs_uint i = 0; i<read; i++)
+            // re-order input
+            for (tjs_uint i = 0; i < read; i++)
             {
                 tjs_wchar ch = buf[i];
                 buf[i] = ((ch >> 8) & 0xff) + ((ch & 0xff) << 8);
             }
 #endif
-            if(CryptMode == 0)
+            if (CryptMode == 0)
             {
                 // simple crypt
-                for(tjs_uint i = 0; i<read; i++)
+                for (tjs_uint i = 0; i < read; i++)
                 {
                     tjs_wchar ch = buf[i];
-                    if(ch >= 0x20) buf[i] = ch ^ (((ch&0xfe) << 8)^1);
+                    if (ch >= 0x20)
+                        buf[i] = ch ^ (((ch & 0xfe) << 8) ^ 1);
                 }
             }
-            else if(CryptMode == 1)
+            else if (CryptMode == 1)
             {
                 // simple crypt
-                for(tjs_uint i = 0; i<read; i++)
+                for (tjs_uint i = 0; i < read; i++)
                 {
                     tjs_wchar ch = buf[i];
-                    ch = ((ch & 0xaaaaaaaa)>>1) | ((ch & 0x55555555)<<1);
+                    ch = ((ch & 0xaaaaaaaa) >> 1) | ((ch & 0x55555555) << 1);
                     buf[i] = ch;
                 }
             }
@@ -532,10 +559,11 @@ public:
         }
         else
         {
-            if(size == 0) size = (tjs_uint)BufferLen;
-            if(size)
+            if (size == 0)
+                size = (tjs_uint)BufferLen;
+            if (size)
             {
-                tjs_char *buf = targ.AllocBuffer(size);
+                tjs_char* buf = targ.AllocBuffer(size);
                 TJS_strncpy(buf, BufferPtr, size);
                 buf[size] = 0;
                 BufferPtr += size;
@@ -551,31 +579,29 @@ public:
     }
 
     void Destruct() { delete this; }
-
 };
 //---------------------------------------------------------------------------
 class tTVPTextWriteStream : public iTJSTextWriteStream
 {
     // TODO: 32bit wchar_t support
 
-
     static const tjs_uint COMPRESSION_BUFFER_SIZE = 1024 * 1024;
 
-    tTJSBinaryStream * Stream;
+    tTJSBinaryStream* Stream;
     tjs_int CryptMode;
-                       // -1 for no-crypt
-                       // 0: (unused)	(old buggy crypt mode)
-                       // 1: simple crypt
-                       // 2: complessed
+    // -1 for no-crypt
+    // 0: (unused)	(old buggy crypt mode)
+    // 1: simple crypt
+    // 2: complessed
     int CompressionLevel; // compression level of zlib
 
-    z_stream_s *ZStream;
+    z_stream_s* ZStream;
     tjs_uint CompressionSizePosition;
-    tjs_char *CompressionBuffer;
+    tjs_char* CompressionBuffer;
     bool CompressionFailed;
 
 public:
-    tTVPTextWriteStream(const ttstr & name, const ttstr &modestr)
+    tTVPTextWriteStream(const ttstr& name, const ttstr& modestr)
     {
         // modestr supports following modes:
         // dN: deflate(compress) at mode N ( currently not implemented )
@@ -590,40 +616,40 @@ public:
         CompressionBuffer = NULL;
         CompressionFailed = false;
 
-               // check c/z mode
-        const tjs_char *p;
-        if((p = TJS_strchr(modestr.c_str(), TJS_N('c'))) != NULL)
+        // check c/z mode
+        const tjs_char* p;
+        if ((p = TJS_strchr(modestr.c_str(), TJS_N('c'))) != NULL)
         {
             CryptMode = 1; // simple crypt
-            if(p[1] >= TJS_N('0') && p[1] <= TJS_N('9'))
+            if (p[1] >= TJS_N('0') && p[1] <= TJS_N('9'))
                 CryptMode = p[1] - TJS_N('0');
         }
 
-        if((p = TJS_strchr(modestr.c_str(), TJS_N('z'))) != NULL)
+        if ((p = TJS_strchr(modestr.c_str(), TJS_N('z'))) != NULL)
         {
             CryptMode = 2; // compressed (cannot be with 'c')
-            if(p[1] >= TJS_N('0') && p[1] <= TJS_N('9'))
+            if (p[1] >= TJS_N('0') && p[1] <= TJS_N('9'))
                 CompressionLevel = p[1] - TJS_N('0');
         }
 
-        if(CryptMode != -1 && CryptMode != 1 && CryptMode != 2)
-            TVPThrowExceptionMessage(TVPUnsupportedModeString,
-                                     TJS_N("unsupported cipher mode"));
+        if (CryptMode != -1 && CryptMode != 1 && CryptMode != 2)
+            TVPThrowExceptionMessage(TVPUnsupportedModeString, TJS_N("unsupported cipher mode"));
 
-               // check o mode
-        const tjs_char * o_ofs;
+        // check o mode
+        const tjs_char* o_ofs;
         o_ofs = TJS_strchr(modestr.c_str(), TJS_N('o'));
-        if(o_ofs != NULL)
+        if (o_ofs != NULL)
         {
             // seek to offset
             o_ofs++;
             tjs_char buf[256];
             int i;
-            for(i = 0; i < 255; i++)
+            for (i = 0; i < 255; i++)
             {
-                if(o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
+                if (o_ofs[i] >= TJS_N('0') && o_ofs[i] <= TJS_N('9'))
                     buf[i] = o_ofs[i];
-                else break;
+                else
+                    break;
             }
             buf[i] = 0;
             tjs_uint64 ofs = ttstr(buf).AsInteger();
@@ -635,8 +661,7 @@ public:
             Stream = TVPCreateStream(name, TJS_BS_WRITE);
         }
 
-
-        if(CryptMode == 1 || CryptMode == 2)
+        if (CryptMode == 1 || CryptMode == 2)
         {
             // simple crypt or compressed
             tjs_uint8 crypt_mode_sig[4];
@@ -646,19 +671,19 @@ public:
             Stream->WriteBuffer(crypt_mode_sig, 3);
         }
 
-               // now output text stream will write unicode texts
-        static tjs_uint8 bommark[4] = { 0xff, 0xfe,
-                                       0x00, 0x00/*dummy 2bytes*/ };
+        // now output text stream will write unicode texts
+        static tjs_uint8 bommark[4] = {0xff, 0xfe, 0x00, 0x00 /*dummy 2bytes*/};
         Stream->WriteBuffer(bommark, 2);
 
-        if(CryptMode == 2)
+        if (CryptMode == 2)
         {
             // allocate and initialize zlib straem
             ZStream = new z_stream_s();
             ZStream->zalloc = Z_NULL;
             ZStream->zfree = Z_NULL;
             ZStream->opaque = Z_NULL;
-            if (deflateInit(ZStream, CompressionLevel) != Z_OK) {
+            if (deflateInit(ZStream, CompressionLevel) != Z_OK)
+            {
                 CompressionFailed = true;
                 TVPThrowExceptionMessage(TVPCompressionFailed);
             }
@@ -667,10 +692,10 @@ public:
 
             ZStream->next_in = NULL;
             ZStream->avail_in = 0;
-            ZStream->next_out = reinterpret_cast<Bytef*>( CompressionBuffer );
+            ZStream->next_out = reinterpret_cast<Bytef*>(CompressionBuffer);
             ZStream->avail_out = COMPRESSION_BUFFER_SIZE;
 
-                   // Compression Size (write dummy)
+            // Compression Size (write dummy)
             CompressionSizePosition = static_cast<tjs_uint>(Stream->GetPosition());
             WriteI64LE((tjs_uint64)0);
             WriteI64LE((tjs_uint64)0);
@@ -679,32 +704,38 @@ public:
 
     ~tTVPTextWriteStream()
     {
-        if(CryptMode == 2)
+        if (CryptMode == 2)
         {
 
-            if (! CompressionFailed) {
-                try {
+            if (!CompressionFailed)
+            {
+                try
+                {
                     // close zlib stream
                     int result = 0;
-                    do {
+                    do
+                    {
                         result = deflate(ZStream, Z_FINISH);
-                        if (result != Z_OK
-                            && result != Z_STREAM_END) {
+                        if (result != Z_OK && result != Z_STREAM_END)
+                        {
                             TVPThrowExceptionMessage(TVPCompressionFailed);
                         }
-                        Stream->WriteBuffer(CompressionBuffer, COMPRESSION_BUFFER_SIZE - ZStream->avail_out);
-                        ZStream->next_out = reinterpret_cast<Bytef*>( CompressionBuffer );
+                        Stream->WriteBuffer(CompressionBuffer,
+                                            COMPRESSION_BUFFER_SIZE - ZStream->avail_out);
+                        ZStream->next_out = reinterpret_cast<Bytef*>(CompressionBuffer);
                         ZStream->avail_out = COMPRESSION_BUFFER_SIZE;
                     } while (result != Z_STREAM_END);
 
-                           // rollback and write compression size.
+                    // rollback and write compression size.
                     Stream->SetPosition(CompressionSizePosition);
                     WriteI64LE((tjs_uint64)ZStream->total_out);
                     WriteI64LE((tjs_uint64)ZStream->total_in);
                 }
-                catch(...) {
+                catch (...)
+                {
                     // delete zlib compress stream
-                    if (ZStream) {
+                    if (ZStream)
+                    {
                         deflateEnd(ZStream);
                         delete ZStream;
                     }
@@ -714,34 +745,35 @@ public:
                 }
             }
             // delete zlib compress stream
-            if (ZStream) {
+            if (ZStream)
+            {
                 deflateEnd(ZStream);
                 delete ZStream;
             }
             delete[] CompressionBuffer;
-
         }
 
-        if(Stream) delete Stream;
+        if (Stream)
+            delete Stream;
     }
 
     void WriteI64LE(tjs_uint64 v)
     {
         // write 64bit little endian value to the file.
         tjs_uint8 buf[8];
-        buf[0] = (tjs_uint8)(v	>>	(0*8));
-        buf[1] = (tjs_uint8)(v	>>	(1*8));
-        buf[2] = (tjs_uint8)(v	>>	(2*8));
-        buf[3] = (tjs_uint8)(v	>>	(3*8));
-        buf[4] = (tjs_uint8)(v	>>	(4*8));
-        buf[5] = (tjs_uint8)(v	>>	(5*8));
-        buf[6] = (tjs_uint8)(v	>>	(6*8));
-        buf[7] = (tjs_uint8)(v	>>	(7*8));
+        buf[0] = (tjs_uint8)(v >> (0 * 8));
+        buf[1] = (tjs_uint8)(v >> (1 * 8));
+        buf[2] = (tjs_uint8)(v >> (2 * 8));
+        buf[3] = (tjs_uint8)(v >> (3 * 8));
+        buf[4] = (tjs_uint8)(v >> (4 * 8));
+        buf[5] = (tjs_uint8)(v >> (5 * 8));
+        buf[6] = (tjs_uint8)(v >> (6 * 8));
+        buf[7] = (tjs_uint8)(v >> (7 * 8));
 
         Stream->WriteBuffer(buf, 8);
     }
 
-    void Write(const ttstr & targ)
+    void Write(const ttstr& targ)
     {
         tjs_wchar* buf = NULL;
         tjs_int len = 0;
@@ -755,28 +787,28 @@ public:
             buf[len] = 0;
 
 #if TJS_HOST_IS_BIG_ENDIAN
-            tjs_uint16 *p;
-            if(CryptMode == 1)
+            tjs_uint16* p;
+            if (CryptMode == 1)
             {
                 // simple crypt
                 p = buf;
-                if(p)
+                if (p)
                 {
-                    while(*p)
+                    while (*p)
                     {
                         tjs_char ch = *p;
-                        ch = ((ch & 0xaaaaaaaa)>>1) | ((ch & 0x55555555)<<1);
+                        ch = ((ch & 0xaaaaaaaa) >> 1) | ((ch & 0x55555555) << 1);
                         *p = ch;
                         p++;
                     }
                 }
             }
 
-                   // re-order to little endian unicode text
+            // re-order to little endian unicode text
             p = buf;
-            if(p)
+            if (p)
             {
-                while(*p)
+                while (*p)
                 {
                     *p = ((*p >> 8) & 0xff) + ((*p & 0xff) << 8);
                     p++;
@@ -785,24 +817,23 @@ public:
 
             WriteRawData(str.c_str(), len * sizeof(tjs_char));
 #else
-            if(CryptMode == 1)
+            if (CryptMode == 1)
             {
                 // simple crypt
                 tjs_wchar* p;
                 p = buf;
-                if(p)
+                if (p)
                 {
-                    while(*p)
+                    while (*p)
                     {
                         tjs_wchar ch = *p;
-                        ch = ((ch & 0xaaaaaaaa)>>1) | ((ch & 0x55555555)<<1);
+                        ch = ((ch & 0xaaaaaaaa) >> 1) | ((ch & 0x55555555) << 1);
                         *p = ch;
                         p++;
                     }
                 }
 
                 WriteRawData(buf, len * sizeof(tjs_wchar));
-
             }
             else
             {
@@ -810,31 +841,34 @@ public:
             }
 #endif
         }
-        catch(...)
+        catch (...)
         {
-            delete [] buf;
+            delete[] buf;
             throw;
         }
-        delete [] buf;
+        delete[] buf;
     }
 
-    void WriteRawData(void *ptr, size_t size)
+    void WriteRawData(void* ptr, size_t size)
     {
-        if(CryptMode == 2)
+        if (CryptMode == 2)
         {
             // compressed with zlib stream.
             ZStream->next_in = (Bytef*)ptr;
             ZStream->avail_in = (uInt)size;
 
-            while (ZStream->avail_in > 0) {
+            while (ZStream->avail_in > 0)
+            {
                 int result = deflate(ZStream, Z_NO_FLUSH);
-                if (result != Z_OK) {
+                if (result != Z_OK)
+                {
                     CompressionFailed = true;
                     TVPThrowExceptionMessage(TVPCompressionFailed);
                 }
-                if (ZStream->avail_out == 0) {
+                if (ZStream->avail_out == 0)
+                {
                     Stream->WriteBuffer(CompressionBuffer, COMPRESSION_BUFFER_SIZE);
-                    ZStream->next_out = reinterpret_cast<Bytef*>( CompressionBuffer );
+                    ZStream->next_out = reinterpret_cast<Bytef*>(CompressionBuffer);
                     ZStream->avail_out = COMPRESSION_BUFFER_SIZE;
                 }
             }
@@ -854,14 +888,12 @@ iTJSTextReadStream* TVPCreateTextStreamForRead(tTJSBinaryStream* stream, const t
     return new tTVPTextReadStream(stream, modestr);
 }
 //---------------------------------------------------------------------------
-iTJSTextReadStream * TVPCreateTextStreamForRead(const ttstr & name,
-                                               const ttstr & modestr)
+iTJSTextReadStream* TVPCreateTextStreamForRead(const ttstr& name, const ttstr& modestr)
 {
     return new tTVPTextReadStream(name, modestr);
 }
 //---------------------------------------------------------------------------
-iTJSTextWriteStream * TVPCreateTextStreamForWrite(const ttstr & name,
-                                                 const ttstr & modestr)
+iTJSTextWriteStream* TVPCreateTextStreamForWrite(const ttstr& name, const ttstr& modestr)
 {
     return new tTVPTextWriteStream(name, modestr);
 }
@@ -869,14 +901,23 @@ iTJSTextWriteStream * TVPCreateTextStreamForWrite(const ttstr & name,
 void TVPSetDefaultReadEncoding(const ttstr& encoding)
 {
     DefaultReadEncoding = encoding;
-    ttstr codestr = encoding;  codestr.ToLowerCase();
-    if (codestr == enc_gbk) {
+    ttstr codestr = encoding;
+    codestr.ToLowerCase();
+    if (codestr == enc_gbk)
+    {
         mbtowc_for_text_stream = gbk_mbtowc;
-    } else if (codestr == enc_utf8 || codestr == enc_utf8_2) {
+    }
+    else if (codestr == enc_utf8 || codestr == enc_utf8_2)
+    {
         mbtowc_for_text_stream = utf8_mbtowc;
-    } else if (codestr == enc_jis || codestr == enc_jis_2 || codestr == enc_jis_3 || codestr == enc_jis_4) {
+    }
+    else if (codestr == enc_jis || codestr == enc_jis_2 || codestr == enc_jis_3 ||
+             codestr == enc_jis_4)
+    {
         mbtowc_for_text_stream = sjis_mbtowc;
-    } else {
+    }
+    else
+    {
         TVPThrowExceptionMessage(TVPUnsupportedEncoding, encoding);
     }
 }
@@ -886,4 +927,3 @@ const tjs_char* TVPGetDefaultReadEncoding()
     return DefaultReadEncoding.c_str();
 }
 //---------------------------------------------------------------------------
-

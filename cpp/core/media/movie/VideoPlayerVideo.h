@@ -70,19 +70,23 @@ public:
     bool AcceptsData() override;
     bool HasData() const override { return m_messageQueue.GetDataSize() > 0; }
     int GetLevel() override { return m_messageQueue.GetLevel(); }
-    bool IsInited() const  override { return m_messageQueue.IsInited(); }
-    void SendMessage(CDVDMsg* pMsg, int priority = 0)  override { m_messageQueue.Put(pMsg, priority); }
-    void FlushMessages()  override{ m_messageQueue.Flush(); }
+    bool IsInited() const override { return m_messageQueue.IsInited(); }
+    void SendMessage(CDVDMsg* pMsg, int priority = 0) override
+    {
+        m_messageQueue.Put(pMsg, priority);
+    }
+    void FlushMessages() override { m_messageQueue.Flush(); }
 
-    void EnableSubtitle(bool bEnable)  override{ m_bRenderSubs = bEnable; }
-    bool IsSubtitleEnabled()  override{ return m_bRenderSubs; }
-    double GetSubtitleDelay()  override{ return m_iSubtitleDelay; }
+    void EnableSubtitle(bool bEnable) override { m_bRenderSubs = bEnable; }
+    bool IsSubtitleEnabled() override { return m_bRenderSubs; }
+    double GetSubtitleDelay() override { return m_iSubtitleDelay; }
     void SetSubtitleDelay(double delay) override { m_iSubtitleDelay = delay; }
     bool IsStalled() const override { return m_stalled; }
     bool IsRewindStalled() const override { return m_rewindStalled; }
     double GetCurrentPts() override;
-    double GetOutputDelay() override; /* returns the expected delay, from that a packet is put in queue */
-    int GetDecoderFreeSpace()  override{ return 0; }
+    double GetOutputDelay()
+        override; /* returns the expected delay, from that a packet is put in queue */
+    int GetDecoderFreeSpace() override { return 0; }
     std::string GetPlayerInfo() override;
     int GetVideoBitrate() override;
     std::string GetStereoMode() override;

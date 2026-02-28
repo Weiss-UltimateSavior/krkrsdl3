@@ -30,9 +30,10 @@ struct emotelimit // 区域限制
 class emotenode;
 struct emoteRender // 渲染方式
 {
-    int type = 0; // 0:不绘制 1:参与网格变形和矩阵变换 2:只参与矩阵变换 3:layout/motion变形穿透(无法使用网格和透明度)，需要将matTrans合并到下一级使用
+    int type = 0; // 0:不绘制 1:参与网格变形和矩阵变换 2:只参与矩阵变换
+                  // 3:layout/motion变形穿透(无法使用网格和透明度)，需要将matTrans合并到下一级使用
     glm::mat4 matTrans = glm::mat4(1.0f);
-    float controlPts[32] = { 0.0 };
+    float controlPts[32] = {0.0};
     float opa = 1.0;
 
     bool hasStencil = false;
@@ -68,7 +69,7 @@ public:
     double time = 0.0;
     uint8_t type;
 
-    //content
+    // content
     bool hasContent = false;
     double coordX = 0.0, coordY = 0.0, coordZ = 0.0, angle = 0.0, sx = 0.0, sy = 0.0, zx = 1.0,
            zy = 1.0, ox = 0.0, oy = 0.0, opa = 1.0;
@@ -82,29 +83,17 @@ public:
     std::array<double, 4> zcc_x = {0};
     std::array<double, 4> zcc_y = {0};
     bool hasccc = false;
-    std::array<double, 2> ccc_c = { 0 }; // 坐标曲线
-    std::array<double, 4> ccc_x = { 0 };
-    std::array<double, 4> ccc_y = { 0 };
+    std::array<double, 2> ccc_c = {0}; // 坐标曲线
+    std::array<double, 4> ccc_x = {0};
+    std::array<double, 4> ccc_y = {0};
 
-    //mesh
+    // mesh
     bool hasbp = false;
-    double bp[32] = {
-    0.000000f, 0.000000f,
-    0.333333f, 0.000000f,
-    0.666667f, 0.000000f,
-    1.000000f, 0.000000f,
-    0.000000f, 0.333333f,
-    0.333333f, 0.333333f,
-    0.666667f, 0.333333f,
-    1.000000f, 0.333333f,
-    0.000000f, 0.666667f,
-    0.333333f, 0.666667f,
-    0.666667f, 0.666667f,
-    1.000000f, 0.666667f,
-    0.000000f, 1.000000f,
-    0.333333f, 1.000000f,
-    0.666667f, 1.000000f,
-    1.000000f, 1.000000f }; // 网格数据
+    double bp[32] = {0.000000f, 0.000000f, 0.333333f, 0.000000f, 0.666667f, 0.000000f, 1.000000f,
+                     0.000000f, 0.000000f, 0.333333f, 0.333333f, 0.333333f, 0.666667f, 0.333333f,
+                     1.000000f, 0.333333f, 0.000000f, 0.666667f, 0.333333f, 0.666667f, 0.666667f,
+                     0.666667f, 1.000000f, 0.666667f, 0.000000f, 1.000000f, 0.333333f, 1.000000f,
+                     0.666667f, 1.000000f, 1.000000f, 1.000000f}; // 网格数据
     bool hascc = false;
     std::array<double, 2> cc_c = {0}; // 网格曲线
     std::array<double, 4> cc_x = {0};
@@ -119,7 +108,11 @@ class emotemotion;
 class emotenode
 {
 public:
-    emotenode(emotemotion* rootmotion, emotenode* parent, std::vector<emotenode*>& nodeList, emotefile* filePtr, uint32_t startOffset);
+    emotenode(emotemotion* rootmotion,
+              emotenode* parent,
+              std::vector<emotenode*>& nodeList,
+              emotefile* filePtr,
+              uint32_t startOffset);
     ~emotenode();
 
     void checkDrawStatus(float tick, std::vector<emoteRender>& renderList, emotelimit lim);
@@ -157,13 +150,14 @@ private:
     emoteicon* ic = nullptr;
     void resizeMainData();
     uint8_t* data = nullptr; // 自身icon
-    float originX = 0; // 给子类用的坐标原点 同时也作为变换的锚点
+    float originX = 0;       // 给子类用的坐标原点 同时也作为变换的锚点
     float originY = 0;
     float width = 0;
     float height = 0;
     bool isNeedDraw = false; // 是否需要绘制
     bool isIcon = false; // 是否需要实际绘制(只有icon需要，诸如 blank 只起到布局和变形作用)
-    bool isLayout = false; // layout/motion与blank的区别，前者无法提供网格变形，无缓存画布，无透明度，变化矩阵需要合并到下一级
+    bool isLayout =
+        false; // layout/motion与blank的区别，前者无法提供网格变形，无缓存画布，无透明度，变化矩阵需要合并到下一级
     emoteframe* frame = nullptr;
     emoteframe* nextframe = nullptr;
 
@@ -174,13 +168,13 @@ private:
     float currCoordy = 0;
     float currCoordz = 0;
     float currOpa = 1.0;
-    float currAngle = 0.0; //变换参数 旋转angle   错切sx/sy   缩放zx/zy   
+    float currAngle = 0.0; // 变换参数 旋转angle   错切sx/sy   缩放zx/zy
     float currSx = 0.0, currSy = 0.0;
     float currZx = 0.0, currZy = 0.0;
     float currOx = 0.0, currOy = 0.0;
     float currTimeOffset = 0.0; // motion引用偏移值
     bool isNeedBp = false;
-    float currbp[32] = {0.0}; //网格参数
+    float currbp[32] = {0.0}; // 网格参数
 
     // opengl
     void resizeOpenGL();
@@ -264,7 +258,7 @@ public:
     // base
     double time = 0.0;
     uint8_t type = 0;
-    //content
+    // content
     bool hasContent = false;
     double easing = 0.0, value = 0.0;
 };
@@ -326,18 +320,18 @@ public:
     ~bustControl();
     struct BustState
     {
-        Vector3 op;           // 静止位置 (op)
-        Vector3 p;     // 当前位置 (p)
-        Vector3 pv;           // 当前速度 (pv)
-        double ofs;    // 偏移量 (ofs)
+        Vector3 op; // 静止位置 (op)
+        Vector3 p;  // 当前位置 (p)
+        Vector3 pv; // 当前速度 (pv)
+        double ofs; // 偏移量 (ofs)
     };
 
     BustState param;
-    double spring;       // 弹簧系数
-    double friction;     // 摩擦力
-    double gravity;      // 重力
-    double scale_x;      // X轴缩放
-    double scale_y;      // Y轴缩放
+    double spring;      // 弹簧系数
+    double friction;    // 摩擦力
+    double gravity;     // 重力
+    double scale_x;     // X轴缩放
+    double scale_y;     // Y轴缩放
     std::string var_lr; // 左右变量名
     std::string var_ud; // 上下变量名
 };
@@ -365,7 +359,7 @@ public:
     double friction_y;
     double bend_spd;
     double bend_vol;
-    
+
     double bendR;
     double bendS;
     double ofs;
@@ -518,7 +512,7 @@ public:
 
     std::map<std::string, float> _varList;
     std::vector<emoteattrcomp*> _attrcomp;
-    //std::vector<std::string> _mirrorControl;
+    // std::vector<std::string> _mirrorControl;
     std::vector<emoteselect*> _selectorControl;
     std::vector<emotetimeline*> _timelineControl;
     std::vector<eyeControl*> _eyeControl;
@@ -551,7 +545,7 @@ public:
     double originY = 0;
     double width = 0;
     double height = 0;
-    std::string type; 
+    std::string type;
     int32_t pixel = -1;
     int32_t pal = -1;
     double texWidth = 0;
@@ -599,7 +593,7 @@ public:
     void ReadAllData(uint8_t* output, uint32_t outputlen);
 
 public:
-    bool isKrkr = true; // 根据"spec"进行区别， true:"krkr" false:"win"
+    bool isKrkr = true;    // 根据"spec"进行区别， true:"krkr" false:"win"
     bool isMotion = false; // false:emote true:motion
     uint8_t colorType = 0; // 0:BGRA(一般情形,krkr/win) 1:RGBA(common)
     bool isMirror = false;

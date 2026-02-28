@@ -3,17 +3,16 @@
 #include "tjsNative.h"
 #include "tjsNativeWaveSoundBuffer.h"
 
-
 //---------------------------------------------------------------------------
 // tTJSNI_BaseMIDISoundBuffer
 //---------------------------------------------------------------------------
-class tTJSNI_BaseMIDISoundBuffer : public tTJSNI_SoundBuffer {
+class tTJSNI_BaseMIDISoundBuffer : public tTJSNI_SoundBuffer
+{
     typedef tTJSNI_SoundBuffer inherited;
 
 public:
     tTJSNI_BaseMIDISoundBuffer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 protected:
@@ -22,28 +21,27 @@ public:
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-extern void TVPMIDIOutData(const tjs_uint8 *data, int len);
+extern void TVPMIDIOutData(const tjs_uint8* data, int len);
 /* output MIDI data (can be multiple data at once) */
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 // tTJSNI_MIDISoundBuffer : MIDI Native Instance
 //---------------------------------------------------------------------------
 class tTVPSMFTrack;
-class tTJSNI_MIDISoundBuffer : public tTJSNI_BaseMIDISoundBuffer {
+class tTJSNI_MIDISoundBuffer : public tTJSNI_BaseMIDISoundBuffer
+{
     friend class tTVPSMFTrack;
     typedef tTJSNI_BaseMIDISoundBuffer inherited;
 
 public:
     tTJSNI_MIDISoundBuffer();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 #ifdef TVP_ENABLE_MIDI
 private:
-    std::vector<tTVPSMFTrack *> Tracks;
+    std::vector<tTVPSMFTrack*> Tracks;
     tjs_int Division;
 
     tjs_int64 Position;
@@ -52,7 +50,7 @@ private:
 
     tjs_int64 TickCountDelta; //
 
-    bool UsingChannel[16]; // using channel is true
+    bool UsingChannel[16];       // using channel is true
     tjs_uint32 UsingNote[16][4]; // using notes
 
     int Volumes[16]; // track volumes
@@ -70,7 +68,7 @@ private:
     tjs_uint64 LastTickTime; // tick count of last OnTimer()
 
     HWND UtilWindow; // a dummy window for receiving status from playing thread
-    void WndProc(Messages::TMessage &Msg); // its window procedure
+    void WndProc(Messages::TMessage& Msg); // its window procedure
 
 private:
     void AllNoteOff();
@@ -79,7 +77,7 @@ private:
 
 public:
     bool OnTimer();
-    void Open(const ttstr &name);
+    void Open(const ttstr& name);
 
 private:
     bool StopPlay();
@@ -94,7 +92,7 @@ private:
 
 public:
     tjs_int GetVolume() const { return Volume; } // GetVolume override
-    void SetVolume(tjs_int v); // SetVolume override
+    void SetVolume(tjs_int v);                   // SetVolume override
 
     tjs_int GetVolume2() const { return Volume2; }
     void SetVolume2(tjs_int v);
@@ -117,11 +115,11 @@ protected:
 class tTJSNC_MIDISoundBuffer : public tTJSNativeClass
 {
 public:
-	tTJSNC_MIDISoundBuffer();
-	static tjs_uint32 ClassID;
+    tTJSNC_MIDISoundBuffer();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_MIDISoundBuffer();

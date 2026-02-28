@@ -854,11 +854,11 @@ struct ncbNativeObjectBoxing
             typedef typename ConvT::Stripper<TargetT>::Type ClassT;
             typedef ncbInstanceAdaptor<ClassT> AdaptorT;
 
-            ClassT* p = box<TargetT>::Get(src);                    //< コピー/参照/ポインタ場合分け
-            bool const s = box<TargetT>::Sticky;                   //< sticky フラグ
+            ClassT* p = box<TargetT>::Get(src);  //< コピー/参照/ポインタ場合分け
+            bool const s = box<TargetT>::Sticky; //< sticky フラグ
             iTJSDispatch2* adpobj = AdaptorT::CreateAdaptor(p, s); //< アダプタTJSオブジェクト生成
             dst = tTJSVariant(adpobj, adpobj);                     //< Variantにコピー
-            adpobj->Release();                                     //< コピー済みなのでadaptorは不要
+            adpobj->Release(); //< コピー済みなのでadaptorは不要
         }
 
         // for reference
@@ -882,7 +882,7 @@ struct ncbNativeObjectBoxing
             iTJSDispatch2* obj =
                 src.AsObjectNoAddRef(); //< 参照カウンタ増加なしでDispatchオブジェクト取得
             ClassT* p = AdaptorT::GetNativeInstance(obj, true); //< 実インスタンスのポインタを取得
-            dst = ConvT::ToTarget<TargetT>::Get(p);             //< 必要とされる型に変換して返す
+            dst = ConvT::ToTarget<TargetT>::Get(p); //< 必要とされる型に変換して返す
         }
     };
 };
@@ -1292,9 +1292,9 @@ struct ncbNativeClassMethodBase : public tTJSDispatch
     {
         _imethod = this;
         switch (t)
-        {       // タイプ名を設定
-                //		case nitClass:    _name = TJS_N("Class");    break; //
-                //クラスになることはありえない
+        { // タイプ名を設定
+          //		case nitClass:    _name = TJS_N("Class");    break; //
+          // クラスになることはありえない
             case nitMethod:
                 _name = TJS_N("Function");
                 break;
@@ -1767,10 +1767,12 @@ protected:
         typedef typename SelectorT::ClassT
             ClassT; // メソッド呼び出しの対象クラス(staticならvoid, bridgeなら転送先クラス)
         typedef typename SelectorT::MethodT MethodT; // メソッド型
-        typedef typename SelectorT::GetInstanceT GetInstanceT; // インスタンス取得するための型(voidなら取得しない,
-                                                               // bridgeなら転送先インスタンス取得)
-        typedef typename SelectorT::FunctorT FunctorT; // 引き数取得用ファンクタ型(通常はparamsFunctor,
-                                                       // proxyならparamsFunctorWithInstance)
+        typedef typename SelectorT::GetInstanceT
+            GetInstanceT; // インスタンス取得するための型(voidなら取得しない,
+                          // bridgeなら転送先インスタンス取得)
+        typedef
+            typename SelectorT::FunctorT FunctorT; // 引き数取得用ファンクタ型(通常はparamsFunctor,
+                                                   // proxyならparamsFunctorWithInstance)
         // enum { InvokeSelect = SelectorT::InvokeSelect };     // ivsMethod, ivsProxy,
         // ivsConstructor enum { ArgsCount = SelectorT::ArgsCount };           // 引数の個数(proxy
         // なら-1された値)
@@ -2788,8 +2790,8 @@ struct ncbRegistNativeClass : public ncbRegistNativeClassBase
 
         // 4 global の PropSet メソッドを用い、オブジェクトを登録する
         global->PropSet(TJS_MEMBERENSURE, // メンバがなかった場合には作成するようにするフラグ
-                        _className,       // メンバ名
-                        0,     // ヒント ( 本来はメンバ名のハッシュ値だが、NULL でもよい )
+                        _className, // メンバ名
+                        0, // ヒント ( 本来はメンバ名のハッシュ値だが、NULL でもよい )
                         &val,  // 登録する値
                         global // コンテキスト ( global でよい )
         );
@@ -3038,7 +3040,10 @@ struct ncbAutoRegister
         PostRegist,
         LINE_COUNT
     };
-#define NCB_INNER_AUTOREGISTER_LINES_INSTANCE {0, 0, 0}
+#define NCB_INNER_AUTOREGISTER_LINES_INSTANCE \
+    { \
+        0, 0, 0 \
+    }
     NameT modulename;
     ncbAutoRegister(NameT name, LineT line) : modulename(name), _next(_top[line])
     {

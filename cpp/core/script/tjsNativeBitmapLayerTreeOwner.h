@@ -5,11 +5,11 @@
 #include "tjsNativeBitmap.h"
 #include "LayerTreeOwner.h"
 
-class tTJSNI_BitmapLayerTreeOwner : public tTJSNativeInstance,
-                                    public tTVPLayerTreeOwner {
-    iTJSDispatch2 *Owner;
-    iTJSDispatch2 *BitmapObject;
-    tTJSNI_Bitmap *BitmapNI;
+class tTJSNI_BitmapLayerTreeOwner : public tTJSNativeInstance, public tTVPLayerTreeOwner
+{
+    iTJSDispatch2* Owner;
+    iTJSDispatch2* BitmapObject;
+    tTJSNI_Bitmap* BitmapNI;
 
 public:
 public:
@@ -17,32 +17,34 @@ public:
     ~tTJSNI_BitmapLayerTreeOwner();
 
     // tTJSNativeInstance
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
-    iTJSDispatch2 *GetBitmapObjectNoAddRef();
+    iTJSDispatch2* GetBitmapObjectNoAddRef();
 
     // tTVPLayerTreeOwner
-    iTJSDispatch2 *GetOwnerNoAddRef() const { return Owner; }
+    iTJSDispatch2* GetOwnerNoAddRef() const { return Owner; }
 
-    virtual void StartBitmapCompletion(iTVPLayerManager *manager);
-    virtual void NotifyBitmapCompleted(class iTVPLayerManager *manager, tjs_int x, tjs_int y,
-                          tTVPBaseTexture *bmp, const tTVPRect &cliprect,
-                          tTVPLayerType type, tjs_int opacity);
-    virtual void EndBitmapCompletion(iTVPLayerManager *manager);
+    virtual void StartBitmapCompletion(iTVPLayerManager* manager);
+    virtual void NotifyBitmapCompleted(class iTVPLayerManager* manager,
+                                       tjs_int x,
+                                       tjs_int y,
+                                       tTVPBaseTexture* bmp,
+                                       const tTVPRect& cliprect,
+                                       tTVPLayerType type,
+                                       tjs_int opacity);
+    virtual void EndBitmapCompletion(iTVPLayerManager* manager);
 
     virtual void OnSetMouseCursor(tjs_int cursor);
-    virtual void OnGetCursorPos(tjs_int &x, tjs_int &y);
+    virtual void OnGetCursorPos(tjs_int& x, tjs_int& y);
     virtual void OnSetCursorPos(tjs_int x, tjs_int y);
     virtual void OnReleaseMouseCapture();
-    virtual void OnSetHintText(iTJSDispatch2 *sender, const ttstr &hint);
+    virtual void OnSetHintText(iTJSDispatch2* sender, const ttstr& hint);
 
     virtual void OnResizeLayer(tjs_int w, tjs_int h);
     virtual void OnChangeLayerImage();
 
-    virtual void OnSetAttentionPoint(tTJSNI_BaseLayer *layer, tjs_int x,
-                                     tjs_int y);
+    virtual void OnSetAttentionPoint(tTJSNI_BaseLayer* layer, tjs_int x, tjs_int y);
     virtual void OnDisableAttentionPoint();
     virtual void OnSetImeMode(tjs_int mode);
     virtual void OnResetImeMode();
@@ -51,14 +53,16 @@ public:
     tjs_int GetHeight() const { return BitmapNI->GetHeight(); }
 };
 
-class tTJSNC_BitmapLayerTreeOwner : public tTJSNativeClass {
-	typedef tTJSNativeClass inherited;
+class tTJSNC_BitmapLayerTreeOwner : public tTJSNativeClass
+{
+    typedef tTJSNativeClass inherited;
+
 public:
-	tTJSNC_BitmapLayerTreeOwner();
-	static tjs_uint32 ClassID;
+    tTJSNC_BitmapLayerTreeOwner();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 
 extern tTJSNativeClass* TVPCreateNativeClass_BitmapLayerTreeOwner();

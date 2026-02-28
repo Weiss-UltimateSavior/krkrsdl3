@@ -4,7 +4,7 @@
 
 static void InitPlugin()
 {
-	TVPExecuteScript(TJS_N("function drawFFTGraph(){}"));
+    TVPExecuteScript(TJS_N("function drawFFTGraph(){}"));
 }
 
 NCB_PRE_REGIST_CALLBACK(InitPlugin);

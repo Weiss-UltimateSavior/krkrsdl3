@@ -91,9 +91,9 @@ struct ShrinkCopy : public LayerUtils
 {
     // TJS Method
     static tjs_error(layerShrinkCopy)(tTJSVariant* result,
-                                                      tjs_int numparams,
-                                                      tTJSVariant** param,
-                                                      iTJSDispatch2* dst)
+                                      tjs_int numparams,
+                                      tTJSVariant** param,
+                                      iTJSDispatch2* dst)
     {
         if (numparams < 9)
             return TJS_E_BADPARAMCOUNT;
@@ -437,9 +437,9 @@ struct LimitedShrink : public LayerUtils
 {
     // TJS Method
     static tjs_error(layerShrinkCopy)(tTJSVariant* result,
-                                                      tjs_int numparams,
-                                                      tTJSVariant** param,
-                                                      iTJSDispatch2* dst)
+                                      tjs_int numparams,
+                                      tTJSVariant** param,
+                                      iTJSDispatch2* dst)
     {
         if (numparams < 2)
             return TJS_E_BADPARAMCOUNT;

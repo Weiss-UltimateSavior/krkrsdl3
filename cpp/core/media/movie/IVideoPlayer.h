@@ -22,7 +22,7 @@ struct SStartMsg
 class IDVDStreamPlayer
 {
 public:
-    IDVDStreamPlayer() {};
+    IDVDStreamPlayer(){};
     virtual ~IDVDStreamPlayer() {}
     virtual bool OpenStream(CDVDStreamInfo& hint) = 0;
     virtual void CloseStream(bool bWaitForBuffers) = 0;
@@ -45,7 +45,7 @@ class CDVDVideoCodec;
 class IDVDStreamPlayerVideo : public IDVDStreamPlayer
 {
 public:
-    IDVDStreamPlayerVideo() {};
+    IDVDStreamPlayerVideo(){};
     ~IDVDStreamPlayerVideo() {}
     virtual bool OpenStream(CDVDStreamInfo& hint) = 0;
     virtual void CloseStream(bool bWaitForBuffers) = 0;
@@ -77,7 +77,7 @@ class CDVDAudioCodec;
 class IDVDStreamPlayerAudio : public IDVDStreamPlayer
 {
 public:
-    IDVDStreamPlayerAudio() {};
+    IDVDStreamPlayerAudio(){};
     ~IDVDStreamPlayerAudio() {}
     virtual bool OpenStream(CDVDStreamInfo& hints) = 0;
     virtual void CloseStream(bool bWaitForBuffers) = 0;
@@ -88,7 +88,7 @@ public:
     virtual int GetLevel() = 0;
     virtual bool IsInited() const = 0;
     virtual void SendMessage(CDVDMsg* pMsg, int priority = 0) = 0;
-    virtual void SetVolume(float fVolume) {};
+    virtual void SetVolume(float fVolume){};
     virtual std::string GetPlayerInfo() = 0;
     virtual int GetAudioBitrate() = 0;
     virtual int GetAudioChannels() = 0;

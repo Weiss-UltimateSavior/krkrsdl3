@@ -635,7 +635,7 @@ unsigned int CVideoPlayerAudio::AddPackets(const DVDAudioFrame& audioframe)
             else
             {
                 m_soundDevice->AppendBuffer(audioframe.data[0] + offset * audioframe.m_frameSize,
-                                     frames * audioframe.m_frameSize);
+                                            frames * audioframe.m_frameSize);
             }
 
             if (!m_soundDevice->IsPlaying())

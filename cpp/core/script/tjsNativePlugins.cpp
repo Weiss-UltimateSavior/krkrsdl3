@@ -4,75 +4,77 @@
 #include "tjsArray.h"
 #include "TVPPlugin.h"
 
-
 //---------------------------------------------------------------------------
 // TVPCreateNativeClass_Plugins
 //---------------------------------------------------------------------------
 tTJSNativeClass* TVPCreateNativeClass_Plugins()
 {
-	tTJSNC_Plugins* cls = new tTJSNC_Plugins();
+    tTJSNC_Plugins* cls = new tTJSNC_Plugins();
 
+    // setup some platform-specific members
+    //---------------------------------------------------------------------------
 
-	// setup some platform-specific members
-//---------------------------------------------------------------------------
+    //-- methods
 
-//-- methods
+    //----------------------------------------------------------------------
+    TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ link)
+    {
+        if (numparams < 1)
+            return TJS_E_BADPARAMCOUNT;
 
-//----------------------------------------------------------------------
-	TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/link)
-	{
-		if (numparams < 1) return TJS_E_BADPARAMCOUNT;
+        ttstr name = *param[0];
 
-		ttstr name = *param[0];
+        TVPLoadPlugin(name);
 
-		TVPLoadPlugin(name);
+        return TJS_S_OK;
+    }
+    TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(/*object to register*/ cls,
+                                            /*func. name*/ link)
+    //----------------------------------------------------------------------
+    TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ unlink)
+    {
+        if (numparams < 1)
+            return TJS_E_BADPARAMCOUNT;
 
-		return TJS_S_OK;
-	}
-	TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(/*object to register*/cls,
-		/*func. name*/link)
-		//----------------------------------------------------------------------
-		TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/unlink)
-	{
-		if (numparams < 1) return TJS_E_BADPARAMCOUNT;
+        ttstr name = *param[0];
 
-		ttstr name = *param[0];
+        bool res = TVPUnloadPlugin(name);
 
-		bool res = TVPUnloadPlugin(name);
+        if (result)
+            *result = (tjs_int)res;
 
-		if (result) *result = (tjs_int)res;
+        return TJS_S_OK;
+    }
+    TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(/*object to register*/ cls,
+                                            /*func. name*/ unlink)
+    //----------------------------------------------------------------------
+    TJS_BEGIN_NATIVE_METHOD_DECL(getList)
+    {
+        iTJSDispatch2* array = TJSCreateArrayObject();
+        try
+        {
+            tjs_int idx = 0;
+            for (ttstr name : TVPRegisteredPlugins)
+            {
+                tTJSVariant val(name);
+                array->PropSetByNum(TJS_MEMBERENSURE, idx++, &val, array);
+            }
+            if (result)
+                *result = tTJSVariant(array, array);
+        }
+        catch (...)
+        {
+            array->Release();
+            throw;
+        }
+        array->Release();
+        return TJS_S_OK;
+    }
+    TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(cls, getList)
+    //---------------------------------------------------------------------------
 
-		return TJS_S_OK;
-	}
-	TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(/*object to register*/cls,
-		/*func. name*/unlink)
-		//----------------------------------------------------------------------
-		TJS_BEGIN_NATIVE_METHOD_DECL(getList)
-	{
-		iTJSDispatch2* array = TJSCreateArrayObject();
-		try
-		{
-			tjs_int idx = 0;
-			for (ttstr name : TVPRegisteredPlugins) {
-				tTJSVariant val(name);
-				array->PropSetByNum(TJS_MEMBERENSURE, idx++, &val, array);
-			}
-			if (result) *result = tTJSVariant(array, array);
-		}
-		catch (...)
-		{
-			array->Release();
-			throw;
-		}
-		array->Release();
-		return TJS_S_OK;
-	}
-	TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(cls, getList)
-		//---------------------------------------------------------------------------
-
-
-		//---------------------------------------------------------------------------
-		return cls;
+    //---------------------------------------------------------------------------
+    return cls;
 }
 //---------------------------------------------------------------------------
 
@@ -101,8 +103,8 @@ tTJSNC_Plugins::tTJSNC_Plugins() : inherited(TJS_N("Plugins"))
 //---------------------------------------------------------------------------
 tTJSNativeInstance* tTJSNC_Plugins::CreateNativeInstance()
 {
-	// this class cannot create an instance
-	TVPThrowExceptionMessage(TVPCannotCreateInstance);
-	return NULL;
+    // this class cannot create an instance
+    TVPThrowExceptionMessage(TVPCannotCreateInstance);
+    return NULL;
 }
 //---------------------------------------------------------------------------

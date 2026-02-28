@@ -7,14 +7,14 @@
 //---------------------------------------------------------------------------
 class tTJSNC_AsyncTrigger : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSNC_AsyncTrigger();
-	static tjs_uint32 ClassID;
+    tTJSNC_AsyncTrigger();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_AsyncTrigger();

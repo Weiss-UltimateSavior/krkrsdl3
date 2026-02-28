@@ -53,7 +53,7 @@ tTJSBinaryStream* PSBMedia::Open(const ttstr& name, tjs_uint32 flags)
         iterFile->second._resources.find(name.SubString(dotIndex + 1, name.GetLen()));
     if (iterChunk == iterFile->second._resources.end())
         return nullptr;
-    
+
     tTJSBinaryStream* filePtr = TVPCreateStream(iterFile->first);
     if (!filePtr)
         return nullptr;
@@ -87,4 +87,4 @@ void PSBMedia::RemovePSBFile(const ttstr& name)
     _resources.erase(name);
 }
 
-}
+} // namespace PSB

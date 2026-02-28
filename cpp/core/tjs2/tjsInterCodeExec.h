@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TJS2 Script Engine
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // Intermediate Code Execution
@@ -11,7 +11,6 @@
 
 #ifndef tjsInterCodeExecH
 #define tjsInterCodeExecH
-
 
 namespace TJS
 {
@@ -21,42 +20,40 @@ extern void TJSVariantArrayStackCompactNow();
 
 class tTJSVariantArrayStack
 {
-	//	tTJSCriticalSection CS;
+    //	tTJSCriticalSection CS;
 
-	struct tVariantArray
-	{
-		tTJSVariant *Array;
-		tjs_int Using;
-		tjs_int Allocated;
-	};
+    struct tVariantArray
+    {
+        tTJSVariant* Array;
+        tjs_int Using;
+        tjs_int Allocated;
+    };
 
-	tVariantArray * Arrays; // array of array
-	tjs_int NumArraysAllocated;
-	tjs_int NumArraysUsing;
-	tVariantArray * Current;
-	tjs_int CompactVariantArrayMagic;
-	tjs_int OperationDisabledCount;
+    tVariantArray* Arrays; // array of array
+    tjs_int NumArraysAllocated;
+    tjs_int NumArraysUsing;
+    tVariantArray* Current;
+    tjs_int CompactVariantArrayMagic;
+    tjs_int OperationDisabledCount;
 
-	void IncreaseVariantArray(tjs_int num);
+    void IncreaseVariantArray(tjs_int num);
 
-	void DecreaseVariantArray(void);
+    void DecreaseVariantArray(void);
 
-	void InternalCompact(void);
-
+    void InternalCompact(void);
 
 public:
-	tTJSVariantArrayStack();
-	~tTJSVariantArrayStack();
+    tTJSVariantArrayStack();
+    ~tTJSVariantArrayStack();
 
-	tTJSVariant * Allocate(tjs_int num);
+    tTJSVariant* Allocate(tjs_int num);
 
-	void Deallocate(tjs_int num, tTJSVariant *ptr);
+    void Deallocate(tjs_int num, tTJSVariant* ptr);
 
-	void Compact() { InternalCompact(); }
+    void Compact() { InternalCompact(); }
 
-}/* *TJSVariantArrayStack = NULL*/;
+} /* *TJSVariantArrayStack = NULL*/;
 //---------------------------------------------------------------------------
-}
-
+} // namespace TJS
 
 #endif

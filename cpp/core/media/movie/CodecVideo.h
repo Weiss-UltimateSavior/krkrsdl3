@@ -41,10 +41,12 @@ struct DVDVideoPicture
 };
 
 #define DVP_FLAG_TOP_FIELD_FIRST 0x00000001
-#define DVP_FLAG_REPEAT_TOP_FIELD 0x00000002 //< Set to indicate that the top field should be repeated
+#define DVP_FLAG_REPEAT_TOP_FIELD \
+    0x00000002                         //< Set to indicate that the top field should be repeated
 #define DVP_FLAG_ALLOCATED 0x00000004  //< Set to indicate that this has allocated data
 #define DVP_FLAG_INTERLACED 0x00000008 //< Set to indicate that this frame is interlaced
-#define DVP_FLAG_DROPPED 0x00000010 //< indicate that this picture has been dropped in decoder stage, will have no data
+#define DVP_FLAG_DROPPED \
+    0x00000010 //< indicate that this picture has been dropped in decoder stage, will have no data
 
 struct CDVDStreamInfo;
 

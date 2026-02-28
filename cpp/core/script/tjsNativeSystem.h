@@ -7,16 +7,15 @@
 //---------------------------------------------------------------------------
 class tTJSNC_System : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSNC_System();
-	static tjs_uint32 ClassID;
+    tTJSNC_System();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_System();
 //---------------------------------------------------------------------------
-

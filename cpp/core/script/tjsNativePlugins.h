@@ -7,17 +7,15 @@
 //---------------------------------------------------------------------------
 class tTJSNC_Plugins : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSNC_Plugins();
-	static tjs_uint32 ClassID;
+    tTJSNC_Plugins();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_Plugins();
 //---------------------------------------------------------------------------
-
-

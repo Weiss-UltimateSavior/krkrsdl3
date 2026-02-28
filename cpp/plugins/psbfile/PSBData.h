@@ -4,8 +4,8 @@
 
 namespace PSB
 {
-    enum PSBObjType : unsigned char
-    {
+enum PSBObjType : unsigned char
+{
     None = 0x0,
     Null = 0x1,
     False = 0x2,
@@ -93,4 +93,4 @@ struct PSBHeader
 };
 
 bool parsePSBArray(std::vector<tjs_uint32>* target, tjs_int8 count, TJS::tTJSBinaryStream* stream);
-}
+} // namespace PSB

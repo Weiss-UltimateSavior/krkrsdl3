@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TJS2 Script Engine
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // configuration
@@ -17,13 +17,13 @@
 
 //---------------------------------------------------------------------------
 /*
-	many settings can be changed here.
+        many settings can be changed here.
 
-	tjsCommHead.h includes most common headers that will be needed to
-	compile the entire TJS program.
+        tjsCommHead.h includes most common headers that will be needed to
+        compile the entire TJS program.
 
-	configuration about Critical Section for multithreading support is there in
-	tjsUtils.cpp/h.
+        configuration about Critical Section for multithreading support is there in
+        tjsUtils.cpp/h.
 */
 
 // TODO: autoconf integration
@@ -32,14 +32,14 @@
 
 namespace TJS
 {
-#define TJS_nsprintf		sprintf
-#define TJS_nstrcpy			strcpy
-#define TJS_nstrcat			strcat
-#define TJS_nstrlen			strlen
-#define TJS_nstrstr			strstr
-#define TJS_vfprintf		vfwprintf
-#define TJS_octetcpy		memcpy
-#define TJS_octetcmp		memcmp
+#define TJS_nsprintf sprintf
+#define TJS_nstrcpy strcpy
+#define TJS_nstrcat strcat
+#define TJS_nstrlen strlen
+#define TJS_nstrstr strstr
+#define TJS_vfprintf vfwprintf
+#define TJS_octetcpy memcpy
+#define TJS_octetcmp memcmp
 
 tjs_int TJS_atoi(const tjs_char* s);
 tjs_char* TJS_int_to_str(tjs_int value, tjs_char* string);
@@ -53,15 +53,15 @@ tjs_int64 TJS_atoll(const tjs_char* s);
 tjs_int TJS_sprintf(tjs_char* s, const tjs_char* format, ...);
 tjs_int TJS_timezone();
 
-#define TJS_strncpy_s(d, dl, s, sl)		TJS_strncpy(d, s, sl)
+#define TJS_strncpy_s(d, dl, s, sl) TJS_strncpy(d, s, sl)
 
-#define TJS_narrowtowidelen(X) TJS_mbstowcs(NULL, (X),0) // narrow->wide (if) converted length
+#define TJS_narrowtowidelen(X) TJS_mbstowcs(NULL, (X), 0) // narrow->wide (if) converted length
 #define TJS_narrowtowide TJS_mbstowcs
 
 void TJS_debug_out(const tjs_char* format, ...);
 
 #if TJS_DEBUG_TRACE
-#define TJS_D(x)	TJS_debug_out x;
+#define TJS_D(x) TJS_debug_out x;
 #define TJS_F_TRACE(x) tTJSFuncTrace ___trace(TJS_N(x));
 #else
 #define TJS_D(x)
@@ -109,8 +109,6 @@ void TJSNativeDebuggerBreak();
 void TJSSetFPUE();
 void TJSRestoreFPUE();
 
-
-
 //---------------------------------------------------------------------------
 // elapsed time profiler
 //---------------------------------------------------------------------------
@@ -118,41 +116,31 @@ void TJSRestoreFPUE();
 extern tjs_uint TJSGetTickCount();
 class tTJSTimeProfiler
 {
-	tjs_uint& timevar;
-	tjs_uint start;
-public:
-	tTJSTimeProfiler(tjs_uint& tv) : timevar(tv)
-	{
-		start = TJSGetTickCount();
-	}
+    tjs_uint& timevar;
+    tjs_uint start;
 
-	~tTJSTimeProfiler()
-	{
-		timevar += TJSGetTickCount() - start;
-	}
+public:
+    tTJSTimeProfiler(tjs_uint& tv) : timevar(tv) { start = TJSGetTickCount(); }
+
+    ~tTJSTimeProfiler() { timevar += TJSGetTickCount() - start; }
 };
 #endif
 //---------------------------------------------------------------------------
-
-
 
 //---------------------------------------------------------------------------
 // function tracer
 //---------------------------------------------------------------------------
 class tTJSFuncTrace
 {
-	tjs_char* funcname;
+    tjs_char* funcname;
+
 public:
-	tTJSFuncTrace(tjs_char* p)
-	{
-		funcname = p;
-		TJS_debug_out(TJS_N("enter: %s\n"), funcname);
-	}
-	~tTJSFuncTrace()
-	{
-		TJS_debug_out(TJS_N("exit: %s\n"), funcname);
-	}
+    tTJSFuncTrace(tjs_char* p)
+    {
+        funcname = p;
+        TJS_debug_out(TJS_N("enter: %s\n"), funcname);
+    }
+    ~tTJSFuncTrace() { TJS_debug_out(TJS_N("exit: %s\n"), funcname); }
 };
 //---------------------------------------------------------------------------
-};
-
+}; // namespace TJS

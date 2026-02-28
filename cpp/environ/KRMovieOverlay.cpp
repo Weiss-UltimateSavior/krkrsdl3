@@ -1,5 +1,6 @@
 #include <thread>
-extern "C" {
+extern "C"
+{
 #include "libswscale/swscale.h"
 }
 
@@ -18,10 +19,10 @@ NS_KRMOVIE_BEGIN
 
 VideoPresentOverlay::VideoPresentOverlay()
 {
-	pSprite = new SDL_Sprite;
-	pSprite->isVisible = true;
-	pSprite->xPos = 0;
-	pSprite->yPos = 0;
+    pSprite = new SDL_Sprite;
+    pSprite->isVisible = true;
+    pSprite->xPos = 0;
+    pSprite->yPos = 0;
 }
 
 VideoPresentOverlay::~VideoPresentOverlay()
@@ -42,37 +43,39 @@ void VideoPresentOverlay::Play()
 {
     if (pSprite != NULL)
         pSprite->isVisible = true;
-	TVPMoviePlayer::Play();
+    TVPMoviePlayer::Play();
 }
 
 void VideoPresentOverlay::Stop()
 {
     if (pSprite != NULL)
         pSprite->isVisible = false;
-	TVPMoviePlayer::Stop();
+    TVPMoviePlayer::Stop();
 }
 
 void VideoPresentOverlay::OnContinuousCallback(tjs_uint64 tick)
 {
-    if(!m_usedPicture)
+    if (!m_usedPicture)
         return;
     double m_curpts = m_pPlayer->GetClock() / DVD_TIME_BASE;
     {
         std::lock_guard<std::mutex> lk(m_mtxPicture);
-        BitmapPicture &picbuf = m_picture[m_curPicture];
+        BitmapPicture& picbuf = m_picture[m_curPicture];
         // check pts
-        if(picbuf.pts > m_curpts) { // present in future
+        if (picbuf.pts > m_curpts)
+        { // present in future
             return;
         }
     }
-    
-	BitmapPicture pic;
-    do { // skip frame
+
+    BitmapPicture pic;
+    do
+    { // skip frame
         pic.Clear();
         m_picture[m_curPicture].swap(pic);
         m_curPicture = (m_curPicture + 1) & (MAX_BUFFER_COUNT - 1);
         --m_usedPicture;
-    } while(m_usedPicture > 0 && m_curpts >= m_picture[m_curPicture].pts);
+    } while (m_usedPicture > 0 && m_curpts >= m_picture[m_curPicture].pts);
     assert(m_usedPicture >= 0);
     m_condPicture.notify_all();
 
@@ -80,7 +83,8 @@ void VideoPresentOverlay::OnContinuousCallback(tjs_uint64 tick)
     if (pic.rgba == NULL)
         return;
     {
-        if(pSprite->texture == 0) {
+        if (pSprite->texture == 0)
+        {
             pSprite->width = pic.width;
             pSprite->height = pic.height;
             krkrsdl3::SDL_GL_CreateTexture(*pSprite);
@@ -93,40 +97,46 @@ void VideoPresentOverlay::OnContinuousCallback(tjs_uint64 tick)
 
 MoviePlayerOverlay::~MoviePlayerOverlay()
 {
-	delete m_pPlayer; m_pPlayer = nullptr;
+    delete m_pPlayer;
+    m_pPlayer = nullptr;
 }
 
 void MoviePlayerOverlay::SetWindow(tTJSNI_Window* window)
-{	
-	TVPAddContinuousEventHook(this);
+{
+    TVPAddContinuousEventHook(this);
 }
 
-void MoviePlayerOverlay::BuildGraph(tTJSNI_VideoOverlay* callbackwin, tTJSBinaryStream*stream, const tjs_char * streamname, const tjs_char *type, uint64_t size)
+void MoviePlayerOverlay::BuildGraph(tTJSNI_VideoOverlay* callbackwin,
+                                    tTJSBinaryStream* stream,
+                                    const tjs_char* streamname,
+                                    const tjs_char* type,
+                                    uint64_t size)
 {
-	m_pCallbackWin = callbackwin;
-	m_pPlayer->SetCallback(std::bind(&MoviePlayerOverlay::OnPlayEvent, this, std::placeholders::_1, std::placeholders::_2));
-	m_pPlayer->OpenFromStream(stream, streamname, type, size);
+    m_pCallbackWin = callbackwin;
+    m_pPlayer->SetCallback(std::bind(&MoviePlayerOverlay::OnPlayEvent, this, std::placeholders::_1,
+                                     std::placeholders::_2));
+    m_pPlayer->OpenFromStream(stream, streamname, type, size);
 }
 
-const tTVPRect & MoviePlayerOverlay::GetBounds()
+const tTVPRect& MoviePlayerOverlay::GetBounds()
 {
-	return m_pCallbackWin->GetBounds();
+    return m_pCallbackWin->GetBounds();
 }
 
 void KRMovie::MoviePlayerOverlay::SetVisible(bool b)
 {
-	VideoPresentOverlay::SetVisible(b);
+    VideoPresentOverlay::SetVisible(b);
 }
 
-void MoviePlayerOverlay::OnPlayEvent(KRMovieEvent msg, void *p)
+void MoviePlayerOverlay::OnPlayEvent(KRMovieEvent msg, void* p)
 {
-	if (msg == KRMovieEvent::Ended) {
-		NativeEvent ev(WM_GRAPHNOTIFY);
-		ev.WParam = EC_COMPLETE;
-		ev.LParam = 0;
-		m_pCallbackWin->PostEvent(ev);
-	}
+    if (msg == KRMovieEvent::Ended)
+    {
+        NativeEvent ev(WM_GRAPHNOTIFY);
+        ev.WParam = EC_COMPLETE;
+        ev.LParam = 0;
+        m_pCallbackWin->PostEvent(ev);
+    }
 }
-
 
 NS_KRMOVIE_END

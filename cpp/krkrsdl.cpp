@@ -19,15 +19,38 @@
 #endif
 #endif
 
+void printGLInfo()
+{
+    const GLubyte* vendor = glGetString(GL_VENDOR);
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* version = glGetString(GL_VERSION);
+    const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+    SDL_Log("OpenGL Vendor    : %s\n", vendor);
+    SDL_Log("OpenGL Renderer  : %s\n", renderer);
+    SDL_Log("OpenGL Version   : %s\n", version);
+    SDL_Log("GLSL Version     : %s\n", glslVersion);
+
+    GLint numExtensions;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    SDL_Log("Supported Extensions (%d):\n", numExtensions);
+    for (int i = 0; i < numExtensions; i++)
+    {
+        const GLubyte* ext = glGetStringi(GL_EXTENSIONS, i);
+        SDL_Log("  %s\n", ext);
+    }
+}
+
 SDL_Window* tvp_window;
 static SDL_GLContext tvp_glContext = NULL;
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) { // for format converter
-		SDL_Log("Fail to initialize SDL.");
-		return SDL_APP_FAILURE;
-	}
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
+    { // for format converter
+        SDL_Log("Fail to initialize SDL.");
+        return SDL_APP_FAILURE;
+    }
 
     // 窗口
     SDL_PropertiesID props = SDL_CreateProperties();
@@ -54,6 +77,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
     SDL_GL_MakeCurrent(tvp_window, tvp_glContext);
+    // info
+    printGLInfo();
 
     // 初始化时不显示
     SDL_HideWindow(tvp_window);
@@ -88,8 +113,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     return SDL_APP_CONTINUE;
 }
 
-
-
 std::map<SDL_Sprite*, callbackOnKeyDownUpEvent> sdl_keyDownCallback;
 std::map<SDL_Sprite*, callbackOnKeyDownUpEvent> sdl_keyUpCallback;
 std::map<SDL_Sprite*, callbackOnMouseDownEvent> sdl_mouseDownCallback;
@@ -101,232 +124,265 @@ std::vector<SDL_Sprite*> renderTexture;
 std::mutex sdlRenderMtx;
 static SDL_FRect rectBuff;
 
-SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
+SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
+{
     switch (event->type)
     {
-        //退出
-    case SDL_EVENT_QUIT:
-        return SDL_APP_SUCCESS;
-        // 键盘事件
-    case SDL_EVENT_KEY_DOWN:
-    {
-        std::lock_guard<std::mutex> lock(sdlCallbackMtx);
-        // 检查modal对象
-        bool hasModal = false;
-        for (auto callback : sdl_keyDownCallback)
-        {
-            if (callback.first->isModal && callback.first->isVisible)
-                hasModal = true;
-        }
-        // 写入缓冲区
-        for (auto callback : sdl_keyDownCallback)
-        {
-            if (hasModal)
-            {
-                if (callback.first->isModal)
-                {
-                    callback.second(event->key.scancode);
-                    break;
-                }
-            }
-            else
-            {
-                if (callback.first->isVisible)
-                {
-                    callback.second(event->key.scancode);
-                }
-            }
-        }
-        break;
-    }
-    case SDL_EVENT_KEY_UP:
-    {
-        std::lock_guard<std::mutex> lock(sdlCallbackMtx);
-        // 检查modal对象
-        bool hasModal = false;
-        for (auto callback : sdl_keyUpCallback)
-        {
-            if (callback.first->isModal && callback.first->isVisible)
-                hasModal = true;
-        }
-        // 写入缓冲区
-        for (auto callback : sdl_keyUpCallback)
-        {
-            if (hasModal)
-            {
-                if (callback.first->isModal)
-                {
-                    callback.second(event->key.scancode);
-                    break;
-                }
-            }
-            else
-            {
-                if (callback.first->isVisible)
-                {
-                    callback.second(event->key.scancode);
-                }
-            }
-        }
-        break;
-    }
-        // 鼠标事件
-    case SDL_EVENT_MOUSE_BUTTON_DOWN:
-    {
-        tTVPMouseButton tmp = mbX1;
-        switch (event->button.button)
-        {
-        case SDL_BUTTON_RIGHT:
-            tmp = mbRight;
-            break;
-        case SDL_BUTTON_MIDDLE:
-            tmp = mbMiddle;
-            break;
-        case SDL_BUTTON_LEFT:
-            tmp = mbLeft;
-            break;
-        default:
-            break;
-        }
-
-        if (tmp != mbX1)
+            // 退出
+        case SDL_EVENT_QUIT:
+            return SDL_APP_SUCCESS;
+            // 键盘事件
+        case SDL_EVENT_KEY_DOWN:
         {
             std::lock_guard<std::mutex> lock(sdlCallbackMtx);
             // 检查modal对象
             bool hasModal = false;
-            for(auto callback : sdl_mouseDownCallback) {
-                if(callback.first->isModal && callback.first->isVisible)
+            for (auto callback : sdl_keyDownCallback)
+            {
+                if (callback.first->isModal && callback.first->isVisible)
                     hasModal = true;
             }
             // 写入缓冲区
-            for (auto callback : sdl_mouseDownCallback)
+            for (auto callback : sdl_keyDownCallback)
             {
-                if(hasModal)
+                if (hasModal)
                 {
-                    if(callback.first->isModal) {
-                        callback.second(tmp,
-                                        (event->button.x - callback.first->xPos) / callback.first->scale,
-                                        (event->button.y - callback.first->yPos) / callback.first->scale);
+                    if (callback.first->isModal)
+                    {
+                        callback.second(event->key.scancode);
                         break;
                     }
-                } else {
-                    if(callback.first->isVisible) {
-                        callback.second(tmp,
-                                        (event->button.x - callback.first->xPos) / callback.first->scale,
-                                        (event->button.y - callback.first->yPos) / callback.first->scale);
+                }
+                else
+                {
+                    if (callback.first->isVisible)
+                    {
+                        callback.second(event->key.scancode);
                     }
                 }
-                
             }
-        }
-        break;
-    }
-    case SDL_EVENT_MOUSE_BUTTON_UP:
-    {
-        tTVPMouseButton tmp = mbX1;
-        switch (event->button.button)
-        {
-        case SDL_BUTTON_RIGHT:
-            tmp = mbRight;
-            break;
-        case SDL_BUTTON_MIDDLE:
-            tmp = mbMiddle;
-            break;
-        case SDL_BUTTON_LEFT:
-            tmp = mbLeft;
-            break;
-        default:
             break;
         }
-
-        if (tmp != mbX1)
+        case SDL_EVENT_KEY_UP:
         {
             std::lock_guard<std::mutex> lock(sdlCallbackMtx);
             // 检查modal对象
             bool hasModal = false;
-            for(auto callback : sdl_mouseUpCallback) {
-                if(callback.first->isModal && callback.first->isVisible)
+            for (auto callback : sdl_keyUpCallback)
+            {
+                if (callback.first->isModal && callback.first->isVisible)
                     hasModal = true;
             }
             // 写入缓冲区
-            for(auto callback : sdl_mouseUpCallback) {
-                if(hasModal) {
-                    if(callback.first->isModal) {
-                        callback.second(tmp,
-                                        (event->button.x - callback.first->xPos)/ callback.first->scale,
-                                        (event->button.y - callback.first->yPos)/ callback.first->scale);
+            for (auto callback : sdl_keyUpCallback)
+            {
+                if (hasModal)
+                {
+                    if (callback.first->isModal)
+                    {
+                        callback.second(event->key.scancode);
                         break;
                     }
-                } else {
-                    if(callback.first->isVisible) {
-                        callback.second(tmp,
-                                        (event->button.x - callback.first->xPos)/ callback.first->scale,
-                                        (event->button.y - callback.first->yPos)/ callback.first->scale);
+                }
+                else
+                {
+                    if (callback.first->isVisible)
+                    {
+                        callback.second(event->key.scancode);
                     }
                 }
             }
+            break;
         }
-        break;
-    }
-    case SDL_EVENT_MOUSE_MOTION:
-    {
-        std::lock_guard<std::mutex> lock(sdlCallbackMtx);
-        // 检查modal对象
-        bool hasModal = false;
-        for(auto callback : sdl_mouseMoveCallback) {
-            if(callback.first->isModal && callback.first->isVisible)
-                hasModal = true;
-        }
-        // 写入缓冲区
-        for(auto callback : sdl_mouseMoveCallback) {
-            if(hasModal) {
-                if(callback.first->isModal) {
-                    callback.second((event->motion.x - callback.first->xPos)/ callback.first->scale,
-                                    (event->motion.y - callback.first->yPos)/ callback.first->scale);
+            // 鼠标事件
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        {
+            tTVPMouseButton tmp = mbX1;
+            switch (event->button.button)
+            {
+                case SDL_BUTTON_RIGHT:
+                    tmp = mbRight;
                     break;
+                case SDL_BUTTON_MIDDLE:
+                    tmp = mbMiddle;
+                    break;
+                case SDL_BUTTON_LEFT:
+                    tmp = mbLeft;
+                    break;
+                default:
+                    break;
+            }
+
+            if (tmp != mbX1)
+            {
+                std::lock_guard<std::mutex> lock(sdlCallbackMtx);
+                // 检查modal对象
+                bool hasModal = false;
+                for (auto callback : sdl_mouseDownCallback)
+                {
+                    if (callback.first->isModal && callback.first->isVisible)
+                        hasModal = true;
                 }
-            } else {
-                if(callback.first->isVisible) {
-                    callback.second((event->motion.x - callback.first->xPos)/ callback.first->scale,
-                                    (event->motion.y - callback.first->yPos)/ callback.first->scale);
+                // 写入缓冲区
+                for (auto callback : sdl_mouseDownCallback)
+                {
+                    if (hasModal)
+                    {
+                        if (callback.first->isModal)
+                        {
+                            callback.second(
+                                tmp,
+                                (event->button.x - callback.first->xPos) / callback.first->scale,
+                                (event->button.y - callback.first->yPos) / callback.first->scale);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (callback.first->isVisible)
+                        {
+                            callback.second(
+                                tmp,
+                                (event->button.x - callback.first->xPos) / callback.first->scale,
+                                (event->button.y - callback.first->yPos) / callback.first->scale);
+                        }
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
-    case SDL_EVENT_MOUSE_WHEEL:
-    {
-        std::lock_guard<std::mutex> lock(sdlCallbackMtx);
-        // 检查modal对象
-        bool hasModal = false;
-        for(auto callback : sdl_mouseScrollCallback) {
-            if(callback.first->isModal && callback.first->isVisible)
-                hasModal = true;
-        }
-        // 写入缓冲区
-        for(auto callback : sdl_mouseScrollCallback) {
-            if(hasModal) {
-                if(callback.first->isModal) {
-                    callback.second(event->wheel.x, event->wheel.y,
-                                    event->wheel.x, event->wheel.y);
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        {
+            tTVPMouseButton tmp = mbX1;
+            switch (event->button.button)
+            {
+                case SDL_BUTTON_RIGHT:
+                    tmp = mbRight;
                     break;
+                case SDL_BUTTON_MIDDLE:
+                    tmp = mbMiddle;
+                    break;
+                case SDL_BUTTON_LEFT:
+                    tmp = mbLeft;
+                    break;
+                default:
+                    break;
+            }
+
+            if (tmp != mbX1)
+            {
+                std::lock_guard<std::mutex> lock(sdlCallbackMtx);
+                // 检查modal对象
+                bool hasModal = false;
+                for (auto callback : sdl_mouseUpCallback)
+                {
+                    if (callback.first->isModal && callback.first->isVisible)
+                        hasModal = true;
                 }
-            } else {
-                if(callback.first->isVisible) {
-                    callback.second(event->wheel.x, event->wheel.y,
-                                    event->wheel.x, event->wheel.y);
+                // 写入缓冲区
+                for (auto callback : sdl_mouseUpCallback)
+                {
+                    if (hasModal)
+                    {
+                        if (callback.first->isModal)
+                        {
+                            callback.second(
+                                tmp,
+                                (event->button.x - callback.first->xPos) / callback.first->scale,
+                                (event->button.y - callback.first->yPos) / callback.first->scale);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if (callback.first->isVisible)
+                        {
+                            callback.second(
+                                tmp,
+                                (event->button.x - callback.first->xPos) / callback.first->scale,
+                                (event->button.y - callback.first->yPos) / callback.first->scale);
+                        }
+                    }
                 }
             }
+            break;
         }
-        break;
-    }
-    default:
-        break;
+        case SDL_EVENT_MOUSE_MOTION:
+        {
+            std::lock_guard<std::mutex> lock(sdlCallbackMtx);
+            // 检查modal对象
+            bool hasModal = false;
+            for (auto callback : sdl_mouseMoveCallback)
+            {
+                if (callback.first->isModal && callback.first->isVisible)
+                    hasModal = true;
+            }
+            // 写入缓冲区
+            for (auto callback : sdl_mouseMoveCallback)
+            {
+                if (hasModal)
+                {
+                    if (callback.first->isModal)
+                    {
+                        callback.second(
+                            (event->motion.x - callback.first->xPos) / callback.first->scale,
+                            (event->motion.y - callback.first->yPos) / callback.first->scale);
+                        break;
+                    }
+                }
+                else
+                {
+                    if (callback.first->isVisible)
+                    {
+                        callback.second(
+                            (event->motion.x - callback.first->xPos) / callback.first->scale,
+                            (event->motion.y - callback.first->yPos) / callback.first->scale);
+                    }
+                }
+            }
+            break;
+        }
+        case SDL_EVENT_MOUSE_WHEEL:
+        {
+            std::lock_guard<std::mutex> lock(sdlCallbackMtx);
+            // 检查modal对象
+            bool hasModal = false;
+            for (auto callback : sdl_mouseScrollCallback)
+            {
+                if (callback.first->isModal && callback.first->isVisible)
+                    hasModal = true;
+            }
+            // 写入缓冲区
+            for (auto callback : sdl_mouseScrollCallback)
+            {
+                if (hasModal)
+                {
+                    if (callback.first->isModal)
+                    {
+                        callback.second(event->wheel.x, event->wheel.y, event->wheel.x,
+                                        event->wheel.y);
+                        break;
+                    }
+                }
+                else
+                {
+                    if (callback.first->isVisible)
+                    {
+                        callback.second(event->wheel.x, event->wheel.y, event->wheel.x,
+                                        event->wheel.y);
+                    }
+                }
+            }
+            break;
+        }
+        default:
+            break;
     }
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppIterate(void* appstate) {
+SDL_AppResult SDL_AppIterate(void* appstate)
+{
     ::Application->Run();
     iTVPTexture2D::RecycleProcess();
 
@@ -336,8 +392,9 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     krkrsdl3::SDL_GL_BaseSet(RW, RH);
     {
         std::lock_guard<std::mutex> lock(sdlRenderMtx);
-        for(auto texture : renderTexture) {
-            if(texture->isVisible)
+        for (auto texture : renderTexture)
+        {
+            if (texture->isVisible)
             {
                 krkrsdl3::SDL_GL_DrawTexture(texture, RW, RH);
             }
@@ -349,11 +406,11 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_Fail() {
+SDL_AppResult SDL_Fail()
+{
     SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
     return SDL_APP_FAILURE;
 }
-
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {

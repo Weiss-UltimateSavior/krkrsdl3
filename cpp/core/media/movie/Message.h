@@ -15,44 +15,46 @@ public:
         // messages used in the whole system
 
         GENERAL_RESYNC, //
-        GENERAL_FLUSH, // flush all buffers
-        GENERAL_RESET, // reset codecs for new data
+        GENERAL_FLUSH,  // flush all buffers
+        GENERAL_RESET,  // reset codecs for new data
         GENERAL_PAUSE,
         GENERAL_STREAMCHANGE, //
-        GENERAL_SYNCHRONIZE, //
-        GENERAL_GUI_ACTION, // gui action of some sort
-        GENERAL_EOF, // eof of stream
+        GENERAL_SYNCHRONIZE,  //
+        GENERAL_GUI_ACTION,   // gui action of some sort
+        GENERAL_EOF,          // eof of stream
 
         // player core related messages (cVideoPlayer.cpp)
 
-        PLAYER_SET_AUDIOSTREAM, //
-        PLAYER_SET_VIDEOSTREAM, //
-        PLAYER_SET_SUBTITLESTREAM, //
+        PLAYER_SET_AUDIOSTREAM,            //
+        PLAYER_SET_VIDEOSTREAM,            //
+        PLAYER_SET_SUBTITLESTREAM,         //
         PLAYER_SET_SUBTITLESTREAM_VISIBLE, //
-        PLAYER_SET_STATE, // restore the VideoPlayer to a certain state
-        PLAYER_SET_RECORD, // set record state
-        PLAYER_SEEK, //
-        PLAYER_SEEK_CHAPTER, //
-        PLAYER_SETSPEED, // set the playback speed
+        PLAYER_SET_STATE,                  // restore the VideoPlayer to a certain state
+        PLAYER_SET_RECORD,                 // set record state
+        PLAYER_SEEK,                       //
+        PLAYER_SEEK_CHAPTER,               //
+        PLAYER_SETSPEED,                   // set the playback speed
 
-        PLAYER_CHANNEL_NEXT, // switches to next playback channel
-        PLAYER_CHANNEL_PREV, // switches to previous playback channel
-        PLAYER_CHANNEL_PREVIEW_NEXT, // switches to next channel preview (does not switch the channel)
-        PLAYER_CHANNEL_PREVIEW_PREV, // switches to previous channel preview (does not switch the channel)
+        PLAYER_CHANNEL_NEXT,          // switches to next playback channel
+        PLAYER_CHANNEL_PREV,          // switches to previous playback channel
+        PLAYER_CHANNEL_PREVIEW_NEXT,  // switches to next channel preview (does not switch the
+                                      // channel)
+        PLAYER_CHANNEL_PREVIEW_PREV,  // switches to previous channel preview (does not switch the
+                                      // channel)
         PLAYER_CHANNEL_SELECT_NUMBER, // switches to the channel with the provided channel number
-        PLAYER_CHANNEL_SELECT, // switches to the provided channel
-        PLAYER_STARTED, // sent whenever a sub player has finished it's first frame after open
+        PLAYER_CHANNEL_SELECT,        // switches to the provided channel
+        PLAYER_STARTED,  // sent whenever a sub player has finished it's first frame after open
         PLAYER_AVCHANGE, // signal a change in audio or video parameters
 
         // demuxer related messages
 
         DEMUXER_PACKET, // data packet
-        DEMUXER_RESET, // reset the demuxer
+        DEMUXER_RESET,  // reset the demuxer
 
         // video related messages
 
         VIDEO_SET_ASPECT, // set aspectratio of video
-        VIDEO_DRAIN, // wait for decoder to output last frame
+        VIDEO_DRAIN,      // wait for decoder to output last frame
 
         // audio related messages
 
@@ -95,7 +97,6 @@ protected:
 
 private:
     Message m_message;
-    
 };
 
 #define SYNCSOURCE_AUDIO 0x01

@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TVP2 ( T Visual Presenter 2 )  A script authoring tool
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TVP2 ( T Visual Presenter 2 )  A script authoring tool
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // Thread base class
@@ -19,7 +19,8 @@
 //---------------------------------------------------------------------------
 // tTVPThreadPriority
 //---------------------------------------------------------------------------
-enum tTVPThreadPriority {
+enum tTVPThreadPriority
+{
     ttpIdle,
     ttpLowest,
     ttpLower,
@@ -56,7 +57,7 @@ public:
 
 protected:
     virtual void Execute() = 0;
-    virtual void OnExit() {};
+    virtual void OnExit(){};
 
 public:
     void WaitFor();
@@ -65,23 +66,20 @@ public:
     void SetPriority(tTVPThreadPriority pri);
 
     void Resume();
-
 };
 //---------------------------------------------------------------------------
-
-
 
 //---------------------------------------------------------------------------
 // tTVPThreadEvent
 //---------------------------------------------------------------------------
 class tTVPThreadEvent
 {
-	std::condition_variable Handle;
-	std::mutex Mutex;
+    std::condition_variable Handle;
+    std::mutex Mutex;
 
 public:
-	void Set();
-	bool WaitFor(tjs_uint timeout);
+    void Set();
+    bool WaitFor(tjs_uint timeout);
 };
 
 /*[*/
@@ -94,7 +92,7 @@ tjs_int TVPGetThreadNum();
 void TVPExecThreadTask(int numThreads, TVP_THREAD_TASK_FUNC func);
 
 //---------------------------------------------------------------------------
-void TVPAddOnThreadExitEvent(const std::function<void()> &ev);
+void TVPAddOnThreadExitEvent(const std::function<void()>& ev);
 void TVPOnThreadExited();
 //---------------------------------------------------------------------------
 

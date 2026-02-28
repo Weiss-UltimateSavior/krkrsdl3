@@ -21,49 +21,47 @@
 //---------------------------------------------------------------------------
 extern tjs_char TVPArchiveDelimiter; //  = '>';
 
-
 //---------------------------------------------------------------------------
 class iTVPStorageLister // callback class for GetListAt
 {
 public:
-    virtual void Add(const ttstr &file) = 0;
+    virtual void Add(const ttstr& file) = 0;
 };
 //---------------------------------------------------------------------------
-class iTVPStorageMedia {
+class iTVPStorageMedia
+{
 public:
     virtual ~iTVPStorageMedia() {} // add by ZeaS
     virtual void AddRef() = 0;
     virtual void Release() = 0;
 
-    virtual void GetName(ttstr &name) = 0;
+    virtual void GetName(ttstr& name) = 0;
     // returns media name like "file", "http" etc.
 
     //	virtual bool IsCaseSensitive() = 0;
     // returns whether this media is case sensitive or not
 
-    virtual void NormalizeDomainName(ttstr &name) = 0;
+    virtual void NormalizeDomainName(ttstr& name) = 0;
     // normalize domain name according with the media's rule
 
-    virtual void NormalizePathName(ttstr &name) = 0;
+    virtual void NormalizePathName(ttstr& name) = 0;
     // normalize path name according with the media's rule
 
     // "name" below is normalized but does not contain media, eg.
     // not "media://domain/path" but "domain/path"
 
-    virtual bool CheckExistentStorage(const ttstr &name) = 0;
+    virtual bool CheckExistentStorage(const ttstr& name) = 0;
     // check file existence
 
-    virtual tTJSBinaryStream *Open(const ttstr &name,
-                                                   tjs_uint32 flags) = 0;
+    virtual tTJSBinaryStream* Open(const ttstr& name, tjs_uint32 flags) = 0;
     // open a storage and return a tTJSBinaryStream instance.
     // name does not contain in-archive storage name but
     // is normalized.
 
-    virtual void GetListAt(const ttstr &name,
-                                           iTVPStorageLister *lister) = 0;
+    virtual void GetListAt(const ttstr& name, iTVPStorageLister* lister) = 0;
     // list files at given place
 
-    virtual void GetLocallyAccessibleName(ttstr &name) = 0;
+    virtual void GetLocallyAccessibleName(ttstr& name) = 0;
     // basically the same as above,
     // check wether given name is easily accessible from local OS filesystem.
     // if true, returns local OS native name. otherwise returns an empty string.
@@ -71,26 +69,32 @@ public:
 //---------------------------------------------------------------------------
 /*]*/
 
-class tTVPStorageMedia : public iTVPStorageMedia {
+class tTVPStorageMedia : public iTVPStorageMedia
+{
 protected:
     tjs_int refCount;
     tTVPStorageMedia() : refCount(1) {}
 
     virtual void AddRef() override { refCount++; }
-    virtual void Release() override {
-        if(refCount == 1) {
+    virtual void Release() override
+    {
+        if (refCount == 1)
+        {
             delete this;
-        } else {
+        }
+        else
+        {
             refCount--;
         }
     }
-    virtual void NormalizeDomainName(ttstr &name) override {}
-    virtual void NormalizePathName(ttstr &name) override {}
-    virtual void GetLocallyAccessibleName(ttstr &name) override {}
+    virtual void NormalizeDomainName(ttstr& name) override {}
+    virtual void NormalizePathName(ttstr& name) override {}
+    virtual void GetLocallyAccessibleName(ttstr& name) override {}
 };
 
-struct tTVPLocalFileInfo {
-    const char *NativeName;
+struct tTVPLocalFileInfo
+{
+    const char* NativeName;
     unsigned short Mode; // S_IFMT
     tjs_uint64 Size;
     time_t AccessTime;
@@ -101,19 +105,18 @@ struct tTVPLocalFileInfo {
 //---------------------------------------------------------------------------
 // implementation in this unit
 //---------------------------------------------------------------------------
-void TVPRegisterStorageMedia(iTVPStorageMedia *media);
+void TVPRegisterStorageMedia(iTVPStorageMedia* media);
 // register storage media
-void TVPUnregisterStorageMedia(iTVPStorageMedia *media);
+void TVPUnregisterStorageMedia(iTVPStorageMedia* media);
 // remove storage media
 
-
-ttstr TVPNormalizeStorageName(const ttstr &name);
-void TVPSetCurrentDirectory(const ttstr &name);
+ttstr TVPNormalizeStorageName(const ttstr& name);
+void TVPSetCurrentDirectory(const ttstr& name);
 // set system current directory.
 // directory must end with path delimiter '/',
 // or archive delimiter '>'.
-void TVPGetLocalName(ttstr &name);
-ttstr TVPGetLocallyAccessibleName(const ttstr &name);
+void TVPGetLocalName(ttstr& name);
+ttstr TVPGetLocallyAccessibleName(const ttstr& name);
 
 //---------------------------------------------------------------------------
 // tTVPArchiveCache
@@ -121,63 +124,60 @@ ttstr TVPGetLocallyAccessibleName(const ttstr &name);
 void TVPClearArchiveCache();
 //---------------------------------------------------------------------------
 
-bool TVPIsExistentStorageNoSearchNoNormalize(const ttstr &name);
+bool TVPIsExistentStorageNoSearchNoNormalize(const ttstr& name);
 
-bool TVPIsExistentStorageNoSearch(const ttstr &name);
+bool TVPIsExistentStorageNoSearch(const ttstr& name);
 // if "name" is exists, return true. otherwise return false.
 // this does not search any auto search path.
 
-ttstr TVPExtractStorageExt(const ttstr &name);
+ttstr TVPExtractStorageExt(const ttstr& name);
 // extract "name"'s extension and return it.
 
-
-ttstr TVPExtractStorageName(const ttstr &name);
+ttstr TVPExtractStorageName(const ttstr& name);
 // extract "name"'s storage name ( excluding path ) and return it.
 
-ttstr TVPExtractStoragePath(const ttstr &name);
+ttstr TVPExtractStoragePath(const ttstr& name);
 // extract "name"'s path ( including last delimiter ) and return it.
 
-ttstr TVPChopStorageExt(const ttstr &name);
+ttstr TVPChopStorageExt(const ttstr& name);
 // chop storage's extension and return it.
 // extensition delimiter '.' will not be held.
 
 //---------------------------------------------------------------------------
 // Auto search path support
 //---------------------------------------------------------------------------
-void TVPAddAutoPath(const ttstr &name);
+void TVPAddAutoPath(const ttstr& name);
 // add given path to auto search path
 
-void TVPRemoveAutoPath(const ttstr &name);
+void TVPRemoveAutoPath(const ttstr& name);
 // remove given path from auto search path
 //---------------------------------------------------------------------------
 
-ttstr TVPGetPlacedPath(const ttstr &name);
+ttstr TVPGetPlacedPath(const ttstr& name);
 // search path and return the path which the "name" is placed.
 
-ttstr TVPSearchPlacedPath(const ttstr &name);
+ttstr TVPSearchPlacedPath(const ttstr& name);
 // the same as TVPGetPlacedPath, except for rising exception when the storage
 // is not found.
 
-bool TVPIsExistentStorage(const ttstr &name);
+bool TVPIsExistentStorage(const ttstr& name);
 // if "name" is exists, return true. otherwise return false.
 // this searches auto search path.
 
-tTJSBinaryStream *TVPCreateStream(const ttstr &name,
-                                         tjs_uint32 flags = 0);
+tTJSBinaryStream* TVPCreateStream(const ttstr& name, tjs_uint32 flags = 0);
 // open "name" and return tTJSBinaryStream instance.
 // name will be local storage, network storage, in-archive storage, etc...
 
-
 void TVPClearStorageCaches();
 // clear all internal storage related caches.
-void TVPRemoveFromStorageCache(const ttstr &name);
+void TVPRemoveFromStorageCache(const ttstr& name);
 
 ttstr TVPGetTemporaryName();
 // retrieve file name to store temporary data ( must be unique, local name )
-bool TVPRemoveFile(const ttstr &name);
+bool TVPRemoveFile(const ttstr& name);
 // remove local file ( "name" is a local *native* name )
 // this must not throw an exception ( return false if error )
-bool TVPRemoveFolder(const ttstr &name);
+bool TVPRemoveFolder(const ttstr& name);
 // remove local directory ( "name" is a local *native* name )
 // this must not throw an exception ( return false if error )
 
@@ -185,52 +185,43 @@ ttstr TVPGetAppPath();
 // retrieve program path, in normalized storage name
 
 //---------------------------------------------------------------------------
-bool TVPCheckExistentLocalFolder(const ttstr &name);
+bool TVPCheckExistentLocalFolder(const ttstr& name);
 /* name must be an OS's NATIVE folder name */
 
-bool TVPCheckExistentLocalFile(const ttstr &name);
+bool TVPCheckExistentLocalFile(const ttstr& name);
 /* name must be an OS's NATIVE file name */
 
 //---------------------------------------------------------------------------
 // utilities
 //---------------------------------------------------------------------------
-ttstr TVPStringFromBMPUnicode(const tjs_uint16 *src, tjs_int maxlen = -1);
+ttstr TVPStringFromBMPUnicode(const tjs_uint16* src, tjs_int maxlen = -1);
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 // must be implemented in each platform
 //---------------------------------------------------------------------------
-tTVPArchive *TVPOpenArchive(const ttstr &name, bool normalizeFileName);
+tTVPArchive* TVPOpenArchive(const ttstr& name, bool normalizeFileName);
 // open archive and return tTVPArchive instance.
 
-int TVPCheckArchive(const ttstr &localname);
+int TVPCheckArchive(const ttstr& localname);
 
 //---------------------------------------------------------------------------
 // BinaryStream Functions
 //---------------------------------------------------------------------------
-tTJSBinaryStream *TVPCreateBinaryStreamForRead(const ttstr &name,
-                                                      const ttstr &modestr);
-tTJSBinaryStream *TVPCreateBinaryStreamForWrite(const ttstr &name,
-                                                       const ttstr &modestr);
+tTJSBinaryStream* TVPCreateBinaryStreamForRead(const ttstr& name, const ttstr& modestr);
+tTJSBinaryStream* TVPCreateBinaryStreamForWrite(const ttstr& name, const ttstr& modestr);
 //---------------------------------------------------------------------------
 
-
-void TVPPreNormalizeStorageName(ttstr &name);
+void TVPPreNormalizeStorageName(ttstr& name);
 // called by TVPNormalizeStorageName before it process the storage name.
 // user may pass the OS's native filename to the TVP storage system,
 // so that this function must convert it to the TVP storage name rules.
 
-
 //---------------------------------------------------------------------------
 
+bool TVPSelectFile(iTJSDispatch2* params);
 
-
-
-
-bool TVPSelectFile(iTJSDispatch2 *params);
-
-ttstr ReplaceStringAll(ttstr src, const ttstr &target,
-                              const ttstr &dest);
-ttstr GetDataPathDirectory(const ttstr &exename);
+ttstr ReplaceStringAll(ttstr src, const ttstr& target, const ttstr& dest);
+ttstr GetDataPathDirectory(const ttstr& exename);
 
 #endif

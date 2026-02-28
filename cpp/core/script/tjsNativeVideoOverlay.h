@@ -9,60 +9,58 @@
 enum tTVPVideoOverlayMode
 {
     vomOverlay, // Overlay
-    vomLayer, // Draw Layer
-    vomMixer, // VMR
-    vomMFEVR, // Media Foundation with EVR
+    vomLayer,   // Draw Layer
+    vomMixer,   // VMR
+    vomMFEVR,   // Media Foundation with EVR
 };
 
 /*[*/
 //---------------------------------------------------------------------------
 // tTVPPeriodEventType : event type in onPeriod event
 //---------------------------------------------------------------------------
-enum tTVPPeriodEventReason {
-    perLoop, // the event is by loop rewind
-    perPeriod, // the event is by period point specified by the user
+enum tTVPPeriodEventReason
+{
+    perLoop,    // the event is by loop rewind
+    perPeriod,  // the event is by period point specified by the user
     perPrepare, // the event is by prepare() method
     perSegLoop, // the event is by segment loop rewind
 };
 
-
 /*]*/
-
 
 //---------------------------------------------------------------------------
 // tTJSNI_BaseVideoOverlay
 //---------------------------------------------------------------------------
 class tTJSNI_Window;
-class tTJSNI_BaseVideoOverlay : public tTJSNativeInstance {
+class tTJSNI_BaseVideoOverlay : public tTJSNativeInstance
+{
     typedef tTJSNativeInstance inherited;
 
 public:
     tTJSNI_BaseVideoOverlay();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 protected:
-    iTJSDispatch2 *Owner;
+    iTJSDispatch2* Owner;
     bool CanDeliverEvents;
-    tTJSNI_Window *Window;
+    tTJSNI_Window* Window;
     TJS::tTJSVariantClosure ActionOwner;
     tTVPSoundStatus Status; // status
 
     ttstr GetStatusString() const;
     void SetStatus(tTVPSoundStatus s);
     void SetStatusAsync(tTVPSoundStatus s);
-    void FireCallbackCommand(const ttstr &command, const ttstr &argument);
+    void FireCallbackCommand(const ttstr& command, const ttstr& argument);
     void FirePeriodEvent(tTVPPeriodEventReason reason);
     void FireFrameUpdateEvent(tjs_int frame);
-
 
 public:
     virtual void Disconnect() = 0; // called from Window object's invalidation
     virtual bool GetVisible() const = 0;
-    virtual const tTVPRect &GetBounds() const = 0;
+    virtual const tTVPRect& GetBounds() const = 0;
     virtual tTVPVideoOverlayMode GetMode() const = 0;
-    virtual bool GetVideoSize(tjs_int &w, tjs_int &h) const = 0;
+    virtual bool GetVideoSize(tjs_int& w, tjs_int& h) const = 0;
 
     tTJSVariantClosure GetActionOwnerNoAddRef() const { return ActionOwner; }
 };
@@ -72,55 +70,53 @@ public:
 // tTJSNI_VideoOverlay : VideoOverlay Native Instance
 //---------------------------------------------------------------------------
 class iTVPVideoOverlay;
-class tTJSNI_VideoOverlay : public tTJSNI_BaseVideoOverlay {
+class tTJSNI_VideoOverlay : public tTJSNI_BaseVideoOverlay
+{
     typedef tTJSNI_BaseVideoOverlay inherited;
 
-    iTVPVideoOverlay *VideoOverlay;
-    iTVPVideoOverlay *CachedOverlay = nullptr;
+    iTVPVideoOverlay* VideoOverlay;
+    iTVPVideoOverlay* CachedOverlay = nullptr;
     tTVPVideoOverlayMode CachedOverlayMode;
     ttstr CachedPlayingFile;
 
     tTVPRect Rect;
     bool Visible;
 
-           //	HWND OwnerWindow;
+    //	HWND OwnerWindow;
 
-           // HWND UtilWindow; // window which receives messages from video overlay
-           // object
+    // HWND UtilWindow; // window which receives messages from video overlay
+    // object
     NativeEventQueue<tTJSNI_VideoOverlay> EventQueue;
 
-    tTVPLocalTempStorageHolder *LocalTempStorageHolder;
-    class tTJSNI_BaseLayer *Layer1;
-    class tTJSNI_BaseLayer *Layer2;
-    tTVPVideoOverlayMode
-        Mode; //!< Modeの動的な変更は出来ない。open前にセットしておくこと
+    tTVPLocalTempStorageHolder* LocalTempStorageHolder;
+    class tTJSNI_BaseLayer* Layer1;
+    class tTJSNI_BaseLayer* Layer2;
+    tTVPVideoOverlayMode Mode; //!< Modeの動的な変更は出来ない。open前にセットしておくこと
     bool Loop;
 
-    class tTVPBaseTexture *Bitmap[2]; //!< Layer描画用バッファ用Bitmap
-    uint8_t *BmpBits[2];
+    class tTVPBaseTexture* Bitmap[2]; //!< Layer描画用バッファ用Bitmap
+    uint8_t* BmpBits[2];
 
     bool IsPrepare; //!< 準備モードかどうか
 
     int SegLoopStartFrame; //!< セグメントループ開始フレーム
-    int SegLoopEndFrame; //!< セグメントループ終了フレーム
+    int SegLoopEndFrame;   //!< セグメントループ終了フレーム
 
-           //! イベントが設定された時、現在フレームの方が進んでいたかどうか。
-           //! イベントが設定されているフレームより前に現在フレームが移動した時、このフラグは解除される。
+    //! イベントが設定された時、現在フレームの方が進んでいたかどうか。
+    //! イベントが設定されているフレームより前に現在フレームが移動した時、このフラグは解除される。
     bool IsEventPast;
     int EventFrame; //!< イベントを発生させるフレーム
 
 public:
     tTJSNI_VideoOverlay();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                        iTJSDispatch2 *tjs_obj)override;
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj) override;
     void Invalidate() override;
 
-
 public:
-    void Open(const ttstr &name);
+    void Open(const ttstr& name);
     void Close();
     void Shutdown();
-    void Disconnect()override; // tTJSNI_BaseVideoOverlay::Disconnect override
+    void Disconnect() override; // tTJSNI_BaseVideoOverlay::Disconnect override
 
     void Play();
     void Stop();
@@ -129,7 +125,8 @@ public:
     void Prepare();
 
     void SetSegmentLoop(int comeFrame, int goFrame);
-    void CancelSegmentLoop() {
+    void CancelSegmentLoop()
+    {
         SegLoopStartFrame = -1;
         SegLoopEndFrame = -1;
     }
@@ -144,8 +141,8 @@ public:
 
     void SetPosition(tjs_int left, tjs_int top);
     void SetSize(tjs_int width, tjs_int height);
-    void SetBounds(const tTVPRect &rect);
-    virtual const tTVPRect &GetBounds() const override { return Rect; }
+    void SetBounds(const tTVPRect& rect);
+    virtual const tTVPRect& GetBounds() const override { return Rect; }
 
     void SetLeft(tjs_int l);
     tjs_int GetLeft() const { return Rect.left; }
@@ -172,10 +169,10 @@ public:
     void SetLoop(bool b);
     bool GetLoop() const { return Loop; }
 
-    void SetLayer1(tTJSNI_BaseLayer *l);
-    tTJSNI_BaseLayer *GetLayer1() { return Layer1; }
-    void SetLayer2(tTJSNI_BaseLayer *l);
-    tTJSNI_BaseLayer *GetLayer2() { return Layer2; }
+    void SetLayer1(tTJSNI_BaseLayer* l);
+    tTJSNI_BaseLayer* GetLayer1() { return Layer1; }
+    void SetLayer2(tTJSNI_BaseLayer* l);
+    tTJSNI_BaseLayer* GetLayer2() { return Layer2; }
 
     void SetMode(tTVPVideoOverlayMode m);
     virtual tTVPVideoOverlayMode GetMode() const override { return Mode; }
@@ -200,14 +197,13 @@ public:
     tjs_uint GetNumberOfVideoStream();
     void SelectVideoStream(tjs_uint n);
     tjs_int GetEnabledVideoStream();
-    void SetMixingLayer(tTJSNI_BaseLayer *l);
+    void SetMixingLayer(tTJSNI_BaseLayer* l);
     void ResetMixingBitmap();
 
     void SetMixingMovieAlpha(tjs_real a);
     tjs_real GetMixingMovieAlpha();
     void SetMixingMovieBGColor(tjs_uint col);
     tjs_uint GetMixingMovieBGColor();
-
 
     tjs_real GetContrastRangeMin();
     tjs_real GetContrastRangeMax();
@@ -240,16 +236,16 @@ public:
     tjs_int GetOriginalWidth();
     tjs_int GetOriginalHeight();
 
-    bool GetVideoSize(tjs_int &w, tjs_int &h) const override;
+    bool GetVideoSize(tjs_int& w, tjs_int& h) const override;
 
     void ResetOverlayParams();
     void SetRectOffset(tjs_int ofsx, tjs_int ofsy);
     void DetachVideoOverlay();
 
-    void PostEvent(const NativeEvent &ev) { EventQueue.PostEvent(ev); }
+    void PostEvent(const NativeEvent& ev) { EventQueue.PostEvent(ev); }
 
 public:
-    void WndProc(NativeEvent &ev);
+    void WndProc(NativeEvent& ev);
     // UtilWindow's window procedure
     void ClearWndProcMessages(); // clear WndProc's message queue
 };

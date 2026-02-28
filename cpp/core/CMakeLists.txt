@@ -132,4 +132,7 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/utils/TickCount.cpp
     ${KRKRSDL_CORE_PATH}/utils/TVPTimer.cpp
     ${KRKRSDL_CORE_PATH}/utils/VelocityTracker.cpp
+	${KRKRSDL_CORE_PATH}/utils/math/md5.c
+	${KRKRSDL_CORE_PATH}/utils/math/xxhash.c
+	${KRKRSDL_CORE_PATH}/utils/math/xxtea.cpp
     )

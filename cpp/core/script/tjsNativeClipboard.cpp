@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TVP2 ( T Visual Presenter 2 )  A script authoring tool
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TVP2 ( T Visual Presenter 2 )  A script authoring tool
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // Clipboard Class interface
@@ -17,14 +17,16 @@
 //---------------------------------------------------------------------------
 bool TVPClipboardHasFormat(tTVPClipboardFormat format)
 {
-	switch (format) {
-	case cbfText: {
-		bool result = false;
-		return result; // ANSI text or UNICODE text
-	}
-	default:
-		return false;
-	}
+    switch (format)
+    {
+        case cbfText:
+        {
+            bool result = false;
+            return result; // ANSI text or UNICODE text
+        }
+        default:
+            return false;
+    }
 }
 //---------------------------------------------------------------------------
 void TVPClipboardSetText(const ttstr& text)
@@ -33,15 +35,16 @@ void TVPClipboardSetText(const ttstr& text)
 //---------------------------------------------------------------------------
 bool TVPClipboardGetText(ttstr& text)
 {
-	return false;
+    return false;
 }
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-tjs_error tTJSNI_BaseClipboard::Construct(tjs_int numparams, tTJSVariant** param,
-	iTJSDispatch2* dsp)
+tjs_error tTJSNI_BaseClipboard::Construct(tjs_int numparams,
+                                          tTJSVariant** param,
+                                          iTJSDispatch2* dsp)
 {
-	return TJS_S_OK;
+    return TJS_S_OK;
 }
 //---------------------------------------------------------------------------
 void tTJSNI_BaseClipboard::Invalidate()
@@ -49,95 +52,87 @@ void tTJSNI_BaseClipboard::Invalidate()
 }
 //---------------------------------------------------------------------------
 
-
-
-
 //---------------------------------------------------------------------------
 tjs_uint32 tTJSNC_Clipboard::ClassID = -1;
 //---------------------------------------------------------------------------
-tTJSNC_Clipboard::tTJSNC_Clipboard() : inherited(TJS_N("Clipboard"))
+tTJSNC_Clipboard::tTJSNC_Clipboard()
+  : inherited(TJS_N("Clipboard")){
+        // registration of native members
+
+        TJS_BEGIN_NATIVE_MEMBERS(Clipboard) // constructor
+        TJS_DECL_EMPTY_FINALIZE_METHOD
+            //----------------------------------------------------------------------
+            TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL_NO_INSTANCE(/*TJS class name*/ Clipboard){
+                return TJS_S_OK;
+}
+TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/ Clipboard)
+//----------------------------------------------------------------------
+
+//-- methods
+
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ hasFormat)
 {
-	// registration of native members
+    if (numparams < 1)
+        return TJS_E_BADPARAMCOUNT;
 
-	TJS_BEGIN_NATIVE_MEMBERS(Clipboard) // constructor
-		TJS_DECL_EMPTY_FINALIZE_METHOD
-		//----------------------------------------------------------------------
-		TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL_NO_INSTANCE(/*TJS class name*/Clipboard)
-	{
-		return TJS_S_OK;
-	}
-	TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/Clipboard)
-		//----------------------------------------------------------------------
+    tTVPClipboardFormat format = (tTVPClipboardFormat)(tjs_int)*param[0];
 
-		//-- methods
+    bool has = TVPClipboardHasFormat(format);
 
-		//----------------------------------------------------------------------
-		TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/hasFormat)
-	{
-		if (numparams < 1) return TJS_E_BADPARAMCOUNT;
+    if (result)
+        *result = has;
 
-		tTVPClipboardFormat format = (tTVPClipboardFormat)(tjs_int)*param[0];
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_STATIC_METHOD_DECL(/*func. name*/ hasFormat)
+//----------------------------------------------------------------------
 
-		bool has = TVPClipboardHasFormat(format);
+//-- events
 
-		if (result)
-			*result = has;
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-		return TJS_S_OK;
-	}
-	TJS_END_NATIVE_STATIC_METHOD_DECL(/*func. name*/hasFormat)
-		//----------------------------------------------------------------------
+//--properties
 
-		//-- events
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(asText){TJS_BEGIN_NATIVE_PROP_GETTER{ttstr text;
+bool got = TVPClipboardGetText(text);
+if (got)
+    *result = text;
+else
+    result->Clear();
+// returns void if the clipboard does not have a text data
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
 
-		//----------------------------------------------------------------------
-		//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TVPClipboardSetText(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_STATIC_PROP_DECL(asText)
+//----------------------------------------------------------------------
 
-		//--properties
-
-		//----------------------------------------------------------------------
-		TJS_BEGIN_NATIVE_PROP_DECL(asText)
-	{
-		TJS_BEGIN_NATIVE_PROP_GETTER
-		{
-			ttstr text;
-			bool got = TVPClipboardGetText(text);
-			if (got)
-				*result = text;
-			else
-				result->Clear();
-			// returns void if the clipboard does not have a text data
-		return TJS_S_OK;
-		}
-			TJS_END_NATIVE_PROP_GETTER
-
-			TJS_BEGIN_NATIVE_PROP_SETTER
-		{
-			TVPClipboardSetText(*param);
-			return TJS_S_OK;
-		}
-			TJS_END_NATIVE_PROP_SETTER
-	}
-	TJS_END_NATIVE_STATIC_PROP_DECL(asText)
-		//----------------------------------------------------------------------
-
-		TJS_END_NATIVE_MEMBERS
+TJS_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 // tTJSNC_Clipboard
 //---------------------------------------------------------------------------
 tTJSNativeInstance* tTJSNC_Clipboard::CreateNativeInstance()
 {
-	return NULL;
+    return NULL;
 }
 //---------------------------------------------------------------------------
 tTJSNativeClass* TVPCreateNativeClass_Clipboard()
 {
-	tTJSNativeClass* cls = new tTJSNC_Clipboard();
+    tTJSNativeClass* cls = new tTJSNC_Clipboard();
 
-	return cls;
+    return cls;
 }
 //---------------------------------------------------------------------------

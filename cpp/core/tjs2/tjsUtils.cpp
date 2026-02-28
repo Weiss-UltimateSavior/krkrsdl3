@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TJS2 Script Engine
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // utility functions
@@ -17,302 +17,342 @@
 namespace TJS
 {
 
-struct tTJSCriticalSectionImpl {
-	std::mutex _mutex;
-	std::thread::id _tid;
-	bool lock();
-	void unlock();
+struct tTJSCriticalSectionImpl
+{
+    std::mutex _mutex;
+    std::thread::id _tid;
+    bool lock();
+    void unlock();
 };
 
-bool tTJSCriticalSectionImpl::lock() {
-	std::thread::id id = std::this_thread::get_id();
-	if (_tid == id) return false;
-	_mutex.lock();
-	_tid = id;
-	return true;
-}
-
-void tTJSCriticalSectionImpl::unlock() {
-	_tid = std::thread::id();
-	_mutex.unlock();
-}
-
-bool tTJSCriticalSection::lock() {
-	return _impl->lock();
-}
-
-void tTJSCriticalSection::unlock() {
-	_impl->unlock();
-}
-
-tTJSCriticalSection::tTJSCriticalSection() {
-	_impl = new tTJSCriticalSectionImpl;
-}
-
-tTJSCriticalSection::~tTJSCriticalSection() {
-	delete _impl;
-}
-
-void tTJSSpinLock::lock() {
-	while (atom_lock.test_and_set(std::memory_order_acquire)) {
-		std::this_thread::yield();
-//		TVPRelinquishCPU();
-	}
-}
-
-void tTJSSpinLock::unlock() {
-	atom_lock.clear(std::memory_order_release);
-}
-
-tTJSSpinLock::tTJSSpinLock() {
-	unlock();
-}
-
-tTJSSpinLockHolder::tTJSSpinLockHolder(tTJSSpinLock &lock) {
-	lock.lock();
-	Lock = &lock;
-}
-
-tTJSSpinLockHolder::~tTJSSpinLockHolder() {
-	if (Lock) {
-		Lock->unlock();
-	}
-}
-
-//---------------------------------------------------------------------------
-iTJSDispatch2 * TJSObjectTraceTarget;
-//---------------------------------------------------------------------------
-static void TJSTrimStringLength(tTJSString &str, tjs_int len)
+bool tTJSCriticalSectionImpl::lock()
 {
-	if(str.GetLen() > len)
-	{
-		tjs_char *p = str.Independ();
-		p[len] = 0; // trim length
-		if(len >= 3)
-		{
-			p[len-1] = TJS_N('.');
-			p[len-2] = TJS_N('.');
-			p[len-3] = TJS_N('.');
-		}
-		str.FixLen();
-	}
+    std::thread::id id = std::this_thread::get_id();
+    if (_tid == id)
+        return false;
+    _mutex.lock();
+    _tid = id;
+    return true;
 }
-//---------------------------------------------------------------------------
-const tjs_char * TJSVariantTypeToTypeString(tTJSVariantType type)
+
+void tTJSCriticalSectionImpl::unlock()
 {
-	switch(type)
-	{
-	case tvtVoid: return (const tjs_char *)TJS_N("void");
-	case tvtInteger: return (const tjs_char *)TJS_N("int");
-	case tvtReal: return (const tjs_char *)TJS_N("real");
-	case tvtString: return (const tjs_char *)TJS_N("string");
-	case tvtOctet: return (const tjs_char *)TJS_N("octet");
-	case tvtObject: return (const tjs_char *)TJS_N("object");
-	}
-	return (const tjs_char *)TJS_N("unknown");
+    _tid = std::thread::id();
+    _mutex.unlock();
 }
-//---------------------------------------------------------------------------
-tTJSString TJSVariantToReadableString(const tTJSVariant &val,
-	tjs_int maxlen)
+
+bool tTJSCriticalSection::lock()
 {
-	// convert given variant to human-readable string
-	// ( eg. "(string)\"this is a\\nstring\"" )
-
-	tTJSVariantType type = val.Type();
-
-	switch(type)
-	{
-	case tvtVoid:
-	  {
-		tTJSString str(TJS_N("(void)"));
-		TJSTrimStringLength(str, maxlen);
-		return str;
-	  }
-	case tvtInteger:
-	  {
-		tTJSString str(TJS_N("(int)"));
-		str += (tTJSString)val;
-		TJSTrimStringLength(str, maxlen);
-		return str;
-	  }
-	case tvtReal:
-	  {
-		tTJSString str(TJS_N("(real)"));
-		str += (tTJSString)val;
-		TJSTrimStringLength(str, maxlen);
-		return str;
-	  }
-	case tvtString:
-	  {
-		tTJSString str(TJS_N("(string)\""));
-		str += ttstr(val).EscapeC();
-		str += TJS_N("\"");
-		TJSTrimStringLength(str, maxlen);
-		return str;
-	  }
-	case tvtOctet:
-	  {
-		// TODO: octet conversion
-		tTJSString str(TJS_N("(octet)<% "));
-		tTJSVariantString * s = TJSOctetToListString(val.AsOctetNoAddRef());
-		try
-		{
-			str += s;
-		}
-		catch(...)
-		{
-			if(s) s->Release();
-			throw;
-		}
-		if(s) s->Release();
-		str += TJS_N(" %>");
-		TJSTrimStringLength(str, maxlen);
-		return str;
-	  }
-	case tvtObject:
-	  {
-		tTJSString str(TJS_N("(object)"));
-		try
-		{
-			str += ttstr(val);
-		}
-		catch(...)
-		{
-		}
-		TJSTrimStringLength(str, maxlen);
-		return str;
-	  }
-	}
-	return TJS_N("");
+    return _impl->lock();
 }
-//---------------------------------------------------------------------------
-tTJSString TJSVariantToExpressionString(const tTJSVariant &val)
+
+void tTJSCriticalSection::unlock()
 {
-	// convert given variant to string which can be interpret as an expression.
-	// this function does not convert objects ( returns empty string )
+    _impl->unlock();
+}
 
-	tTJSVariantType type = val.Type();
+tTJSCriticalSection::tTJSCriticalSection()
+{
+    _impl = new tTJSCriticalSectionImpl;
+}
 
-	switch(type)
-	{
-	case tvtVoid:
-	  {
-		return TJS_N("void");
-	  }
-	case tvtInteger:
-	  {
-		return ttstr(val);
-	  }
-	case tvtReal:
-	  {
-		tTJSString str;
-		tTJSVariantString *s = TJSRealToHexString(val.AsReal());
-		try
-		{
-			str = s;
-		}
-		catch(...)
-		{
-			if(s) s->Release();
-			throw;
-		}
-		if(s) s->Release();
-		return str + TJS_N(" /") TJS_N("* ") + ttstr(val) + TJS_N(" *") TJS_N("/");
-	  }
-	case tvtString:
-	  {
-		tTJSString str(TJS_N("\""));
-		str += ttstr(val).EscapeC();
-		str += TJS_N("\"");
-		return str;
-	  }
-	case tvtOctet:
-	  {
-		tTJSString str(TJS_N("<% "));
-		tTJSVariantString * s = TJSOctetToListString(val.AsOctetNoAddRef());
-		try
-		{
-			str += s;
-		}
-		catch(...)
-		{
-			if(s) s->Release();
-			throw;
-		}
-		if(s) s->Release();
-		str += TJS_N(" %>");
-		return str;
-	  }
-	case tvtObject:
-	  {
-		return TJS_N("");
-	  }
-	}
-	return TJS_N("");
+tTJSCriticalSection::~tTJSCriticalSection()
+{
+    delete _impl;
+}
+
+void tTJSSpinLock::lock()
+{
+    while (atom_lock.test_and_set(std::memory_order_acquire))
+    {
+        std::this_thread::yield();
+        //		TVPRelinquishCPU();
+    }
+}
+
+void tTJSSpinLock::unlock()
+{
+    atom_lock.clear(std::memory_order_release);
+}
+
+tTJSSpinLock::tTJSSpinLock()
+{
+    unlock();
+}
+
+tTJSSpinLockHolder::tTJSSpinLockHolder(tTJSSpinLock& lock)
+{
+    lock.lock();
+    Lock = &lock;
+}
+
+tTJSSpinLockHolder::~tTJSSpinLockHolder()
+{
+    if (Lock)
+    {
+        Lock->unlock();
+    }
+}
+
+//---------------------------------------------------------------------------
+iTJSDispatch2* TJSObjectTraceTarget;
+//---------------------------------------------------------------------------
+static void TJSTrimStringLength(tTJSString& str, tjs_int len)
+{
+    if (str.GetLen() > len)
+    {
+        tjs_char* p = str.Independ();
+        p[len] = 0; // trim length
+        if (len >= 3)
+        {
+            p[len - 1] = TJS_N('.');
+            p[len - 2] = TJS_N('.');
+            p[len - 3] = TJS_N('.');
+        }
+        str.FixLen();
+    }
 }
 //---------------------------------------------------------------------------
+const tjs_char* TJSVariantTypeToTypeString(tTJSVariantType type)
+{
+    switch (type)
+    {
+        case tvtVoid:
+            return (const tjs_char*)TJS_N("void");
+        case tvtInteger:
+            return (const tjs_char*)TJS_N("int");
+        case tvtReal:
+            return (const tjs_char*)TJS_N("real");
+        case tvtString:
+            return (const tjs_char*)TJS_N("string");
+        case tvtOctet:
+            return (const tjs_char*)TJS_N("octet");
+        case tvtObject:
+            return (const tjs_char*)TJS_N("object");
+    }
+    return (const tjs_char*)TJS_N("unknown");
+}
+//---------------------------------------------------------------------------
+tTJSString TJSVariantToReadableString(const tTJSVariant& val, tjs_int maxlen)
+{
+    // convert given variant to human-readable string
+    // ( eg. "(string)\"this is a\\nstring\"" )
 
+    tTJSVariantType type = val.Type();
 
+    switch (type)
+    {
+        case tvtVoid:
+        {
+            tTJSString str(TJS_N("(void)"));
+            TJSTrimStringLength(str, maxlen);
+            return str;
+        }
+        case tvtInteger:
+        {
+            tTJSString str(TJS_N("(int)"));
+            str += (tTJSString)val;
+            TJSTrimStringLength(str, maxlen);
+            return str;
+        }
+        case tvtReal:
+        {
+            tTJSString str(TJS_N("(real)"));
+            str += (tTJSString)val;
+            TJSTrimStringLength(str, maxlen);
+            return str;
+        }
+        case tvtString:
+        {
+            tTJSString str(TJS_N("(string)\""));
+            str += ttstr(val).EscapeC();
+            str += TJS_N("\"");
+            TJSTrimStringLength(str, maxlen);
+            return str;
+        }
+        case tvtOctet:
+        {
+            // TODO: octet conversion
+            tTJSString str(TJS_N("(octet)<% "));
+            tTJSVariantString* s = TJSOctetToListString(val.AsOctetNoAddRef());
+            try
+            {
+                str += s;
+            }
+            catch (...)
+            {
+                if (s)
+                    s->Release();
+                throw;
+            }
+            if (s)
+                s->Release();
+            str += TJS_N(" %>");
+            TJSTrimStringLength(str, maxlen);
+            return str;
+        }
+        case tvtObject:
+        {
+            tTJSString str(TJS_N("(object)"));
+            try
+            {
+                str += ttstr(val);
+            }
+            catch (...)
+            {
+            }
+            TJSTrimStringLength(str, maxlen);
+            return str;
+        }
+    }
+    return TJS_N("");
+}
+//---------------------------------------------------------------------------
+tTJSString TJSVariantToExpressionString(const tTJSVariant& val)
+{
+    // convert given variant to string which can be interpret as an expression.
+    // this function does not convert objects ( returns empty string )
 
+    tTJSVariantType type = val.Type();
+
+    switch (type)
+    {
+        case tvtVoid:
+        {
+            return TJS_N("void");
+        }
+        case tvtInteger:
+        {
+            return ttstr(val);
+        }
+        case tvtReal:
+        {
+            tTJSString str;
+            tTJSVariantString* s = TJSRealToHexString(val.AsReal());
+            try
+            {
+                str = s;
+            }
+            catch (...)
+            {
+                if (s)
+                    s->Release();
+                throw;
+            }
+            if (s)
+                s->Release();
+            return str + TJS_N(" /") TJS_N("* ") + ttstr(val) + TJS_N(" *") TJS_N("/");
+        }
+        case tvtString:
+        {
+            tTJSString str(TJS_N("\""));
+            str += ttstr(val).EscapeC();
+            str += TJS_N("\"");
+            return str;
+        }
+        case tvtOctet:
+        {
+            tTJSString str(TJS_N("<% "));
+            tTJSVariantString* s = TJSOctetToListString(val.AsOctetNoAddRef());
+            try
+            {
+                str += s;
+            }
+            catch (...)
+            {
+                if (s)
+                    s->Release();
+                throw;
+            }
+            if (s)
+                s->Release();
+            str += TJS_N(" %>");
+            return str;
+        }
+        case tvtObject:
+        {
+            return TJS_N("");
+        }
+    }
+    return TJS_N("");
+}
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 // TJSAlignedAlloc : aligned memory allocator
 //---------------------------------------------------------------------------
 // template classes to determine an integer type which have the same size as void *.
-struct tTJSPointerSizeEnum { enum tTJSPointerSize { size = sizeof(void*) }; };
-template <tjs_int size> struct tTJSPointerSizedIntegerBase { typedef long type; };
-template <> struct tTJSPointerSizedIntegerBase<8> { typedef tjs_uint64 type; };
-template <> struct tTJSPointerSizedIntegerBase<4> { typedef tjs_uint32 type; };
-struct tTJSPointerSizedInteger : public tTJSPointerSizedIntegerBase< tTJSPointerSizeEnum::size > {};
-//---------------------------------------------------------------------------
-void * TJSAlignedAlloc(tjs_uint bytes, tjs_uint align_bits)
+struct tTJSPointerSizeEnum
 {
-	// aligned memory allocation is to be used to gain performance on some processors.
-	tjs_int align = 1 << align_bits;
-	void *ptr = (void *)(new tjs_uint8[bytes + align + sizeof(void*)]);
-	void *org_ptr = ptr;
-	tTJSPointerSizedInteger::type *iptr =
-		reinterpret_cast<tTJSPointerSizedInteger::type *>(&ptr);
-	*iptr += align + sizeof(void*);
-	*iptr &= ~(tTJSPointerSizedInteger::type)(align - 1);
-	(reinterpret_cast<void**>(ptr))[-1] = org_ptr;
-	return ptr;
+    enum tTJSPointerSize
+    {
+        size = sizeof(void*)
+    };
+};
+template<tjs_int size>
+struct tTJSPointerSizedIntegerBase
+{
+    typedef long type;
+};
+template<>
+struct tTJSPointerSizedIntegerBase<8>
+{
+    typedef tjs_uint64 type;
+};
+template<>
+struct tTJSPointerSizedIntegerBase<4>
+{
+    typedef tjs_uint32 type;
+};
+struct tTJSPointerSizedInteger : public tTJSPointerSizedIntegerBase<tTJSPointerSizeEnum::size>
+{
+};
+//---------------------------------------------------------------------------
+void* TJSAlignedAlloc(tjs_uint bytes, tjs_uint align_bits)
+{
+    // aligned memory allocation is to be used to gain performance on some processors.
+    tjs_int align = 1 << align_bits;
+    void* ptr = (void*)(new tjs_uint8[bytes + align + sizeof(void*)]);
+    void* org_ptr = ptr;
+    tTJSPointerSizedInteger::type* iptr = reinterpret_cast<tTJSPointerSizedInteger::type*>(&ptr);
+    *iptr += align + sizeof(void*);
+    *iptr &= ~(tTJSPointerSizedInteger::type)(align - 1);
+    (reinterpret_cast<void**>(ptr))[-1] = org_ptr;
+    return ptr;
 }
 //---------------------------------------------------------------------------
-void TJSAlignedDealloc(void *ptr)
+void TJSAlignedDealloc(void* ptr)
 {
-	delete [] (tjs_uint8*)((reinterpret_cast<void**>(ptr))[-1]);
+    delete[] (tjs_uint8*)((reinterpret_cast<void**>(ptr))[-1]);
 }
 //---------------------------------------------------------------------------
-
-
 
 //---------------------------------------------------------------------------
 // floating-point class checker
 //---------------------------------------------------------------------------
 tjs_uint32 TJSGetFPClass(tjs_real r)
 {
-	tjs_uint64 *ui64 = (tjs_uint64*)&r;
+    tjs_uint64* ui64 = (tjs_uint64*)&r;
 
-	if(TJS_IEEE_D_IS_NaN(*ui64))
-	{
-		if(TJS_IEEE_D_SIGN_MASK & *ui64)
-			return TJS_FC_CLASS_NAN | TJS_FC_SIGN_MASK;
-		else
-			return TJS_FC_CLASS_NAN;
-	}
-	if(TJS_IEEE_D_IS_INF(*ui64))
-	{
-		if(TJS_IEEE_D_SIGN_MASK & *ui64)
-			return TJS_FC_CLASS_INF | TJS_FC_SIGN_MASK;
-		else
-			return TJS_FC_CLASS_INF;
-	}
-	if(TJS_IEEE_D_SIGN_MASK & *ui64)
-		return TJS_FC_CLASS_NORMAL | TJS_FC_SIGN_MASK;
-	else
-		return TJS_FC_CLASS_NORMAL;
+    if (TJS_IEEE_D_IS_NaN(*ui64))
+    {
+        if (TJS_IEEE_D_SIGN_MASK & *ui64)
+            return TJS_FC_CLASS_NAN | TJS_FC_SIGN_MASK;
+        else
+            return TJS_FC_CLASS_NAN;
+    }
+    if (TJS_IEEE_D_IS_INF(*ui64))
+    {
+        if (TJS_IEEE_D_SIGN_MASK & *ui64)
+            return TJS_FC_CLASS_INF | TJS_FC_SIGN_MASK;
+        else
+            return TJS_FC_CLASS_INF;
+    }
+    if (TJS_IEEE_D_SIGN_MASK & *ui64)
+        return TJS_FC_CLASS_NORMAL | TJS_FC_SIGN_MASK;
+    else
+        return TJS_FC_CLASS_NORMAL;
 }
 //---------------------------------------------------------------------------
 
-}
+} // namespace TJS

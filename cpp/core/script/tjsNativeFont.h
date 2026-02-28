@@ -6,24 +6,24 @@
 //---------------------------------------------------------------------------
 // tTJSNI_Font : Font Native Object
 //---------------------------------------------------------------------------
-class tTJSNI_Font : public tTJSNativeInstance {
+class tTJSNI_Font : public tTJSNativeInstance
+{
     typedef tTJSNativeInstance inherited;
 
     tTVPFont Font;
-    tTJSNI_BaseLayer *Layer;
+    tTJSNI_BaseLayer* Layer;
 
-    tjs_int GetTextWidthDirect(const ttstr &text);
+    tjs_int GetTextWidthDirect(const ttstr& text);
 
 public:
     tTJSNI_Font();
     ~tTJSNI_Font();
-    tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-                                        iTJSDispatch2 *tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
-    tTJSNI_BaseLayer *GetLayer() const { return Layer; }
+    tTJSNI_BaseLayer* GetLayer() const { return Layer; }
 
-    void SetFontFace(const ttstr &face);
+    void SetFontFace(const ttstr& face);
     ttstr GetFontFace() const;
     void SetFontHeight(tjs_int height);
     tjs_int GetFontHeight() const;
@@ -40,24 +40,24 @@ public:
     void SetFontFaceIsFileName(bool b);
     bool GetFontFaceIsFileName() const;
 
-    tjs_int GetTextWidth(const ttstr &text);
-    tjs_int GetTextHeight(const ttstr &text);
-    double GetEscWidthX(const ttstr &text);
-    double GetEscWidthY(const ttstr &text);
-    double GetEscHeightX(const ttstr &text);
-    double GetEscHeightY(const ttstr &text);
-    void GetFontGlyphDrawRect(const ttstr &text, tTVPRect &area);
+    tjs_int GetTextWidth(const ttstr& text);
+    tjs_int GetTextHeight(const ttstr& text);
+    double GetEscWidthX(const ttstr& text);
+    double GetEscWidthY(const ttstr& text);
+    double GetEscHeightX(const ttstr& text);
+    double GetEscHeightY(const ttstr& text);
+    void GetFontGlyphDrawRect(const ttstr& text, tTVPRect& area);
 
-    void GetFontList(tjs_uint32 flags, std::vector<ttstr> &list);
+    void GetFontList(tjs_uint32 flags, std::vector<ttstr>& list);
 
-    void MapPrerenderedFont(const ttstr &storage);
+    void MapPrerenderedFont(const ttstr& storage);
     void UnmapPrerenderedFont();
 
-    const tTVPFont &GetFont() const;
+    const tTVPFont& GetFont() const;
 };
 //---------------------------------------------------------------------------
 
-extern iTJSDispatch2 *TVPCreateFontObject(iTJSDispatch2 *layer);
+extern iTJSDispatch2* TVPCreateFontObject(iTJSDispatch2* layer);
 
 //---------------------------------------------------------------------------
 // tTJSNC_Font : TJS Font class
@@ -65,13 +65,12 @@ extern iTJSDispatch2 *TVPCreateFontObject(iTJSDispatch2 *layer);
 class tTJSNC_Font : public tTJSNativeClass
 {
 public:
-	tTJSNC_Font();
-	static tjs_uint32 ClassID;
+    tTJSNC_Font();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
+    tTJSNativeInstance* CreateNativeInstance();
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_Font();
 //---------------------------------------------------------------------------
-

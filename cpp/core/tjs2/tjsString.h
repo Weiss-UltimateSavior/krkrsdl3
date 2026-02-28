@@ -26,17 +26,13 @@ class tTJSStringBufferLength
 {
 public:
     tjs_int n;
-    tTJSStringBufferLength(tjs_int n) {this->n = n;}
+    tTJSStringBufferLength(tjs_int n) { this->n = n; }
 };
 /*]*/
 //---------------------------------------------------------------------------
 
-
-
-
-
 class tTJSVariant;
-extern const tjs_char *TJSNullStrPtr;
+extern const tjs_char* TJSNullStrPtr;
 
 /*[*/
 //---------------------------------------------------------------------------
@@ -45,7 +41,7 @@ extern const tjs_char *TJSNullStrPtr;
 class tTJSVariantString;
 struct tTJSString_S
 {
-    tTJSVariantString *Ptr;
+    tTJSVariantString* Ptr;
 };
 class tTJSString;
 /*]*/
@@ -69,8 +65,7 @@ public:
             Ptr->AddRef();
     }
     tTJSString(const tjs_char* str) { Ptr = TJSAllocVariantString(str); }
-    tTJSString(const tTJSStringBufferLength len)
-    { Ptr = TJSAllocVariantStringBuffer(len.n); }
+    tTJSString(const tTJSStringBufferLength len) { Ptr = TJSAllocVariantStringBuffer(len.n); }
     tTJSString(tjs_char rch)
     {
         tjs_char ch[2];
@@ -82,56 +77,59 @@ public:
     tTJSString(const tTJSVariant& val);
 
     tTJSString(const tTJSString& str, int n) // construct with first n chars of str
-    { Ptr = TJSAllocVariantString(str.c_str(), n); }
+    {
+        Ptr = TJSAllocVariantString(str.c_str(), n);
+    }
 
     tTJSString(const tjs_char* str, int n) // same as above except for str's type
-    { Ptr = TJSAllocVariantString(str, n); }
+    {
+        Ptr = TJSAllocVariantString(str, n);
+    }
 
-    tTJSString(tjs_int n);                       // from int
+    tTJSString(tjs_int n);   // from int
     tTJSString(tjs_int64 n); // from int64
 
-    tTJSString(const std::string &str) { Ptr = TJSAllocVariantString(str.c_str()); }
+    tTJSString(const std::string& str) { Ptr = TJSAllocVariantString(str.c_str()); }
 
-           //--------------------------------------------------------- destructor --
+    //--------------------------------------------------------- destructor --
     ~tTJSString()
     {
         if (Ptr)
             Ptr->Release();
     }
 
-           //--------------------------------------------------------- conversion --
-    const tjs_char* c_str() const
-    { return Ptr ? Ptr->operator const tjs_char *():TJSNullStrPtr; }
+    //--------------------------------------------------------- conversion --
+    const tjs_char* c_str() const { return Ptr ? Ptr->operator const tjs_char*() : TJSNullStrPtr; }
 
     const std::string AsStdString() const
     {
-        if(!Ptr) return std::string("");
+        if (!Ptr)
+            return std::string("");
         // this constant string value must match std::string in type
         return std::string(*Ptr);
     }
 
-    tTJSVariantString* AsVariantStringNoAddRef() const
-    {
-        return Ptr;
-    }
+    tTJSVariantString* AsVariantStringNoAddRef() const { return Ptr; }
 
     tjs_int64 AsInteger() const;
 
-           //------------------------------------------------------- substitution --
+    //------------------------------------------------------- substitution --
     tTJSString& operator=(const tTJSString& rhs)
     {
-        if(rhs.Ptr) rhs.Ptr->AddRef();
-        if(Ptr) Ptr->Release();
+        if (rhs.Ptr)
+            rhs.Ptr->AddRef();
+        if (Ptr)
+            Ptr->Release();
         Ptr = rhs.Ptr;
         return *this;
     }
 
     tTJSString& operator=(const tjs_char* rhs)
     {
-        if(Ptr)
+        if (Ptr)
         {
             Independ();
-            if(rhs && rhs[0])
+            if (rhs && rhs[0])
                 Ptr->ResetString(rhs);
             else
                 Ptr->Release(), Ptr = NULL;
@@ -143,86 +141,102 @@ public:
         return *this;
     }
 
-           //------------------------------------------------------------ compare --
+    //------------------------------------------------------------ compare --
     bool operator==(const tTJSString& ref) const
     {
-        if(Ptr == ref.Ptr) return true; // both empty or the same pointer
-        if(!Ptr && ref.Ptr) return false;
-        if(Ptr && !ref.Ptr) return false;
-        if(Ptr->Length != ref.Ptr->Length) return false;
+        if (Ptr == ref.Ptr)
+            return true; // both empty or the same pointer
+        if (!Ptr && ref.Ptr)
+            return false;
+        if (Ptr && !ref.Ptr)
+            return false;
+        if (Ptr->Length != ref.Ptr->Length)
+            return false;
         return !TJS_strcmp(*Ptr, *ref.Ptr);
     }
 
-    bool operator!=(const tTJSString& ref) const
-    {
-        return ! this->operator == (ref);
-    }
+    bool operator!=(const tTJSString& ref) const { return !this->operator==(ref); }
 
     tjs_int CompareIC(const tTJSString& ref) const
     {
-        if(!Ptr && !ref.Ptr) return true; // both empty string
-        if(!Ptr && ref.Ptr) return false;
-        if(Ptr && !ref.Ptr) return false;
+        if (!Ptr && !ref.Ptr)
+            return true; // both empty string
+        if (!Ptr && ref.Ptr)
+            return false;
+        if (Ptr && !ref.Ptr)
+            return false;
         return TJS_stricmp(*Ptr, *ref.Ptr);
     }
 
     bool operator==(const tjs_char* ref) const
     {
         bool rnemp = ref && ref[0];
-        if(!Ptr && !rnemp) return true; // both empty string
-        if(!Ptr && rnemp) return false;
-        if(Ptr && !rnemp) return false;
+        if (!Ptr && !rnemp)
+            return true; // both empty string
+        if (!Ptr && rnemp)
+            return false;
+        if (Ptr && !rnemp)
+            return false;
         return !TJS_strcmp(*Ptr, ref);
     }
 
-    bool operator!=(const tjs_char* ref) const
-    {
-        return ! this->operator == (ref);
-    }
+    bool operator!=(const tjs_char* ref) const { return !this->operator==(ref); }
 
     tjs_int CompareIC(const tjs_char* ref) const
     {
         bool rnemp = ref && ref[0];
-        if(!Ptr && !rnemp) return true; // both empty string
-        if(!Ptr && rnemp) return false;
-        if(Ptr && !rnemp) return false;
+        if (!Ptr && !rnemp)
+            return true; // both empty string
+        if (!Ptr && rnemp)
+            return false;
+        if (Ptr && !rnemp)
+            return false;
         return TJS_stricmp(*Ptr, ref);
     }
 
     bool operator<(const tTJSString& ref) const
     {
-        if(!Ptr && !ref.Ptr) return false;
-        if(!Ptr && ref.Ptr) return true;
-        if(Ptr && !ref.Ptr) return false;
-        return TJS_strcmp(*Ptr, *ref.Ptr)<0;
+        if (!Ptr && !ref.Ptr)
+            return false;
+        if (!Ptr && ref.Ptr)
+            return true;
+        if (Ptr && !ref.Ptr)
+            return false;
+        return TJS_strcmp(*Ptr, *ref.Ptr) < 0;
     }
 
     bool operator>(const tTJSString& ref) const
     {
-        if(!Ptr && !ref.Ptr) return false;
-        if(!Ptr && ref.Ptr) return false;
-        if(Ptr && !ref.Ptr) return true;
-        return TJS_strcmp(*Ptr, *ref.Ptr)>0;
+        if (!Ptr && !ref.Ptr)
+            return false;
+        if (!Ptr && ref.Ptr)
+            return false;
+        if (Ptr && !ref.Ptr)
+            return true;
+        return TJS_strcmp(*Ptr, *ref.Ptr) > 0;
     }
 
-           //---------------------------------------------------------- operation --
+    //---------------------------------------------------------- operation --
     void operator+=(const tTJSString& ref)
     {
-        if(!ref.Ptr) return;
+        if (!ref.Ptr)
+            return;
         Independ();
         Ptr = TJSAppendVariantString(Ptr, *ref.Ptr);
     }
 
     void operator+=(const tTJSVariantString* ref)
     {
-        if(!ref) return;
+        if (!ref)
+            return;
         Independ();
         Ptr = TJSAppendVariantString(Ptr, ref);
     }
 
     void operator+=(const tjs_char* ref)
     {
-        if(!ref) return;
+        if (!ref)
+            return;
         Independ();
         Ptr = TJSAppendVariantString(Ptr, ref);
     }
@@ -238,9 +252,12 @@ public:
 
     tTJSString operator+(const tTJSString& ref) const
     {
-        if(!ref.Ptr && !Ptr) return tTJSString();
-        if(!ref.Ptr) return *this;
-        if(!Ptr) return ref;
+        if (!ref.Ptr && !Ptr)
+            return tTJSString();
+        if (!ref.Ptr)
+            return *this;
+        if (!Ptr)
+            return ref;
 
         tTJSString newstr;
         newstr.Ptr = TJSAllocVariantString(*this->Ptr, *ref.Ptr);
@@ -249,9 +266,12 @@ public:
 
     tTJSString operator+(const tjs_char* ref) const
     {
-        if(!ref && !Ptr) return tTJSString();
-        if(!ref) return *this;
-        if(!Ptr) return tTJSString(ref);
+        if (!ref && !Ptr)
+            return tTJSString();
+        if (!ref)
+            return *this;
+        if (!Ptr)
+            return tTJSString(ref);
 
         tTJSString newstr;
         newstr.Ptr = TJSAllocVariantString(*this->Ptr, ref);
@@ -260,7 +280,8 @@ public:
 
     tTJSString operator+(tjs_char rch) const
     {
-        if(!Ptr) return tTJSString(rch);
+        if (!Ptr)
+            return tTJSString(rch);
         tjs_char ch[2];
         ch[0] = rch;
         ch[1] = 0;
@@ -270,45 +291,49 @@ public:
     }
 
     /*m[*/
-    friend tTJSString operator + (const tjs_char *lhs, const tTJSString &rhs);
+    friend tTJSString operator+(const tjs_char* lhs, const tTJSString& rhs);
     /*]m*/
 
     tjs_char operator[](tjs_uint i) const
     {
         // returns character at i. this function does not check the range.
-        if(!Ptr) return 0;
-        return Ptr->operator const tjs_char *() [i];
+        if (!Ptr)
+            return 0;
+        return Ptr->operator const tjs_char*()[i];
     }
 
     void Clear()
     {
-        if(Ptr) Ptr->Release(), Ptr = NULL;
+        if (Ptr)
+            Ptr->Release(), Ptr = NULL;
     }
 
     tjs_char* AllocBuffer(tjs_uint len)
     {
         /* you must call FixLen when you allocate larger buffer than actual string length */
 
-        if(Ptr) Ptr->Release();
+        if (Ptr)
+            Ptr->Release();
         Ptr = TJSAllocVariantStringBuffer(len);
-        return const_cast<tjs_char*>(Ptr->operator const tjs_char *());
+        return const_cast<tjs_char*>(Ptr->operator const tjs_char*());
     }
 
     tjs_char* AppendBuffer(tjs_uint len)
     {
         /* you must call FixLen when you allocate larger buffer than actual string length */
 
-        if(!Ptr) return AllocBuffer(len);
+        if (!Ptr)
+            return AllocBuffer(len);
         Independ();
         Ptr->AppendBuffer(len);
-        return const_cast<tjs_char *>(Ptr->operator const tjs_char *());
+        return const_cast<tjs_char*>(Ptr->operator const tjs_char*());
     }
-
 
     void FixLen()
     {
         Independ();
-        if(Ptr) Ptr = Ptr->FixLength();
+        if (Ptr)
+            Ptr = Ptr->FixLength();
     }
 
     void Replace(const tTJSString& from, const tTJSString& to, bool forall = true);
@@ -322,17 +347,16 @@ public:
     void ToLowerCase();
     void ToUppserCase();
 
-    tjs_int printf(const tjs_char *format, ...);
+    tjs_int printf(const tjs_char* format, ...);
 
-    tTJSString EscapeC() const;   // c-style string escape/unescaep
+    tTJSString EscapeC() const; // c-style string escape/unescaep
     tTJSString UnescapeC() const;
 
     void EscapeC(tTJSString& dest) const { dest = EscapeC(); }
     void UnescapeC(tTJSString& dest) const { dest = UnescapeC(); }
 
     bool StartsWith(const tjs_char* string) const;
-    bool StartsWith(const tTJSString& string) const
-    { return StartsWith(string.c_str()); }
+    bool StartsWith(const tTJSString& string) const { return StartsWith(string.c_str()); }
 
     tjs_uint32* GetHint()
     {
@@ -341,11 +365,11 @@ public:
         return Ptr->GetHint();
     }
 
-           //------------------------------------------------------------- others --
+    //------------------------------------------------------------- others --
     bool IsEmpty() const { return Ptr == NULL; }
 
 private:
-    tjs_char * InternalIndepend();
+    tjs_char* InternalIndepend();
 
 public:
     tjs_char* Independ()
@@ -353,30 +377,32 @@ public:
         // severs sharing of the string instance
         // and returns independent internal buffer
 
-               // note that you must call FixLen after making modification of the buffer
-               // if you shorten the string using this method's return value.
-               // USING THIS METHOD'S RETURN VALUE AND MODIFYING THE INTERNAL
-               // BUFFER IS VERY DANGER.
+        // note that you must call FixLen after making modification of the buffer
+        // if you shorten the string using this method's return value.
+        // USING THIS METHOD'S RETURN VALUE AND MODIFYING THE INTERNAL
+        // BUFFER IS VERY DANGER.
 
-        if(!Ptr) return NULL;
+        if (!Ptr)
+            return NULL;
 
-        if(Ptr->GetRefCount() == 0)
+        if (Ptr->GetRefCount() == 0)
         {
             // already indepentent
-            return const_cast<tjs_char *>(Ptr->operator const tjs_char *());
+            return const_cast<tjs_char*>(Ptr->operator const tjs_char*());
         }
         return InternalIndepend();
     }
 
-
     tjs_int GetLen() const
     {
-        if(!Ptr) return 0;
+        if (!Ptr)
+            return 0;
         return Ptr->GetLength();
     }
     tjs_int GetCharLen() const
     {
-        if (!Ptr) return 0;
+        if (!Ptr)
+            return 0;
         return Ptr->GetCharLength();
     }
 
@@ -384,13 +410,13 @@ public:
 
     tjs_char GetLastChar() const
     {
-        if(!Ptr) return (tjs_char)0;
-        const tjs_char * p = Ptr->operator const tjs_char*();
+        if (!Ptr)
+            return (tjs_char)0;
+        const tjs_char* p = Ptr->operator const tjs_char*();
         return p[Ptr->GetLength() - 1];
     }
 
-
-           //---------------------------------------------- allocator/deallocater --
+    //---------------------------------------------- allocator/deallocater --
     static void* operator new(size_t size) { return new char[size]; }
     static void operator delete(void* p) { delete[] ((char*)p); }
 
@@ -399,15 +425,17 @@ public:
 
     static void* operator new(size_t size, void* buf) { return buf; }
     //--------------------------------------------- indexer / finder --
-    int      IndexOf (const tTJSString& str, unsigned int pos = 0) const;
-    int      IndexOf (const char* s, unsigned int pos = 0, unsigned int n = -1) const { return IndexOf(tTJSString(s, n), pos); }
-    int      IndexOf (tjs_char c, unsigned int pos = 0) const { return IndexOf(tTJSString(&c, 1), pos); }
-    tTJSString    SubString(unsigned int pos, unsigned int len) const;
+    int IndexOf(const tTJSString& str, unsigned int pos = 0) const;
+    int IndexOf(const char* s, unsigned int pos = 0, unsigned int n = -1) const
+    {
+        return IndexOf(tTJSString(s, n), pos);
+    }
+    int IndexOf(tjs_char c, unsigned int pos = 0) const { return IndexOf(tTJSString(&c, 1), pos); }
+    tTJSString SubString(unsigned int pos, unsigned int len) const;
     tTJSString Trim();
 };
 /*end-of-tTJSString*/
 extern tTJSString operator+(const tjs_char* lhs, const tTJSString& rhs);
-
 
 //---------------------------------------------------------------------------
 extern tTJSString TJSInt32ToHex(tjs_uint32 num, int zeropad = 8);

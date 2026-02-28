@@ -2,7 +2,7 @@
 /**
  * レイヤーツリーを保持する機能を Windowのみでなく、一般化し、このインターフェイス
  * を持つクラスであれば、レイヤーツリーを持てるようにする
- * 
+ *
  */
 //---------------------------------------------------------------------------
 //!@file レイヤーツリーオーナー
@@ -16,35 +16,45 @@
 class iTVPLayerTreeOwner
 {
 public:
-	// LayerManager/Layer -> LTO
-	virtual void RegisterLayerManager( class iTVPLayerManager* manager ) = 0;
-	virtual void UnregisterLayerManager( class iTVPLayerManager* manager ) = 0;
+    // LayerManager/Layer -> LTO
+    virtual void RegisterLayerManager(class iTVPLayerManager* manager) = 0;
+    virtual void UnregisterLayerManager(class iTVPLayerManager* manager) = 0;
 
-	virtual void StartBitmapCompletion(iTVPLayerManager * manager) = 0;
-	virtual void NotifyBitmapCompleted(class iTVPLayerManager * manager,
-		tjs_int x, tjs_int y, class tTVPBaseTexture *bmp,
-		const struct tTVPRect &cliprect, enum tTVPLayerType type, tjs_int opacity) = 0;
-	virtual void EndBitmapCompletion(iTVPLayerManager * manager) = 0;
+    virtual void StartBitmapCompletion(iTVPLayerManager* manager) = 0;
+    virtual void NotifyBitmapCompleted(class iTVPLayerManager* manager,
+                                       tjs_int x,
+                                       tjs_int y,
+                                       class tTVPBaseTexture* bmp,
+                                       const struct tTVPRect& cliprect,
+                                       enum tTVPLayerType type,
+                                       tjs_int opacity) = 0;
+    virtual void EndBitmapCompletion(iTVPLayerManager* manager) = 0;
 
-	virtual void SetMouseCursor(class iTVPLayerManager* manager, tjs_int cursor) = 0;
-	virtual void GetCursorPos(class iTVPLayerManager* manager, tjs_int &x, tjs_int &y) = 0;
-	virtual void SetCursorPos(class iTVPLayerManager* manager, tjs_int x, tjs_int y) = 0;
-	virtual void ReleaseMouseCapture(class iTVPLayerManager* manager) = 0;
+    virtual void SetMouseCursor(class iTVPLayerManager* manager, tjs_int cursor) = 0;
+    virtual void GetCursorPos(class iTVPLayerManager* manager, tjs_int& x, tjs_int& y) = 0;
+    virtual void SetCursorPos(class iTVPLayerManager* manager, tjs_int x, tjs_int y) = 0;
+    virtual void ReleaseMouseCapture(class iTVPLayerManager* manager) = 0;
 
-	virtual void SetHint(class iTVPLayerManager* manager, iTJSDispatch2* sender, const ttstr &hint) = 0;
+    virtual void SetHint(class iTVPLayerManager* manager,
+                         iTJSDispatch2* sender,
+                         const ttstr& hint) = 0;
 
-	virtual void NotifyLayerResize(class iTVPLayerManager* manager) = 0;
-	virtual void NotifyLayerImageChange(class iTVPLayerManager* manager) = 0;
+    virtual void NotifyLayerResize(class iTVPLayerManager* manager) = 0;
+    virtual void NotifyLayerImageChange(class iTVPLayerManager* manager) = 0;
 
-	virtual void SetAttentionPoint(class iTVPLayerManager* manager, class tTJSNI_BaseLayer *layer, tjs_int x, tjs_int y) = 0;
-	virtual void DisableAttentionPoint(class iTVPLayerManager* manager) = 0;
+    virtual void SetAttentionPoint(class iTVPLayerManager* manager,
+                                   class tTJSNI_BaseLayer* layer,
+                                   tjs_int x,
+                                   tjs_int y) = 0;
+    virtual void DisableAttentionPoint(class iTVPLayerManager* manager) = 0;
 
-	virtual void SetImeMode( class iTVPLayerManager* manager, tjs_int mode ) = 0; // mode == tTVPImeMode
-	virtual void ResetImeMode( class iTVPLayerManager* manager ) = 0;
+    virtual void SetImeMode(class iTVPLayerManager* manager,
+                            tjs_int mode) = 0; // mode == tTVPImeMode
+    virtual void ResetImeMode(class iTVPLayerManager* manager) = 0;
 
-	virtual iTJSDispatch2 * GetOwnerNoAddRef() const = 0;
-	// LTO -> LayerManager/Layer
-	// LTO からの通知は必要要件ではない
+    virtual iTJSDispatch2* GetOwnerNoAddRef() const = 0;
+    // LTO -> LayerManager/Layer
+    // LTO からの通知は必要要件ではない
 };
 
 /**
@@ -52,27 +62,28 @@ public:
  * ほぼ iTVPLayerManager 関連メソッドのみ
  * いくつかのメソッドは未実装なので、継承した先で実装する必要がある
  */
-class tTVPLayerTreeOwner : public iTVPLayerTreeOwner {
+class tTVPLayerTreeOwner : public iTVPLayerTreeOwner
+{
 protected:
-    size_t PrimaryLayerManagerIndex; //!< プライマリレイヤマネージャ
-    std::vector<iTVPLayerManager *> Managers; //!< レイヤマネージャの配列
-    tTVPRect DestRect; //!< 描画先位置
+    size_t PrimaryLayerManagerIndex;         //!< プライマリレイヤマネージャ
+    std::vector<iTVPLayerManager*> Managers; //!< レイヤマネージャの配列
+    tTVPRect DestRect;                       //!< 描画先位置
 
 protected:
-    iTVPLayerManager *GetLayerManagerAt(size_t index);
-    const iTVPLayerManager *GetLayerManagerAt(size_t index) const;
-    bool TransformToPrimaryLayerManager(tjs_int &x, tjs_int &y);
-    bool TransformToPrimaryLayerManager(tjs_real &x, tjs_real &y);
-    bool TransformFromPrimaryLayerManager(tjs_int &x, tjs_int &y);
+    iTVPLayerManager* GetLayerManagerAt(size_t index);
+    const iTVPLayerManager* GetLayerManagerAt(size_t index) const;
+    bool TransformToPrimaryLayerManager(tjs_int& x, tjs_int& y);
+    bool TransformToPrimaryLayerManager(tjs_real& x, tjs_real& y);
+    bool TransformFromPrimaryLayerManager(tjs_int& x, tjs_int& y);
 
-    void GetPrimaryLayerSize(tjs_int &w, tjs_int &h) const;
+    void GetPrimaryLayerSize(tjs_int& w, tjs_int& h) const;
 
 public:
     tTVPLayerTreeOwner();
 
     // LayerManager/Layer -> LTO
-    virtual void RegisterLayerManager(class iTVPLayerManager *manager);
-    virtual void UnregisterLayerManager(class iTVPLayerManager *manager);
+    virtual void RegisterLayerManager(class iTVPLayerManager* manager);
+    virtual void UnregisterLayerManager(class iTVPLayerManager* manager);
 
     /* 実際の描画
     virtual void StartBitmapCompletion(iTVPLayerManager *
@@ -83,38 +94,34 @@ public:
     */
 
     // 以下は何もしない
-    virtual void SetMouseCursor(class iTVPLayerManager *manager,
-                                                tjs_int cursor);
-    virtual void GetCursorPos(class iTVPLayerManager *manager,
-                                              tjs_int &x, tjs_int &y);
-    virtual void SetCursorPos(class iTVPLayerManager *manager,
-                                              tjs_int x, tjs_int y);
-    virtual void ReleaseMouseCapture(class iTVPLayerManager *manager);
+    virtual void SetMouseCursor(class iTVPLayerManager* manager, tjs_int cursor);
+    virtual void GetCursorPos(class iTVPLayerManager* manager, tjs_int& x, tjs_int& y);
+    virtual void SetCursorPos(class iTVPLayerManager* manager, tjs_int x, tjs_int y);
+    virtual void ReleaseMouseCapture(class iTVPLayerManager* manager);
 
-    virtual void SetHint(class iTVPLayerManager *manager,
-                                         iTJSDispatch2 *sender,
-                                         const ttstr &hint);
+    virtual void SetHint(class iTVPLayerManager* manager, iTJSDispatch2* sender, const ttstr& hint);
 
-    virtual void NotifyLayerResize(class iTVPLayerManager *manager);
-    virtual void NotifyLayerImageChange(class iTVPLayerManager *manager);
+    virtual void NotifyLayerResize(class iTVPLayerManager* manager);
+    virtual void NotifyLayerImageChange(class iTVPLayerManager* manager);
 
-    virtual void SetAttentionPoint(class iTVPLayerManager *manager, tTJSNI_BaseLayer *layer,
-                      tjs_int x, tjs_int y);
-    virtual void DisableAttentionPoint(class iTVPLayerManager *manager);
+    virtual void SetAttentionPoint(class iTVPLayerManager* manager,
+                                   tTJSNI_BaseLayer* layer,
+                                   tjs_int x,
+                                   tjs_int y);
+    virtual void DisableAttentionPoint(class iTVPLayerManager* manager);
 
-    virtual void SetImeMode(class iTVPLayerManager *manager,
-                                            tjs_int mode);
-    virtual void ResetImeMode(class iTVPLayerManager *manager);
+    virtual void SetImeMode(class iTVPLayerManager* manager, tjs_int mode);
+    virtual void ResetImeMode(class iTVPLayerManager* manager);
 
     // virtual iTJSDispatch2 * GetOwnerNoAddRef() const = 0;
 
     // 以下は上述のメソッドがコールされた後に、実際に値を設定するために呼ばれる
     // cursor == 0 は default
     virtual void OnSetMouseCursor(tjs_int cursor) = 0;
-    virtual void OnGetCursorPos(tjs_int &x, tjs_int &y) = 0;
+    virtual void OnGetCursorPos(tjs_int& x, tjs_int& y) = 0;
     virtual void OnSetCursorPos(tjs_int x, tjs_int y) = 0;
     virtual void OnReleaseMouseCapture() = 0;
-    virtual void OnSetHintText(iTJSDispatch2 *sender, const ttstr &hint) = 0;
+    virtual void OnSetHintText(iTJSDispatch2* sender, const ttstr& hint) = 0;
 
     /**
      * プライマリーレイヤーのサイズが変更された時に呼ばれる
@@ -126,8 +133,7 @@ public:
      */
     virtual void OnChangeLayerImage() = 0;
 
-    virtual void OnSetAttentionPoint(tTJSNI_BaseLayer *layer, tjs_int x,
-                                     tjs_int y) = 0;
+    virtual void OnSetAttentionPoint(tTJSNI_BaseLayer* layer, tjs_int x, tjs_int y) = 0;
     virtual void OnDisableAttentionPoint() = 0;
     virtual void OnSetImeMode(tjs_int mode) = 0;
     virtual void OnResetImeMode() = 0;
@@ -136,41 +142,40 @@ public:
     // LayerManager に対してイベントを通知するためのメソッド
     void FireClick(tjs_int x, tjs_int y);
     void FireDoubleClick(tjs_int x, tjs_int y);
-    void FireMouseDown(tjs_int x, tjs_int y, enum tTVPMouseButton mb,
-                       tjs_uint32 flags);
-    void FireMouseUp(tjs_int x, tjs_int y, enum tTVPMouseButton mb,
-                     tjs_uint32 flags);
+    void FireMouseDown(tjs_int x, tjs_int y, enum tTVPMouseButton mb, tjs_uint32 flags);
+    void FireMouseUp(tjs_int x, tjs_int y, enum tTVPMouseButton mb, tjs_uint32 flags);
     void FireMouseMove(tjs_int x, tjs_int y, tjs_uint32 flags);
     void FireMouseWheel(tjs_uint32 shift, tjs_int delta, tjs_int x, tjs_int y);
 
     void FireReleaseCapture();
     void FireMouseOutOfWindow();
 
-    void FireTouchDown(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy,
-                       tjs_uint32 id);
-    void FireTouchUp(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy,
-                     tjs_uint32 id);
-    void FireTouchMove(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy,
-                       tjs_uint32 id);
-    void FireTouchScaling(tjs_real startdist, tjs_real curdist, tjs_real cx,
-                          tjs_real cy, tjs_int flag);
-    void FireTouchRotate(tjs_real startangle, tjs_real curangle, tjs_real dist,
-                         tjs_real cx, tjs_real cy, tjs_int flag);
+    void FireTouchDown(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id);
+    void FireTouchUp(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id);
+    void FireTouchMove(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id);
+    void FireTouchScaling(
+        tjs_real startdist, tjs_real curdist, tjs_real cx, tjs_real cy, tjs_int flag);
+    void FireTouchRotate(tjs_real startangle,
+                         tjs_real curangle,
+                         tjs_real dist,
+                         tjs_real cx,
+                         tjs_real cy,
+                         tjs_int flag);
     void FireMultiTouch();
 
     void FireKeyDown(tjs_uint key, tjs_uint32 shift);
     void FireKeyUp(tjs_uint key, tjs_uint32 shift);
     void FireKeyPress(tjs_char key);
 
-    void FireDisplayRotate(tjs_int orientation, tjs_int rotate, tjs_int bpp,
-                           tjs_int hresolution, tjs_int vresolution);
+    void FireDisplayRotate(
+        tjs_int orientation, tjs_int rotate, tjs_int bpp, tjs_int hresolution, tjs_int vresolution);
 
     void FireRecheckInputState();
 
     // レイヤー管理補助
-    tTJSNI_BaseLayer *GetPrimaryLayer();
-    tTJSNI_BaseLayer *GetFocusedLayer();
-    void SetFocusedLayer(tTJSNI_BaseLayer *layer);
+    tTJSNI_BaseLayer* GetPrimaryLayer();
+    tTJSNI_BaseLayer* GetFocusedLayer();
+    void SetFocusedLayer(tTJSNI_BaseLayer* layer);
 };
 
 #endif

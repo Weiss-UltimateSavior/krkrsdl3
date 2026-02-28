@@ -143,8 +143,8 @@ void SDL_GL_BaseSet(int w, int h)
             // 位置          // 纹理坐标
             0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // 左下
             1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // 右下
-            1.0f, 1.0f,  0.0f, 1.0f, 0.0f, // 右上
-            0.0f, 1.0f,  0.0f, 0.0f, 0.0f, // 左上
+            1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // 右上
+            0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // 左上
         };
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
         // EBO
@@ -193,7 +193,8 @@ void SDL_GL_CreateTexture(SDL_Sprite& sp)
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sp.width, sp.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sp.width, sp.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 NULL);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -214,7 +215,7 @@ void SDL_GL_UpdateTexture(SDL_Sprite* sp, uint8_t* buff, int width, int height, 
 {
     glBindTexture(GL_TEXTURE_2D, sp->texture);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch / 4);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buff);
     glGenerateMipmap(GL_TEXTURE_2D);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -243,4 +244,4 @@ void SDL_GL_DestroyTexture(SDL_Sprite* sp)
     sp->texture = 0;
 }
 
-}
+} // namespace krkrsdl3

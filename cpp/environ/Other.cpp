@@ -25,16 +25,17 @@ ttstr TVPLocalExtractFilePath(const ttstr& name)
     tjs_int i = name.GetLen() - 1;
     for (; i >= 0; i--)
     {
-        if (p[i] == TJS_N(':') || p[i] == TJS_N('/') ||
-            p[i] == TJS_N('\\'))
+        if (p[i] == TJS_N(':') || p[i] == TJS_N('/') || p[i] == TJS_N('\\'))
             break;
     }
     return ttstr(p, i + 1);
 }
 #ifndef _KRKRSDL3_ANDROID
-bool TVPWriteDataToFile(const ttstr& filepath, const void* data, unsigned int len) {
-    FILE *handle = fopen(filepath.AsStdString().c_str(), "wb");
-    if(handle) {
+bool TVPWriteDataToFile(const ttstr& filepath, const void* data, unsigned int len)
+{
+    FILE* handle = fopen(filepath.AsStdString().c_str(), "wb");
+    if (handle)
+    {
         bool ret = fwrite(data, 1, len, handle) == len;
         fclose(handle);
         return ret;
@@ -50,20 +51,28 @@ extern bool TVPWriteDataToFile(const ttstr& filepath, const void* data, unsigned
 // tTVPLocalFileStream
 //---------------------------------------------------------------------------
 tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
-                                         const ttstr& localname, tjs_uint32 flag)
-  : MemBuffer(nullptr), FileName(localname), Handle(nullptr)
+                                         const ttstr& localname,
+                                         tjs_uint32 flag)
+  : MemBuffer(nullptr),
+    FileName(localname),
+    Handle(nullptr)
 {
     tjs_uint32 access = flag & TJS_BS_ACCESS_MASK;
-    if (access == TJS_BS_WRITE) {
+    if (access == TJS_BS_WRITE)
+    {
         if (TVPCheckExistentLocalFile(localname))
         {
-        } else {
+        }
+        else
+        {
             ttstr dirpath = TVPLocalExtractFilePath(localname);
             const tjs_char* p = dirpath.c_str();
             tjs_int i = dirpath.GetLen();
-            if (p[i - 1] == TJS_N('/') || p[i - 1] == TJS_N('\\')) i--;
+            if (p[i - 1] == TJS_N('/') || p[i - 1] == TJS_N('\\'))
+                i--;
             dirpath = dirpath.SubString(0, i);
-            if (!TVPCheckExistentLocalFolder(dirpath) && !TVPCreateFolders(dirpath)) {
+            if (!TVPCheckExistentLocalFolder(dirpath) && !TVPCreateFolders(dirpath))
+            {
                 TVPThrowExceptionMessage(TVPCannotOpenStorage, origname);
             }
         }
@@ -72,7 +81,8 @@ tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
     }
 
     const char* mode = nullptr;
-    switch (access) {
+    switch (access)
+    {
         case TJS_BS_READ:
             mode = "rb";
             break;
@@ -89,12 +99,16 @@ tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
 
     Handle = SDL_IOFromFile(localname.c_str(), mode);
 
-    if (!Handle) {
-        if (access == TJS_BS_APPEND || access == TJS_BS_UPDATE) {
+    if (!Handle)
+    {
+        if (access == TJS_BS_APPEND || access == TJS_BS_UPDATE)
+        {
             Handle = SDL_IOFromFile(localname.c_str(), "rb");
-            if (Handle) {
+            if (Handle)
+            {
                 Sint64 size = SDL_GetIOSize((SDL_IOStream*)Handle);
-                if (size > 0 && size < 4 * 1024 * 1024) {
+                if (size > 0 && size < 4 * 1024 * 1024)
+                {
                     MemBuffer = new tTVPMemoryStream();
                     MemBuffer->SetSize(static_cast<tjs_uint64>(size));
                     SDL_ReadIO((SDL_IOStream*)Handle, MemBuffer->GetInternalBuffer(), size);
@@ -106,15 +120,17 @@ tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
         }
     }
 
-           // push current tick as an environment noise
+    // push current tick as an environment noise
     uint32_t tick = TVPGetRoughTickCount32();
     TVPPushEnvironNoise(&tick, sizeof(tick));
 }
 //---------------------------------------------------------------------------
 tTVPLocalFileStream::~tTVPLocalFileStream()
 {
-    if (MemBuffer) {
-        if (!TVPWriteDataToFile(FileName, MemBuffer->GetInternalBuffer(), MemBuffer->GetSize())) {
+    if (MemBuffer)
+    {
+        if (!TVPWriteDataToFile(FileName, MemBuffer->GetInternalBuffer(), MemBuffer->GetSize()))
+        {
             delete MemBuffer;
             ttstr filename(FileName);
             FileName.~tTJSString();
@@ -123,23 +139,26 @@ tTVPLocalFileStream::~tTVPLocalFileStream()
         }
         delete MemBuffer;
     }
-    if (Handle) {
+    if (Handle)
+    {
         SDL_CloseIO((SDL_IOStream*)Handle);
     }
 
-           // push current tick as an environment noise
-           // (timing information from file accesses may be good noises)
+    // push current tick as an environment noise
+    // (timing information from file accesses may be good noises)
     uint32_t tick = TVPGetRoughTickCount32();
     TVPPushEnvironNoise(&tick, sizeof(tick));
 }
 //---------------------------------------------------------------------------
 tjs_uint64 tTVPLocalFileStream::Seek(tjs_int64 offset, tjs_int whence)
 {
-    if (MemBuffer) {
+    if (MemBuffer)
+    {
         return MemBuffer->Seek(offset, whence);
     }
     SDL_IOWhence sdl_whence;
-    switch (whence) {
+    switch (whence)
+    {
         case SEEK_SET:
             sdl_whence = SDL_IO_SEEK_SET;
             break;
@@ -158,7 +177,8 @@ tjs_uint64 tTVPLocalFileStream::Seek(tjs_int64 offset, tjs_int whence)
 //---------------------------------------------------------------------------
 tjs_uint tTVPLocalFileStream::Read(void* buffer, tjs_uint read_size)
 {
-    if (MemBuffer) {
+    if (MemBuffer)
+    {
         return MemBuffer->Read(buffer, read_size);
     }
     return static_cast<tjs_uint>(SDL_ReadIO((SDL_IOStream*)Handle, buffer, read_size));
@@ -166,7 +186,8 @@ tjs_uint tTVPLocalFileStream::Read(void* buffer, tjs_uint read_size)
 //---------------------------------------------------------------------------
 tjs_uint tTVPLocalFileStream::Write(const void* buffer, tjs_uint write_size)
 {
-    if (MemBuffer) {
+    if (MemBuffer)
+    {
         return MemBuffer->Write(buffer, write_size);
     }
     return static_cast<tjs_uint>(SDL_WriteIO((SDL_IOStream*)Handle, buffer, write_size));
@@ -174,7 +195,8 @@ tjs_uint tTVPLocalFileStream::Write(const void* buffer, tjs_uint write_size)
 //---------------------------------------------------------------------------
 void tTVPLocalFileStream::SetEndOfStorage()
 {
-    if (MemBuffer) {
+    if (MemBuffer)
+    {
         return MemBuffer->SetEndOfStorage();
     }
 
@@ -183,59 +205,63 @@ void tTVPLocalFileStream::SetEndOfStorage()
 //---------------------------------------------------------------------------
 tjs_uint64 tTVPLocalFileStream::GetSize()
 {
-    if (MemBuffer) {
+    if (MemBuffer)
+    {
         return MemBuffer->GetSize();
     }
     return static_cast<tjs_uint64>(SDL_GetIOSize((SDL_IOStream*)Handle));
 }
 //---------------------------------------------------------------------------
 
-std::string TVPShowFileSelector(
-    const std::string& title,
-    const std::string& filename,
-    std::string initdir,
-    bool issave
-)
+std::string TVPShowFileSelector(const std::string& title,
+                                const std::string& filename,
+                                std::string initdir,
+                                bool issave)
 {
     std::string result = "";
-    const SDL_DialogFileFilter filters[] = {
-        { "All files", "*" }
-    };
-    const char* dialog_title = title.empty() ? 
-        (issave ? "Save File" : "Select File") : title.c_str();
+    const SDL_DialogFileFilter filters[] = {{"All files", "*"}};
+    const char* dialog_title =
+        title.empty() ? (issave ? "Save File" : "Select File") : title.c_str();
     const char* initial_path = initdir.empty() ? NULL : initdir.c_str();
-    struct DialogData {
+    struct DialogData
+    {
         std::string* result_ptr;
         bool completed;
     };
     DialogData data = {&result, false};
-    auto callback = [](void* userdata, const char* const* files, int filter) {
+    auto callback = [](void* userdata, const char* const* files, int filter)
+    {
         DialogData* data = static_cast<DialogData*>(userdata);
-        if (files && files[0]) {
+        if (files && files[0])
+        {
             *(data->result_ptr) = files[0];
         }
         data->completed = true;
     };
-    
-    if (issave) {
+
+    if (issave)
+    {
         const char* default_name = filename.empty() ? "untitled" : filename.c_str();
         SDL_ShowSaveFileDialog(callback, &data, NULL, filters, 1, default_name);
-    } else {
+    }
+    else
+    {
         const char* default_path = initial_path ? initial_path : "";
         SDL_ShowOpenFolderDialog(callback, &data, NULL, default_path, false);
     }
-    
-    while (!data.completed) {
+
+    while (!data.completed)
+    {
         SDL_PumpEvents();
         SDL_Delay(10);
     }
-    
+
     return result;
 }
 
 std::string TVPShowDirectorySelector(const std::string& title,
-                                std::string initdir,
-                                std::string rootdir)
+                                     std::string initdir,
+                                     std::string rootdir)
 {
     std::string result = "";
     const char* dialog_title = title.empty() ? "Select Folder" : title.c_str();
@@ -516,7 +542,7 @@ bool TVPInputQuery(const std::string& title, const std::string& prompt, std::str
             SDL_Texture* promptTexture = SDL_CreateTextureFromSurface(renderer, promptSurface);
             if (promptTexture)
             {
-                SDL_FRect promptRect = {20, 20, (float)promptSurface->w,  (float)promptSurface->h};
+                SDL_FRect promptRect = {20, 20, (float)promptSurface->w, (float)promptSurface->h};
                 SDL_RenderTexture(renderer, promptTexture, NULL, &promptRect);
                 SDL_DestroyTexture(promptTexture);
             }
@@ -540,7 +566,8 @@ bool TVPInputQuery(const std::string& title, const std::string& prompt, std::str
                 SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
                 if (textTexture)
                 {
-                    SDL_FRect textRect = {25, 70, std::min((float)textSurface->w,  (float)WIDTH - 50),
+                    SDL_FRect textRect = {25, 70,
+                                          std::min((float)textSurface->w, (float)WIDTH - 50),
                                           (float)textSurface->h};
                     SDL_RenderTexture(renderer, textTexture, NULL, &textRect);
                     SDL_DestroyTexture(textTexture);
@@ -566,7 +593,7 @@ bool TVPInputQuery(const std::string& title, const std::string& prompt, std::str
                 if (textTexture)
                 {
                     SDL_FRect textRect = {inputRect.x + 5, inputRect.y + 10,
-                                          SDL_min( (float)textSurface->w,  (float)inputRect.w - 10),
+                                          SDL_min((float)textSurface->w, (float)inputRect.w - 10),
                                           (float)textSurface->h};
                     SDL_RenderTexture(renderer, textTexture, NULL, &textRect);
 
@@ -579,7 +606,8 @@ bool TVPInputQuery(const std::string& title, const std::string& prompt, std::str
                         if (cursorSurface && showCursor)
                         {
                             int cursorX = inputRect.x + 5 + cursorSurface->w;
-                            SDL_FRect cursorRect = { (float)cursorX, inputRect.y + 5, 2, inputRect.h - 10};
+                            SDL_FRect cursorRect = {(float)cursorX, inputRect.y + 5, 2,
+                                                    inputRect.h - 10};
                             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                             SDL_RenderFillRect(renderer, &cursorRect);
                             SDL_DestroySurface(cursorSurface);
@@ -634,8 +662,8 @@ bool TVPInputQuery(const std::string& title, const std::string& prompt, std::str
             if (okTexture)
             {
                 SDL_FRect okTextRect = {okRect.x + okRect.w / 2 - okSurface->w / 2,
-                                        okRect.y + okRect.h / 2 - okSurface->h / 2,  (float)okSurface->w,
-                                        (float)okSurface->h};
+                                        okRect.y + okRect.h / 2 - okSurface->h / 2,
+                                        (float)okSurface->w, (float)okSurface->h};
                 SDL_RenderTexture(renderer, okTexture, NULL, &okTextRect);
                 SDL_DestroyTexture(okTexture);
             }
@@ -650,7 +678,7 @@ bool TVPInputQuery(const std::string& title, const std::string& prompt, std::str
             {
                 SDL_FRect cancelTextRect = {cancelRect.x + cancelRect.w / 2 - cancelSurface->w / 2,
                                             cancelRect.y + cancelRect.h / 2 - cancelSurface->h / 2,
-                                            (float)cancelSurface->w,  (float)cancelSurface->h};
+                                            (float)cancelSurface->w, (float)cancelSurface->h};
                 SDL_RenderTexture(renderer, cancelTexture, NULL, &cancelTextRect);
                 SDL_DestroyTexture(cancelTexture);
             }
@@ -689,22 +717,28 @@ int TVPShowSimpleInputBox(ttstr& text,
         return 1;
 }
 
-int TVPShowSimpleMessageBox(const ttstr& text, const ttstr& caption, const std::vector<ttstr>& vecButtons)
+int TVPShowSimpleMessageBox(const ttstr& text,
+                            const ttstr& caption,
+                            const std::vector<ttstr>& vecButtons)
 {
     std::vector<std::string> sdlButtonTexts;
     std::vector<SDL_MessageBoxButtonData> sdlButtons;
     sdlButtons.resize(vecButtons.size());
-    for (const auto& btn : vecButtons) {
+    for (const auto& btn : vecButtons)
+    {
         sdlButtonTexts.push_back(btn.AsStdString());
     }
-    for (size_t i = 0; i < vecButtons.size(); ++i) {
+    for (size_t i = 0; i < vecButtons.size(); ++i)
+    {
         SDL_MessageBoxButtonData btn = {0};
         btn.buttonID = static_cast<int>(i);
 
-        if (i == 0) {
+        if (i == 0)
+        {
             btn.flags |= SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
         }
-        if (i == vecButtons.size() - 1) {
+        if (i == vecButtons.size() - 1)
+        {
             btn.flags |= SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT;
         }
 
@@ -714,37 +748,40 @@ int TVPShowSimpleMessageBox(const ttstr& text, const ttstr& caption, const std::
 
     std::string titleStr = caption.AsStdString();
     std::string textStr = text.AsStdString();
-    SDL_MessageBoxData msgboxData = {
-            SDL_MESSAGEBOX_INFORMATION,
-            nullptr,
-            titleStr.c_str(),
-            textStr.c_str(),
-            static_cast<int>(vecButtons.size()),
-            vecButtons.empty() ? nullptr : sdlButtons.data(),
-            nullptr
-    };
+    SDL_MessageBoxData msgboxData = {SDL_MESSAGEBOX_INFORMATION,
+                                     nullptr,
+                                     titleStr.c_str(),
+                                     textStr.c_str(),
+                                     static_cast<int>(vecButtons.size()),
+                                     vecButtons.empty() ? nullptr : sdlButtons.data(),
+                                     nullptr};
 
-    if (vecButtons.empty()) {
-        SDL_MessageBoxButtonData defaultButton = {
-                SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT | SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT,
-                0,
-                "确定"
-        };
+    if (vecButtons.empty())
+    {
+        SDL_MessageBoxButtonData defaultButton = {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT |
+                                                      SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT,
+                                                  0, "确定"};
         msgboxData.buttons = &defaultButton;
         msgboxData.numbuttons = 1;
     }
 
     int buttonid = -1;
-    if (!SDL_ShowMessageBox(&msgboxData, &buttonid)) {
-        SDL_Log("SDL_ShowMessageBox failed: %s",  SDL_GetError());
+    if (!SDL_ShowMessageBox(&msgboxData, &buttonid))
+    {
+        SDL_Log("SDL_ShowMessageBox failed: %s", SDL_GetError());
         return -1;
     }
     return buttonid;
 }
 
-int TVPShowSimpleMessageBox(const char* pszText, const char* pszTitle, unsigned int nButton, const char** btnText) {
-	std::vector<ttstr> vecButtons;
-    for (unsigned int i = 0; i < nButton; ++i) {
+int TVPShowSimpleMessageBox(const char* pszText,
+                            const char* pszTitle,
+                            unsigned int nButton,
+                            const char** btnText)
+{
+    std::vector<ttstr> vecButtons;
+    for (unsigned int i = 0; i < nButton; ++i)
+    {
         vecButtons.emplace_back(btnText[i]);
     }
     return TVPShowSimpleMessageBox(pszText, pszTitle, vecButtons);
@@ -958,16 +995,18 @@ ttstr TVPGetOSName()
 #endif
 }
 
-void TVPShowPopMenu(tTJSNI_MenuItem* menu) {
-    
-}
-
-void TVPCheckAndSendDumps(const std::string& dumpdir, const std::string& packageName, const std::string& versionStr)
+void TVPShowPopMenu(tTJSNI_MenuItem* menu)
 {
-
 }
 
-void TVPOpenPatchLibUrl() {
+void TVPCheckAndSendDumps(const std::string& dumpdir,
+                          const std::string& packageName,
+                          const std::string& versionStr)
+{
+}
+
+void TVPOpenPatchLibUrl()
+{
     std::string url = "https://zeas2.github.io/Kirikiroid2_patch/patch";
     SDL_OpenURL(url.c_str());
 }

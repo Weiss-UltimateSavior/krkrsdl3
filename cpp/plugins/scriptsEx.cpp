@@ -255,22 +255,22 @@ class ScriptsAdd
 {
 
 public:
-    ScriptsAdd() {};
+    ScriptsAdd(){};
 
     /**
      * メンバ名一覧の取得
      */
     static tjs_error getKeys(tTJSVariant* result,
-                                             tjs_int numparams,
-                                             tTJSVariant** param,
-                                             iTJSDispatch2* objthis);
+                             tjs_int numparams,
+                             tTJSVariant** param,
+                             iTJSDispatch2* objthis);
     /**
      * メンバの個数の取得
      */
     static tjs_error getCount(tTJSVariant* result,
-                                              tjs_int numparams,
-                                              tTJSVariant** param,
-                                              iTJSDispatch2* objthis);
+                              tjs_int numparams,
+                              tTJSVariant** param,
+                              iTJSDispatch2* objthis);
     /**
      * コンテキストの取得
      */
@@ -292,16 +292,16 @@ public:
     //----------------------------------------------------------------------
     // 全配列・辞書巡回
     static tjs_error foreach (tTJSVariant* result,
-                                              tjs_int numparams,
-                                              tTJSVariant * *param,
-                                              iTJSDispatch2 * objthis);
+                              tjs_int numparams,
+                              tTJSVariant * *param,
+                              iTJSDispatch2 * objthis);
 
     //----------------------------------------------------------------------
     // hash値取得
     static tjs_error getMD5HashString(tTJSVariant* result,
-                                                      tjs_int numparams,
-                                                      tTJSVariant** param,
-                                                      iTJSDispatch2* objthis);
+                                      tjs_int numparams,
+                                      tTJSVariant** param,
+                                      iTJSDispatch2* objthis);
 
     //----------------------------------------------------------------------
     // オブジェクト複製
@@ -310,27 +310,27 @@ public:
     //----------------------------------------------------------------------
     // フラグ指定つきプロパティ操作
     static tjs_error propSet(tTJSVariant* result,
-                                             tjs_int numparams,
-                                             tTJSVariant** param,
-                                             iTJSDispatch2* objthis);
+                             tjs_int numparams,
+                             tTJSVariant** param,
+                             iTJSDispatch2* objthis);
     static tjs_error propGet(tTJSVariant* result,
-                                             tjs_int numparams,
-                                             tTJSVariant** param,
-                                             iTJSDispatch2* objthis);
+                             tjs_int numparams,
+                             tTJSVariant** param,
+                             iTJSDispatch2* objthis);
 
     //----------------------------------------------------------------------
     // (const)つき辞書／配列を安全に評価
     static tjs_error safeEvalStorage(tTJSVariant* result,
-                                                     tjs_int numparams,
-                                                     tTJSVariant** param,
-                                                     iTJSDispatch2* objthis);
+                                     tjs_int numparams,
+                                     tTJSVariant** param,
+                                     iTJSDispatch2* objthis);
 
     //----------------------------------------------------------------------
     // あいまい文字列検索（bitapアルゴリズムによる）
     static tjs_error stringFuzzySearch(tTJSVariant* result,
-                                                       tjs_int numparams,
-                                                       tTJSVariant** param,
-                                                       iTJSDispatch2* objthis);
+                                       tjs_int numparams,
+                                       tTJSVariant** param,
+                                       iTJSDispatch2* objthis);
 
 private:
     /**
@@ -345,15 +345,15 @@ private:
 class DictMemberGetCaller : public tTJSDispatch /** EnumMembers 用 */
 {
 public:
-    DictMemberGetCaller(iTJSDispatch2* array) : array(array) {};
-    virtual tjs_error FuncCall( // function invocation
-        tjs_uint32 flag,                        // calling flag
-        const tjs_char* membername,             // member name ( NULL for a default member )
-        tjs_uint32* hint,                       // hint for the member name (in/out)
-        tTJSVariant* result,                    // result
-        tjs_int numparams,                      // number of parameters
-        tTJSVariant** param,                    // parameters
-        iTJSDispatch2* objthis                  // object as "this"
+    DictMemberGetCaller(iTJSDispatch2* array) : array(array){};
+    virtual tjs_error FuncCall(     // function invocation
+        tjs_uint32 flag,            // calling flag
+        const tjs_char* membername, // member name ( NULL for a default member )
+        tjs_uint32* hint,           // hint for the member name (in/out)
+        tTJSVariant* result,        // result
+        tjs_int numparams,          // number of parameters
+        tTJSVariant** param,        // parameters
+        iTJSDispatch2* objthis      // object as "this"
     )
     {
         if (numparams > 1)
@@ -406,14 +406,14 @@ public:
 
     DictMemberCompareCaller(tTJSVariantClosure& _target) : target(_target), match(true) {}
 
-    virtual tjs_error FuncCall( // function invocation
-        tjs_uint32 flag,                        // calling flag
-        const tjs_char* membername,             // member name ( NULL for a default member )
-        tjs_uint32* hint,                       // hint for the member name (in/out)
-        tTJSVariant* result,                    // result
-        tjs_int numparams,                      // number of parameters
-        tTJSVariant** param,                    // parameters
-        iTJSDispatch2* objthis                  // object as "this"
+    virtual tjs_error FuncCall(     // function invocation
+        tjs_uint32 flag,            // calling flag
+        const tjs_char* membername, // member name ( NULL for a default member )
+        tjs_uint32* hint,           // hint for the member name (in/out)
+        tTJSVariant* result,        // result
+        tjs_int numparams,          // number of parameters
+        tTJSVariant** param,        // parameters
+        iTJSDispatch2* objthis      // object as "this"
     )
     {
         if (result)
@@ -457,14 +457,14 @@ public:
     {
     }
 
-    virtual tjs_error FuncCall( // function invocation
-        tjs_uint32 flag,                        // calling flag
-        const tjs_char* membername,             // member name ( NULL for a default member )
-        tjs_uint32* hint,                       // hint for the member name (in/out)
-        tTJSVariant* result,                    // result
-        tjs_int numparams,                      // number of parameters
-        tTJSVariant** param,                    // parameters
-        iTJSDispatch2* objthis                  // object as "this"
+    virtual tjs_error FuncCall(     // function invocation
+        tjs_uint32 flag,            // calling flag
+        const tjs_char* membername, // member name ( NULL for a default member )
+        tjs_uint32* hint,           // hint for the member name (in/out)
+        tTJSVariant* result,        // result
+        tjs_int numparams,          // number of parameters
+        tTJSVariant** param,        // parameters
+        iTJSDispatch2* objthis      // object as "this"
     )
     {
         if (result)
@@ -510,14 +510,14 @@ public:
     {
     }
 
-    virtual tjs_error FuncCall( // function invocation
-        tjs_uint32 flag,                        // calling flag
-        const tjs_char* membername,             // member name ( NULL for a default member )
-        tjs_uint32* hint,                       // hint for the member name (in/out)
-        tTJSVariant* result,                    // result
-        tjs_int numparams,                      // number of parameters
-        tTJSVariant** param,                    // parameters
-        iTJSDispatch2* objthis                  // object as "this"
+    virtual tjs_error FuncCall(     // function invocation
+        tjs_uint32 flag,            // calling flag
+        const tjs_char* membername, // member name ( NULL for a default member )
+        tjs_uint32* hint,           // hint for the member name (in/out)
+        tTJSVariant* result,        // result
+        tjs_int numparams,          // number of parameters
+        tTJSVariant** param,        // parameters
+        iTJSDispatch2* objthis      // object as "this"
     )
     {
         breakResult.Clear();
@@ -564,9 +564,9 @@ void ScriptsAdd::_getKeys(tTJSVariant* result, tTJSVariant& obj)
  * メンバ名一覧の取得
  */
 tjs_error ScriptsAdd::getKeys(tTJSVariant* result,
-                                              tjs_int numparams,
-                                              tTJSVariant** param,
-                                              iTJSDispatch2* objthis)
+                              tjs_int numparams,
+                              tTJSVariant** param,
+                              iTJSDispatch2* objthis)
 {
     if (numparams < 1)
         return TJS_E_BADPARAMCOUNT;
@@ -578,9 +578,9 @@ tjs_error ScriptsAdd::getKeys(tTJSVariant* result,
  * メンバの個数の取得
  */
 tjs_error ScriptsAdd::getCount(tTJSVariant* result,
-                                               tjs_int numparams,
-                                               tTJSVariant** param,
-                                               iTJSDispatch2* objthis)
+                               tjs_int numparams,
+                               tTJSVariant** param,
+                               iTJSDispatch2* objthis)
 {
     if (numparams < 1)
         return TJS_E_BADPARAMCOUNT;
@@ -749,9 +749,9 @@ bool ScriptsAdd::equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
 //----------------------------------------------------------------------
 // 全配列・辞書巡回
 tjs_error ScriptsAdd::foreach (tTJSVariant* result,
-                                               tjs_int numparams,
-                                               tTJSVariant * *param,
-                                               iTJSDispatch2 * objthis)
+                               tjs_int numparams,
+                               tTJSVariant * *param,
+                               iTJSDispatch2 * objthis)
 {
     if (numparams < 2)
         return TJS_E_BADPARAMCOUNT;
@@ -828,9 +828,9 @@ tjs_error ScriptsAdd::foreach (tTJSVariant* result,
  * @return ハッシュ値（32文字の16進数ハッシュ文字列（小文字））
  */
 tjs_error ScriptsAdd::getMD5HashString(tTJSVariant* result,
-                                                       tjs_int numparams,
-                                                       tTJSVariant** param,
-                                                       iTJSDispatch2* objthis)
+                                       tjs_int numparams,
+                                       tTJSVariant** param,
+                                       iTJSDispatch2* objthis)
 {
     if (numparams < 1)
         return TJS_E_BADPARAMCOUNT;
@@ -862,15 +862,15 @@ tjs_error ScriptsAdd::getMD5HashString(tTJSVariant* result,
 class DictMemberCloneCaller : public tTJSDispatch
 {
 public:
-    DictMemberCloneCaller(iTJSDispatch2* dict) : dict(dict) {};
-    virtual tjs_error FuncCall( // function invocation
-        tjs_uint32 flag,                        // calling flag
-        const tjs_char* membername,             // member name ( NULL for a default member )
-        tjs_uint32* hint,                       // hint for the member name (in/out)
-        tTJSVariant* result,                    // result
-        tjs_int numparams,                      // number of parameters
-        tTJSVariant** param,                    // parameters
-        iTJSDispatch2* objthis                  // object as "this"
+    DictMemberCloneCaller(iTJSDispatch2* dict) : dict(dict){};
+    virtual tjs_error FuncCall(     // function invocation
+        tjs_uint32 flag,            // calling flag
+        const tjs_char* membername, // member name ( NULL for a default member )
+        tjs_uint32* hint,           // hint for the member name (in/out)
+        tTJSVariant* result,        // result
+        tjs_int numparams,          // number of parameters
+        tTJSVariant** param,        // parameters
+        iTJSDispatch2* objthis      // object as "this"
     )
     {
         tTJSVariant value = ScriptsAdd::clone(*param[2]);
@@ -946,9 +946,9 @@ tTJSVariant ScriptsAdd::clone(tTJSVariant obj)
 //----------------------------------------------------------------------
 // フラグ指定つきプロパティ操作
 tjs_error ScriptsAdd::propSet(tTJSVariant* result,
-                                              tjs_int numparams,
-                                              tTJSVariant** param,
-                                              iTJSDispatch2* objthis)
+                              tjs_int numparams,
+                              tTJSVariant** param,
+                              iTJSDispatch2* objthis)
 {
     if (numparams < 3)
         return TJS_E_BADPARAMCOUNT;
@@ -962,9 +962,9 @@ tjs_error ScriptsAdd::propSet(tTJSVariant* result,
                                                  param[2], clo.ObjThis));
 }
 tjs_error ScriptsAdd::propGet(tTJSVariant* result,
-                                              tjs_int numparams,
-                                              tTJSVariant** param,
-                                              iTJSDispatch2* objthis)
+                              tjs_int numparams,
+                              tTJSVariant** param,
+                              iTJSDispatch2* objthis)
 {
     if (numparams < 2)
         return TJS_E_BADPARAMCOUNT;
@@ -982,9 +982,9 @@ tjs_error ScriptsAdd::propGet(tTJSVariant* result,
 //----------------------------------------------------------------------
 // (const)つき辞書／配列を安全に評価
 tjs_error ScriptsAdd::safeEvalStorage(tTJSVariant* result,
-                                                      tjs_int numparams,
-                                                      tTJSVariant** param,
-                                                      iTJSDispatch2* objthis)
+                                      tjs_int numparams,
+                                      tTJSVariant** param,
+                                      iTJSDispatch2* objthis)
 {
     if (numparams < 1)
         return TJS_E_BADPARAMCOUNT;
@@ -1044,9 +1044,9 @@ tjs_error ScriptsAdd::safeEvalStorage(tTJSVariant* result,
 //----------------------------------------------------------------------
 // あいまい文字列検索（bitapアルゴリズムによる）
 tjs_error ScriptsAdd::stringFuzzySearch(tTJSVariant* result,
-                                                        tjs_int numparams,
-                                                        tTJSVariant** param,
-                                                        iTJSDispatch2* objthis)
+                                        tjs_int numparams,
+                                        tTJSVariant** param,
+                                        iTJSDispatch2* objthis)
 {
     if (numparams < 3)
         return TJS_E_BADPARAMCOUNT;

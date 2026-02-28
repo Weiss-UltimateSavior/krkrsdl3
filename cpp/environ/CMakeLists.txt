@@ -8,9 +8,6 @@ set(KRKRSDL_ENVIRON_SRC
     ${KRKRSDL_ENVIRON_PATH}/Other.cpp
     ${KRKRSDL_ENVIRON_PATH}/TVPConfig.cpp
     ${KRKRSDL_ENVIRON_PATH}/WaveMixer.cpp
-    ${KRKRSDL_ENVIRON_PATH}/math/md5.c
-    ${KRKRSDL_ENVIRON_PATH}/math/xxhash.c
-    ${KRKRSDL_ENVIRON_PATH}/math/xxtea.cpp
     ${KRKRSDL_ENVIRON_PATH}/gl/tvpgl.cpp
     )
 	

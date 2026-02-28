@@ -66,9 +66,7 @@ protected:
 
 public:
     tTJSNI_BaseMenuItem();
-    tjs_error Construct(tjs_int numparams,
-                                        tTJSVariant** param,
-                                        iTJSDispatch2* tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 public:
@@ -125,9 +123,7 @@ class tTJSNI_MenuItem : public tTJSNI_BaseMenuItem
 
 public:
     tTJSNI_MenuItem();
-    tjs_error Construct(tjs_int numparams,
-                                        tTJSVariant** param,
-                                        iTJSDispatch2* tjs_obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* tjs_obj);
     void Invalidate();
 
 private:
@@ -187,7 +183,7 @@ class tTVPOnMenuItemClickInputEvent : public tTVPBaseInputEvent
     static tTVPUniqueTagForInputEvent Tag;
 
 public:
-    tTVPOnMenuItemClickInputEvent(tTJSNI_BaseMenuItem* menu) : tTVPBaseInputEvent(menu, Tag) {};
+    tTVPOnMenuItemClickInputEvent(tTJSNI_BaseMenuItem* menu) : tTVPBaseInputEvent(menu, Tag){};
     void Deliver() const { ((tTJSNI_BaseMenuItem*)GetSource())->OnClick(); }
 };
 //---------------------------------------------------------------------------
@@ -197,25 +193,24 @@ public:
 //---------------------------------------------------------------------------
 class tTJSNC_MenuItem : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSNC_MenuItem();
-	static tjs_uint32 ClassID;
+    tTJSNC_MenuItem();
+    static tjs_uint32 ClassID;
 
 protected:
-	tTJSNativeInstance* CreateNativeInstance();
-	/*
-		implement this in each platform.
-		this must return a proper instance of tTJSNC_MenuItem.
-	*/
+    tTJSNativeInstance* CreateNativeInstance();
+    /*
+            implement this in each platform.
+            this must return a proper instance of tTJSNC_MenuItem.
+    */
 };
 //---------------------------------------------------------------------------
 extern tTJSNativeClass* TVPCreateNativeClass_MenuItem();
 /*
-	implement this in each platform.
-	this must return a proper instance of tTJSNC_MenuItem.
-	usually simple returns: new tTJSNC_MenuItem();
+        implement this in each platform.
+        this must return a proper instance of tTJSNC_MenuItem.
+        usually simple returns: new tTJSNC_MenuItem();
 */
 //---------------------------------------------------------------------------
-

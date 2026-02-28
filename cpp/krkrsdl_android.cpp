@@ -14,15 +14,38 @@
 
 #include "eventCallbackFun.h"
 
+void printGLInfo()
+{
+    const GLubyte* vendor = glGetString(GL_VENDOR);
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* version = glGetString(GL_VERSION);
+    const GLubyte* glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+    SDL_Log("OpenGL Vendor    : %s\n", vendor);
+    SDL_Log("OpenGL Renderer  : %s\n", renderer);
+    SDL_Log("OpenGL Version   : %s\n", version);
+    SDL_Log("GLSL Version     : %s\n", glslVersion);
+
+    GLint numExtensions;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    SDL_Log("Supported Extensions (%d):\n", numExtensions);
+    for (int i = 0; i < numExtensions; i++)
+    {
+        const GLubyte* ext = glGetStringi(GL_EXTENSIONS, i);
+        SDL_Log("  %s\n", ext);
+    }
+}
+
 SDL_Window* tvp_window;
 SDL_GLContext tvp_glContext = NULL;
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) { // for format converter
-		SDL_Log("Fail to initialize SDL.");
-		return SDL_APP_FAILURE;
-	}
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
+    { // for format converter
+        SDL_Log("Fail to initialize SDL.");
+        return SDL_APP_FAILURE;
+    }
 
     // 窗口
     SDL_PropertiesID props = SDL_CreateProperties();
@@ -52,6 +75,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
     SDL_GL_MakeCurrent(tvp_window, tvp_glContext);
+    // info
+    printGLInfo();
 
     // 初始化时不显示
     SDL_HideWindow(tvp_window);
@@ -69,7 +94,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("Game Start Failed.");
         return SDL_APP_FAILURE;
     }
-    
+
     SDL_ShowWindow(tvp_window);
 
     // 初始帧数
@@ -79,8 +104,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 
     return SDL_APP_CONTINUE;
 }
-
-
 
 std::map<SDL_Sprite*, callbackOnKeyDownUpEvent> sdl_keyDownCallback;
 std::map<SDL_Sprite*, callbackOnKeyDownUpEvent> sdl_keyUpCallback;
@@ -94,21 +117,22 @@ std::mutex sdlRenderMtx;
 static SDL_FRect rectBuff;
 
 // 安卓专属事件机制
-enum TouchState {
+enum TouchState
+{
     STATE_IDLE,
-    STATE_SINGLE_FINGER,    // 单指状态（处理左键和移动）
-    STATE_MULTI_FINGER,     // 多指状态（处理右键）
+    STATE_SINGLE_FINGER, // 单指状态（处理左键和移动）
+    STATE_MULTI_FINGER,  // 多指状态（处理右键）
 };
-struct Finger {
+struct Finger
+{
     SDL_FingerID id;
-    float x, y;          // 归一化坐标
+    float x, y;           // 归一化坐标
     float startX, startY; // 按下时的位置
     Uint64 downTime;
     bool active;
     bool moved;
 
-    Finger() : id(0), x(0), y(0), startX(0), startY(0),
-               downTime(0), active(false), moved(false) {}
+    Finger() : id(0), x(0), y(0), startX(0), startY(0), downTime(0), active(false), moved(false) {}
 };
 static TouchState _state;
 static std::map<SDL_FingerID, Finger> fingers;
@@ -117,24 +141,29 @@ static Uint64 rightClickStartTime;
 static const Uint32 RIGHT_CLICK_CONFIRM_DELAY = 150;
 void sendMouseEvent(int button, int eventType, float pX, float pY);
 void sendMouseMotion(float pX, float pY);
-void calculateCenter(float& centerX, float& centerY) {
+void calculateCenter(float& centerX, float& centerY)
+{
     float sumX = 0, sumY = 0;
     int count = 0;
 
-    for (const auto& pair : fingers) {
-        if (pair.second.active) {
+    for (const auto& pair : fingers)
+    {
+        if (pair.second.active)
+        {
             sumX += pair.second.x;
             sumY += pair.second.y;
             count++;
         }
     }
 
-    if (count > 0) {
+    if (count > 0)
+    {
         centerX = sumX / count;
         centerY = sumY / count;
     }
 }
-void handleFingerDown(const SDL_TouchFingerEvent& e) {
+void handleFingerDown(const SDL_TouchFingerEvent& e)
+{
     Finger f;
     f.id = e.fingerID;
     f.x = f.startX = e.x;
@@ -145,31 +174,38 @@ void handleFingerDown(const SDL_TouchFingerEvent& e) {
 
     fingers[e.fingerID] = f;
 
-    if (fingers.size() == 1) {
+    if (fingers.size() == 1)
+    {
         // 单击->左键
         _state = STATE_SINGLE_FINGER;
-    } else if (fingers.size() >= 2) {
+    }
+    else if (fingers.size() >= 2)
+    {
         // 双击->右键
         _state = STATE_MULTI_FINGER;
     }
 }
-void handleFingerUp(const SDL_TouchFingerEvent& e) {
+void handleFingerUp(const SDL_TouchFingerEvent& e)
+{
     auto it = fingers.find(e.fingerID);
-    if (it == fingers.end()) return;
+    if (it == fingers.end())
+        return;
 
     Finger& f = it->second;
     f.active = false;
 
     if (fingers.size() == 1)
     {
-        if(_state == STATE_SINGLE_FINGER)
+        if (_state == STATE_SINGLE_FINGER)
         {
-            if(!f.moved) sendMouseEvent(SDL_BUTTON_LEFT, SDL_EVENT_MOUSE_BUTTON_DOWN, f.x, f.y);
+            if (!f.moved)
+                sendMouseEvent(SDL_BUTTON_LEFT, SDL_EVENT_MOUSE_BUTTON_DOWN, f.x, f.y);
             sendMouseEvent(SDL_BUTTON_LEFT, SDL_EVENT_MOUSE_BUTTON_UP, f.x, f.y);
         }
-        else if(_state == STATE_MULTI_FINGER)
+        else if (_state == STATE_MULTI_FINGER)
         {
-            if(!f.moved) sendMouseEvent(SDL_BUTTON_RIGHT, SDL_EVENT_MOUSE_BUTTON_DOWN, f.x, f.y);
+            if (!f.moved)
+                sendMouseEvent(SDL_BUTTON_RIGHT, SDL_EVENT_MOUSE_BUTTON_DOWN, f.x, f.y);
             sendMouseEvent(SDL_BUTTON_RIGHT, SDL_EVENT_MOUSE_BUTTON_UP, f.x, f.y);
         }
         _state = STATE_IDLE;
@@ -177,18 +213,21 @@ void handleFingerUp(const SDL_TouchFingerEvent& e) {
 
     fingers.erase(it);
 }
-void handleFingerMotion(const SDL_TouchFingerEvent& e) {
+void handleFingerMotion(const SDL_TouchFingerEvent& e)
+{
     auto it = fingers.find(e.fingerID);
-    if (it == fingers.end()) return;
+    if (it == fingers.end())
+        return;
 
     Finger& f = it->second;
 
     // 检查是否移动
     float dx = e.x - f.startX;
     float dy = e.y - f.startY;
-    float moveDist = dx*dx + dy*dy;
+    float moveDist = dx * dx + dy * dy;
 
-    if (moveDist > 0.0001f) { // 移动阈值
+    if (moveDist > 0.0001f)
+    { // 移动阈值
         f.moved = true;
         f.x = e.x;
         f.y = e.y;
@@ -200,10 +239,13 @@ void handleFingerMotion(const SDL_TouchFingerEvent& e) {
         }
     }
 }
-int getActiveFingerCount() {
+int getActiveFingerCount()
+{
     int count = 0;
-    for (const auto& pair : fingers) {
-        if (pair.second.active) count++;
+    for (const auto& pair : fingers)
+    {
+        if (pair.second.active)
+            count++;
     }
     return count;
 }
@@ -232,58 +274,70 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
 
     if (tmp != mbX1)
     {
-        if(eventType == SDL_EVENT_MOUSE_BUTTON_DOWN)
+        if (eventType == SDL_EVENT_MOUSE_BUTTON_DOWN)
         {
             std::lock_guard<std::mutex> lock(sdlCallbackMtx);
             // 检查modal对象
             bool hasModal = false;
-            for(auto callback : sdl_mouseDownCallback) {
-                if(callback.first->isModal && callback.first->isVisible)
+            for (auto callback : sdl_mouseDownCallback)
+            {
+                if (callback.first->isModal && callback.first->isVisible)
                     hasModal = true;
             }
             // 写入缓冲区
             for (auto callback : sdl_mouseDownCallback)
             {
-                if(hasModal)
+                if (hasModal)
                 {
-                    if(callback.first->isModal) {
-                        callback.second(tmp, (pixelX - callback.first->xPos) / callback.first->scale,
-                                        (pixelY- callback.first->yPos) / callback.first->scale);
+                    if (callback.first->isModal)
+                    {
+                        callback.second(tmp,
+                                        (pixelX - callback.first->xPos) / callback.first->scale,
+                                        (pixelY - callback.first->yPos) / callback.first->scale);
                         break;
                     }
-                } else {
-                    if(callback.first->isVisible) {
+                }
+                else
+                {
+                    if (callback.first->isVisible)
+                    {
                         callback.second(tmp,
                                         (pixelX - callback.first->xPos) / callback.first->scale,
                                         (pixelY - callback.first->yPos) / callback.first->scale);
                     }
                 }
-
             }
         }
-        else if(eventType == SDL_EVENT_MOUSE_BUTTON_UP)
+        else if (eventType == SDL_EVENT_MOUSE_BUTTON_UP)
         {
             std::lock_guard<std::mutex> lock(sdlCallbackMtx);
             // 检查modal对象
             bool hasModal = false;
-            for(auto callback : sdl_mouseUpCallback) {
-                if(callback.first->isModal && callback.first->isVisible)
+            for (auto callback : sdl_mouseUpCallback)
+            {
+                if (callback.first->isModal && callback.first->isVisible)
                     hasModal = true;
             }
             // 写入缓冲区
-            for(auto callback : sdl_mouseUpCallback) {
-                if(hasModal) {
-                    if(callback.first->isModal) {
+            for (auto callback : sdl_mouseUpCallback)
+            {
+                if (hasModal)
+                {
+                    if (callback.first->isModal)
+                    {
                         callback.second(tmp,
-                                        (pixelX - callback.first->xPos)/ callback.first->scale,
-                                        (pixelY - callback.first->yPos)/ callback.first->scale);
+                                        (pixelX - callback.first->xPos) / callback.first->scale,
+                                        (pixelY - callback.first->yPos) / callback.first->scale);
                         break;
                     }
-                } else {
-                    if(callback.first->isVisible) {
+                }
+                else
+                {
+                    if (callback.first->isVisible)
+                    {
                         callback.second(tmp,
-                                        (pixelX - callback.first->xPos)/ callback.first->scale,
-                                        (pixelY - callback.first->yPos)/ callback.first->scale);
+                                        (pixelX - callback.first->xPos) / callback.first->scale,
+                                        (pixelY - callback.first->yPos) / callback.first->scale);
                     }
                 }
             }
@@ -300,31 +354,39 @@ void sendMouseMotion(float pX, float pY)
     std::lock_guard<std::mutex> lock(sdlCallbackMtx);
     // 检查modal对象
     bool hasModal = false;
-    for(auto callback : sdl_mouseMoveCallback) {
-        if(callback.first->isModal && callback.first->isVisible)
+    for (auto callback : sdl_mouseMoveCallback)
+    {
+        if (callback.first->isModal && callback.first->isVisible)
             hasModal = true;
     }
     // 写入缓冲区
-    for(auto callback : sdl_mouseMoveCallback) {
-        if(hasModal) {
-            if(callback.first->isModal) {
-                callback.second((pixelX - callback.first->xPos)/ callback.first->scale,
-                                (pixelY - callback.first->yPos)/ callback.first->scale);
+    for (auto callback : sdl_mouseMoveCallback)
+    {
+        if (hasModal)
+        {
+            if (callback.first->isModal)
+            {
+                callback.second((pixelX - callback.first->xPos) / callback.first->scale,
+                                (pixelY - callback.first->yPos) / callback.first->scale);
                 break;
             }
-        } else {
-            if(callback.first->isVisible) {
-                callback.second((pixelX - callback.first->xPos)/ callback.first->scale,
-                                (pixelY - callback.first->yPos)/ callback.first->scale);
+        }
+        else
+        {
+            if (callback.first->isVisible)
+            {
+                callback.second((pixelX - callback.first->xPos) / callback.first->scale,
+                                (pixelY - callback.first->yPos) / callback.first->scale);
             }
         }
     }
 }
 
-SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
+SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
+{
     switch (event->type)
     {
-        //退出
+        // 退出
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
         // 触屏事件
@@ -354,8 +416,9 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     krkrsdl3::SDL_GL_BaseSet(RW, RH);
     {
         std::lock_guard<std::mutex> lock(sdlRenderMtx);
-        for(auto texture : renderTexture) {
-            if(texture->isVisible)
+        for (auto texture : renderTexture)
+        {
+            if (texture->isVisible)
             {
                 krkrsdl3::SDL_GL_DrawTexture(texture, RW, RH);
             }
@@ -367,11 +430,11 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_Fail() {
+SDL_AppResult SDL_Fail()
+{
     SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
     return SDL_APP_FAILURE;
 }
-
 
 void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {

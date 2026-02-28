@@ -4,7 +4,6 @@
 #include "gl/tvpgl.h"
 #include "tjsNativeLayer.h"
 
-
 extern "C"
 {
 #include "libswscale/swscale.h"
@@ -31,20 +30,23 @@ struct BufferManager
         bufferLen = inLen / 4 + 1;
 
         buffer = new uint32_t[bufferLen];
-        memcpy(buffer, indata, inLen);;
-        
+        memcpy(buffer, indata, inLen);
+        ;
+
         bit_buffer = ((uint32_t)buffer[0] << 24) | ((uint32_t)indata[1] << 16) |
                      ((uint32_t)indata[2] << 8) | (uint32_t)indata[3];
         bits_available = 32;
-        
+
         current_ptr = buffer;
         end_ptr = buffer + bufferLen;
 
         decodeUVStatus = 0;
         decodeYStatus = 0;
     }
-    ~BufferManager() {
-        if (buffer) {
+    ~BufferManager()
+    {
+        if (buffer)
+        {
             delete[] buffer;
         }
     }
@@ -67,15 +69,47 @@ struct _ExtHuffmanTable
     uint8_t extended_symbols[512];
 } HuffmanTableEx[4] = {
     {{
-         static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xFFFFFFFF), 0x00000002, 0x00000006, 0x0000000E, 0x0000001E, 0x0000003E,
-         0x0000007E, 0x000000FE, 0x000001FE, 0x000003FE, 0x000007FE, static_cast<int32_t>(0xFFFFFFFF), static_cast<int32_t>(0xFFFFFFFF),
-         static_cast<int32_t>(0xFFFFFFFF), static_cast<int32_t>(0xFFFFFFFF), static_cast<int32_t>(0xFFFFFFFF), 0x000FFFFF, static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D),
-      },
-     {
-            static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), 0x00000000, static_cast<int32_t>(0xFFFFFFFD), static_cast<int32_t>(0xFFFFFFF6), static_cast<int32_t>(0xFFFFFFE7), static_cast<int32_t>(0xFFFFFFC8),
-            static_cast<int32_t>(0xFFFFFF89), static_cast<int32_t>(0xFFFFFF0A), static_cast<int32_t>(0xFFFFFE0B), static_cast<int32_t>(0xFFFFFC0C), static_cast<int32_t>(0xFFFFF80D), static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D),
-            static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D)
-      },
+         static_cast<int32_t>(0xBAADF00D),
+         static_cast<int32_t>(0xFFFFFFFF),
+         0x00000002,
+         0x00000006,
+         0x0000000E,
+         0x0000001E,
+         0x0000003E,
+         0x0000007E,
+         0x000000FE,
+         0x000001FE,
+         0x000003FE,
+         0x000007FE,
+         static_cast<int32_t>(0xFFFFFFFF),
+         static_cast<int32_t>(0xFFFFFFFF),
+         static_cast<int32_t>(0xFFFFFFFF),
+         static_cast<int32_t>(0xFFFFFFFF),
+         static_cast<int32_t>(0xFFFFFFFF),
+         0x000FFFFF,
+         static_cast<int32_t>(0xBAADF00D),
+         static_cast<int32_t>(0xBAADF00D),
+     },
+     {static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      0x00000000,
+      static_cast<int32_t>(0xFFFFFFFD),
+      static_cast<int32_t>(0xFFFFFFF6),
+      static_cast<int32_t>(0xFFFFFFE7),
+      static_cast<int32_t>(0xFFFFFFC8),
+      static_cast<int32_t>(0xFFFFFF89),
+      static_cast<int32_t>(0xFFFFFF0A),
+      static_cast<int32_t>(0xFFFFFE0B),
+      static_cast<int32_t>(0xFFFFFC0C),
+      static_cast<int32_t>(0xFFFFF80D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D)},
      {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x00, 0x00, 0x00,
       0x00, 0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41, 0x51, 0x07,
       0x61, 0x71, 0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91, 0xA1, 0xB1, 0xC1, 0x09, 0x23,
@@ -111,12 +145,34 @@ struct _ExtHuffmanTable
       0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
       0x80, 0xB0, 0xEF, 0xFD, 0xAD, 0xB0, 0xEF, 0xFD, 0xAD, 0xB0, 0xEF, 0xFD, 0xAD, 0xB0, 0xEF,
       0xFD, 0xAD}},
-    {{static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xFFFFFFFF), 0x00000001, 0x00000004, 0x0000000B, 0x0000001B, 0x0000003B,
-     0x0000007A, 0x000000F9, 0x000001FA, 0x000003FA, 0x000007F9, 0x00000FF7, static_cast<int32_t>(0xFFFFFFFF),
-     0x00003FE0, 0x00007FC3, 0x0000FFFE, 0x000FFFFF, static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D)},
-    {static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), 0x00000000, static_cast<int32_t>(0xFFFFFFFE), static_cast<int32_t>(0xFFFFFFF9), static_cast<int32_t>(0xFFFFFFED), static_cast<int32_t>(0xFFFFFFD1),
-            static_cast<int32_t>(0xFFFFFF95), static_cast<int32_t>(0xFFFFFF1A), static_cast<int32_t>(0xFFFFFE20), static_cast<int32_t>(0xFFFFFC25), static_cast<int32_t>(0xFFFFF82A), static_cast<int32_t>(0xFFFFF030), static_cast<int32_t>(0xBAADF00D),
-            static_cast<int32_t>(0xFFFFC048), static_cast<int32_t>(0xFFFF8067), static_cast<int32_t>(0xFFFF00A3)},
+    {{static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xFFFFFFFF),
+      0x00000001,
+      0x00000004,
+      0x0000000B,
+      0x0000001B,
+      0x0000003B,
+      0x0000007A,
+      0x000000F9,
+      0x000001FA,
+      0x000003FA,
+      0x000007F9,
+      0x00000FF7,
+      static_cast<int32_t>(0xFFFFFFFF),
+      0x00003FE0,
+      0x00007FC3,
+      0x0000FFFE,
+      0x000FFFFF,
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D)},
+     {static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), 0x00000000,
+      static_cast<int32_t>(0xFFFFFFFE), static_cast<int32_t>(0xFFFFFFF9),
+      static_cast<int32_t>(0xFFFFFFED), static_cast<int32_t>(0xFFFFFFD1),
+      static_cast<int32_t>(0xFFFFFF95), static_cast<int32_t>(0xFFFFFF1A),
+      static_cast<int32_t>(0xFFFFFE20), static_cast<int32_t>(0xFFFFFC25),
+      static_cast<int32_t>(0xFFFFF82A), static_cast<int32_t>(0xFFFFF030),
+      static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xFFFFC048),
+      static_cast<int32_t>(0xFFFF8067), static_cast<int32_t>(0xFFFF00A3)},
      {0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21, 0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61,
       0x71, 0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91, 0xA1, 0xB1, 0xC1, 0x09, 0x23, 0x33,
       0x52, 0xF0, 0x15, 0x62, 0x72, 0xD1, 0x0A, 0x16, 0x24, 0x34, 0xE1, 0x25, 0xF1, 0x17, 0x18,
@@ -153,12 +209,46 @@ struct _ExtHuffmanTable
       0xAD, 0xFD, 0xAD, 0x51, 0x10, 0xFD, 0xAD, 0x51, 0x10, 0xFD, 0xAD, 0x51, 0x10, 0xFD, 0xAD,
       0x51, 0x10}},
     {},
-    {{static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xFFFFFFFF), 0x00000001, 0x00000004, 0x0000000C, 0x0000001C, 0x0000003B,
-             0x0000007B, 0x000000FA, 0x000001FA, 0x000003FA, 0x000007F9, 0x00000FF7, static_cast<int32_t>(0xFFFFFFFF),
-             static_cast<int32_t>(0xFFFFFFFF), 0x00007FC0, 0x0000FFFE, 0x000FFFFF, static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D)},
-            {static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), 0x00000000, static_cast<int32_t>(0xFFFFFFFE), static_cast<int32_t>(0xFFFFFFF9), static_cast<int32_t>(0xFFFFFFEC), static_cast<int32_t>(0xFFFFFFCF),
-                    static_cast<int32_t>(0xFFFFFF93), static_cast<int32_t>(0xFFFFFF17), static_cast<int32_t>(0xFFFFFE1C), static_cast<int32_t>(0xFFFFFC21), static_cast<int32_t>(0xFFFFF826), static_cast<int32_t>(0xFFFFF02C), static_cast<int32_t>(0xBAADF00D),
-                    static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xFFFF8064), static_cast<int32_t>(0xFFFF00A3), static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D), static_cast<int32_t>(0xBAADF00D)},
+    {{static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xFFFFFFFF),
+      0x00000001,
+      0x00000004,
+      0x0000000C,
+      0x0000001C,
+      0x0000003B,
+      0x0000007B,
+      0x000000FA,
+      0x000001FA,
+      0x000003FA,
+      0x000007F9,
+      0x00000FF7,
+      static_cast<int32_t>(0xFFFFFFFF),
+      static_cast<int32_t>(0xFFFFFFFF),
+      0x00007FC0,
+      0x0000FFFE,
+      0x000FFFFF,
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D)},
+     {static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      0x00000000,
+      static_cast<int32_t>(0xFFFFFFFE),
+      static_cast<int32_t>(0xFFFFFFF9),
+      static_cast<int32_t>(0xFFFFFFEC),
+      static_cast<int32_t>(0xFFFFFFCF),
+      static_cast<int32_t>(0xFFFFFF93),
+      static_cast<int32_t>(0xFFFFFF17),
+      static_cast<int32_t>(0xFFFFFE1C),
+      static_cast<int32_t>(0xFFFFFC21),
+      static_cast<int32_t>(0xFFFFF826),
+      static_cast<int32_t>(0xFFFFF02C),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xFFFF8064),
+      static_cast<int32_t>(0xFFFF00A3),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D),
+      static_cast<int32_t>(0xBAADF00D)},
      {
          0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12, 0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61,
          0x07, 0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xA1, 0x08, 0x23, 0x42, 0xB1, 0xC1, 0x15, 0x52,
@@ -195,8 +285,7 @@ struct _ExtHuffmanTable
          0x34, 0x00, 0x00, 0x00, 0x2D, 0x00, 0x00, 0x00, 0x26, 0x00, 0x00, 0x00, 0x1F, 0x00, 0x00,
          0x00, 0x27, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x00, 0x00, 0x35, 0x00, 0x00, 0x00, 0x3C, 0x00,
          0x00, 0x00,
-     }}   
-    };
+     }}};
 struct _HuffmanTable
 {
     uint8_t base_symbols[512];
@@ -737,19 +826,22 @@ uint8_t decode_extended_huffman(_HuffmanTable* tbl, BufferManager* stream)
     }
     // 返回解码符号
     return tbl->_ext->extended_symbols[tbl->_ext->extended_offsets[total_bits] + // param_1 + 0x850
-                           code                                       // uVar7
+                                       code                                      // uVar7
     ];
 }
-void decode_dc_run_length(_HuffmanTable* tbl, BufferManager* stream, int16_t* block, int32_t& lastStatus)
+void decode_dc_run_length(_HuffmanTable* tbl,
+                          BufferManager* stream,
+                          int16_t* block,
+                          int32_t& lastStatus)
 {
     int32_t available_bits = stream->bits_available; // iVar11
-    uint32_t bit_buffer = stream->bit_buffer;    // uVar6
-    uint32_t* current_ptr = stream->current_ptr; // puVar8
+    uint32_t bit_buffer = stream->bit_buffer;        // uVar6
+    uint32_t* current_ptr = stream->current_ptr;     // puVar8
 
-    uint32_t code = 0;               // uVar5
-    int32_t code_length = 9;         // iVar10
-    uint32_t* current = current_ptr; // puVar7
-    uint32_t buffer = bit_buffer;    // uVar9
+    uint32_t code = 0;                  // uVar5
+    int32_t code_length = 9;            // iVar10
+    uint32_t* current = current_ptr;    // puVar7
+    uint32_t buffer = bit_buffer;       // uVar9
     int32_t available = available_bits; // iVar12
 
     // Huffman解码循环
@@ -874,7 +966,7 @@ void decode_dc_run_length(_HuffmanTable* tbl, BufferManager* stream, int16_t* bl
             }
             else
                 stream->bits_available = available - 9;
-            int extra_value = 0;         // uVar9
+            int extra_value = 0; // uVar9
 
             do
             {
@@ -887,7 +979,8 @@ void decode_dc_run_length(_HuffmanTable* tbl, BufferManager* stream, int16_t* bl
                 if (bits_remaining >= 0)
                 {
                     uint32_t mask = BIT_MASKS[extra_bits];
-                    extra_value = mask & (stream->bit_buffer >> (bits_remaining & 0x1f)) | extra_value;
+                    extra_value =
+                        mask & (stream->bit_buffer >> (bits_remaining & 0x1f)) | extra_value;
                     stream->bits_available = bits_remaining;
 
                     if (bits_remaining == 0)
@@ -931,13 +1024,13 @@ int decode_ac_run_length(_HuffmanTable* tbl, BufferManager* stream, int16_t* blo
     do
     {
         int32_t available_bits = stream->bits_available; // iVar14
-        uint32_t bit_buffer = stream->bit_buffer;    // uVar10
-        uint32_t* current_ptr = stream->current_ptr; // puVar12
+        uint32_t bit_buffer = stream->bit_buffer;        // uVar10
+        uint32_t* current_ptr = stream->current_ptr;     // puVar12
 
-        uint32_t code = 0;               // uVar9
-        int32_t code_length = 9;         // iVar8
-        uint32_t* current = current_ptr; // puVar11
-        uint32_t buffer = bit_buffer;    // uVar6
+        uint32_t code = 0;                  // uVar9
+        int32_t code_length = 9;            // iVar8
+        uint32_t* current = current_ptr;    // puVar11
+        uint32_t buffer = bit_buffer;       // uVar6
         int32_t available = available_bits; // iVar15
         do
         {
@@ -964,7 +1057,7 @@ int decode_ac_run_length(_HuffmanTable* tbl, BufferManager* stream, int16_t* blo
         } while (code_length > 0);
 
         // 查找符号
-        uint32_t lookup_addr = (uint32_t)code;      // uVar7
+        uint32_t lookup_addr = (uint32_t)code;           // uVar7
         uint8_t symbol = tbl->base_symbols[lookup_addr]; // bVar5
         int run_length = 0;
 
@@ -1049,7 +1142,7 @@ int decode_ac_run_length(_HuffmanTable* tbl, BufferManager* stream, int16_t* blo
         else
         {
             // 直接编码
-            uint16_t value = tbl->extended_values[lookup_addr]; // uVar9
+            uint16_t value = tbl->extended_values[lookup_addr];  // uVar9
             int run_length = tbl->run_lengths[lookup_addr] >> 4; // uVar6
 
             if (symbol < 10)
@@ -1082,7 +1175,7 @@ int decode_ac_run_length(_HuffmanTable* tbl, BufferManager* stream, int16_t* blo
                 }
                 else
                     stream->bits_available = available - 9;
-                int extra_value = 0;         // uVar13
+                int extra_value = 0; // uVar13
 
                 do
                 {
@@ -1175,7 +1268,7 @@ typedef long JLONG;
 #define FIX_2_053119869 ((JLONG)16819) /* FIX(2.053119869) */
 #define FIX_2_562915447 ((JLONG)20995) /* FIX(2.562915447) */
 #define FIX_3_072711026 ((JLONG)25172) /* FIX(3.072711026) */
-#define DESCALE(x, n) RIGHT_SHIFT((x) + (ONE << ((n) - 1)), n)
+#define DESCALE(x, n) RIGHT_SHIFT((x) + (ONE << ((n)-1)), n)
 #define MAXJSAMPLE 255
 #define CENTERJSAMPLE 128
 #define RANGE_MASK (MAXJSAMPLE * 4 + 3)
@@ -1201,8 +1294,7 @@ void jpeg_idct_data(int16_t* block, uint8_t* qtbl, uint8_t* retBlock, uint32_t r
         tmp_tbl += CENTERJSAMPLE;
         for (int i = 128; i < 512; i++)
             tmp_tbl[i] = MAXJSAMPLE;
-        memset(tmp_tbl + (2 * (MAXJSAMPLE + 1)), 0,
-               2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE);
+        memset(tmp_tbl + (2 * (MAXJSAMPLE + 1)), 0, 2 * (MAXJSAMPLE + 1) - CENTERJSAMPLE);
         memcpy(tmp_tbl + (4 * (MAXJSAMPLE + 1) - CENTERJSAMPLE), sample_range_limit,
                CENTERJSAMPLE * sizeof(JSAMPLE));
     }
@@ -1216,7 +1308,8 @@ void jpeg_idct_data(int16_t* block, uint8_t* qtbl, uint8_t* retBlock, uint32_t r
 
     inptr = block;
     int _quantptrData[64];
-    for (size_t i = 0; i < 64; i++) _quantptrData[i] = (int)qtbl[i];
+    for (size_t i = 0; i < 64; i++)
+        _quantptrData[i] = (int)qtbl[i];
     quantptr = _quantptrData;
     wsptr = workspace;
     for (ctr = DCTSIZE; ctr > 0; ctr--)
@@ -1342,8 +1435,7 @@ void jpeg_idct_data(int16_t* block, uint8_t* qtbl, uint8_t* retBlock, uint32_t r
             wsptr[6] == 0 && wsptr[7] == 0)
         {
             /* AC terms all zero */
-            JSAMPLE dcval =
-                range_limit[(int)DESCALE((JLONG)wsptr[0], PASS1_BITS + 3) & RANGE_MASK];
+            JSAMPLE dcval = range_limit[(int)DESCALE((JLONG)wsptr[0], PASS1_BITS + 3) & RANGE_MASK];
 
             outptr[0] = dcval;
             outptr[1] = dcval;
@@ -1460,7 +1552,8 @@ struct AlphaMovieHeader
         stream->ReadBuffer(&width, 2);
         stream->ReadBuffer(&height, 2);
         stream->ReadBuffer(&alpha_decode_attr, 4);
-        if (!memcmp(magic, "AJPM", 4)) return false;
+        if (!memcmp(magic, "AJPM", 4))
+            return false;
         return true;
     }
 };
@@ -1480,12 +1573,12 @@ struct AlphaMovieFrame
     tjs_uint32 zlib_buffer_size;
 
     // add by author
-    //tjs_uint32 ptrPose;
+    // tjs_uint32 ptrPose;
     tjs_uint8* ptrData = nullptr;
 
     bool parseAMVFrame(TJS::tTJSBinaryStream* stream, bool isZlib)
     {
-        //ptrPose = stream->GetPosition() + (isZlib ? 24 : 20);
+        // ptrPose = stream->GetPosition() + (isZlib ? 24 : 20);
         stream->ReadBuffer(magic, 4);
         stream->ReadBuffer(&size_of_frame, 4);
         size_of_frame -= (isZlib ? 16 : 12);
@@ -1668,8 +1761,7 @@ void AlphaMovie::open(tTJSString fileName)
                     if (decoded == 1)
                     {
                         int dequantized = idcBuff[0] * qtbl[1][0];
-                        int rounded = (dequantized < 0) ? dequantized + 7
-                                                        : dequantized;
+                        int rounded = (dequantized < 0) ? dequantized + 7 : dequantized;
                         int pixel = (rounded >> 3) + 128;
                         pixel = (pixel < 0) ? 0 : (pixel > 255) ? 255 : pixel;
 
@@ -1704,7 +1796,7 @@ void AlphaMovie::open(tTJSString fileName)
                         uint64_t pattern = (uint64_t)(uint8_t)pixel * 0x0101010101010101;
 
                         // 填充8x8块 - 7次内存写入覆盖整个块
-                        *((uint64_t*)currentV ) = pattern;
+                        *((uint64_t*)currentV) = pattern;
                         *((uint64_t*)(currentV + _a.frame_width / 2)) = pattern;
                         *((uint64_t*)(currentV + _a.frame_width / 2 * 2)) = pattern;
                         *((uint64_t*)(currentV + _a.frame_width / 2 * 3)) = pattern;
@@ -1732,7 +1824,7 @@ void AlphaMovie::open(tTJSString fileName)
                         uint64_t pattern = (uint64_t)(uint8_t)pixel * 0x0101010101010101;
 
                         // 填充8x8块 - 7次内存写入覆盖整个块
-                        *((uint64_t*)currentY ) = pattern;
+                        *((uint64_t*)currentY) = pattern;
                         *((uint64_t*)(currentY + _a.frame_width)) = pattern;
                         *((uint64_t*)(currentY + _a.frame_width * 2)) = pattern;
                         *((uint64_t*)(currentY + _a.frame_width * 3)) = pattern;
@@ -1784,8 +1876,8 @@ void AlphaMovie::open(tTJSString fileName)
                         uint64_t pattern = (uint64_t)(uint8_t)pixel * 0x0101010101010101;
 
                         // 填充8x8块 - 7次内存写入覆盖整个块
-                        *((uint64_t*)(currentY + _a.frame_width * 8 )) = pattern;
-                        *((uint64_t*)(currentY + _a.frame_width * 9 )) = pattern;
+                        *((uint64_t*)(currentY + _a.frame_width * 8)) = pattern;
+                        *((uint64_t*)(currentY + _a.frame_width * 9)) = pattern;
                         *((uint64_t*)(currentY + _a.frame_width * 10)) = pattern;
                         *((uint64_t*)(currentY + _a.frame_width * 11)) = pattern;
                         *((uint64_t*)(currentY + _a.frame_width * 12)) = pattern;
@@ -1811,8 +1903,8 @@ void AlphaMovie::open(tTJSString fileName)
                         uint64_t pattern = (uint64_t)(uint8_t)pixel * 0x0101010101010101;
 
                         // 填充8x8块 - 7次内存写入覆盖整个块
-                        *((uint64_t*)(currentY + 8 + _a.frame_width * 8 )) = pattern;
-                        *((uint64_t*)(currentY + 8 + _a.frame_width * 9 )) = pattern;
+                        *((uint64_t*)(currentY + 8 + _a.frame_width * 8)) = pattern;
+                        *((uint64_t*)(currentY + 8 + _a.frame_width * 9)) = pattern;
                         *((uint64_t*)(currentY + 8 + _a.frame_width * 10)) = pattern;
                         *((uint64_t*)(currentY + 8 + _a.frame_width * 11)) = pattern;
                         *((uint64_t*)(currentY + 8 + _a.frame_width * 12)) = pattern;
@@ -1834,16 +1926,13 @@ void AlphaMovie::open(tTJSString fileName)
             // yuv420p to rgba
             uLongf rgbaSize = _a.frame_width * _a.frame_height * 4;
             tjs_uint8* rgba_buffer = new tjs_uint8[rgbaSize];
-            img_convert_ctx = sws_getCachedContext(
-                img_convert_ctx, _a.frame_width, _a.frame_height, AV_PIX_FMT_YUV420P,
-                                 _a.frame_width, _a.frame_height,
-                                 AV_PIX_FMT_RGBA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+            img_convert_ctx =
+                sws_getCachedContext(img_convert_ctx, _a.frame_width, _a.frame_height,
+                                     AV_PIX_FMT_YUV420P, _a.frame_width, _a.frame_height,
+                                     AV_PIX_FMT_RGBA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
             const uint8_t* src_slice[4] = {
-                yuv_buffer,
-                yuv_buffer + _a.frame_width * _a.frame_height,
-                yuv_buffer + _a.frame_width * _a.frame_height * 5 / 4,
-                NULL
-            };
+                yuv_buffer, yuv_buffer + _a.frame_width * _a.frame_height,
+                yuv_buffer + _a.frame_width * _a.frame_height * 5 / 4, NULL};
             int src_stride[4] = {_a.frame_width,     // Y分量步长
                                  _a.frame_width / 2, // U分量步长（宽度减半）
                                  _a.frame_width / 2, // V分量步长（宽度减半）
@@ -1866,7 +1955,7 @@ void AlphaMovie::open(tTJSString fileName)
         }
         else // jpeg解码
         {
-            //prepare
+            // prepare
             tjs_uint32 cacheLen = _a.size_of_frame;
             tjs_uint8* cache = new tjs_uint8[cacheLen];
             filePtr->ReadBuffer(cache, cacheLen);
@@ -2171,9 +2260,10 @@ void AlphaMovie::open(tTJSString fileName)
             // yuva420p to rgba
             uLongf rgbaSize = _a.frame_width * _a.frame_height * 4;
             tjs_uint8* rgba_buffer = new tjs_uint8[rgbaSize];
-            img_convert_ctx = sws_getCachedContext(
-                img_convert_ctx, _a.frame_width, _a.frame_height, AV_PIX_FMT_YUVA420P, _a.frame_width,
-                _a.frame_height, AV_PIX_FMT_RGBA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+            img_convert_ctx =
+                sws_getCachedContext(img_convert_ctx, _a.frame_width, _a.frame_height,
+                                     AV_PIX_FMT_YUVA420P, _a.frame_width, _a.frame_height,
+                                     AV_PIX_FMT_RGBA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
             const uint8_t* src_slice[5] = {
                 yuva_buffer, yuva_buffer + _a.frame_width * _a.frame_height,
                 yuva_buffer + _a.frame_width * _a.frame_height * 5 / 4,
@@ -2218,7 +2308,7 @@ void AlphaMovie::clear()
     {
         delete m_BmpBits;
         m_BmpBits = nullptr;
-    }    
+    }
 }
 
 tjs_int AlphaMovie::showNextImage(tTJSVariant layer)

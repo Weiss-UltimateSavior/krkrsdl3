@@ -10,7 +10,7 @@ extern "C"
 
 NS_KRMOVIE_BEGIN
 
-    class CDVDAudioCodecFFmpeg : public CDVDAudioCodec
+class CDVDAudioCodecFFmpeg : public CDVDAudioCodec
 {
 public:
     CDVDAudioCodecFFmpeg();

@@ -1,9 +1,9 @@
 //---------------------------------------------------------------------------
 /*
-	TJS2 Script Engine
-	Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
+        TJS2 Script Engine
+        Copyright (C) 2000 W.Dee <dee@kikyou.info> and contributors
 
-	See details of license at "license.txt"
+        See details of license at "license.txt"
 */
 //---------------------------------------------------------------------------
 // Dictionary class implementation
@@ -23,149 +23,182 @@ namespace TJS
 //---------------------------------------------------------------------------
 class tTJSDictionaryClass : public tTJSNativeClass
 {
-	typedef tTJSNativeClass inherited;
+    typedef tTJSNativeClass inherited;
 
 public:
-	tTJSDictionaryClass();
-	~tTJSDictionaryClass();
+    tTJSDictionaryClass();
+    ~tTJSDictionaryClass();
 
 public:
-	tjs_error 	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
-		 iTJSDispatch2 **result,
-			tjs_int numparams, tTJSVariant **param,	iTJSDispatch2 *objthis);
+    tjs_error CreateNew(tjs_uint32 flag,
+                        const tjs_char* membername,
+                        tjs_uint32* hint,
+                        iTJSDispatch2** result,
+                        tjs_int numparams,
+                        tTJSVariant** param,
+                        iTJSDispatch2* objthis);
 
 protected:
-	tTJSNativeInstance *CreateNativeInstance();
-	iTJSDispatch2 *CreateBaseTJSObject();
+    tTJSNativeInstance* CreateNativeInstance();
+    iTJSDispatch2* CreateBaseTJSObject();
 
-	static tjs_uint32 ClassID;
+    static tjs_uint32 ClassID;
+
 private:
-
 protected:
 };
 //---------------------------------------------------------------------------
 // tTJSDictionaryNI : TJS Dictionary Native C++ instance
 //---------------------------------------------------------------------------
-class tTJSDictionaryNI : public tTJSNativeInstance,
-							public tTJSSaveStructuredDataCallback
+class tTJSDictionaryNI : public tTJSNativeInstance, public tTJSSaveStructuredDataCallback
 {
-	typedef tTJSNativeInstance inherited;
+    typedef tTJSNativeInstance inherited;
 
-	tTJSCustomObject * Owner;
+    tTJSCustomObject* Owner;
+
 public:
+    tTJSDictionaryNI();
+    ~tTJSDictionaryNI();
 
-	tTJSDictionaryNI();
-	~tTJSDictionaryNI();
-
-	tjs_error Construct(tjs_int numparams, tTJSVariant **param,
-		iTJSDispatch2 *obj);
+    tjs_error Construct(tjs_int numparams, tTJSVariant** param, iTJSDispatch2* obj);
 
 private:
-	void Invalidate(); // Invalidate override
+    void Invalidate(); // Invalidate override
 
 public:
-	bool IsValid() const { return Owner != NULL; } // check validation
+    bool IsValid() const { return Owner != NULL; } // check validation
 
-	void Assign(iTJSDispatch2 *dsp, bool clear = true);
+    void Assign(iTJSDispatch2* dsp, bool clear = true);
 
-	void Clear();
+    void Clear();
 
 private:
-	struct tAssignCallback : public tTJSDispatch
-	{
-		tTJSCustomObject * Owner;
-		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
-			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
-			tTJSVariant **param, iTJSDispatch2 *objthis);
-			// method from iTJSDispatch2, for enumeration callback
-	};
-	friend class tSaveStructCallback;
+    struct tAssignCallback : public tTJSDispatch
+    {
+        tTJSCustomObject* Owner;
+        tjs_error FuncCall(tjs_uint32 flag,
+                           const tjs_char* membername,
+                           tjs_uint32* hint,
+                           tTJSVariant* result,
+                           tjs_int numparams,
+                           tTJSVariant** param,
+                           iTJSDispatch2* objthis);
+        // method from iTJSDispatch2, for enumeration callback
+    };
+    friend class tSaveStructCallback;
 
 public:
-	void SaveStructuredData(std::vector<iTJSDispatch2 *> &stack,
-                                iTJSTextWriteStream & stream, const ttstr&indentstr);
-	void SaveStructuredBinary(std::vector<iTJSDispatch2 *> &stack, tTJSBinaryStream &stream );
-		// method from tTJSSaveStructuredDataCallback
+    void SaveStructuredData(std::vector<iTJSDispatch2*>& stack,
+                            iTJSTextWriteStream& stream,
+                            const ttstr& indentstr);
+    void SaveStructuredBinary(std::vector<iTJSDispatch2*>& stack, tTJSBinaryStream& stream);
+    // method from tTJSSaveStructuredDataCallback
 private:
-	struct tSaveStructCallback : public tTJSDispatch
-	{
-		std::vector<iTJSDispatch2 *> * Stack;
-		iTJSTextWriteStream *Stream;
-		const ttstr * IndentStr;
-		bool First;
+    struct tSaveStructCallback : public tTJSDispatch
+    {
+        std::vector<iTJSDispatch2*>* Stack;
+        iTJSTextWriteStream* Stream;
+        const ttstr* IndentStr;
+        bool First;
 
-		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
-			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
-			tTJSVariant **param, iTJSDispatch2 *objthis);
-	};
-	friend struct tSaveStructCallback;
+        tjs_error FuncCall(tjs_uint32 flag,
+                           const tjs_char* membername,
+                           tjs_uint32* hint,
+                           tTJSVariant* result,
+                           tjs_int numparams,
+                           tTJSVariant** param,
+                           iTJSDispatch2* objthis);
+    };
+    friend struct tSaveStructCallback;
 
-	struct tSaveStructBinayCallback : public tTJSDispatch {
-		std::vector<iTJSDispatch2 *> * Stack;
-		tTJSBinaryStream *Stream;
+    struct tSaveStructBinayCallback : public tTJSDispatch
+    {
+        std::vector<iTJSDispatch2*>* Stack;
+        tTJSBinaryStream* Stream;
 
-		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
-			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
-			tTJSVariant **param, iTJSDispatch2 *objthis);
-	};
-	friend struct tSaveStructBinayCallback;
+        tjs_error FuncCall(tjs_uint32 flag,
+                           const tjs_char* membername,
+                           tjs_uint32* hint,
+                           tTJSVariant* result,
+                           tjs_int numparams,
+                           tTJSVariant** param,
+                           iTJSDispatch2* objthis);
+    };
+    friend struct tSaveStructBinayCallback;
 
-	struct tSaveMemberCountCallback : public tTJSDispatch {
-		tjs_uint Count;
-		tSaveMemberCountCallback() : Count(0) {}
+    struct tSaveMemberCountCallback : public tTJSDispatch
+    {
+        tjs_uint Count;
+        tSaveMemberCountCallback() : Count(0) {}
 
-		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
-			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
-			tTJSVariant **param, iTJSDispatch2 *objthis);
-	};
-	friend struct tSaveMemberCountCallback;
+        tjs_error FuncCall(tjs_uint32 flag,
+                           const tjs_char* membername,
+                           tjs_uint32* hint,
+                           tTJSVariant* result,
+                           tjs_int numparams,
+                           tTJSVariant** param,
+                           iTJSDispatch2* objthis);
+    };
+    friend struct tSaveMemberCountCallback;
 
 public:
-	void AssignStructure(iTJSDispatch2 * dsp, std::vector<iTJSDispatch2 *> &stack);
+    void AssignStructure(iTJSDispatch2* dsp, std::vector<iTJSDispatch2*>& stack);
 
-	struct tAssignStructCallback : public tTJSDispatch
-	{
-		std::vector<iTJSDispatch2 *> * Stack;
-		iTJSDispatch2 * Dest;
+    struct tAssignStructCallback : public tTJSDispatch
+    {
+        std::vector<iTJSDispatch2*>* Stack;
+        iTJSDispatch2* Dest;
 
-		tjs_error FuncCall(tjs_uint32 flag, const tjs_char * membername,
-			tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams,
-			tTJSVariant **param, iTJSDispatch2 *objthis);
-	};
-	friend struct tAssignStructCallback;
+        tjs_error FuncCall(tjs_uint32 flag,
+                           const tjs_char* membername,
+                           tjs_uint32* hint,
+                           tTJSVariant* result,
+                           tjs_int numparams,
+                           tTJSVariant** param,
+                           iTJSDispatch2* objthis);
+    };
+    friend struct tAssignStructCallback;
 };
 //---------------------------------------------------------------------------
 class tTJSDictionaryObject : public tTJSCustomObject
 {
-	typedef tTJSCustomObject inherited;
+    typedef tTJSCustomObject inherited;
 
 public:
-	tTJSDictionaryObject();
-	tTJSDictionaryObject(tjs_int hashbits);
-	~tTJSDictionaryObject();
+    tTJSDictionaryObject();
+    tTJSDictionaryObject(tjs_int hashbits);
+    ~tTJSDictionaryObject();
 
+    tjs_error FuncCall(tjs_uint32 flag,
+                       const tjs_char* membername,
+                       tjs_uint32* hint,
+                       tTJSVariant* result,
+                       tjs_int numparams,
+                       tTJSVariant** param,
+                       iTJSDispatch2* objthis);
 
-	tjs_error 	FuncCall(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
-		tTJSVariant *result,
-		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+    tjs_error PropGet(tjs_uint32 flag,
+                      const tjs_char* membername,
+                      tjs_uint32* hint,
+                      tTJSVariant* result,
+                      iTJSDispatch2* objthis);
 
+    tjs_error CreateNew(tjs_uint32 flag,
+                        const tjs_char* membername,
+                        tjs_uint32* hint,
+                        iTJSDispatch2** result,
+                        tjs_int numparams,
+                        tTJSVariant** param,
+                        iTJSDispatch2* objthis);
 
-	tjs_error 	PropGet(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
-		tTJSVariant *result,
-		iTJSDispatch2 *objthis);
-
-	tjs_error 	CreateNew(tjs_uint32 flag, const tjs_char * membername, tjs_uint32 *hint,
-		iTJSDispatch2 **result,
-		tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
-
-
-	tjs_error 	Operation(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint,
-		tTJSVariant *result,
-		const tTJSVariant *param, iTJSDispatch2 *objthis);
-
+    tjs_error Operation(tjs_uint32 flag,
+                        const tjs_char* membername,
+                        tjs_uint32* hint,
+                        tTJSVariant* result,
+                        const tTJSVariant* param,
+                        iTJSDispatch2* objthis);
 };
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 // TJSGetDictionaryClassID
@@ -173,14 +206,11 @@ public:
 extern tjs_int32 TJSGetDictionaryClassID();
 //---------------------------------------------------------------------------
 
-
-
 //---------------------------------------------------------------------------
 // TJSCreateDictionaryObject
 //---------------------------------------------------------------------------
 extern iTJSDispatch2* TJSCreateDictionaryObject(iTJSDispatch2** classout = 0);
 //---------------------------------------------------------------------------
-
 
 //---------------------------------------------------------------------------
 } // namespace TJS

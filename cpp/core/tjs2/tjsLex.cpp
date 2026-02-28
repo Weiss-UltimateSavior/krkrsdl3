@@ -1620,7 +1620,7 @@ re_match:
             }
     }
 
-    if(!TJS_iswalpha(Current) && *Current!=TJS_N('_'))
+    if (!TJS_iswalpha(Current) && *Current != TJS_N('_'))
     {
         ttstr str(TJSInvalidChar);
         str.Replace(TJS_N("%1"), ttstr(*Current).EscapeC());
@@ -1631,15 +1631,15 @@ re_match:
     tjs_int nch = 0;
     while (true)
     {
-        if(TJS_iswdigit(ptr) || *ptr==TJS_N('_') || *ptr == TJS_SKIP_CODE)
+        if (TJS_iswdigit(ptr) || *ptr == TJS_N('_') || *ptr == TJS_SKIP_CODE)
         {
             ptr++, nch++;
             continue;
         }
         int alphaLen = TJS_iswalpha(ptr);
-        if(alphaLen > 0)
+        if (alphaLen > 0)
         {
-            ptr += alphaLen, nch+=alphaLen;
+            ptr += alphaLen, nch += alphaLen;
             continue;
         }
         break;
