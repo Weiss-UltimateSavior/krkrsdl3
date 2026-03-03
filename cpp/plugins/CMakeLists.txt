@@ -51,6 +51,10 @@ set(KRKRSDL_PLUGINS_SRC
     ${KRKRSDL_PLUGINS_PATH}/extrans/wave.cpp
     ${KRKRSDL_PLUGINS_PATH}/KAGParserEx/KAG.cpp
     ${KRKRSDL_PLUGINS_PATH}/KAGParserEx/KAGParserEx.cpp
+	${KRKRSDL_PLUGINS_PATH}/ExtKAGParser/ExtKAG.cpp
+    ${KRKRSDL_PLUGINS_PATH}/ExtKAGParser/ExtKAGParser.cpp
+	${KRKRSDL_PLUGINS_PATH}/ExtKAGParser/TJSAry.cpp
+	${KRKRSDL_PLUGINS_PATH}/ExtKAGParser/TJSDic.cpp
     ${KRKRSDL_PLUGINS_PATH}/LayerExDraw/LayerExDraw.cpp
     ${KRKRSDL_PLUGINS_PATH}/psbfile/PSB.cpp
     ${KRKRSDL_PLUGINS_PATH}/psbfile/PSBData.cpp

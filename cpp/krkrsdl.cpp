@@ -55,6 +55,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
     SDL_GL_MakeCurrent(tvp_window, tvp_glContext);
+    SDL_GL_SetSwapInterval(1);
     // GL相关信息初始化
     krkrsdl3::fetchGLInfo();
 
