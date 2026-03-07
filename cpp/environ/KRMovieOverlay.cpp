@@ -21,6 +21,7 @@ VideoPresentOverlay::VideoPresentOverlay()
 {
     pSprite = new SDL_Sprite;
     pSprite->isVisible = true;
+    pSprite->type = 2;
     pSprite->xPos = 0;
     pSprite->yPos = 0;
 }

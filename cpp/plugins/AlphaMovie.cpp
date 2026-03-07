@@ -1593,11 +1593,11 @@ struct AlphaMovieFrame
     }
 };
 
-class AlphaMovie
+class tTJSNI_AlphaMovie : public tTJSNativeInstance
 {
 public:
-    AlphaMovie();
-    ~AlphaMovie();
+    tTJSNI_AlphaMovie();
+    ~tTJSNI_AlphaMovie();
 
     void open(tTJSString fileName);
     void clear();
@@ -1652,16 +1652,16 @@ private:
     tjs_real _FPSRate = 1.0;
 };
 
-AlphaMovie::AlphaMovie()
+tTJSNI_AlphaMovie::tTJSNI_AlphaMovie()
 {
 }
 
-AlphaMovie::~AlphaMovie()
+tTJSNI_AlphaMovie::~tTJSNI_AlphaMovie()
 {
     clear();
 }
 
-void AlphaMovie::open(tTJSString fileName)
+void tTJSNI_AlphaMovie::open(tTJSString fileName)
 {
     clear();
     filePtr = TVPCreateStream(fileName);
@@ -2290,7 +2290,7 @@ void AlphaMovie::open(tTJSString fileName)
     _frame = 0;
 }
 
-void AlphaMovie::clear()
+void tTJSNI_AlphaMovie::clear()
 {
     for (size_t i = 0; i < frameInfoList.size(); i++)
     {
@@ -2311,7 +2311,7 @@ void AlphaMovie::clear()
     }
 }
 
-tjs_int AlphaMovie::showNextImage(tTJSVariant layer)
+tjs_int tTJSNI_AlphaMovie::showNextImage(tTJSVariant layer)
 {
     tTJSNI_BaseLayer* src = NULL;
     tTJSVariantClosure clo = layer.AsObjectClosureNoAddRef();
@@ -2344,54 +2344,383 @@ tjs_int AlphaMovie::showNextImage(tTJSVariant layer)
     return _frame;
 }
 
-bool AlphaMovie::isPlaying()
+bool tTJSNI_AlphaMovie::isPlaying()
 {
     return _isPlaying;
 }
 
-void AlphaMovie::play()
+void tTJSNI_AlphaMovie::play()
 {
     _isPlaying = true;
 }
 
-void AlphaMovie::stop()
+void tTJSNI_AlphaMovie::stop()
 {
     clear();
     _isPlaying = false;
     _frame = 0;
 }
 
-void AlphaMovie::setPosition(tjs_int x, tjs_int y)
+void tTJSNI_AlphaMovie::setPosition(tjs_int x, tjs_int y)
 {
     _left = x;
     _top = y;
 }
 
-void AlphaMovie::setNextMovieFile(tTJSString fileName)
+void tTJSNI_AlphaMovie::setNextMovieFile(tTJSString fileName)
 {
     // nothing to do
 }
 
-NCB_REGISTER_CLASS(AlphaMovie)
+//---------------------------------------------------------------------------
+// tTJSNC_AlphaMovie
+//---------------------------------------------------------------------------
+class tTJSNC_AlphaMovie : public tTJSNativeClass
 {
-    Constructor();
-    NCB_METHOD(open);
-    NCB_METHOD(clear);
-    NCB_METHOD(showNextImage);
-    NCB_METHOD(isPlaying);
-    NCB_METHOD(play);
-    NCB_METHOD(stop);
-    NCB_METHOD(setPosition);
-    NCB_METHOD(setNextMovieFile);
-    NCB_PROPERTY(numOfFrame, GetNumOfFrame, SetNumOfFrame);
-    NCB_PROPERTY(frame, GetFrame, SetFrame);
-    NCB_PROPERTY(loop, GetLoop, SetLoop);
-    NCB_PROPERTY(nextLoop, GetNextLoop, SetNextLoop);
-    NCB_PROPERTY(preloadSamples, GetPreloadSamples, SetPreloadSamples);
-    NCB_PROPERTY(left, GetLeft, SetLeft);
-    NCB_PROPERTY(top, GetTop, SetTop);
-    NCB_PROPERTY(screenWidth, GetScreenWidth, SetScreenWidth);
-    NCB_PROPERTY(screenHeight, GetScreenHeight, SetScreenHeight);
-    NCB_PROPERTY(FPSScale, GetFPSScale, SetFPSScale);
-    NCB_PROPERTY(FPSRate, GetFPSRate, SetFPSRate);
+    typedef tTJSNativeClass inherited;
+
+public:
+    tTJSNC_AlphaMovie();
+
+    static tjs_uint32 ClassID;
+
+protected:
+    tTJSNativeInstance* CreateNativeInstance()
+    {
+        return new tTJSNI_AlphaMovie();
+    }
+};
+tjs_uint32 tTJSNC_AlphaMovie::ClassID = (tjs_uint32)-1;
+tTJSNC_AlphaMovie::tTJSNC_AlphaMovie()
+  : tTJSNativeClass(TJS_N("AlphaMovie")){
+        // register native methods/properties
+
+        TJS_BEGIN_NATIVE_MEMBERS(AlphaMovie) TJS_DECL_EMPTY_FINALIZE_METHOD
+            //----------------------------------------------------------------------
+            // constructor/methods
+            //----------------------------------------------------------------------
+            TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(/*var.name*/ _this,
+                                              /*var.type*/ tTJSNI_AlphaMovie,
+                                              /*TJS class name*/ AlphaMovie){return TJS_S_OK;
 }
+TJS_END_NATIVE_CONSTRUCTOR_DECL(/*TJS class name*/ AlphaMovie)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ open)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    if (numparams < 1)
+        return TJS_E_BADPARAMCOUNT;
+    _this->open(param[0]->AsStringNoAddRef());
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ open)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ clear)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->clear();
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ clear)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ showNextImage)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    if (numparams < 1)
+        return TJS_E_BADPARAMCOUNT;
+    tjs_int num = _this->showNextImage(*param[0]);
+    if (result)
+        *result = num;
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ showNextImage)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ isPlaying)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    if (result)
+        *result = _this->isPlaying();
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ isPlaying)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ play)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->play();
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ play)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ stop)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->stop();
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ stop)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ setPosition)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+
+    if (numparams < 2)
+        return TJS_E_BADPARAMCOUNT;
+    _this->setPosition(*param[0], *param[1]);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ setPosition)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ setNextMovieFile)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    if (numparams < 1)
+        return TJS_E_BADPARAMCOUNT;
+    _this->setNextMovieFile(param[0]->AsStringNoAddRef());
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_METHOD_DECL(/*func. name*/ setNextMovieFile)
+//----------------------------------------------------------------------
+
+//---------------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// properties
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(numOfFrame){TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(
+    /*var. name*/ _this, /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetNumOfFrame();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetNumOfFrame(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(numOfFrame)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(frame){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetFrame();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetFrame(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(frame)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(loop){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetLoop();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetLoop(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(loop)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(nextLoop){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetNextLoop();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetNextLoop(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(nextLoop)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(preloadSamples){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetPreloadSamples();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetPreloadSamples(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(preloadSamples)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(left){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetLeft();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetLeft(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(left)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(top){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetTop();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetTop(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(top)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(screenWidth){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetScreenWidth();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetScreenWidth(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(screenWidth)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(screenHeight){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetScreenHeight();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetScreenHeight(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(screenHeight)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(FPSScale){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetFPSScale();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetFPSScale(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(FPSScale)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(FPSRate){
+    TJS_BEGIN_NATIVE_PROP_GETTER{TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                                         /*var. type*/ tTJSNI_AlphaMovie);
+*result = _this->GetFPSRate();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_AlphaMovie);
+    _this->SetFPSRate(*param);
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(FPSRate)
+//----------------------------------------------------------------------
+TJS_END_NATIVE_MEMBERS
+}
+tTJSNativeClass* TVPCreateNativeClass_AlphaMovie()
+{
+    return new tTJSNC_AlphaMovie();
+}
+
+void InitPlugin_AlphaMovie()
+{
+    iTJSDispatch2* global = TVPGetScriptDispatch();
+    if (global)
+    {
+        tTJSVariant val;
+        iTJSDispatch2* tjsclass = TVPCreateNativeClass_AlphaMovie();
+        val = tTJSVariant(tjsclass);
+        tjsclass->Release();
+        global->PropSet(TJS_MEMBERENSURE, "AlphaMovie", NULL, &val, global);
+        global->Release();
+    }
+}
+NCB_PRE_REGIST_CALLBACK(InitPlugin_AlphaMovie);

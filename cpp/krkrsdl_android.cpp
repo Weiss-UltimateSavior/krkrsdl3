@@ -260,7 +260,7 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
             bool hasModal = false;
             for (auto callback : sdl_mouseDownCallback)
             {
-                if (callback.first->isModal && callback.first->isVisible)
+                if (callback.first->type == 1 && callback.first->isVisible)
                     hasModal = true;
             }
             // 写入缓冲区
@@ -268,7 +268,7 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
             {
                 if (hasModal)
                 {
-                    if (callback.first->isModal)
+                    if (callback.first->type == 1)
                     {
                         callback.second(tmp,
                                         (pixelX - callback.first->xPos) / callback.first->scale,
@@ -294,7 +294,7 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
             bool hasModal = false;
             for (auto callback : sdl_mouseUpCallback)
             {
-                if (callback.first->isModal && callback.first->isVisible)
+                if (callback.first->type == 1 && callback.first->isVisible)
                     hasModal = true;
             }
             // 写入缓冲区
@@ -302,7 +302,7 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
             {
                 if (hasModal)
                 {
-                    if (callback.first->isModal)
+                    if (callback.first->type == 1)
                     {
                         callback.second(tmp,
                                         (pixelX - callback.first->xPos) / callback.first->scale,
@@ -335,7 +335,7 @@ void sendMouseMotion(float pX, float pY)
     bool hasModal = false;
     for (auto callback : sdl_mouseMoveCallback)
     {
-        if (callback.first->isModal && callback.first->isVisible)
+        if (callback.first->type == 1 && callback.first->isVisible)
             hasModal = true;
     }
     // 写入缓冲区
@@ -343,7 +343,7 @@ void sendMouseMotion(float pX, float pY)
     {
         if (hasModal)
         {
-            if (callback.first->isModal)
+            if (callback.first->type == 1)
             {
                 callback.second((pixelX - callback.first->xPos) / callback.first->scale,
                                 (pixelY - callback.first->yPos) / callback.first->scale);
@@ -384,6 +384,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     return SDL_APP_CONTINUE;
 }
 
+static const int sdl_drawOrder[] = {0, 2, 1};  // 窗口 -> overlay -> modal
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
     ::Application->Run();
@@ -395,11 +396,15 @@ SDL_AppResult SDL_AppIterate(void* appstate)
     krkrsdl3::SDL_GL_BaseSet(RW, RH);
     {
         std::lock_guard<std::mutex> lock(sdlRenderMtx);
-        for (auto texture : renderTexture)
+        for (int type : sdl_drawOrder)
         {
-            if (texture->isVisible)
+            for (int i = renderTexture.size() - 1; i >= 0; --i)
             {
-                krkrsdl3::SDL_GL_DrawTexture(texture, RW, RH);
+                auto texture = renderTexture[i];
+                if (texture->isVisible && texture->type == type)
+                {
+                    krkrsdl3::SDL_GL_DrawTexture(texture, RW, RH);
+                }
             }
         }
     }

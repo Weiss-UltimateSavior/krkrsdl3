@@ -152,11 +152,9 @@ GLuint createProgram()
 void SDL_GL_BaseSet(int w, int h)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendEquation(GL_FUNC_ADD);
+    glDisable(GL_BLEND);
     glClear(GL_COLOR_BUFFER_BIT);
     if (krkrsdl3_program == 0 || glIsProgram(krkrsdl3_program) != GL_TRUE)
     {
@@ -223,9 +221,7 @@ void SDL_GL_CreateTexture(SDL_Sprite& sp)
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sp.width, sp.height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 NULL);
-
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sp.width, sp.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

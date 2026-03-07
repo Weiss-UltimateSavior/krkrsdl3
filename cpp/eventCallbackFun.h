@@ -11,11 +11,11 @@ typedef void (*callbackOnMouseMoveEvent)(int, int);
 struct SDL_Sprite
 {
     uint64_t texture = 0;
+    int type = 0; //0:窗口 1:modal 2:overlay
     int xPos = 0, yPos = 0;
     float scale = 1.0;
     int width = 0, height = 0;
     bool isVisible = false;
-    bool isModal = false;
 };
 
 namespace krkrsdl3

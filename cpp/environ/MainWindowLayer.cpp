@@ -433,7 +433,7 @@ public:
 
     virtual void ShowWindowAsModal() override
     {
-        pSprite->isModal = true;
+        pSprite->type = 1;
         in_mode_ = true;
         SetVisible(true);
         BringToFront();
