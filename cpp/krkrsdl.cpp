@@ -122,8 +122,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                     hasModal = true;
             }
             // 写入缓冲区
-            for (auto callback : sdl_keyDownCallback)
+            for (auto it = sdl_keyDownCallback.rbegin(); it != sdl_keyDownCallback.rend(); ++it)
             {
+                auto callback = *it;
                 if (hasModal)
                 {
                     if (callback.first->type == 1)
@@ -153,8 +154,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                     hasModal = true;
             }
             // 写入缓冲区
-            for (auto callback : sdl_keyUpCallback)
+            for (auto it = sdl_keyUpCallback.rbegin(); it != sdl_keyUpCallback.rend(); ++it)
             {
+                auto callback = *it;
                 if (hasModal)
                 {
                     if (callback.first->type == 1)
@@ -203,8 +205,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                         hasModal = true;
                 }
                 // 写入缓冲区
-                for (auto callback : sdl_mouseDownCallback)
+                for (auto it = sdl_mouseDownCallback.rbegin(); it != sdl_mouseDownCallback.rend(); ++it)
                 {
+                    auto callback = *it;
                     if (hasModal)
                     {
                         if (callback.first->type == 1)
@@ -259,8 +262,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                         hasModal = true;
                 }
                 // 写入缓冲区
-                for (auto callback : sdl_mouseUpCallback)
+                for (auto it = sdl_mouseUpCallback.rbegin(); it != sdl_mouseUpCallback.rend(); ++it)
                 {
+                    auto callback = *it;
                     if (hasModal)
                     {
                         if (callback.first->type == 1)
@@ -297,8 +301,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                     hasModal = true;
             }
             // 写入缓冲区
-            for (auto callback : sdl_mouseMoveCallback)
+            for (auto it = sdl_mouseMoveCallback.rbegin(); it != sdl_mouseMoveCallback.rend(); ++it)
             {
+                auto callback = *it;
                 if (hasModal)
                 {
                     if (callback.first->type == 1)
@@ -332,8 +337,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                     hasModal = true;
             }
             // 写入缓冲区
-            for (auto callback : sdl_mouseScrollCallback)
+            for (auto it = sdl_mouseScrollCallback.rbegin(); it != sdl_mouseScrollCallback.rend(); ++it)
             {
+                auto callback = *it;
                 if (hasModal)
                 {
                     if (callback.first->type == 1)

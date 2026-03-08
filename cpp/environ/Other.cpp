@@ -1,4 +1,5 @@
 #include <string>
+#include <filesystem>
 
 #include "Platform.h"
 #include "tjsCommHead.h"
@@ -40,6 +41,59 @@ bool TVPWriteDataToFile(const ttstr& filepath, const void* data, unsigned int le
         return ret;
     }
     return false;
+}
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+// TVPCreateFolders
+//---------------------------------------------------------------------------
+static bool _TVPCreateFolders(const ttstr& folder)
+{
+    // create directories along with "folder"
+    if (folder.IsEmpty())
+        return true;
+
+    if (TVPCheckExistentLocalFolder(folder))
+        return true; // already created
+
+    const tjs_char* p = folder.c_str();
+    tjs_int i = folder.GetLen() - 1;
+
+    if (p[i] == TJS_N(':'))
+        return true;
+
+    while (i >= 0 && (p[i] == TJS_N('/') || p[i] == TJS_N('\\')))
+        i--;
+
+    if (i >= 0 && p[i] == TJS_N(':'))
+        return true;
+
+    for (; i >= 0; i--)
+    {
+        if (p[i] == TJS_N(':') || p[i] == TJS_N('/') || p[i] == TJS_N('\\'))
+            break;
+    }
+
+    ttstr parent(p, i + 1);
+    if (!TVPCreateFolders(parent))
+        return false;
+
+    return std::filesystem::create_directory(folder.AsStdString().c_str());
+}
+bool TVPCreateFolders(const ttstr& folder)
+{
+    if (folder.IsEmpty())
+        return true;
+
+    const tjs_char* p = folder.c_str();
+    tjs_int i = folder.GetLen() - 1;
+
+    if (p[i] == TJS_N(':'))
+        return true;
+
+    if (p[i] == TJS_N('/') || p[i] == TJS_N('\\'))
+        i--;
+
+    return _TVPCreateFolders(ttstr(p, i + 1));
 }
 //---------------------------------------------------------------------------
 

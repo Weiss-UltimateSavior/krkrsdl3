@@ -264,8 +264,9 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
                     hasModal = true;
             }
             // 写入缓冲区
-            for (auto callback : sdl_mouseDownCallback)
+            for (auto it = sdl_mouseDownCallback.rbegin(); it != sdl_mouseDownCallback.rend(); ++it)
             {
+                auto callback = *it;
                 if (hasModal)
                 {
                     if (callback.first->type == 1)
@@ -298,8 +299,9 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
                     hasModal = true;
             }
             // 写入缓冲区
-            for (auto callback : sdl_mouseUpCallback)
+            for (auto it = sdl_mouseUpCallback.rbegin(); it != sdl_mouseUpCallback.rend(); ++it)
             {
+                auto callback = *it;
                 if (hasModal)
                 {
                     if (callback.first->type == 1)
@@ -339,8 +341,9 @@ void sendMouseMotion(float pX, float pY)
             hasModal = true;
     }
     // 写入缓冲区
-    for (auto callback : sdl_mouseMoveCallback)
+    for (auto it = sdl_mouseMoveCallback.rbegin(); it != sdl_mouseMoveCallback.rend(); ++it)
     {
+        auto callback = *it;
         if (hasModal)
         {
             if (callback.first->type == 1)
