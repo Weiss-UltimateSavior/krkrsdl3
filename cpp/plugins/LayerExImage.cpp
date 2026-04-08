@@ -11,6 +11,15 @@
 
 #define NCB_MODULE_NAME TJS_N("layerExImage.dll")
 
+void layerExImage::reset()
+{
+	layerExBase_GL::reset();
+	// バッファ位置をクリッピングにあわせて変更する
+	_buffer += _clipTop * _pitch + _clipLeft * 4;
+	_width  = _clipWidth;
+	_height = _clipHeight;
+}
+
 void layerExImage::lut(BYTE* pLut)
 {
     BYTE* src = (BYTE*)_buffer;

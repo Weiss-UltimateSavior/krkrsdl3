@@ -15,6 +15,8 @@ public:
     // コンストラクタ
     layerExImage(DispatchT obj) : layerExBase_GL(obj) {}
 
+    virtual void reset();
+
     /**
      * ルックアップテーブル反映
      * @param pLut lookup table
