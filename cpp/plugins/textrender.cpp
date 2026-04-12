@@ -371,12 +371,14 @@ public:
 
     property_accessor(renderOver, bool, m_state.renderOver);
     property_accessor(renderDelay, int, m_state.renderDelay);
-    property_accessor(renderLeft, int, m_boxLeft);
-    int get_renderRight() const { return m_boxLeft + m_boxWidth; }
-    void set_renderRight(int v) { m_boxWidth = v - m_boxLeft; };
-    property_accessor(renderTop, int, m_boxTop);
-    int get_renderBottom() const { return m_boxTop + m_boxHeight; }
-    void set_renderBottom(int v) { m_boxHeight = v - m_boxTop; };
+    int get_renderLeft() const { return m_renderLeft; }
+    void set_renderLeft(int v) { throw "avoid to set set_renderLeft"; };
+    int get_renderRight() const { return m_renderRight; }
+    void set_renderRight(int v) { throw "avoid to set set_renderRight"; };
+    int get_renderTop() const { return m_renderTop; }
+    void set_renderTop(int v) { throw "avoid to set set_renderTop"; };
+    int get_renderBottom() const { return m_renderBottom; }
+    void set_renderBottom(int v) { throw "avoid to set renderBottom"; };
     property_accessor(renderText, ttstr, m_state.renderText);
     int get_renderCount() const { return m_state.renderText.length(); }
     void set_renderCount(int v) { throw "avoid to set renderCount"; };
@@ -398,10 +400,16 @@ public:
     property_accessor(defaultValign, int, m_default.valign);
 
 private:
+    // 可渲染区域
     int m_boxLeft = 0;
     int m_boxTop = 0;
     int m_boxWidth = 0;
     int m_boxHeight = 0;
+    // 已渲染区域
+    int m_renderLeft = 0;
+    int m_renderTop = 0;
+    int m_renderRight = 0;
+    int m_renderBottom = 0;
 
     int curr_x = 0;
     int curr_y = 0;
@@ -455,7 +463,7 @@ TextRenderBase::TextRenderBase()
 
 TextRenderBase::~TextRenderBase()
 {
-    if (!m_rasterizer)
+    if (m_rasterizer)
         m_rasterizer->Release();
 }
 
@@ -867,7 +875,7 @@ bool TextRenderBase::render(tTJSString text, int autoIndent, int diff, int all, 
                     {
                         p += chLen;
                         chLen = utf8_char_len(p);
-                        if (chLen != 1)
+                        if (chLen == 0)
                         {
                             TVPThrowExceptionMessage(TJS_N("TextRenderBase::render() failed to "
                                                            "parse: expected character, found EOF"));
@@ -887,7 +895,7 @@ bool TextRenderBase::render(tTJSString text, int autoIndent, int diff, int all, 
                     {
                         p += chLen;
                         chLen = utf8_char_len(p);
-                        if (chLen != 1)
+                        if (chLen == 0)
                         {
                             TVPThrowExceptionMessage(TJS_N("TextRenderBase::render() failed to "
                                                            "parse: expected character, found EOF"));
@@ -943,16 +951,44 @@ void TextRenderBase::performLinebreak()
         curr_x = m_boxLeft + m_indent;
     m_isBeginningOfLine = true;
     if (m_state.valign == kTextRenderAlignmentLeft)
+    {
         curr_y += rasterizer->GetAscentHeight() + m_state.lineSpacing;
+        m_renderBottom += m_state.lineSpacing;
+    }
     else if (m_state.valign == kTextRenderAlignmentRight)
+    {
         curr_y -= rasterizer->GetAscentHeight() + m_state.lineSpacing;
+        m_renderTop -= m_state.lineSpacing;
+    }
     else
         curr_y += rasterizer->GetAscentHeight() + m_state.lineSpacing;
 }
 
+extern bool Layer_FetchImageSize(ttstr imageName, int& w, int& h);
 void TextRenderBase::pushGraphicalCharacter(ttstr const& graph)
 {
-    // TODO: implement graphical characters
+    // 获取图像信息
+    int _w = 0, _h = 0;
+    Layer_FetchImageSize(graph, _w, _h);
+
+    // 推入图像数据
+    CharacterInfo info{
+        m_state.bold,
+        m_state.italic,
+        true,
+        false,
+        m_state.face,
+        0,
+        0,
+        _w,
+        _h,
+        m_state.chColor,
+        (m_state.edge ? m_state.edgeColor : 0),
+        (m_state.shadow ? m_state.shadowColor : 0),
+        (ttstr(graph)),
+    };
+
+    m_buffer.push_back(std::move(info));
 }
 
 static bool findchInChars(const tjs_wchar* chz, const tjs_wchar ch)
@@ -1030,12 +1066,27 @@ void TextRenderBase::pushCharacter(const tjs_char* ch)
 
     m_isBeginningOfLine = false;
 }
-#include <SDL3/SDL.h>
+
 void TextRenderBase::flush(bool force)
 {
     if (m_buffer.empty())
     {
         return;
+    }
+
+    // 有数据了，为y增加一行区域
+    if (m_state.align == kTextRenderAlignmentLeft)
+    {
+        m_renderBottom += GetCurrentRasterizer()->GetAscentHeight() + m_state.lineSpacing;
+    }
+    else if (m_state.align == kTextRenderAlignmentRight)
+    {
+        m_renderTop -= GetCurrentRasterizer()->GetAscentHeight() + m_state.lineSpacing;
+    }
+    else
+    {
+        m_renderTop = m_boxTop;
+        m_renderBottom = m_boxTop + m_boxHeight;
     }
 
     // try place all characters in the same line
@@ -1068,6 +1119,7 @@ void TextRenderBase::flush(bool force)
             ch.y = curr_y;
 
             x = new_x;
+            m_renderRight = std::max(m_renderRight, x);
         }
 
         curr_x = x;
@@ -1100,6 +1152,7 @@ void TextRenderBase::flush(bool force)
             ch.y = curr_y;
 
             x = new_x - m_state.pitch;
+            m_renderLeft = std::min(m_renderLeft, x);
         }
 
         curr_x = x;
@@ -1141,6 +1194,9 @@ void TextRenderBase::flush(bool force)
         }
 
         curr_x = x;
+
+        m_renderLeft = m_boxLeft;
+        m_renderRight = m_boxLeft + m_boxWidth;
     }
     
     m_characters.insert(m_characters.end(), m_buffer.begin(), m_buffer.end());
@@ -1202,18 +1258,41 @@ void TextRenderBase::clear()
     {
         // 正常搞
         curr_y = m_boxTop;
+        m_renderTop = m_boxTop;
+        m_renderBottom = m_boxTop;
     }
     else if (m_state.valign == kTextRenderAlignmentRight)
     {
         // 从底部开始
         curr_y = m_boxTop + m_boxHeight - m_state.fontsize;
+        m_renderTop = m_boxTop + m_boxHeight;
+        m_renderBottom = m_boxTop + m_boxHeight;
     }
     else
     {
         // 感觉为了高效实现对齐和实时渲染，以后可能得改整个textrender的流程
         // 不考虑多行了，现在的流程不好搞
         curr_y = m_boxTop + (m_boxHeight - GetCurrentRasterizer()->GetAscentHeight()) / 2;
+        m_renderTop = m_boxTop;
+        m_renderBottom = m_boxTop;
     }
+    // x的渲染区域重置
+    if (m_state.align == kTextRenderAlignmentLeft)
+    {
+        m_renderLeft = m_boxLeft;
+        m_renderRight = m_boxLeft;
+    }
+    else if (m_state.align == kTextRenderAlignmentRight)
+    {
+        m_renderLeft = m_boxLeft + m_boxWidth;
+        m_renderRight = m_boxLeft + m_boxWidth;
+    }
+    else
+    {
+        m_renderLeft = m_boxLeft;
+        m_renderRight = m_boxLeft;
+    }
+
     m_indent = 0;
 
     m_isBeginningOfLine = true;

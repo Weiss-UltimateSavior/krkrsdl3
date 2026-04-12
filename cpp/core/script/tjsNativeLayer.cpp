@@ -193,6 +193,23 @@ public:
     static void FreeTemp() { TVPTempBitmapHolder->InternalFreeTemp(); }
 };
 //---------------------------------------------------------------------------
+
+bool Layer_FetchImageSize(ttstr imageName, int& w, int& h)
+{
+    iTVPBaseBitmap* dest = new tTVPBaseTexture(*TVPTempBitmapHolder->Get());
+    if (dest)
+    {
+        ttstr provincename;
+        iTJSDispatch2* metainfo = NULL;
+        TVPLoadGraphic(dest, imageName, TVP_clNone, 0, 0, glmNormal, &provincename, &metainfo);
+        w = dest->GetTexture()->GetWidth(), h = dest->GetTexture()->GetHeight();
+        delete dest;
+        return true;
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------
 const tTVPBaseTexture& TVPGetInitialBitmap()
 {
     tTVPTempBitmapHolder::AddRef(); // ensure default bitmap
@@ -11259,6 +11276,37 @@ TJS_DENY_NATIVE_PROP_SETTER
 }
 TJS_END_NATIVE_PROP_DECL(provinceImageBufferPitch)
 //----------------------------------------------------------------------
+
+//-- static methods
+
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ fetchImageSize)
+{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this, /*var. type*/ tTJSNI_Layer);
+
+    if (numparams < 1)
+        return TJS_E_BADPARAMCOUNT;
+
+    int w = 0, h = 0;
+    bool ret = Layer_FetchImageSize(*param[0], w, h);
+    if (ret && result)
+    {
+        iTJSDispatch2* retArray = TJSCreateArrayObject();
+        tTJSVariant tmp(retArray, retArray);
+
+        tTJSVariant _w(w), _h(h);
+        retArray->PropSetByNum(TJS_MEMBERENSURE, 0, &_w, retArray);
+        retArray->PropSetByNum(TJS_MEMBERENSURE, 1, &_h, retArray);
+
+        *result = tmp;
+        retArray->Release();
+    }
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_STATIC_METHOD_DECL(/*func. name*/ fetchImageSize)
+
+//----------------------------------------------------------------------
+
 TJS_END_NATIVE_MEMBERS
 }
 //---------------------------------------------------------------------------
