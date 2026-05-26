@@ -5,6 +5,7 @@
 
 #include <map>
 #include "emotefile.h"
+#include "emoterunner.h"
 
 #include "tjsNativeLayer.h"
 
@@ -122,7 +123,7 @@ public:
     void set_motionKey(tTJSString motionKey)
     {
         _motionKey = motionKey;
-        _currentfile = _resourceManager->GetPlayerByName(motionKey);
+        emtEngine._mainfile = _resourceManager->GetPlayerByName(motionKey);
     }
     tTJSString get_motion() { return _motion; }
     void set_motion(tTJSString v)
@@ -185,18 +186,18 @@ public:
     tTJSVariant getVariableFrameList(tTJSString name);
     tTJSVariant getCommandList();
     tTJSVariant getLayerGetter(tTJSString name);
+    tTJSVariant getLayerMotion(tTJSString name);
     void setFlip(bool isFlip);
     void setSlant(tjs_real x, tjs_real y);
     void setZoom(tjs_real x, tjs_real y);
-
+    
 protected:
     bool isMotion = false;
 
 private:
     // runtime
     ResourceManager* _resourceManager;
-    emotefile* _currentfile = nullptr;
-    emotemotion* _currmotion = nullptr;
+    emoteengine emtEngine;
     tjs_real clockPassed = -1.0;
     tjs_real speedRatio = 20.0;
     bool isSelfClear = false; // true:draw使用完全copy(以实现自主clear) false:通过clear函数间接完成
@@ -273,6 +274,7 @@ public:
     using EmotePlayer::unserialize;
     using EmotePlayer::getCommandList;
     using EmotePlayer::getLayerGetter;
+    using EmotePlayer::getLayerMotion;
     using EmotePlayer::setFlip;
     using EmotePlayer::setSlant;
     using EmotePlayer::setZoom;

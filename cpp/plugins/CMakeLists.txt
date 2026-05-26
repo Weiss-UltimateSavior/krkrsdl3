@@ -41,6 +41,7 @@ set(KRKRSDL_PLUGINS_SRC
     ${KRKRSDL_PLUGINS_PATH}/emoteplayer/emotefile.cpp
     ${KRKRSDL_PLUGINS_PATH}/emoteplayer/emoteplayer.cpp
     ${KRKRSDL_PLUGINS_PATH}/emoteplayer/emoteplayerclass.cpp
+	${KRKRSDL_PLUGINS_PATH}/emoteplayer/emoterunner.cpp
     ${KRKRSDL_PLUGINS_PATH}/extrans/extrans.cpp
     ${KRKRSDL_PLUGINS_PATH}/extrans/mosaic.cpp
     ${KRKRSDL_PLUGINS_PATH}/extrans/ripple.cpp
@@ -60,8 +61,4 @@ set(KRKRSDL_PLUGINS_SRC
     ${KRKRSDL_PLUGINS_PATH}/psbfile/PSBData.cpp
     ${KRKRSDL_PLUGINS_PATH}/psbfile/PSBFile.cpp
     ${KRKRSDL_PLUGINS_PATH}/psbfile/PSBMedia.cpp
-	${KRKRSDL_PLUGINS_PATH}/sqlite3/extend.cpp
-	${KRKRSDL_PLUGINS_PATH}/sqlite3/sqlite3.c
-	${KRKRSDL_PLUGINS_PATH}/sqlite3/sqlite3.cpp
-	${KRKRSDL_PLUGINS_PATH}/sqlite3/xp3_vfs.cpp
     )

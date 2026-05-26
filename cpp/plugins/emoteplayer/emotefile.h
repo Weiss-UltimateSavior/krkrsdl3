@@ -18,42 +18,6 @@
 
 namespace emoteplayer
 {
-struct emotelimit // 区域限制
-{
-    float originX = 0.0f;
-    float originY = 0.0f;
-    float width = 0.0f;
-    float height = 0.0f;
-    float zMax = 0.0f;
-};
-struct emoterect
-{
-    float left = 0;
-    float top = 0;
-    float right = 0;
-    float bottom = 0;
-};
-
-class emotenode;
-struct emoteRender // 渲染方式
-{
-    int type = 0; // 0:不绘制 1:参与网格变形和矩阵变换 2:只参与矩阵变换
-                  // 3:layout/motion变形穿透(无法使用网格和透明度)，需要将matTrans合并到下一级使用
-    glm::mat4 matTrans = glm::mat4(1.0f);
-    float controlPts[32] = {0.0};
-    float opa = 1.0;
-
-    bool hasStencil = false;
-    std::vector<emotenode*> layerNode;
-
-    float originX = 0; // 基础参数
-    float originY = 0;
-    float width = 0;
-    float height = 0;
-
-    // 辅助信息
-    std::string label;
-};
 
 struct emoteVar // 变量
 {
@@ -61,8 +25,10 @@ struct emoteVar // 变量
     int32_t rangeEnd = 1;
     int32_t division = 0;
     std::string id;
-    float currVal = 0.0f;
-    float transToTick() { return division * ((currVal - rangeBegin) / (rangeEnd - rangeBegin)); }
+    float transToTick(float currVal)
+    {
+        return division * ((currVal - rangeBegin) / (rangeEnd - rangeBegin));
+    }
 };
 
 class emotefile;
@@ -122,17 +88,10 @@ public:
               uint32_t startOffset);
     ~emotenode();
 
-    void checkDrawStatus(float tick, std::vector<emoteRender>& renderList, emotelimit lim);
-    void progress(float tick, std::vector<emoteRender>& renderList, emotelimit lim);
-    void draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint exTex);
-
     // once
     emotenode* _parent = nullptr;
     emotemotion* _rootmotion = nullptr;
     bool removed = false;
-    float getCurrentRenderZ();
-    // refmotion
-    emotemotion* emot = nullptr;
 
     uint8_t meshCombine = 0;
     uint8_t meshDivision = 0;
@@ -147,45 +106,7 @@ public:
     std::vector<emoteframe*> frameList;
     std::vector<emotenode*> children;
 
-private:
     emotefile* _filePtr = nullptr;
-
-    // render method
-    std::vector<emoteRender> renderMethod;
-
-    // check
-    emoteicon* ic = nullptr;
-    void resizeMainData();
-    uint8_t* data = nullptr; // 自身icon
-    float originX = 0;       // 给子类用的坐标原点 同时也作为变换的锚点
-    float originY = 0;
-    float width = 0;
-    float height = 0;
-    bool isNeedDraw = false; // 是否需要绘制
-    bool isIcon = false; // 是否需要实际绘制(只有icon需要，诸如 blank 只起到布局和变形作用)
-    bool isLayout =
-        false; // layout/motion与blank的区别，前者无法提供网格变形，无缓存画布，无透明度，变化矩阵需要合并到下一级
-    emoteframe* frame = nullptr;
-    emoteframe* nextframe = nullptr;
-
-    // runtime
-    float currTick = 0;
-    int8_t currbm = 0; // 混色模式 0:标准混色 1: 2: 3: 4:
-    float currCoordx = 0;
-    float currCoordy = 0;
-    float currCoordz = 0;
-    float currOpa = 1.0;
-    float currAngle = 0.0; // 变换参数 旋转angle   错切sx/sy   缩放zx/zy
-    float currSx = 0.0, currSy = 0.0;
-    float currZx = 0.0, currZy = 0.0;
-    float currOx = 0.0, currOy = 0.0;
-    float currTimeOffset = 0.0; // motion引用偏移值
-    bool isNeedBp = false;
-    float currbp[32] = {0.0}; // 网格参数
-
-    // opengl
-    void resizeOpenGL();
-    GLuint selftexture = 0; // 自身图片纹理
 };
 
 class emotemotion
@@ -194,11 +115,7 @@ public:
     emotemotion(emotefile* filePtr, uint32_t startOffset);
     ~emotemotion();
 
-    float getTickByIdx(int32_t parameterIdx);
     emotenode* getNodeByName(const std::string& name);
-    void progress(float tick, std::vector<emoteRender>& renderList, emotelimit lim);
-    void draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint exTex);
-    bool contains(tjs_real x, tjs_real y);
 
     double lastTime;
     std::vector<emotenode*> layer;
@@ -209,17 +126,11 @@ public:
 
     std::vector<int32_t> priority;
     std::vector<emoteVar*> parameter;
+    std::map<std::string, float> parameterCache;
     bool isParameterize = false;
     int32_t parameterIdx = -1;
 
-    // shape rect
-    std::vector<emoterect> shapeList;
-
-private:
     emotefile* _filePtr = nullptr;
-
-    // render method
-    std::vector<emoteRender> renderMethod;
 };
 
 class emoteobject
@@ -228,7 +139,6 @@ public:
     emoteobject(emotefile* filePtr, uint32_t startOffset);
     ~emoteobject();
     emoteVar* findVarByName(const std::string& name);
-    bool contains(tjs_real x, tjs_real y);
 
     uint8_t type;
     std::map<std::string, emotemotion*> motion;
@@ -385,95 +295,6 @@ public:
     std::string var_ud;
 };
 
-// 物理玩不明白，这都是ai写的 分别用于parts/hair/bust
-class SmoothPeriodicRandom
-{
-private:
-    float noise_seed;
-
-public:
-    SmoothPeriodicRandom();
-
-    float generate(float tick, float a, float b, float period = 60.0f);
-};
-class HairSwaySimulator
-{
-private:
-    std::vector<float> phases;
-    std::vector<float> frequencies;
-    std::vector<float> amplitudes;
-    float wind_seed;
-
-    // 风力参数
-    struct WindParams
-    {
-        glm::vec2 start; // 风起始位置
-        glm::vec2 goal;  // 风目标位置
-        float speed;     // 风速
-        float powMin;    // 最小强度
-        float powMax;    // 最大强度
-        float progress;  // 风进程 0.0-1.0
-        bool active;     // 风是否激活
-    };
-
-    WindParams wind;
-
-public:
-    HairSwaySimulator();
-
-    // 风开始
-    void startWind(glm::vec2 start, glm::vec2 goal, float speed, float powMin, float powMax);
-
-    // 停止风
-    void stopWind();
-
-    // 获取当前风力强度（基于位置和进度）
-    float getCurrentWindStrength(glm::vec2 hairPosition);
-
-    // 获取风的方向
-    glm::vec2 getWindDirection();
-
-    float generate(float tick, glm::vec2 hairPosition, float a, float b);
-
-    // 检查风是否活跃
-    bool isWindActive();
-
-    // 获取风进度
-    float getWindProgress();
-};
-class BreastJiggleSimulator
-{
-public:
-    class SpringDamper
-    {
-    public:
-        float position;  // 当前位置
-        float velocity;  // 当前速度
-        float target;    // 目标位置
-        float stiffness; // 弹性系数 (0.1-0.3)
-        float damping;   // 阻尼系数 (0.05-0.15)
-        float mass;      // 质量 (0.8-1.2)
-
-        SpringDamper(float stiff = 0.2f, float damp = 0.1f, float m = 1.0f);
-
-        void update(float delta_time);
-    };
-
-    SpringDamper vertical_spring;   // 垂直运动
-    SpringDamper horizontal_spring; // 水平运动
-    SpringDamper bounce_spring;     // 弹跳运动
-    float base_movement;            // 基础运动（如呼吸）
-    float last_body_movement;       // 上一帧身体运动
-
-    BreastJiggleSimulator();
-
-    float generate(
-        float tick, float body_movement, float a, float b, float delta_time = 1.0f / 60.0f);
-
-    // 外部冲击（如跳跃落地）
-    void addImpulse(float force);
-};
-
 struct emoteattrcompRemoveItem
 {
     std::string chara;
@@ -543,6 +364,8 @@ public:
     emoteicon(emotefile* filePtr, uint32_t startOffset);
     ~emoteicon();
 
+    void ensureLoad();
+
     struct Clip
     {
         double bottom = 0.0;
@@ -562,6 +385,9 @@ public:
     int32_t pal = -1;
     double texWidth = 0;
     double texHeight = 0;
+
+    uint8_t* data = nullptr; // icon数据
+    GLuint selftexture = 0; //  图片纹理
 
 private:
     emotefile* _filePtr = nullptr;
@@ -612,7 +438,7 @@ public:
     bool GenerateAniTree();
     bool ClearAniTree();
     void updateZMax(float zMax);
-    float getZMax(bool isMain = false);
+    float getZMax();
     void updateSyncTime(float _syn);
     float getSyncTime();
     emotemetadata* _metadata = nullptr;
@@ -635,27 +461,10 @@ public:
         double len_disp = 0.0;
     } _stereovisionProfile;
     emoteicon* findsourceByName(const std::string& name);
-    bool readIconTobuffer(uint8_t* buff, uint32_t buffSize, uint32_t pitch, emoteicon* ic);
     emotemotion* findmotionByName(const std::string& name);
+    bool readIconTobuffer(uint8_t* buff, uint32_t buffSize, uint32_t pitch, emoteicon* ic);
     bool getTickByName(const std::string& name, float& ret);
-    void updateEyeControl(float tick, bool isMain = false);
-    std::vector<emotetimeline*> currTimeline;
-    float currStartTick = -1.0f;
-    void startTimeline(float tick, const std::string& name, bool isMain = false);
-    void stopTimeline(const std::string& name, bool isMain = false);
-    bool checkTimline(const std::string& name, bool& result, bool isMain = false);
-    void updateTimelineControl(float tick, bool isMain = false);
-    emoteVar* findVarByName(const std::string& name);
-    void setVariable(const std::string& name, tjs_real value, bool isMain = false);
-    SmoothPeriodicRandom oscillator;
-    HairSwaySimulator hair_sim;
-    BreastJiggleSimulator breast_sim;
-    void updatePhysics(float tick);
-
-public:
-    // emotefile附属机制
-    std::vector<emotefile*> _attach;
-    void addEmoteFile(emotefile* itm);
+    void setVariable(const std::string& name, tjs_real value);
 
 private:
     tTJSBinaryStream* filePtr = nullptr;

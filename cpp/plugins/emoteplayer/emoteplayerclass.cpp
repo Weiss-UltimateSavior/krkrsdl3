@@ -281,13 +281,13 @@ void SeparateLayerAdaptor::checkDrawArea(tjs_int width, tjs_int height)
 }
 
 // 专门用来保存contain信息
-tTJSNativeClass* TVPCreateNativeClass_TmpMotionObj(EmotePlayer* ptr, emotemotion* obj);
+tTJSNativeClass* TVPCreateNativeClass_TmpMotionObj(EmotePlayer* ptr, emotemotionref* obj);
 class TmpMotionObj : public tTJSNativeClass
 {
     typedef tTJSNativeClass inherited;
 
 public:
-    TmpMotionObj(EmotePlayer* ptr, emotemotion* obj)
+    TmpMotionObj(EmotePlayer* ptr, emotemotionref* obj)
       : tTJSNativeClass(TJS_N("MotionObj"))
     {
         _ptr = ptr;
@@ -309,7 +309,31 @@ public:
             tjs_real x = *param[0];
             tjs_real y = *param[1];
             if (result)
-                *result = _obj ? _obj->contains(x, y) : false;
+            {
+                if (_obj)
+                {
+                    *result = _obj->contains(x, y);
+                }
+                else
+                {
+                    // 没有_obj: 这是shape节点，检查存储的l/t/w/h属性进行碰撞检测
+                    tTJSVariant vl, vt, vw, vh;
+                    bool hasL = TJS_SUCCEEDED(PropGet(0, TJS_N("l"), nullptr, &vl, this));
+                    bool hasT = TJS_SUCCEEDED(PropGet(0, TJS_N("t"), nullptr, &vt, this));
+                    bool hasW = TJS_SUCCEEDED(PropGet(0, TJS_N("w"), nullptr, &vw, this));
+                    bool hasH = TJS_SUCCEEDED(PropGet(0, TJS_N("h"), nullptr, &vh, this));
+                    if (hasL && hasT && hasW && hasH)
+                    {
+                        double l = (double)vl, t = (double)vt;
+                        double w = (double)vw, h = (double)vh;
+                        *result = (x >= l && x <= l + w && y >= t && y <= t + h);
+                    }
+                    else
+                    {
+                        *result = false;
+                    }
+                }
+            }
             return TJS_S_OK;
         }
         else if (std::strcmp(membername, "getLayerGetter") == 0)
@@ -320,15 +344,16 @@ public:
             ttstr name = *param[0];
             iTJSDispatch2* dsp = TJSCreateDictionaryObject();
 
-            // 寻找mtn
-            emotemotion* emtObj = nullptr;
+            // 寻找mtn (子motion引用)
+            emotemotionref* emtObj = nullptr;
+            emotenode* shapeNode = nullptr;
             if (_obj != nullptr)
             {
-                for (auto objItm : _obj->nodeList)
+                for (auto objItm : _obj->_nodeCache)
                 {
-                    if (objItm->emot && std::strcmp(objItm->label.c_str(), name.c_str()) == 0)
+                    if (objItm.currentMtn && std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0)
                     {
-                        emtObj = objItm->emot;
+                        emtObj = objItm.currentMtnRef;
                         break;
                     }
                 }
@@ -336,7 +361,7 @@ public:
 
             if (emtObj)
             {
-                // shape
+                // 子motion: 返回TmpMotionObj作为shape
                 iTJSDispatch2* mtn = TVPCreateNativeClass_TmpMotionObj(_ptr, emtObj);
                 if (mtn)
                 {
@@ -345,11 +370,131 @@ public:
                     mtn->Release();
                 }
             }
+            else
+            {
+                // 没找到子motion，查找shape节点(仅匹配src以"shape/"开头的节点)
+                if (_obj != nullptr)
+                {
+                    for (auto& objItm : _obj->_nodeCache)
+                    {
+                        if (std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0 &&
+                            !objItm.currentNode->frameList.empty())
+                        {
+                            emoteframe* f = objItm.currentNode->frameList[0];
+                            if (f->hasContent && f->src.rfind("shape/", 0) == 0)
+                            {
+                                shapeNode = objItm.currentNode;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (shapeNode == nullptr && _obj != nullptr)
+                {
+                    // 递归查找子motion中的shape节点
+                    for (auto& objItm : _obj->_nodeCache)
+                    {
+                        if (objItm.currentMtn && objItm.currentMtnRef)
+                        {
+                            auto& subCache = objItm.currentMtnRef->_nodeCache;
+                            for (auto& subItm : subCache)
+                            {
+                                if (std::strcmp(subItm.currentNode->label.c_str(), name.c_str()) == 0 &&
+                                    !subItm.currentNode->frameList.empty())
+                                {
+                                    emoteframe* f = subItm.currentNode->frameList[0];
+                                    if (f->hasContent && f->src.rfind("shape/", 0) == 0)
+                                    {
+                                        shapeNode = subItm.currentNode;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (shapeNode) break;
+                        }
+                    }
+                }
+
+                if (shapeNode && !shapeNode->frameList.empty())
+                {
+                    emoteframe* f = shapeNode->frameList[0];
+                    if (f->hasContent)
+                    {
+                        // 从帧数据中提取位置和大小
+                        double cx = f->coordX;
+                        double cy = f->coordY;
+                        double w = f->zx;
+                        double h = f->zy;
+                        double l = cx - w / 2.0;
+                        double t = cy - h / 2.0;
+
+                        // 创建TmpMotionObj（即使_obj为空，contains函数也能返回false）
+                        // 并在其上设置l/t/w/h属性，以满足TJS侧 area.l / area.contains() 两种用法
+                        iTJSDispatch2* shapeObj = TVPCreateNativeClass_TmpMotionObj(nullptr, nullptr);
+                        if (shapeObj)
+                        {
+                            tTJSVariant vL(l), vT(t), vW(w), vH(h);
+                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("l"), nullptr, &vL, shapeObj);
+                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("t"), nullptr, &vT, shapeObj);
+                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("w"), nullptr, &vW, shapeObj);
+                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("h"), nullptr, &vH, shapeObj);
+                            tTJSVariant shapeVar(shapeObj);
+                            dsp->PropSet(TJS_MEMBERENSURE, TJS_N("shape"), nullptr, &shapeVar, dsp);
+                            shapeObj->Release();
+                        }
+                    }
+                }
+            }
 
             tTJSVariant var(dsp);
             dsp->Release();
             if (result)
                 *result = var;
+            return TJS_S_OK;
+        }
+        else if (std::strcmp(membername, "getLayerMotion") == 0)
+        {
+            if (numparams < 1)
+                return TJS_E_BADPARAMCOUNT;
+            ttstr name = *param[0];
+
+            // 查找指定名称的子motion
+            emotemotionref* emtObj = nullptr;
+            if (_obj != nullptr)
+            {
+                for (auto objItm : _obj->_nodeCache)
+                {
+                    if (objItm.currentMtn && std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0)
+                    {
+                        emtObj = objItm.currentMtnRef;
+                        break;
+                    }
+                }
+            }
+
+            if (emtObj && result)
+            {
+                iTJSDispatch2* mtn = TVPCreateNativeClass_TmpMotionObj(_ptr, emtObj);
+                if (mtn)
+                {
+                    tTJSVariant mtnVar(mtn);
+                    *result = mtnVar;
+                    mtn->Release();
+                }
+            }
+            return TJS_S_OK;
+        }
+        else if (std::strcmp(membername, "setVariable") == 0)
+        {
+            if (numparams < 2)
+                return TJS_E_BADPARAMCOUNT;
+            ttstr name = *param[0];
+            tjs_real value = *param[1];
+            if (_ptr)
+            {
+                _ptr->setVariable(name, value);
+            }
             return TJS_S_OK;
         }
         else
@@ -368,9 +513,9 @@ protected:
 
 private:
     EmotePlayer* _ptr = NULL;
-    emotemotion* _obj = NULL;
+    emotemotionref* _obj = NULL;
 };
-tTJSNativeClass* TVPCreateNativeClass_TmpMotionObj(EmotePlayer* ptr, emotemotion* obj)
+tTJSNativeClass* TVPCreateNativeClass_TmpMotionObj(EmotePlayer* ptr, emotemotionref* obj)
 {
     return new TmpMotionObj(ptr, obj);
 }
@@ -412,20 +557,20 @@ EmotePlayer::~EmotePlayer()
 }
 int32_t EmotePlayer::get_loopTime()
 {
-    if (_currentfile != nullptr && _currentfile->_objects.size() > 0 &&
-        _currentfile->_objects.begin()->second->motion.size() > 0)
+    if (emtEngine._mainfile != nullptr && emtEngine._mainfile->_objects.size() > 0 &&
+        emtEngine._mainfile->_objects.begin()->second->motion.size() > 0)
     {
-        return _currentfile->_objects.begin()->second->motion.begin()->second->loopTime;
+        return emtEngine._mainfile->_objects.begin()->second->motion.begin()->second->loopTime;
     }
     return 0;
 }
 tTJSVariant EmotePlayer::get_variableKeys()
 {
     iTJSDispatch2* array = TJSCreateArrayObject();
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
         std::set<std::string> varList;
-        for (auto varItm : _currentfile->_metadata->_varList)
+        for (auto varItm : emtEngine._mainfile->_metadata->_varList)
         {
             tTJSVariant tmp(varItm.first);
             tTJSVariant* args[] = {&tmp};
@@ -472,16 +617,16 @@ void EmotePlayer::play(tTJSString name, int flag)
     if (_playing)
         return;
     // SDL_Log("play-->%s", name.AsStdString().c_str());
-    if (_currentfile != nullptr && !isMotion) // motionKey的启动模式
+    if (emtEngine._mainfile != nullptr && !isMotion) // motionKey的启动模式
     {
         // motion
-        auto it = _currentfile->_objects.find(_currentfile->_metadata->chara.c_str());
-        if (it != _currentfile->_objects.end())
+        auto it = emtEngine._mainfile->_objects.find(emtEngine._mainfile->_metadata->chara.c_str());
+        if (it != emtEngine._mainfile->_objects.end())
         {
-            auto it1 = it->second->motion.find(_currentfile->_metadata->motion.c_str());
+            auto it1 = it->second->motion.find(emtEngine._mainfile->_metadata->motion.c_str());
             if (it1 != it->second->motion.end())
             {
-                _currmotion = it1->second;
+                emtEngine._mainmotion = it1->second;
             }
         }
         // start
@@ -493,7 +638,7 @@ void EmotePlayer::play(tTJSString name, int flag)
     else if (_resourceManager->cacheData.size() > 0 && isMotion) // chara+motion启动方案
     {
         _motion = name;
-        _currmotion = nullptr;
+        emtEngine._mainmotion = nullptr;
         // motion
         for (auto tmpFile : _resourceManager->cacheData)
         {
@@ -503,12 +648,12 @@ void EmotePlayer::play(tTJSString name, int flag)
                 auto it1 = it->second->motion.find(_motion.AsStdString().c_str());
                 if (it1 != it->second->motion.end())
                 {
-                    _currmotion = it1->second;
+                    emtEngine._mainmotion = it1->second;
                 }
             }
-            if (_currmotion)
+            if (emtEngine._mainmotion)
             {
-                _currentfile = tmpFile.second;
+                emtEngine._mainfile = tmpFile.second;
                 break;
             }
                 
@@ -520,8 +665,8 @@ void EmotePlayer::play(tTJSString name, int flag)
     }
     else // 群体启动模式，即对manager的所有file进行拼好件(其会存在互相索引的情况，结构可能得改改了)
     {
-        _currentfile = nullptr;
-        _currmotion = nullptr;
+        emtEngine._mainfile = nullptr;
+        emtEngine._mainmotion = nullptr;
         for (auto itm : _resourceManager->cacheData)
         {
             // 查询
@@ -531,20 +676,17 @@ void EmotePlayer::play(tTJSString name, int flag)
                 auto it1 = it->second->motion.find(itm.second->_metadata->motion.c_str());
                 if (it1 != it->second->motion.end())
                 {
-                    _currentfile = itm.second;
-                    _currmotion = it1->second;
+                    emtEngine._mainfile = itm.second;
+                    emtEngine._mainmotion = it1->second;
                     break;
                 }
             }
         }
-        // 对剩下文件进行相互并连
-        for (auto itm1 : _resourceManager->cacheData)
+        // 对剩下文件进行相互并连(通过引擎管理附属文件)
+        for (auto itm : _resourceManager->cacheData)
         {
-            for (auto itm2 : _resourceManager->cacheData)
-            {
-                if (itm1.second != itm2.second)
-                    itm1.second->addEmoteFile(itm2.second);
-            }
+            if (itm.second != emtEngine._mainfile)
+                emtEngine.addEmoteFile(itm.second);
         }
         // start
         clockPassed = 0.0;
@@ -586,7 +728,7 @@ void EmotePlayer::progress(tjs_real mstime)
     // SDL_Log("progress-->%f %f", mstime, clockPassed);
     if (_isStop)
         return;
-    if (_currentfile != nullptr && _currmotion != nullptr && clockPassed > -1.0 &&
+    if (emtEngine._mainfile != nullptr && emtEngine._mainmotion != nullptr && clockPassed > -1.0 &&
         _limitArea.width != _limitArea.originX && _limitArea.height != _limitArea.originY)
     {
         if (_playing)
@@ -594,37 +736,41 @@ void EmotePlayer::progress(tjs_real mstime)
         std::vector<emoteRender> empty;
         empty.push_back(_renderMethod);
         // mirror
-        if (_currentfile->isMirror)
+        if (emtEngine._mainfile->isMirror)
         {
             empty.at(0).matTrans = glm::scale(empty.at(0).matTrans, glm::vec3(-1.0f, 1.0f, 1.0f));
         }
         // condition
-        if (_currentfile->_metadata->_varList.size() > 0)
+        if (emtEngine._mainfile->_metadata->_varList.size() > 0)
         {
-            // 更新控制参数
-            _currentfile->updateEyeControl(clockPassed, true);
-            _currentfile->updateTimelineControl(clockPassed, true);
-            // 物理玩不明白，就不开起来污染眼睛了
-            //_currentfile->updatePhysics(clockPassed);
-            //  将子对象画到自己身上
-            _currmotion->progress(0, empty, _limitArea);
+            // 更新控制参数(通过引擎调用)
+            emtEngine.updateEyeControl(clockPassed, true);
+            emtEngine.updateTimelineControl(clockPassed, true);
+            // 使用emoteengine::progress构建独立ref树
+            emtEngine.progress(0, empty, _limitArea);
         }
         else
         {
             // 是否结束
-            if (!isMotion && clockPassed > _currmotion->lastTime)
+            if (!isMotion && clockPassed > emtEngine._mainmotion->lastTime)
             {
                 _playing = false;
             }
             // 对于motion限制最后时间并结束
-            if (isMotion && _currmotion->loopTime < 0 &&
-                clockPassed > _currmotion->syncTime)
+            // 参考ref逻辑: syncTime优先, 其次是selfSyncTime, 最后用lastTime作为兜底
+            if (isMotion && emtEngine._mainmotion->loopTime < 0)
             {
-                clockPassed = _currmotion->syncTime;
-                _playing = false;
+                tjs_real endTime = emtEngine._mainmotion->syncTime;
+                if (endTime <= 0.0) endTime = emtEngine._mainmotion->selfSyncTime;
+                if (endTime <= 0.0) endTime = emtEngine._mainmotion->lastTime;
+                if (clockPassed > endTime)
+                {
+                    clockPassed = endTime;
+                    _playing = false;
+                }
             }
-            // 将子对象画到自己身上
-            _currmotion->progress(clockPassed, empty, _limitArea);
+            // 使用emoteengine::progress构建独立ref树
+            emtEngine.progress(clockPassed, empty, _limitArea);
         }
     }
 }
@@ -646,7 +792,7 @@ void EmotePlayer::draw(iTJSDispatch2* objthis)
         withoutAdaptor = true;
     }
 
-    if (_currentfile != nullptr && _currmotion != nullptr)
+    if (emtEngine._mainfile != nullptr && emtEngine._mainmotion != nullptr)
     {
         ResetDrawArea(ths->GetWidth(), ths->GetHeight());
         if (withoutAdaptor)
@@ -661,10 +807,11 @@ void EmotePlayer::draw(iTJSDispatch2* objthis)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         else
             glClear(GL_DEPTH_BUFFER_BIT);
+        // 使用emoteengine::draw进行绘制(使用progress阶段缓存的独立ref树)
         if (withoutAdaptor)
-            _currmotion->draw(fbo, _limitArea, superfbo, superfbotexture);
+            emtEngine.draw(fbo, _limitArea, superfbo, superfbotexture);
         else
-            _currmotion->draw(self->fbo, _limitArea, self->superfbo, self->superfbotexture);
+            emtEngine.draw(self->fbo, _limitArea, self->superfbo, self->superfbotexture);
         if (m_bmpData != nullptr && m_BmpBits != nullptr)
         {
             // read
@@ -720,21 +867,21 @@ void EmotePlayer::setColor(tjs_uint32 color)
 }
 void EmotePlayer::setVariable(tTJSString name, tjs_real value)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
         std::string tmpName = name.AsStdString();
         tmpName.append(1, '\0'); // 终有一天，我会把这sb字符串给优化掉
-        _currentfile->setVariable(tmpName, value, true); // 管你有没有，设了再说
+        emtEngine.setVariable(tmpName, value); // 管你有没有，设了再说
     }
 }
 tjs_real EmotePlayer::getVariable(tTJSString name)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
         std::string tmpName = name.AsStdString();
         tmpName.append(1, '\0'); // 终有一天，我会把这sb字符串给优化掉
-        auto varPos = _currentfile->_metadata->_varList.find(tmpName);
-        if (varPos != _currentfile->_metadata->_varList.end())
+        auto varPos = emtEngine._mainfile->_metadata->_varList.find(tmpName);
+        if (varPos != emtEngine._mainfile->_metadata->_varList.end())
         {
             return varPos->second;
         }
@@ -748,7 +895,7 @@ void EmotePlayer::setOuterForce(tTJSString name, tjs_real ofx, tjs_real ofy)
 void EmotePlayer::setDrawAffineTranslateMatrix(
     tjs_real a, tjs_real b, tjs_real c, tjs_real d, tjs_int tx, tjs_int ty)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
         _affineTrans = glm::mat4(a, -c, 0.0f, 0.0f, -b, d, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, tx,
                                  ty, 0.0f, 1.0f);
@@ -781,9 +928,9 @@ void EmotePlayer::skip()
 }
 void EmotePlayer::skipToSync()
 {
-    if (_currmotion != nullptr)
+    if (emtEngine._mainmotion != nullptr)
     {
-        clockPassed = _currentfile->getSyncTime();
+        clockPassed = emtEngine._mainfile->getSyncTime();
     }
     SDL_Log("EmotePlayer::skipToSync TODO");
 }
@@ -799,34 +946,34 @@ void EmotePlayer::stop()
 }
 void EmotePlayer::playTimeline(tTJSString name, tjs_int flags)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        _currentfile->startTimeline(-10000.0f, name.AsStdString(),
-                                    true); // 管你有没有，设了再说
+        emtEngine.startTimeline(-10000.0f, name.AsStdString(),
+                                true); // 管你有没有，设了再说
     }
 }
 void EmotePlayer::stopTimeline(tTJSString name)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        _currentfile->stopTimeline(name.AsStdString(), true); // 管你有没有，设了再说
+        emtEngine.stopTimeline(name.AsStdString(), true); // 管你有没有，设了再说
     }
 }
 bool EmotePlayer::getTimelinePlaying(tTJSString name)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
         bool ret = false;
-        if (_currentfile->checkTimline(name.AsStdString(), ret, true))
+        if (emtEngine.checkTimline(name.AsStdString(), ret, true))
             return ret;
     }
     return false;
 }
 bool EmotePlayer::getLoopTimeline(tTJSString name)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        for (auto itm : _currentfile->_metadata->_timelineControl)
+        for (auto itm : emtEngine._mainfile->_metadata->_timelineControl)
         {
             if (strcmp(itm->label.c_str(), name.AsStdString().c_str()) == 0)
             {
@@ -838,9 +985,9 @@ bool EmotePlayer::getLoopTimeline(tTJSString name)
 }
 tjs_real EmotePlayer::getTimelineTotalFrameCount(tTJSString name)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        for (auto itm : _currentfile->_metadata->_timelineControl)
+        for (auto itm : emtEngine._mainfile->_metadata->_timelineControl)
         {
             if (strcmp(itm->label.c_str(), name.AsStdString().c_str()) == 0)
             {
@@ -853,9 +1000,9 @@ tjs_real EmotePlayer::getTimelineTotalFrameCount(tTJSString name)
 tTJSVariant EmotePlayer::getMainTimelineLabelList()
 {
     iTJSDispatch2* array = TJSCreateArrayObject();
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        for (auto itm : _currentfile->_metadata->_timelineControl)
+        for (auto itm : emtEngine._mainfile->_metadata->_timelineControl)
         {
             if (itm->diff == 0)
             {
@@ -873,9 +1020,9 @@ tTJSVariant EmotePlayer::getMainTimelineLabelList()
 tTJSVariant EmotePlayer::getDiffTimelineLabelList()
 {
     iTJSDispatch2* array = TJSCreateArrayObject();
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        for (auto itm : _currentfile->_metadata->_timelineControl)
+        for (auto itm : emtEngine._mainfile->_metadata->_timelineControl)
         {
             if (itm->diff == 1)
             {
@@ -909,9 +1056,9 @@ tTJSVariant EmotePlayer::getPlayingTimelineInfoList()
 {
     iTJSDispatch2* array = TJSCreateArrayObject();
     tTJSVariant result(array, array);
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        for (auto playingTimeline : _currentfile->currTimeline)
+        for (auto playingTimeline : emtEngine.currTimeline)
         {
             iTJSDispatch2* obj = TJSCreateDictionaryObject();
             tTJSVariant val = tTJSVariant(playingTimeline->label);
@@ -929,9 +1076,9 @@ tTJSVariant EmotePlayer::getPlayingTimelineInfoList()
 }
 tTJSVariant EmotePlayer::getVariableFrameList(tTJSString name)
 {
-    if (_currentfile != nullptr)
+    if (emtEngine._mainfile != nullptr)
     {
-        iTJSDispatch2* root = _currentfile->root().AsObject();
+        iTJSDispatch2* root = emtEngine._mainfile->root().AsObject();
         tTJSVariant itm;
         if (TJS_FAILED(root->PropGet(0, TJS_N("metadata"), NULL, &itm, root)))
         {
@@ -949,7 +1096,7 @@ tTJSVariant EmotePlayer::getVariableFrameList(tTJSString name)
         root = itm.AsObjectThis();
 
         tTJSVariant retNeed;
-        for (tjs_uint32 i = 0; i < _currentfile->_metadata->_varList.size(); i++)
+        for (tjs_uint32 i = 0; i < emtEngine._mainfile->_metadata->_varList.size(); i++)
         {
             tTJSVariant varItem;
             if (TJS_FAILED(root->PropGetByNum(TJS_MEMBERMUSTEXIST, i, &varItem, root)))
@@ -996,14 +1143,14 @@ tTJSVariant EmotePlayer::getLayerGetter(tTJSString name)
     iTJSDispatch2* dsp = TJSCreateDictionaryObject();
 
     // 寻找mtn
-    emotemotion* emtObj = nullptr;
-    if (_currmotion != nullptr)
+    emotemotionref* emtObj = nullptr;
+    if (emtEngine._mainMotionRef != nullptr)
     {
-        for (auto objItm : _currmotion->nodeList)
+        for (auto objItm : emtEngine._mainMotionRef->_nodeCache)
         {
-            if (objItm->emot && std::strcmp(objItm->label.c_str(), name.c_str()) == 0)
+            if (objItm.currentMtn && std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0)
             {
-                emtObj = objItm->emot;
+                emtObj = objItm.currentMtnRef;
                 break;
             }
         }
@@ -1020,10 +1167,121 @@ tTJSVariant EmotePlayer::getLayerGetter(tTJSString name)
             mtn->Release();
         }
     }
+    else if (emtEngine._mainMotionRef != nullptr)
+    {
+        // 没找到子motion，先查找shape节点(如 shape/rect)
+        emotenode* shapeNode = nullptr;
+        for (auto& objItm : emtEngine._mainMotionRef->_nodeCache)
+        {
+            if (std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0 &&
+                !objItm.currentNode->frameList.empty())
+            {
+                emoteframe* f = objItm.currentNode->frameList[0];
+                if (f->hasContent && f->src.rfind("shape/", 0) == 0)
+                {
+                    shapeNode = objItm.currentNode;
+                    break;
+                }
+            }
+        }
+
+        if (shapeNode == nullptr)
+        {
+            // 递归查找子motion中的node
+            for (auto& objItm : emtEngine._mainMotionRef->_nodeCache)
+            {
+                if (objItm.currentMtn && objItm.currentMtnRef)
+                {
+                    auto& subCache = objItm.currentMtnRef->_nodeCache;
+                    // 先查找子motion中的子motion ref
+                    for (auto& subItm : subCache)
+                    {
+                        if (std::strcmp(subItm.currentNode->label.c_str(), name.c_str()) == 0)
+                        {
+                            emtObj = subItm.currentMtnRef;
+                            break;
+                        }
+                    }
+                    if (emtObj) break;
+
+                    // 再查找子motion中的shape节点
+                    for (auto& subItm : subCache)
+                    {
+                        if (std::strcmp(subItm.currentNode->label.c_str(), name.c_str()) == 0 &&
+                            !subItm.currentNode->frameList.empty())
+                        {
+                            emoteframe* f = subItm.currentNode->frameList[0];
+                            if (f->hasContent && f->src.rfind("shape/", 0) == 0)
+                            {
+                                shapeNode = subItm.currentNode;
+                                break;
+                            }
+                        }
+                    }
+                    if (shapeNode) break;
+                }
+            }
+        }
+
+        if (emtObj)
+        {
+            iTJSDispatch2* mtn = TVPCreateNativeClass_TmpMotionObj(this, emtObj);
+            if (mtn)
+            {
+                tTJSVariant mtnVar(mtn);
+                dsp->PropSet(TJS_MEMBERENSURE, "motion", nullptr, &mtnVar, dsp);
+                mtn->Release();
+            }
+        }
+        else if (shapeNode && !shapeNode->frameList.empty())
+        {
+            emoteframe* f = shapeNode->frameList[0];
+            if (f->hasContent)
+            {
+                double cx = f->coordX;
+                double cy = f->coordY;
+                double w = f->zx;
+                double h = f->zy;
+                double l = cx - w / 2.0;
+                double t = cy - h / 2.0;
+
+                iTJSDispatch2* shapeObj = TVPCreateNativeClass_TmpMotionObj(nullptr, nullptr);
+                if (shapeObj)
+                {
+                    tTJSVariant vL(l), vT(t), vW(w), vH(h);
+                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("l"), nullptr, &vL, shapeObj);
+                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("t"), nullptr, &vT, shapeObj);
+                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("w"), nullptr, &vW, shapeObj);
+                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("h"), nullptr, &vH, shapeObj);
+                    tTJSVariant shapeVar(shapeObj);
+                    dsp->PropSet(TJS_MEMBERENSURE, TJS_N("shape"), nullptr, &shapeVar, dsp);
+                    shapeObj->Release();
+                }
+            }
+        }
+    }
     
     tTJSVariant var(dsp);
     dsp->Release();
     return var;
+}
+tTJSVariant EmotePlayer::getLayerMotion(tTJSString name)
+{
+    // 调用getLayerGetter后返回motion属性
+    tTJSVariant getter = getLayerGetter(name);
+    if (getter.Type() == tvtObject)
+    {
+        iTJSDispatch2* dsp = getter.AsObjectThisNoAddRef();
+        if (dsp)
+        {
+            tTJSVariant motion;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_N("motion"), NULL, &motion, dsp)))
+            {
+                return motion;
+            }
+        }
+    }
+    return tTJSVariant();
 }
 void EmotePlayer::setFlip(bool isFlip)
 {
@@ -1116,9 +1374,9 @@ void EmotePlayer::ResetDrawArea(tjs_int width, tjs_int height)
         _height = height;
         _limitArea.width = width;
         _limitArea.height = height;
-        if (_currentfile != nullptr)
+        if (emtEngine._mainfile != nullptr)
         {
-            _limitArea.zMax = _currentfile->getZMax(true) * 2;
+            _limitArea.zMax = emtEngine.getZMax() * 2;
         }
         if (_limitArea.zMax < 30.0f)
             _limitArea.zMax = 30.0f;
