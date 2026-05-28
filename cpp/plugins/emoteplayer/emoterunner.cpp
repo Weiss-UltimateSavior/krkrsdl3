@@ -418,6 +418,7 @@ void emotenoderef::checkDrawStatus(float tick, std::vector<emoteRender>& renderL
         else
             break;
     }
+
     if (frame == nullptr || !frame->hasContent)
     {
         isNeedDraw = false;
@@ -494,9 +495,15 @@ void emotenoderef::checkDrawStatus(float tick, std::vector<emoteRender>& renderL
         }
         else if (strcmp(token.c_str(), "shape") == 0)
         {
-            // TODO
+            // shape节点: 不绘制但记录区域信息
+            // shape的像素尺寸 = zx/zy * 16 (PSB规范: 单元正方形为16x16)
+            // shape子类型从src的第二部分获取: rect(默认)、circle、point、quad
+            const tjs_real shapeUnit = 16.0;
             isNeedDraw = false;
-            return;
+            width = (tjs_real)frame->zx * shapeUnit;
+            height = (tjs_real)frame->zy * shapeUnit;
+            originX = width / 2;
+            originY = height / 2;
         }
         else
         {
@@ -740,6 +747,13 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
         //    renderMethod.push_back(emt);
         //}
 
+        // shape节点: 将currZx/currZy重置为1，避免与width/height双重缩放(px = zx * shapeUnit * 1)
+        if (!isIcon && frame != nullptr && frame->src.rfind("shape/", 0) == 0)
+        {
+            currZx = 1.0f;
+            currZy = 1.0f;
+        }
+
         // 构建变换矩阵 平移 currCoordx/currCoordy → 缩放 zx/zy → 剪切 sx/sy → 旋转 angle
         glm::mat4 model = glm::mat4(1.0f); // 注:复合顺序是反过来的
         model = glm::translate(model, glm::vec3(currCoordx, currCoordy, 0));
@@ -933,9 +947,58 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
         emoterect tmprect;
         tmprect.left = pt1.x;
         tmprect.top = pt1.y;
-        tmprect.right = pt2.x;
-        tmprect.bottom = pt2.y;
+        tmprect.width = pt2.x - pt1.x;
+        tmprect.height = pt2.y - pt1.y;
         shapeList.push_back(tmprect);
+    }
+
+    // 对于shape节点保存面积信息(用于contains检测和getLayerGetter的shape返回)
+    // 注: shape节点可能没有hasContent，用src判断即可
+    if (!isIcon && frame != nullptr && refMtn != nullptr)
+    {
+        std::string src(frame->src);
+        if (src.rfind("shape/", 0) == 0 && renderMethod.size() > 0)
+        {
+            // 两个端点就够了
+            glm::vec2 pt1(0, 0), pt2(1, 1);
+            // 将所有矩阵变形进行作用
+            glm::vec4 tmpVec1(0, 0, 0, 0), tmpVec2(1, 1, 0, 0);
+            for (int32_t i = renderMethod.size() - 1; i >= 0; i--)
+            {
+                // 不想改了，这里自适应一下吧
+                // [0,1]-matTrans->[-1,1]-compute->[0,1]
+                if (i != renderMethod.size() - 1)
+                {
+                    tmpVec1 = glm::vec4(tmpVec1.x / 2 + 0.5, 1 - (tmpVec1.y / 2 + 0.5), 0, 0);
+                    tmpVec2 = glm::vec4(tmpVec2.x / 2 + 0.5, 1 - (tmpVec2.y / 2 + 0.5), 0, 0);
+                }
+                tmpVec1 = renderMethod.at(i).matTrans * glm::vec4(tmpVec1.x, tmpVec1.y, 0.0f, 1.0f);
+                tmpVec2 = renderMethod.at(i).matTrans * glm::vec4(tmpVec2.x, tmpVec2.y, 0.0f, 1.0f);
+            }
+            // 边界缩放
+            pt1.x = (tmpVec1.x / 2.0 + 0.5) * currentNode->_filePtr->_screenSize.width;
+            pt1.y = (1 - (tmpVec1.y / 2.0 + 0.5)) * currentNode->_filePtr->_screenSize.height;
+            pt2.x = (tmpVec2.x / 2.0 + 0.5) * currentNode->_filePtr->_screenSize.width;
+            pt2.y = (1 - (tmpVec2.y / 2.0 + 0.5)) * currentNode->_filePtr->_screenSize.height;
+            // 保存区域(使用独立的shapeList，避免状态重复)
+            emoterect tmprect;
+            tmprect.label = currentNode->label;
+            tmprect.left = pt1.x;
+            tmprect.top = pt1.y;
+            tmprect.width = pt2.x - pt1.x;
+            tmprect.height = pt2.y - pt1.y;
+            // 根据src后缀确定shape子类型: rect/circle/point/quad
+            std::string srcType = src.substr(6); // 去掉"shape/"
+            if (srcType == "circle")
+                tmprect.shapeType = 1;
+            else if (srcType == "point")
+                tmprect.shapeType = 0;
+            else if (srcType == "quad")
+                tmprect.shapeType = 3;
+            else
+                tmprect.shapeType = 2; // rect默认
+            refMtn->shapeNodeAreas.push_back(tmprect);
+        }
     }
 
     // 传递给子类: 通过_parentMotion查找对应ref，避免创建重复状态
@@ -1146,6 +1209,7 @@ void emotemotionref::progress(float tick, std::vector<emoteRender>& renderList, 
 {
     // 起始
     shapeList.clear();
+    shapeNodeAreas.clear();
     renderMethod.clear();
     renderMethod = renderList;
 
@@ -1242,9 +1306,10 @@ void emotemotionref::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint
 }
 bool emotemotionref::contains(tjs_real x, tjs_real y)
 {
+    // 检查icon节点的shapeList
     for (auto mtnRec : shapeList)
     {
-        if (x >= mtnRec.left && x < mtnRec.right && y >= mtnRec.top && y < mtnRec.bottom)
+        if (x >= mtnRec.left && x < mtnRec.left + mtnRec.width && y >= mtnRec.top && y < mtnRec.top + mtnRec.height)
         {
             return true;
         }
@@ -1589,10 +1654,10 @@ void emoteengine::setVariable(const std::string& name, tjs_real value)
     allFiles.push_back(_mainfile);
     for (auto tmpFile : allFiles)
     {
-        // 设置
+        // 设置(metadata _varList / _selectorControl)
         tmpFile->setVariable(name, value);
 
-        // motion_inter
+        // motion_inter (name = "motionName/varName")
         size_t pos = name.find('/');
         if (pos != std::string::npos)
         {
@@ -1622,7 +1687,68 @@ void emoteengine::setVariable(const std::string& name, tjs_real value)
                 }
             }
         }
+        else
+        {
+            // 简单名(如"helptext"): 遍历所有motion的parameter, 匹配id后写入parameterCache
+            if (tmpFile != nullptr)
+            {
+                for (auto& objPair : tmpFile->_objects)
+                {
+                    for (auto& mtnPair : objPair.second->motion)
+                    {
+                        for (auto varItm : mtnPair.second->parameter)
+                        {
+                            if (varItm->id == name)
+                            {
+                                mtnPair.second->parameterCache[varItm->id] = value;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
+}
+tjs_real emoteengine::getVariable(const std::string& name)
+{
+    size_t pos = name.find('/');
+    if (pos != std::string::npos) // motion类
+    {
+        std::string motionName = name.substr(0, name.find('/'));
+        emoteobject* obj = nullptr;
+        for (auto objItm : _mainfile->_objects)
+        {
+            if (objItm.first == motionName)
+            {
+                obj = objItm.second;
+                break;
+            }
+        }
+        if (obj)
+        {
+            std::string varName = name.substr(name.find('/') + 1);
+            for (auto mtnItm : obj->motion)
+            {
+                for (auto varItm : mtnItm.second->parameter)
+                {
+                    if (varItm->id == varName)
+                    {
+                        return mtnItm.second->parameterCache[varItm->id];
+                    }
+                }
+            }
+        }
+    }
+    else // emote类
+    {
+        auto varPos = _mainfile->_metadata->_varList.find(name);
+        if (varPos != _mainfile->_metadata->_varList.end())
+        {
+            return varPos->second;
+        }
+    }
+    return 0.0;
 }
 void emoteengine::updatePhysics(float tick)
 {

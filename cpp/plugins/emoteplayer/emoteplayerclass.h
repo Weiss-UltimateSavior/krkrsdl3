@@ -114,7 +114,7 @@ public:
     ~EmotePlayer();
 
     property_marco(playing, bool, _playing);
-    property_marco(allplaying, bool, _playing);
+    property_marco(allplaying, bool, _allplaying);
     property_marco(animating, bool, _playing);
     property_marco(useD3D, bool, _useD3D);
     int32_t get_loopTime();
@@ -232,7 +232,9 @@ private:
     MaskMode _maskMode = MaskModeNone;
     bool _isStop = false;
     bool _playing = false;
+    bool _allplaying = false;
     bool _useD3D = false;
+    int _pipoVal = 0;
     tTJSVariant _tags;
 };
 

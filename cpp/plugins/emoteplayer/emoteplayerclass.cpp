@@ -19,6 +19,61 @@ extern void glBaseSetWithoutClear();
 iTJSDispatch2* ResourceManager::_kagWindow = nullptr;
 static SeparateLayerAdaptor* _motionWorkLayer = nullptr;
 
+// 递归查找 shapeNodeAreas 中指定名称的区域
+// 也作为后备: 直接检查节点的frame中的shape信息
+static bool findShapeAreaRecursive(emotemotionref* mtnRef, const char* name, emoterect& outArea)
+{
+    if (mtnRef == nullptr) return false;
+
+    // 查找当前motion的预计算shapeNodeAreas
+    for (auto& area : mtnRef->shapeNodeAreas)
+    {
+        if (std::strcmp(area.label.c_str(), name) == 0)
+        {
+            outArea = area;
+            return true;
+        }
+    }
+
+    // 递归查找子motion的shapeNodeAreas
+    for (auto& n : mtnRef->_nodeCache)
+    {
+        if (n.currentMtn && n.currentMtnRef)
+        {
+            if (findShapeAreaRecursive(n.currentMtnRef, name, outArea))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+// 递归查找子motion ref
+static emotemotionref* findMotionRefRecursive(emotemotionref* mtnRef, const char* name)
+{
+    if (mtnRef == nullptr) return nullptr;
+
+    for (auto& node : mtnRef->_nodeCache)
+    {
+        if (node.currentMtn && std::strcmp(node.currentNode->label.c_str(), name) == 0)
+        {
+            return node.currentMtnRef;
+        }
+    }
+
+    // 递归查找子motion
+    for (auto& node : mtnRef->_nodeCache)
+    {
+        if (node.currentMtn && node.currentMtnRef)
+        {
+            emotemotionref* found = findMotionRefRecursive(node.currentMtnRef, name);
+            if (found) return found;
+        }
+    }
+
+    return nullptr;
+}
+
 ResourceManager::ResourceManager(iTJSDispatch2* kagWindow, tjs_int cacheSize)
 {
     // window info
@@ -280,7 +335,7 @@ void SeparateLayerAdaptor::checkDrawArea(tjs_int width, tjs_int height)
     }
 }
 
-// 专门用来保存contain信息
+// 专门用来保存contain信息 两类节点mtn和shape
 tTJSNativeClass* TVPCreateNativeClass_TmpMotionObj(EmotePlayer* ptr, emotemotionref* obj);
 class TmpMotionObj : public tTJSNativeClass
 {
@@ -316,22 +371,51 @@ public:
                 }
                 else
                 {
-                    // 没有_obj: 这是shape节点，检查存储的l/t/w/h属性进行碰撞检测
-                    tTJSVariant vl, vt, vw, vh;
+                    // 没有_obj: 这是shape节点，检查存储的l/t/w/h和shapeType进行碰撞检测
+                    tTJSVariant vl, vt, vw, vh, vst;
                     bool hasL = TJS_SUCCEEDED(PropGet(0, TJS_N("l"), nullptr, &vl, this));
                     bool hasT = TJS_SUCCEEDED(PropGet(0, TJS_N("t"), nullptr, &vt, this));
                     bool hasW = TJS_SUCCEEDED(PropGet(0, TJS_N("w"), nullptr, &vw, this));
                     bool hasH = TJS_SUCCEEDED(PropGet(0, TJS_N("h"), nullptr, &vh, this));
+                    bool hasST = TJS_SUCCEEDED(PropGet(0, TJS_N("shapeType"), nullptr, &vst, this));
+                    bool res = false;
                     if (hasL && hasT && hasW && hasH)
                     {
                         double l = (double)vl, t = (double)vt;
                         double w = (double)vw, h = (double)vh;
-                        *result = (x >= l && x <= l + w && y >= t && y <= t + h);
+                        int st = hasST ? (int)vst : 2; // 默认rect
+                        switch (st)
+                        {
+                        case 1: // circle: 检查点到圆心距离是否 <= 半径
+                        {
+                            double cx = l + w / 2.0, cy = t + h / 2.0;
+                            double r = w / 2.0; // 取宽的一半为半径
+                            double dx = x - cx, dy = y - cy;
+                            res = (dx * dx + dy * dy <= r * r);
+                            break;
+                        }
+                        case 0: // point: 检测一个很小的范围(即点到圆心距离<1)
+                        {
+                            double cx = l, cy = t;
+                            double dx = x - cx, dy = y - cy;
+                            res = (dx * dx + dy * dy <= 1.0);
+                            break;
+                        }
+                        case 3: // quad: 简化为矩形检测(精确quad需要存储4个顶点坐标)
+                        default: // rect
+                            res = (x >= l && x <= l + w && y >= t && y <= t + h);
+                            break;
+                        }
+                        *result = res;
                     }
                     else
                     {
                         *result = false;
                     }
+                    SDL_Log("px:%f py:%f shapeType:%d --> l:%f t:%f w:%f h:%f --> res:%s", x, y,
+                            hasST ? (int)vst : 2, (double)vl,
+                            (double)vt, (double)vw, (double)vh,
+                            res ? "true" : "false");
                 }
             }
             return TJS_S_OK;
@@ -344,20 +428,8 @@ public:
             ttstr name = *param[0];
             iTJSDispatch2* dsp = TJSCreateDictionaryObject();
 
-            // 寻找mtn (子motion引用)
-            emotemotionref* emtObj = nullptr;
-            emotenode* shapeNode = nullptr;
-            if (_obj != nullptr)
-            {
-                for (auto objItm : _obj->_nodeCache)
-                {
-                    if (objItm.currentMtn && std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0)
-                    {
-                        emtObj = objItm.currentMtnRef;
-                        break;
-                    }
-                }
-            }
+            // 递归寻找子motion ref
+            emotemotionref* emtObj = findMotionRefRecursive(_obj, name.c_str());
 
             if (emtObj)
             {
@@ -372,77 +444,24 @@ public:
             }
             else
             {
-                // 没找到子motion，查找shape节点(仅匹配src以"shape/"开头的节点)
-                if (_obj != nullptr)
+                // 没找到子motion，在预计算的shapeNodeAreas中递归查找(后备则直接从frame提取)
+                emoterect foundArea = {};
+                if (_obj != nullptr && findShapeAreaRecursive(_obj, name.c_str(), foundArea))
                 {
-                    for (auto& objItm : _obj->_nodeCache)
+                    iTJSDispatch2* shapeObj = TVPCreateNativeClass_TmpMotionObj(nullptr, nullptr);
+                    if (shapeObj)
                     {
-                        if (std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0 &&
-                            !objItm.currentNode->frameList.empty())
-                        {
-                            emoteframe* f = objItm.currentNode->frameList[0];
-                            if (f->hasContent && f->src.rfind("shape/", 0) == 0)
-                            {
-                                shapeNode = objItm.currentNode;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (shapeNode == nullptr && _obj != nullptr)
-                {
-                    // 递归查找子motion中的shape节点
-                    for (auto& objItm : _obj->_nodeCache)
-                    {
-                        if (objItm.currentMtn && objItm.currentMtnRef)
-                        {
-                            auto& subCache = objItm.currentMtnRef->_nodeCache;
-                            for (auto& subItm : subCache)
-                            {
-                                if (std::strcmp(subItm.currentNode->label.c_str(), name.c_str()) == 0 &&
-                                    !subItm.currentNode->frameList.empty())
-                                {
-                                    emoteframe* f = subItm.currentNode->frameList[0];
-                                    if (f->hasContent && f->src.rfind("shape/", 0) == 0)
-                                    {
-                                        shapeNode = subItm.currentNode;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (shapeNode) break;
-                        }
-                    }
-                }
-
-                if (shapeNode && !shapeNode->frameList.empty())
-                {
-                    emoteframe* f = shapeNode->frameList[0];
-                    if (f->hasContent)
-                    {
-                        // 从帧数据中提取位置和大小
-                        double cx = f->coordX;
-                        double cy = f->coordY;
-                        double w = f->zx;
-                        double h = f->zy;
-                        double l = cx - w / 2.0;
-                        double t = cy - h / 2.0;
-
-                        // 创建TmpMotionObj（即使_obj为空，contains函数也能返回false）
-                        // 并在其上设置l/t/w/h属性，以满足TJS侧 area.l / area.contains() 两种用法
-                        iTJSDispatch2* shapeObj = TVPCreateNativeClass_TmpMotionObj(nullptr, nullptr);
-                        if (shapeObj)
-                        {
-                            tTJSVariant vL(l), vT(t), vW(w), vH(h);
-                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("l"), nullptr, &vL, shapeObj);
-                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("t"), nullptr, &vT, shapeObj);
-                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("w"), nullptr, &vW, shapeObj);
-                            shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("h"), nullptr, &vH, shapeObj);
-                            tTJSVariant shapeVar(shapeObj);
-                            dsp->PropSet(TJS_MEMBERENSURE, TJS_N("shape"), nullptr, &shapeVar, dsp);
-                            shapeObj->Release();
-                        }
+                        tTJSVariant vL(foundArea.left), vT(foundArea.top);
+                        tTJSVariant vW(foundArea.width), vH(foundArea.height);
+                        tTJSVariant vST(foundArea.shapeType);
+                        shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("l"), nullptr, &vL, shapeObj);
+                        shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("t"), nullptr, &vT, shapeObj);
+                        shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("w"), nullptr, &vW, shapeObj);
+                        shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("h"), nullptr, &vH, shapeObj);
+                        shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("shapeType"), nullptr, &vST, shapeObj);
+                        tTJSVariant shapeVar(shapeObj);
+                        dsp->PropSet(TJS_MEMBERENSURE, TJS_N("shape"), nullptr, &shapeVar, dsp);
+                        shapeObj->Release();
                     }
                 }
             }
@@ -459,19 +478,8 @@ public:
                 return TJS_E_BADPARAMCOUNT;
             ttstr name = *param[0];
 
-            // 查找指定名称的子motion
-            emotemotionref* emtObj = nullptr;
-            if (_obj != nullptr)
-            {
-                for (auto objItm : _obj->_nodeCache)
-                {
-                    if (objItm.currentMtn && std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0)
-                    {
-                        emtObj = objItm.currentMtnRef;
-                        break;
-                    }
-                }
-            }
+            // 递归查找指定名称的子motion
+            emotemotionref* emtObj = findMotionRefRecursive(_obj, name.c_str());
 
             if (emtObj && result)
             {
@@ -498,7 +506,7 @@ public:
             return TJS_S_OK;
         }
         else
-            return TJS_E_INVALIDPARAM;
+            return TJS_E_MEMBERNOTFOUND;
     }
 
     ~TmpMotionObj()
@@ -633,6 +641,7 @@ void EmotePlayer::play(tTJSString name, int flag)
         clockPassed = 0.0;
         _motion = name;
         _playing = true;
+        _allplaying = true;
         isSelfClear = true;
     }
     else if (_resourceManager->cacheData.size() > 0 && isMotion) // chara+motion启动方案
@@ -661,6 +670,7 @@ void EmotePlayer::play(tTJSString name, int flag)
         // start
         clockPassed = 0.0;
         _playing = true;
+        _allplaying = true;
         isSelfClear = true;
     }
     else // 群体启动模式，即对manager的所有file进行拼好件(其会存在互相索引的情况，结构可能得改改了)
@@ -692,6 +702,7 @@ void EmotePlayer::play(tTJSString name, int flag)
         clockPassed = 0.0;
         _motion = name;
         _playing = true;
+        _allplaying = true;
         isSelfClear = false;
     }
 }
@@ -725,7 +736,6 @@ void EmotePlayer::clear(iTJSDispatch2* layer, tjs_uint32 neutralColor)
 }
 void EmotePlayer::progress(tjs_real mstime)
 {
-    // SDL_Log("progress-->%f %f", mstime, clockPassed);
     if (_isStop)
         return;
     if (emtEngine._mainfile != nullptr && emtEngine._mainmotion != nullptr && clockPassed > -1.0 &&
@@ -772,6 +782,11 @@ void EmotePlayer::progress(tjs_real mstime)
             // 使用emoteengine::progress构建独立ref树
             emtEngine.progress(clockPassed, empty, _limitArea);
         }
+        // ping-pong触发更新draw，位置暂时选这里，让它频繁点
+        if (_pipoVal == 0)
+            _pipoVal = 1;
+        else
+            _pipoVal = 0;
     }
 }
 void EmotePlayer::draw(iTJSDispatch2* objthis)
@@ -880,11 +895,7 @@ tjs_real EmotePlayer::getVariable(tTJSString name)
     {
         std::string tmpName = name.AsStdString();
         tmpName.append(1, '\0'); // 终有一天，我会把这sb字符串给优化掉
-        auto varPos = emtEngine._mainfile->_metadata->_varList.find(tmpName);
-        if (varPos != emtEngine._mainfile->_metadata->_varList.end())
-        {
-            return varPos->second;
-        }
+        return emtEngine.getVariable(tmpName);
     }
     return 0.0;
 }
@@ -918,9 +929,11 @@ void EmotePlayer::stopWind()
 }
 bool EmotePlayer::contains(tjs_real x, tjs_real y)
 {
-    //SDL_Log("EmotePlayer::contains TODO");
-    //恒定包含，通过getLayerGetter得到局域contains
-    return true;
+    if (emtEngine._mainMotionRef != nullptr)
+    {
+        return emtEngine._mainMotionRef->contains(x, y);
+    }
+    return false;
 }
 void EmotePlayer::skip()
 {
@@ -942,6 +955,7 @@ void EmotePlayer::stop()
 {
     _isStop = true;
     _playing = false;
+    _allplaying = false;
     SDL_Log("EmotePlayer::stop TODO");
 }
 void EmotePlayer::playTimeline(tTJSString name, tjs_int flags)
@@ -1129,7 +1143,7 @@ tTJSVariant EmotePlayer::getCommandList()
     iTJSDispatch2* dsp = TJSCreateArrayObject();
 
     // 让它能触发更新就行了
-    tTJSVariant tmp(clockPassed);
+    tTJSVariant tmp(_pipoVal);
     tTJSVariant* args[] = {&tmp};
     static tjs_uint addHint = 0;
     dsp->FuncCall(0, TJS_N("add"), &addHint, nullptr, 1, args, dsp);
@@ -1142,19 +1156,8 @@ tTJSVariant EmotePlayer::getLayerGetter(tTJSString name)
 {
     iTJSDispatch2* dsp = TJSCreateDictionaryObject();
 
-    // 寻找mtn
-    emotemotionref* emtObj = nullptr;
-    if (emtEngine._mainMotionRef != nullptr)
-    {
-        for (auto objItm : emtEngine._mainMotionRef->_nodeCache)
-        {
-            if (objItm.currentMtn && std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0)
-            {
-                emtObj = objItm.currentMtnRef;
-                break;
-            }
-        }
-    }
+    // 递归寻找子motion ref
+    emotemotionref* emtObj = findMotionRefRecursive(emtEngine._mainMotionRef, name.c_str());
 
     if (emtObj)
     {
@@ -1169,94 +1172,23 @@ tTJSVariant EmotePlayer::getLayerGetter(tTJSString name)
     }
     else if (emtEngine._mainMotionRef != nullptr)
     {
-        // 没找到子motion，先查找shape节点(如 shape/rect)
-        emotenode* shapeNode = nullptr;
-        for (auto& objItm : emtEngine._mainMotionRef->_nodeCache)
+        // 在预计算的shapeNodeAreas中递归查找(后备则直接从frame提取)
+        emoterect foundArea = {};
+        if (findShapeAreaRecursive(emtEngine._mainMotionRef, name.c_str(), foundArea))
         {
-            if (std::strcmp(objItm.currentNode->label.c_str(), name.c_str()) == 0 &&
-                !objItm.currentNode->frameList.empty())
+            iTJSDispatch2* shapeObj = TVPCreateNativeClass_TmpMotionObj(nullptr, nullptr);
+            if (shapeObj)
             {
-                emoteframe* f = objItm.currentNode->frameList[0];
-                if (f->hasContent && f->src.rfind("shape/", 0) == 0)
-                {
-                    shapeNode = objItm.currentNode;
-                    break;
-                }
-            }
-        }
-
-        if (shapeNode == nullptr)
-        {
-            // 递归查找子motion中的node
-            for (auto& objItm : emtEngine._mainMotionRef->_nodeCache)
-            {
-                if (objItm.currentMtn && objItm.currentMtnRef)
-                {
-                    auto& subCache = objItm.currentMtnRef->_nodeCache;
-                    // 先查找子motion中的子motion ref
-                    for (auto& subItm : subCache)
-                    {
-                        if (std::strcmp(subItm.currentNode->label.c_str(), name.c_str()) == 0)
-                        {
-                            emtObj = subItm.currentMtnRef;
-                            break;
-                        }
-                    }
-                    if (emtObj) break;
-
-                    // 再查找子motion中的shape节点
-                    for (auto& subItm : subCache)
-                    {
-                        if (std::strcmp(subItm.currentNode->label.c_str(), name.c_str()) == 0 &&
-                            !subItm.currentNode->frameList.empty())
-                        {
-                            emoteframe* f = subItm.currentNode->frameList[0];
-                            if (f->hasContent && f->src.rfind("shape/", 0) == 0)
-                            {
-                                shapeNode = subItm.currentNode;
-                                break;
-                            }
-                        }
-                    }
-                    if (shapeNode) break;
-                }
-            }
-        }
-
-        if (emtObj)
-        {
-            iTJSDispatch2* mtn = TVPCreateNativeClass_TmpMotionObj(this, emtObj);
-            if (mtn)
-            {
-                tTJSVariant mtnVar(mtn);
-                dsp->PropSet(TJS_MEMBERENSURE, "motion", nullptr, &mtnVar, dsp);
-                mtn->Release();
-            }
-        }
-        else if (shapeNode && !shapeNode->frameList.empty())
-        {
-            emoteframe* f = shapeNode->frameList[0];
-            if (f->hasContent)
-            {
-                double cx = f->coordX;
-                double cy = f->coordY;
-                double w = f->zx;
-                double h = f->zy;
-                double l = cx - w / 2.0;
-                double t = cy - h / 2.0;
-
-                iTJSDispatch2* shapeObj = TVPCreateNativeClass_TmpMotionObj(nullptr, nullptr);
-                if (shapeObj)
-                {
-                    tTJSVariant vL(l), vT(t), vW(w), vH(h);
-                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("l"), nullptr, &vL, shapeObj);
-                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("t"), nullptr, &vT, shapeObj);
-                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("w"), nullptr, &vW, shapeObj);
-                    shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("h"), nullptr, &vH, shapeObj);
-                    tTJSVariant shapeVar(shapeObj);
-                    dsp->PropSet(TJS_MEMBERENSURE, TJS_N("shape"), nullptr, &shapeVar, dsp);
-                    shapeObj->Release();
-                }
+                tTJSVariant vL(foundArea.left), vT(foundArea.top), vW(foundArea.width), vH(foundArea.height);
+                tTJSVariant vST(foundArea.shapeType);
+                shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("l"), nullptr, &vL, shapeObj);
+                shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("t"), nullptr, &vT, shapeObj);
+                shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("w"), nullptr, &vW, shapeObj);
+                shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("h"), nullptr, &vH, shapeObj);
+                shapeObj->PropSet(TJS_MEMBERENSURE, TJS_N("shapeType"), nullptr, &vST, shapeObj);
+                tTJSVariant shapeVar(shapeObj);
+                dsp->PropSet(TJS_MEMBERENSURE, TJS_N("shape"), nullptr, &shapeVar, dsp);
+                shapeObj->Release();
             }
         }
     }

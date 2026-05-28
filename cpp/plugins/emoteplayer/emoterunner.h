@@ -20,12 +20,16 @@ namespace emoteplayer
         float height = 0.0f;
         float zMax = 0.0f;
     };
+    // shape类型(pointed从PSB node的"shape"字段, 或从frame->src推断)
+    // 0=point 1=circle 2=rect(默认) 3=quad
     struct emoterect
     {
+        std::string label = "";
         float left = 0;
         float top = 0;
-        float right = 0;
-        float bottom = 0;
+        float width = 0;
+        float height = 0;
+        int shapeType = 2; // 默认rect
     };
     struct emoteRender // 渲染方式
     {
@@ -124,6 +128,9 @@ namespace emoteplayer
         std::vector<emotenoderef> _nodeCache;
         // 子motion引用缓存(progress阶段创建，draw阶段使用)
         std::vector<emotemotionref*> _subMotionRefs;
+
+        // shape节点区域(用于 getLayerGetter/getLayerMotion 的shape返回和contains检测)
+        std::vector<emoterect> shapeNodeAreas;
     };
     // 核心模拟引擎
     class emoteengine
@@ -156,6 +163,7 @@ namespace emoteplayer
         void updateTimelineControl(float tick, bool isMain = false);
         emoteVar* findVarByName(const std::string& name);
         void setVariable(const std::string& name, tjs_real value);
+        tjs_real getVariable(const std::string& name);
         void updatePhysics(float tick);
 
         // progress阶段创建的主motion ref(生命周期跨progress/draw)
