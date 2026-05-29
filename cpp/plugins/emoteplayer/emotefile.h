@@ -109,6 +109,7 @@ public:
     emotefile* _filePtr = nullptr;
 };
 
+class emoteobject;
 class emotemotion
 {
 public:
@@ -116,6 +117,9 @@ public:
     ~emotemotion();
 
     emotenode* getNodeByName(const std::string& name);
+
+    emoteobject* parent;
+    std::string name;
 
     double lastTime;
     std::vector<emotenode*> layer;
@@ -141,6 +145,7 @@ public:
     emoteVar* findVarByName(const std::string& name);
 
     uint8_t type;
+    std::string name;
     std::map<std::string, emotemotion*> motion;
 
 private:

@@ -844,6 +844,8 @@ emoteobject::emoteobject(emotefile* filePtr, uint32_t startOffset) : _filePtr(fi
     for (auto _obj : _motion)
     {
         emotemotion* tmp = new emotemotion(filePtr, _obj.second);
+        tmp->parent = this;
+        tmp->name = _obj.first;
         motion.insert(std::pair<std::string, emotemotion*>(_obj.first, tmp));
     }
 }
@@ -2418,6 +2420,7 @@ bool emotefile::GenerateAniTree()
     for (auto _obj : _tmpMap)
     {
         emoteobject* tmp = new emoteobject(this, _obj.second);
+        tmp->name = _obj.first;
         _objects.insert(std::pair<std::string, emoteobject*>(_obj.first, tmp));
     }
     // screen

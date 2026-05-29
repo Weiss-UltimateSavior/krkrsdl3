@@ -108,7 +108,10 @@ namespace emoteplayer
     class emotemotionref
     {
     public:
-        emotemotionref(emotemotion* mt, emoteengine* ee) : currentMotion(mt), refTop(ee) {};
+        emotemotionref(emotemotion* mt, emoteengine* ee, emotenoderef* en = nullptr)
+          : currentMotion(mt),
+            refTop(ee),
+            parent(en) {};
         ~emotemotionref();
 
         float getTickByIdx(int32_t parameterIdx);
@@ -123,6 +126,7 @@ namespace emoteplayer
         emoteengine* refTop = nullptr;
         std::vector<emoterect> shapeList;
         std::vector<emoteRender> renderMethod;
+        emotenoderef* parent = nullptr;
 
         // 核心: 按priority排序的ref列表，平行于currentMotion->nodeList
         std::vector<emotenoderef> _nodeCache;
@@ -148,6 +152,8 @@ namespace emoteplayer
         // progress/draw接口(替代_mainMotionRef)
         void progress(float tick, std::vector<emoteRender>& renderList, emotelimit lim);
         void draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint exTex);
+        // 查找数值
+        bool getTickByName(const std::string& name, tjs_real& retVal);
 
         void addEmoteFile(emotefile* itm);
         float getZMax();
@@ -168,6 +174,8 @@ namespace emoteplayer
 
         // progress阶段创建的主motion ref(生命周期跨progress/draw)
         emotemotionref* _mainMotionRef = nullptr;
+        // 三重签名缓存变量数据
+        std::map<std::string, tjs_real> _varCache;
 
         // shapeList(供emotemotionref::contains查询碰撞)
         std::vector<emoterect> shapeList;

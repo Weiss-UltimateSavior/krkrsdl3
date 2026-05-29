@@ -1018,7 +1018,7 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
         if (currentMtn != nullptr)
         {
             // 在引擎中创建持久化的子motion ref
-            currentMtnRef = new emotemotionref(currentMtn, refTop);
+            currentMtnRef = new emotemotionref(currentMtn, refTop, this);
             refMtn->_subMotionRefs.push_back(currentMtnRef);
             currentMtnRef->progress(tick + currTimeOffset, renderMethod,
                             {originX, originY, width, height, lim.zMax});
@@ -1186,11 +1186,45 @@ float emotemotionref::getTickByIdx(int32_t idx)
     // file系控制
     if (!currentMotion->_filePtr->getTickByName(currentMotion->parameter.at(idx)->id, currVal))
     {
-        // mtn系控制
-        auto itmMap = currentMotion->parameterCache.find(currentMotion->parameter.at(idx)->id);
-        if (itmMap != currentMotion->parameterCache.end())
+        if (currentMotion->_filePtr->isMotion)
         {
-            return itmMap->second;
+            // mtn系控制
+            auto itmMap = currentMotion->parameterCache.find(currentMotion->parameter.at(idx)->id);
+            if (itmMap != currentMotion->parameterCache.end())
+            {
+                if (currentMotion->lastTime < 0)
+                    return itmMap->second;
+                else
+                {
+                    emoteVar* tmpV = currentMotion->parameter.at(idx);
+                    return itmMap->second * currentMotion->lastTime / (tmpV->rangeEnd + 1 - tmpV->rangeBegin); 
+                }
+            }
+            if (parent && parent->refMtn->parent)
+            {
+                // label逆查找的构造系列(两层)
+                std::string fullvals = parent->refMtn->parent->currentNode->label + "/" +
+                                       parent->currentNode->label + "/" +
+                                       currentMotion->parameter.at(idx)->id;
+                fullvals.erase(std::remove(fullvals.begin(), fullvals.end(), '\0'), fullvals.end());
+                fullvals.append(1, '\0');
+                tjs_real retV = 0.0;
+                if (refTop->getTickByName(fullvals, retV))
+                {
+                    return retV;
+                }
+
+                // label逆查找的构造系列(一层)
+                fullvals = parent->refMtn->parent->currentNode->label + "/" +
+                                       currentMotion->parameter.at(idx)->id;
+                fullvals.erase(std::remove(fullvals.begin(), fullvals.end(), '\0'), fullvals.end());
+                fullvals.append(1, '\0');
+                retV = 0.0;
+                if (refTop->getTickByName(fullvals, retV))
+                {
+                    return retV;
+                }
+            }
         }
     }
     return currentMotion->parameter.at(idx)->transToTick(currVal);
@@ -1347,6 +1381,16 @@ void emoteengine::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint ex
     {
         _mainMotionRef->draw(targetFbo, lim, exFbo, exTex);
     }
+}
+bool emoteengine::getTickByName(const std::string& name, tjs_real& retVal)
+{
+    auto it = _varCache.find(name);
+    if (it != _varCache.end())
+    {
+        retVal = it->second;
+        return true;
+    }
+    return false;
 }
 void emoteengine::addEmoteFile(emotefile* itm)
 {
@@ -1685,7 +1729,7 @@ void emoteengine::setVariable(const std::string& name, tjs_real value)
                         }
                     }
                 }
-            }
+}
         }
         else
         {
@@ -1709,32 +1753,55 @@ void emoteengine::setVariable(const std::string& name, tjs_real value)
             }
         }
     }
+    // 变量历史缓存
+    _varCache[name] = value;
 }
 tjs_real emoteengine::getVariable(const std::string& name)
 {
     size_t pos = name.find('/');
-    if (pos != std::string::npos) // motion类
+    if (_mainfile->isMotion) // motion类
     {
-        std::string motionName = name.substr(0, name.find('/'));
-        emoteobject* obj = nullptr;
-        for (auto objItm : _mainfile->_objects)
+        size_t pos = name.find('/');
+        if (pos != std::string::npos)
         {
-            if (objItm.first == motionName)
+            std::string motionName = name.substr(0, name.find('/'));
+            emoteobject* obj = nullptr;
+            for (auto objItm : _mainfile->_objects)
             {
-                obj = objItm.second;
-                break;
+                if (objItm.first == motionName)
+                {
+                    obj = objItm.second;
+                    break;
+                }
+            }
+            if (obj)
+            {
+                std::string varName = name.substr(name.find('/') + 1);
+                for (auto mtnItm : obj->motion)
+                {
+                    for (auto varItm : mtnItm.second->parameter)
+                    {
+                        if (varItm->id == varName)
+                        {
+                            return mtnItm.second->parameterCache[varItm->id];
+                        }
+                    }
+                }
             }
         }
-        if (obj)
+        else
         {
-            std::string varName = name.substr(name.find('/') + 1);
-            for (auto mtnItm : obj->motion)
+            // 简单名(如"helptext"): 遍历所有motion的parameter, 匹配id后写入parameterCache
+            for (auto& objPair : _mainfile->_objects)
             {
-                for (auto varItm : mtnItm.second->parameter)
+                for (auto& mtnPair : objPair.second->motion)
                 {
-                    if (varItm->id == varName)
+                    for (auto varItm : mtnPair.second->parameter)
                     {
-                        return mtnItm.second->parameterCache[varItm->id];
+                        if (varItm->id == name)
+                        {
+                            return mtnPair.second->parameterCache[varItm->id];
+                        }
                     }
                 }
             }
@@ -1747,6 +1814,12 @@ tjs_real emoteengine::getVariable(const std::string& name)
         {
             return varPos->second;
         }
+    }
+    // 看看缓存
+    tjs_real ret = 0.0;
+    if (getTickByName(name, ret))
+    {
+        return ret;
     }
     return 0.0;
 }

@@ -412,10 +412,6 @@ public:
                     {
                         *result = false;
                     }
-                    SDL_Log("px:%f py:%f shapeType:%d --> l:%f t:%f w:%f h:%f --> res:%s", x, y,
-                            hasST ? (int)vst : 2, (double)vl,
-                            (double)vt, (double)vw, (double)vh,
-                            res ? "true" : "false");
                 }
             }
             return TJS_S_OK;
@@ -433,11 +429,12 @@ public:
 
             if (emtObj)
             {
-                // 子motion: 返回TmpMotionObj作为shape
+                // 子motion: 同时设置motion和shape，使路径解析(getLayerMotion/getLayerShape)都能正常工作
                 iTJSDispatch2* mtn = TVPCreateNativeClass_TmpMotionObj(_ptr, emtObj);
                 if (mtn)
                 {
                     tTJSVariant mtnVar(mtn);
+                    dsp->PropSet(TJS_MEMBERENSURE, "motion", nullptr, &mtnVar, dsp);
                     dsp->PropSet(TJS_MEMBERENSURE, "shape", nullptr, &mtnVar, dsp);
                     mtn->Release();
                 }
@@ -1203,7 +1200,7 @@ tTJSVariant EmotePlayer::getLayerMotion(tTJSString name)
     tTJSVariant getter = getLayerGetter(name);
     if (getter.Type() == tvtObject)
     {
-        iTJSDispatch2* dsp = getter.AsObjectThisNoAddRef();
+        iTJSDispatch2* dsp = getter.AsObjectNoAddRef();
         if (dsp)
         {
             tTJSVariant motion;
