@@ -21,6 +21,7 @@ elseif(LINUX)
     set(VCPKG_TARGET_TRIPLET "x64-linux-release")
 elseif(WINDOWS)
     if(MSVC)
+        add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
         set(VCPKG_TARGET_TRIPLET "x64-windows")
     else()
         set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic")
@@ -169,8 +170,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
 find_package(SDL3_ttf CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf::SDL3_ttf)
 
-find_package(blend2d CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE blend2d::blend2d)
+find_package(plutovg CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE plutovg::plutovg)
 
 if(ANDROID)
     # egl

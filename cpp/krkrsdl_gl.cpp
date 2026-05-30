@@ -3,7 +3,7 @@
 #if _KRKRSDL3_GL
 #include <glad/glad.h>
 #else
-#include <GLES3/gl32.h>
+#include <GLES3/gl3.h>
 #endif
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -52,7 +52,7 @@ bool checkGLExtension(const std::string& extname)
 static GLuint krkrsdl3_program = 0, krkrsdl3_vao = 0, krkrsdl3_vbo = 0, krkrsdl3_ebo = 0;
 #if _KRKRSDL3_GL
 const char* vertexShaderSrc = R"(
-#version 430 core
+#version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
 out vec2 TexCoord;
@@ -71,7 +71,7 @@ void main()
 }
 )";
 const char* fragmentShaderSrc = R"(
-#version 430 core
+#version 330 core
 out vec4 FragColor;
 in vec2 TexCoord;
 uniform sampler2D texture1;
@@ -82,7 +82,7 @@ void main()
 }
 )";
 #else
-const char* vertexShaderSrc = R"(#version 320 es
+const char* vertexShaderSrc = R"(#version 300 es
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
 out vec2 TexCoord;
@@ -100,9 +100,10 @@ void main()
     TexCoord = aTexCoord;
 }
 )";
-const char* fragmentShaderSrc = R"(#version 320 es
-out mediump vec4 FragColor;
-in mediump vec2 TexCoord;
+const char* fragmentShaderSrc = R"(#version 300 es
+precision mediump float;
+out vec4 FragColor;
+in vec2 TexCoord;
 uniform sampler2D texture1;
 
 void main()

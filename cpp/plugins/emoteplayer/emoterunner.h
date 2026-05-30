@@ -103,6 +103,17 @@ namespace emoteplayer
         float currTimeOffset = 0.0;
         bool isNeedBp = false;
         float currbp[32] = {0.0};
+
+        // CPU subdivision mesh data
+        struct MeshVertex
+        {
+            float x, y; // clip space position
+            float u, v; // texture coordinate
+        };
+        int _meshDivX = 8;
+        int _meshDivY = 8;
+        std::vector<MeshVertex> _meshVertices;
+        std::vector<uint16_t> _meshIndices;
     };
     // motion辅助类 - 管理按priority排序的nodeList并处理子motion展开
     class emotemotionref

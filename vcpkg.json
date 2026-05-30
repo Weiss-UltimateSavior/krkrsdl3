@@ -9,9 +9,11 @@
         "libvorbis",
         "opusfile",
         "freetype",
+        "plutovg",
 
         "sdl3",
         "sdl3-ttf",
+        "glm",
         {
             "name": "glad",
             "features": ["loader"],
@@ -22,8 +24,6 @@
             "features": ["egl", "loader"],
             "platform": "android"
         },
-        "glm",
-        "blend2d",
 
         {
             "name": "opencv4",

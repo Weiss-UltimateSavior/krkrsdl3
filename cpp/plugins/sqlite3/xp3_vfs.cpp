@@ -19,7 +19,11 @@
 #include <stdlib.h>
 #include "sqlite3/sqlite3.h"
 
+#ifdef _KRKRSDL3_WINDOWS
+#include <Windows.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "TVPStorage.h"
 

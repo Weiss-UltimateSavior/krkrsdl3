@@ -1,6 +1,6 @@
 # 介绍
 
-基于[krkr2](https://github.com/2468785842/krkr2)/[krkrz](https://github.com/krkrz/krkrz/)/[kirikiroid2](https://github.com/zeas2/Kirikiroid2)等开发出的krkr视觉小说引擎(支持windows/linux/android)，使用SDL3统一跨平台管理、opengl进行gpu渲染、blend2d进行cpu绘图。
+一款基于SDL3开发的krkr-like视觉小说引擎(支持windows/linux/android)。
 
 # 目录结构说明
 
@@ -22,8 +22,9 @@
     ├── 📁 utils/  # 工具包
 ├── 📁 environ/ # 不同系统/芯片架构之间的差异化代码
 ├── 📁 plugins/ # 扩展插件代码
-├── 📄 krkrsdl.cpp           # 桌面端启动文件
-├── 📄 krkrsdl_android.cpp   # 移动端启动文件
+├── 📄 krkrsdl.cpp       # 启动文件
+├── 📄 krkrsdl_gl.cpp    # 渲染后端文件
+├── 📄 krkrsdl_menu.cpp  # 菜单功能文件
 📁Res/   # 程序资源文件
 📁vcpkg/ # 自定义vcpkg依赖
 📄.clang-format # 格式化代码风格定义文件
@@ -39,8 +40,9 @@
 - ffmpeg:音视频解码
 - libpng/libwebp/libjpeg-turbo:图片解码
 - libvorbis/opusfile:音频解码
-- freetype:字体
-- sdl3/glad/blend2d:跨平台核心
+- freetype:字体渲染
+- plutosvg:2D矢量图绘制
+- sdl3/glad:跨平台核心
 
 使用说明：对于api稳定的库默认采用最新版本，对于api有较大改动的库采用能兼容的最高版本。
 

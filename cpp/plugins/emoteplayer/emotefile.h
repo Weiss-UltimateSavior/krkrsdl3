@@ -8,7 +8,7 @@
 #if _KRKRSDL3_GL
 #include <glad/glad.h>
 #else
-#include <GLES3/gl32.h>
+#include <GLES3/gl3.h>
 #endif
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

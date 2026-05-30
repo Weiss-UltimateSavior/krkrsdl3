@@ -4,66 +4,71 @@
 #include "TVPFont.h"
 #include "Platform.h"
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <algorithm>
 
 #define NCB_MODULE_NAME TJS_N("layerExDraw.dll")
 
-static std::vector<BLFontDataCore> bl_font_data_vec;
-static std::vector<BLFontFace> bl_font_face_vec;
-static std::vector<ttstr> bl_font_face_name; // 方便一点吧
+// ============================================================
+// Global font storage (replaces blend2d font data/face vectors)
+// ============================================================
+struct FontFaceEntry
+{
+    plutovg_font_face_t* face;
+    ttstr name;
+    void* data;     // owned font data buffer
+    unsigned int dataSize;
+};
+static std::vector<FontFaceEntry> g_fontFaces;
 
-// GDI+ 初期化
 void initGdiPlus()
 {
-
-    // Initialize GDI+.
 }
 
-// GDI+ 初期化
 void deInitGdiPlus()
 {
-    // フォントデータの解放
-    for (auto bl_font_data : bl_font_data_vec)
+    for (auto& entry : g_fontFaces)
     {
-        blFontDataDestroy(&bl_font_data);
+        if (entry.face)
+            plutovg_font_face_destroy(entry.face);
+            // data is freed by plutovg via destroy_func
     }
-    bl_font_face_vec.clear();
-    bl_font_face_name.clear();
+    g_fontFaces.clear();
 }
 
-/**
- * 画像読み込み処理
- * @param name ファイル名
- * @return 画像情報
- */
-BLImage loadImage(const tjs_char* name) // 以后应该要让krkr内核进行图像解码
+// ============================================================
+// Image loading
+// ============================================================
+static plutovg_surface_t* loadImage(const tjs_char* name)
 {
-    BLImage image;
-    BLResult ret = BL_SUCCESS;
     ttstr filename = TVPGetPlacedPath(name);
     if (filename.length())
     {
         tTJSBinaryStream* in = TVPCreateBinaryStreamForRead(filename, TJS_N(""));
         if (in)
         {
-            tjs_uint8* fileData = new tjs_uint8[in->GetSize()];
-            in->ReadBuffer(fileData, in->GetSize());
-            ret = image.readFromData(fileData, in->GetSize());
+            tjs_uint size = (tjs_uint)in->GetSize();
+            tjs_uint8* fileData = new tjs_uint8[size];
+            in->ReadBuffer(fileData, size);
+            plutovg_surface_t* surface = plutovg_surface_load_from_image_data(fileData, size);
             delete[] fileData;
             delete in;
+            return surface;
         }
     }
-    return image;
+    return nullptr;
 }
 
-// --------------------------------------------------------
-// フォント情報
-// --------------------------------------------------------
+// ============================================================
+// GdiPlus static methods
+// ============================================================
+static void fontDataDestroy(void* closure)
+{
+    delete[] (tjs_uint8*)closure;
+}
 
-/**
- * プライベートフォントの追加
- * @param fontFileName フォントファイル名
- */
 void GdiPlus::addPrivateFont(const tjs_char* fontFileName)
 {
     ttstr filename = TVPGetPlacedPath(fontFileName);
@@ -76,7 +81,7 @@ void GdiPlus::addPrivateFont(const tjs_char* fontFileName)
     {
         std::vector<ttstr> ret;
         TVPGetAllFontList(ret);
-        for (auto ftN : ret)
+        for (auto& ftN : ret)
         {
             if (ftN == ttstr(fontFileName))
             {
@@ -85,61 +90,47 @@ void GdiPlus::addPrivateFont(const tjs_char* fontFileName)
                     break;
             }
         }
-
-        // 实在没有就强行换字体吧
         if (!in)
         {
-            in = GetResourceStream("DroidSansFallback.ttf");
+            in = GetResourceStream(TJS_N("DroidSansFallback.ttf"));
         }
     }
     if (in)
     {
-        tjs_uint8* fileData = new tjs_uint8[in->GetSize()];
-        in->ReadBuffer(fileData, in->GetSize());
-        // 读取fontdata
-        BLFontDataCore bl_font_data;
-        blFontDataInit(&bl_font_data);
-        BLResult stat =
-            blFontDataCreateFromData(&bl_font_data, fileData, in->GetSize(), NULL, NULL);
-        // delete[] fileData;
+        tjs_uint size = (tjs_uint)in->GetSize();
+        tjs_uint8* fileData = new tjs_uint8[size];
+        in->ReadBuffer(fileData, size);
         delete in;
-        if (stat != BL_SUCCESS)
+
+        // Load font face (plutovg takes ownership of data via destroy callback)
+        plutovg_font_face_t* face =
+            plutovg_font_face_load_from_data(fileData, size, 0, fontDataDestroy, fileData);
+        if (!face)
         {
-            blFontDataDestroy(&bl_font_data);
-            TVPThrowExceptionMessage(TJS_N("blend2d cannot load:%1"), fontFileName);
+            delete[] fileData;
+            TVPThrowExceptionMessage(TJS_N("plutovg cannot load:%1"), fontFileName);
         }
-        bl_font_data_vec.push_back(bl_font_data);
-        // 加入face
-        for (int i = 0; i < blFontDataGetFaceCount(&bl_font_data); i++)
-        {
-            BLFontFace ffc;
-            stat = ffc.createFromData(bl_font_data, i);
-            if (stat == BL_SUCCESS)
-            {
-                bl_font_face_vec.push_back(ffc);
-                BLString name = ffc.familyName();
-                bl_font_face_name.push_back(ttstr(name.data(), name.size()));
-            }
-        }
+
+        FontFaceEntry entry;
+        entry.face = face;
+        entry.name = ttstr(fontFileName);
+        entry.data = fileData;
+        entry.dataSize = size;
+        g_fontFaces.push_back(entry);
         return;
     }
     TVPThrowExceptionMessage(TJS_N("cannot open:%1"), fontFileName);
 }
 
-/**
- * フォント一覧の取得
- * @param privateOnly true ならプライベートフォントのみ取得
- */
 tTJSVariant GdiPlus::getFontList(bool privateOnly)
 {
     iTJSDispatch2* array = TJSCreateArrayObject();
 
-    // 获取系统字体 直接用TVPFont的数据即可
     if (!privateOnly)
     {
         std::vector<ttstr> ret;
         TVPGetAllFontList(ret);
-        for (auto ftN : ret)
+        for (auto& ftN : ret)
         {
             if (!ftN.IsEmpty())
             {
@@ -149,12 +140,11 @@ tTJSVariant GdiPlus::getFontList(bool privateOnly)
         }
     }
 
-    // BLFontManager已保存字体
-    for (int i = 0; i < bl_font_face_name.size(); i++)
+    for (auto& entry : g_fontFaces)
     {
-        if (bl_font_face_name.at(i).length())
+        if (entry.name.length())
         {
-            tTJSVariant vname(bl_font_face_name.at(i)), *param = &vname;
+            tTJSVariant vname(entry.name), *param = &vname;
             array->FuncCall(0, TJS_N("add"), NULL, 0, 1, &param, array);
         }
     }
@@ -164,59 +154,54 @@ tTJSVariant GdiPlus::getFontList(bool privateOnly)
     return ret;
 }
 
-// --------------------------------------------------------
-// フォント情報
-// --------------------------------------------------------
-
-/**
- * コンストラクタ
- */
+// ============================================================
+// FontInfo implementation
+// ============================================================
 FontInfo::FontInfo()
   : emSize(12),
     style(0),
     gdiPlusUnsupportedFont(false),
     forceSelfPathDraw(false),
-    propertyModified(true)
+    propertyModified(true),
+    ascent(0),
+    descent(0),
+    lineSpacing(0),
+    ascentLeading(0),
+    descentLeading(0)
 {
 }
 
-/**
- * コンストラクタ
- * @param familyName フォントファミリー
- * @param emSize フォントのサイズ
- * @param style フォントスタイル
- */
 FontInfo::FontInfo(const tjs_char* familyName, tjs_real emSize, tjs_int style)
   : gdiPlusUnsupportedFont(false),
     forceSelfPathDraw(false),
-    propertyModified(true)
+    propertyModified(true),
+    ascent(0),
+    descent(0),
+    lineSpacing(0),
+    ascentLeading(0),
+    descentLeading(0)
 {
     setFamilyName(familyName);
     setEmSize(emSize);
     setStyle(style);
 }
 
-/**
- * コピーコンストラクタ
- */
 FontInfo::FontInfo(const FontInfo& orig)
 {
     familyName = orig.familyName;
     emSize = orig.emSize;
     style = orig.style;
+    gdiPlusUnsupportedFont = orig.gdiPlusUnsupportedFont;
+    forceSelfPathDraw = orig.forceSelfPathDraw;
+    propertyModified = true;
+    ascent = descent = lineSpacing = ascentLeading = descentLeading = 0;
 }
 
-/**
- * デストラクタ
- */
 FontInfo::~FontInfo()
 {
     clear();
 }
 
-/**
- * フォント情報のクリア
- */
 void FontInfo::clear()
 {
     familyName = "";
@@ -224,22 +209,17 @@ void FontInfo::clear()
     propertyModified = true;
 }
 
-/**
- * フォントの指定
- */
-void FontInfo::setFamilyName(const tjs_char* familyName)
+void FontInfo::setFamilyName(const tjs_char* name)
 {
     propertyModified = true;
     clear();
-
-    if (familyName)
+    if (name)
     {
-        this->familyName = familyName;
+        this->familyName = name;
     }
-
-    if (getBLFont().empty())
+    if (!getFontFace())
     {
-        GdiPlus::addPrivateFont(familyName);
+        GdiPlus::addPrivateFont(name);
     }
 }
 
@@ -263,32 +243,16 @@ void FontInfo::updateSizeParams(void) const
 {
     if (!propertyModified)
         return;
-
     propertyModified = false;
 
-    BLFont _font;
-    BLFontFace _fontFace;
-    for (int i = 0; i < bl_font_face_name.size(); i++)
+    plutovg_font_face_t* face = getFontFace();
+    if (face)
     {
-        if (bl_font_face_name.at(i) == familyName)
-        {
-            _fontFace = bl_font_face_vec.at(i);
-            break;
-        }
-    }
-    if (!_fontFace.empty())
-    {
-        _font.createFromFace(_fontFace, emSize);
-    }
-
-    if (!_font.empty())
-    {
-        BLFontMetrics metrics = _font.metrics();
-
-        ascent = metrics.ascent;
-        descent = metrics.descent;
-        lineSpacing = metrics.lineGap;
-
+        float a, d, lg;
+        plutovg_font_face_get_metrics(face, (float)emSize, &a, &d, &lg, nullptr);
+        ascent = a;
+        descent = -d; // plutovg returns negative descent
+        lineSpacing = lg;
         ascentLeading = 0;
         descentLeading = 0;
     }
@@ -304,59 +268,51 @@ void FontInfo::updateSizeParams(void) const
 
 tjs_real FontInfo::getAscent() const
 {
-    this->updateSizeParams();
+    updateSizeParams();
     return ascent;
 }
 
 tjs_real FontInfo::getDescent() const
 {
-    this->updateSizeParams();
+    updateSizeParams();
     return descent;
 }
 
 tjs_real FontInfo::getAscentLeading() const
 {
-    this->updateSizeParams();
+    updateSizeParams();
     return ascentLeading;
 }
 
 tjs_real FontInfo::getDescentLeading() const
 {
-    this->updateSizeParams();
+    updateSizeParams();
     return descentLeading;
 }
 
 tjs_real FontInfo::getLineSpacing() const
 {
-    this->updateSizeParams();
+    updateSizeParams();
     return lineSpacing;
 }
 
-BLFont FontInfo::getBLFont() const
+plutovg_font_face_t* FontInfo::getFontFace() const
 {
-    BLFont _font;
-    BLFontFace _fontFace;
-    for (int i = 0; i < bl_font_face_name.size(); i++)
+    // Search by family name
+    for (auto& entry : g_fontFaces)
     {
-        if (bl_font_face_name.at(i) == familyName)
-        {
-            _fontFace = bl_font_face_vec.at(i);
-            break;
-        }
+        if (entry.name == familyName)
+            return entry.face;
     }
-    if (_fontFace.empty() && bl_font_face_vec.size() > 0)
-        _fontFace = bl_font_face_vec.at(0);
-    if (!_fontFace.empty())
-    {
-        _font.createFromFace(_fontFace, emSize);
-    }
-    return _font;
+    // Fallback to first available
+    if (!g_fontFaces.empty())
+        return g_fontFaces[0].face;
+    return nullptr;
 }
 
-// --------------------------------------------------------
-// アピアランス情報
-// --------------------------------------------------------
-
+// ============================================================
+// Appearance implementation
+// ============================================================
 Appearance::Appearance()
 {
 }
@@ -365,10 +321,11 @@ Appearance::~Appearance()
 {
     clear();
 }
+
 Appearance* Appearance::Clone() const
 {
     Appearance* newItm = new Appearance();
-    for (auto itm : drawInfos)
+    for (const auto& itm : drawInfos)
     {
         DrawInfo newdraw(itm);
         newItm->drawInfos.push_back(newdraw);
@@ -376,36 +333,17 @@ Appearance* Appearance::Clone() const
     return newItm;
 }
 
-/**
- * 情報のクリア
- */
 void Appearance::clear()
 {
     drawInfos.clear();
-
-    // customLineCapsも削除
-    // std::vector<CustomLineCap*>::const_iterator i = customLineCaps.begin();
-    // while (i != customLineCaps.end()) {
-    //	delete *i;
-    //	i++;
-    // }
-    // customLineCaps.clear();
 }
 
-// --------------------------------------------------------
-// 各型変換処理
-// --------------------------------------------------------
-
+// ============================================================
+// Helper functions for brush/pen parameter parsing
+// ============================================================
 extern bool IsArray(const tTJSVariant& var);
-
-/**
- * 座標情報の生成
- */
 extern PointF getPoint(const tTJSVariant& var);
 
-/**
- * 点の配列を取得
- */
 static void getPoints(const tTJSVariant& var, std::vector<PointF>& points)
 {
     ncbPropAccessor info(var);
@@ -414,9 +352,7 @@ static void getPoints(const tTJSVariant& var, std::vector<PointF>& points)
     {
         tTJSVariant p;
         if (info.checkVariant(i, p))
-        {
             points.push_back(getPoint(p));
-        }
     }
 }
 
@@ -424,30 +360,18 @@ static void getPoints(ncbPropAccessor& info, int n, std::vector<PointF>& points)
 {
     tTJSVariant var;
     if (info.checkVariant(n, var))
-    {
         getPoints(var, points);
-    }
 }
 
 static void getPoints(ncbPropAccessor& info, const tjs_char* n, std::vector<PointF>& points)
 {
     tTJSVariant var;
     if (info.checkVariant(n, var))
-    {
         getPoints(var, points);
-    }
 }
 
-// -----------------------------
-
-/**
- * 矩形情報の生成
- */
 static RectF getRect(tTJSVariant& var);
 
-/**
- * 矩形の配列を取得
- */
 static void getRects(const tTJSVariant& var, std::vector<RectF>& rects)
 {
     ncbPropAccessor info(var);
@@ -456,76 +380,45 @@ static void getRects(const tTJSVariant& var, std::vector<RectF>& rects)
     {
         tTJSVariant p;
         if (info.checkVariant(i, p))
-        {
             rects.push_back(getRect(p));
-        }
     }
 }
 
-// -----------------------------
-
-/**
- * 実数の配列を取得
- */
 static void getReals(const tTJSVariant& var, std::vector<tjs_real>& points)
 {
     ncbPropAccessor info(var);
     int c = info.GetArrayCount();
     for (int i = 0; i < c; i++)
-    {
         points.push_back((tjs_real)info.getRealValue(i));
-    }
 }
 
 static void getReals(ncbPropAccessor& info, int n, std::vector<tjs_real>& points)
 {
     tTJSVariant var;
     if (info.checkVariant(n, var))
-    {
         getReals(var, points);
-    }
 }
 
 static void getReals(ncbPropAccessor& info, const tjs_char* n, std::vector<tjs_real>& points)
 {
     tTJSVariant var;
     if (info.checkVariant(n, var))
-    {
         getReals(var, points);
-    }
 }
 
-// -----------------------------
-
-/**
- * 色の配列を取得
- */
 static void getColors(const tTJSVariant& var, std::vector<tjs_uint32>& colors)
 {
     ncbPropAccessor info(var);
     int c = info.GetArrayCount();
     for (int i = 0; i < c; i++)
-    {
         colors.push_back((tjs_uint32)info.getIntValue(i));
-    }
-}
-
-static void getColors(ncbPropAccessor& info, int n, std::vector<tjs_uint32>& colors)
-{
-    tTJSVariant var;
-    if (info.checkVariant(n, var))
-    {
-        getColors(var, colors);
-    }
 }
 
 static void getColors(ncbPropAccessor& info, const tjs_char* n, std::vector<tjs_uint32>& colors)
 {
     tTJSVariant var;
     if (info.checkVariant(n, var))
-    {
         getColors(var, colors);
-    }
 }
 
 static RectF calculateBounds(const std::vector<PointF>& points)
@@ -533,7 +426,7 @@ static RectF calculateBounds(const std::vector<PointF>& points)
     RectF bounds;
     if (!points.empty())
     {
-        tjs_real x0 = 0, y0 = 0, x1 = 0, y1 = 0;
+        tjs_real x0 = points[0].x, y0 = points[0].y, x1 = x0, y1 = y0;
         for (size_t i = 1; i < points.size(); i++)
         {
             x0 = std::min(x0, points[i].x);
@@ -546,587 +439,410 @@ static RectF calculateBounds(const std::vector<PointF>& points)
     return bounds;
 }
 
-template<class T>
-void commonBrushParameter(ncbPropAccessor& info, T* brush)
+// ============================================================
+// Hatch pattern generation using plutovg
+// ============================================================
+static plutovg_surface_t* createHatchPattern(HatchStyle style, tjs_uint32 foreColor,
+                                             tjs_uint32 backColor, int size = 8)
 {
-    tTJSVariant var;
-    // SetBlend
-    if (info.checkVariant(TJS_N("blend"), var))
-    {
-        std::vector<tjs_real> factors;
-        std::vector<tjs_real> positions;
-        ncbPropAccessor binfo(var);
-        if (IsArray(var))
-        {
-            getReals(binfo, 0, factors);
-            getReals(binfo, 1, positions);
-        }
-        else
-        {
-            getReals(binfo, TJS_N("blendFactors"), factors);
-            getReals(binfo, TJS_N("blendPositions"), positions);
-        }
-        int count = (int)factors.size();
-        if ((int)positions.size() > count)
-        {
-            count = (int)positions.size();
-        }
-        if (count > 0)
-        {
-            brush->SetBlend(&factors[0], &positions[0], count);
-        }
-    }
-    // SetBlendBellShape
-    if (info.checkVariant(TJS_N("blendBellShape"), var))
-    {
-        ncbPropAccessor sinfo(var);
-        if (IsArray(var))
-        {
-            brush->SetBlendBellShape((tjs_real)sinfo.getRealValue(0),
-                                     (tjs_real)sinfo.getRealValue(1));
-        }
-        else
-        {
-            brush->SetBlendBellShape((tjs_real)info.getRealValue(TJS_N("focus")),
-                                     (tjs_real)info.getRealValue(TJS_N("scale")));
-        }
-    }
-    // SetBlendTriangularShape
-    if (info.checkVariant(TJS_N("blendTriangularShape"), var))
-    {
-        ncbPropAccessor sinfo(var);
-        if (IsArray(var))
-        {
-            brush->SetBlendTriangularShape((tjs_real)sinfo.getRealValue(0),
-                                           (tjs_real)sinfo.getRealValue(1));
-        }
-        else
-        {
-            brush->SetBlendTriangularShape((tjs_real)info.getRealValue(TJS_N("focus")),
-                                           (tjs_real)info.getRealValue(TJS_N("scale")));
-        }
-    }
-    // SetGammaCorrection
-    if (info.checkVariant(TJS_N("useGammaCorrection"), var))
-    {
-        brush->SetGammaCorrection((bool)var);
-    }
-    // SetInterpolationColors
-    if (info.checkVariant(TJS_N("interpolationColors"), var))
-    {
-        std::vector<tjs_uint32> colors;
-        std::vector<tjs_real> positions;
-        ncbPropAccessor binfo(var);
-        if (IsArray(var))
-        {
-            getColors(binfo, 0, colors);
-            getReals(binfo, 1, positions);
-        }
-        else
-        {
-            getColors(binfo, TJS_N("presetColors"), colors);
-            getReals(binfo, TJS_N("blendPositions"), positions);
-        }
-        int count = (int)colors.size();
-        if ((int)positions.size() > count)
-        {
-            count = (int)positions.size();
-        }
-        if (count > 0)
-        {
-            brush->SetInterpolationColors(&colors[0], &positions[0], count);
-        }
-    }
-}
+    plutovg_surface_t* pattern = plutovg_surface_create(size, size);
+    plutovg_canvas_t* ctx = plutovg_canvas_create(pattern);
 
-/**
- * ブラシの生成
- */
-BLImage createHatchPattern(HatchStyle style, BLRgba32 foreColor, BLRgba32 backColor, int size = 8)
-{
-    BLImage pattern(size, size, BL_FORMAT_PRGB32);
-    BLContext ctx(pattern);
+    // Fill background
+    plutovg_color_t bg;
+    plutovg_color_init_argb32(&bg, backColor);
+    plutovg_canvas_set_operator(ctx, PLUTOVG_OPERATOR_SRC);
+    plutovg_canvas_set_color(ctx, &bg);
+    plutovg_canvas_fill_rect(ctx, 0, 0, (float)size, (float)size);
 
-    ctx.setCompOp(BL_COMP_OP_SRC_COPY);
-    ctx.setFillStyle(backColor);
-    ctx.fillAll();
+    // Draw foreground
+    plutovg_color_t fg;
+    plutovg_color_init_argb32(&fg, foreColor);
+    plutovg_canvas_set_operator(ctx, PLUTOVG_OPERATOR_SRC_OVER);
+    plutovg_canvas_set_color(ctx, &fg);
 
-    ctx.setCompOp(BL_COMP_OP_SRC_OVER);
-    ctx.setFillStyle(foreColor);
+    // Helper lambda: stroke a line path on the canvas
+    auto strokeLines = [&](plutovg_path_t* lp) {
+        plutovg_canvas_set_line_width(ctx, 1);
+        plutovg_canvas_stroke_path(ctx, lp);
+        plutovg_path_destroy(lp);
+    };
 
     switch (style)
     {
         case HatchStyleHorizontal:
-            ctx.fillRect(0, size / 2, size, 1);
+            plutovg_canvas_fill_rect(ctx, 0, size / 2.0f, (float)size, 1);
             break;
         case HatchStyleVertical:
-            ctx.fillRect(size / 2, 0, 1, size);
+            plutovg_canvas_fill_rect(ctx, size / 2.0f, 0, 1, (float)size);
             break;
         case HatchStyleForwardDiagonal:
+        {
+            plutovg_path_t* lp = plutovg_path_create();
             for (int i = -size; i < size; i += 2)
             {
-                ctx.fillTriangle(i, 0, i + 1, 0, i + size + 1, size);
+                plutovg_path_move_to(lp, (float)i, 0);
+                plutovg_path_line_to(lp, (float)(i + size), (float)size);
             }
+            strokeLines(lp);
             break;
+        }
         case HatchStyleBackwardDiagonal:
+        {
+            plutovg_path_t* lp = plutovg_path_create();
             for (int i = -size; i < size; i += 2)
             {
-                ctx.fillTriangle(i, size, i + 1, size, i + size + 1, 0);
+                plutovg_path_move_to(lp, (float)(i + size), 0);
+                plutovg_path_line_to(lp, (float)i, (float)size);
             }
+            strokeLines(lp);
             break;
+        }
         case HatchStyleCross:
-            ctx.fillRect(0, size / 2, size, 1);
-            ctx.fillRect(size / 2, 0, 1, size);
+            plutovg_canvas_fill_rect(ctx, 0, size / 2.0f, (float)size, 1);
+            plutovg_canvas_fill_rect(ctx, size / 2.0f, 0, 1, (float)size);
             break;
         case HatchStyleDiagonalCross:
+        {
+            plutovg_path_t* lp = plutovg_path_create();
             for (int i = -size; i < size; i += 2)
             {
-                ctx.fillTriangle(i, 0, i + 1, 0, i + size + 1, size);
-                ctx.fillTriangle(i, size, i + 1, size, i + size + 1, 0);
+                plutovg_path_move_to(lp, (float)i, 0);
+                plutovg_path_line_to(lp, (float)(i + size), (float)size);
+                plutovg_path_move_to(lp, (float)(i + size), 0);
+                plutovg_path_line_to(lp, (float)i, (float)size);
             }
+            strokeLines(lp);
             break;
-        case HatchStyle05Percent:
-            for (int y = 0; y < size; y += 20)
-            {
-                for (int x = 0; x < size; x += 20)
-                {
-                    ctx.fillRect(x, y, 1, 1);
-                }
-            }
-            break;
+        }
         case HatchStyle50Percent:
             for (int y = 0; y < size; y += 2)
-            {
                 for (int x = y % 2; x < size; x += 2)
-                {
-                    ctx.fillRect(x, y, 1, 1);
-                }
-            }
+                    plutovg_canvas_fill_rect(ctx, (float)x, (float)y, 1, 1);
             break;
         case HatchStyleSmallGrid:
             for (int i = 0; i < size; i += 2)
             {
-                ctx.fillRect(0, i, size, 1);
-                ctx.fillRect(i, 0, 1, size);
-            }
-            break;
-        case HatchStyleWeave:
-            for (int i = 0; i < size; i += 4)
-            {
-                ctx.fillRect(i, 0, 2, size);
-                ctx.fillRect(0, i, size, 2);
-            }
-            break;
-        case HatchStyleZigZag:
-            for (int i = 0; i < size; i += 4)
-            {
-                ctx.fillRect(0, i, size, 1);
-                ctx.fillRect(0, i + 2, size, 1);
+                plutovg_canvas_fill_rect(ctx, 0, (float)i, (float)size, 1);
+                plutovg_canvas_fill_rect(ctx, (float)i, 0, 1, (float)size);
             }
             break;
         case HatchStyleDottedGrid:
             for (int y = 0; y < size; y += 4)
-            {
                 for (int x = 0; x < size; x += 4)
-                {
-                    ctx.fillCircle(x, y, 0.5);
-                }
-            }
+                    plutovg_canvas_fill_rect(ctx, (float)x, (float)y, 1, 1);
             break;
         default:
+        {
+            plutovg_path_t* lp = plutovg_path_create();
             for (int i = -size; i < size; i += 2)
             {
-                ctx.fillTriangle(i, 0, i + 1, 0, i + size + 1, size);
+                plutovg_path_move_to(lp, (float)i, 0);
+                plutovg_path_line_to(lp, (float)(i + size), (float)size);
             }
+            strokeLines(lp);
             break;
+        }
     }
-    ctx.end();
+
+    plutovg_canvas_destroy(ctx);
     return pattern;
 }
-BLBrush* createBrush(const tTJSVariant colorOrBrush)
+
+// ============================================================
+// Brush creation
+// ============================================================
+static SoftBrush* createBrush(const tTJSVariant colorOrBrush)
 {
     if (colorOrBrush.Type() != tvtObject)
     {
-        // 纯色
-        return new BLBrush((tjs_int)colorOrBrush);
+        return new SoftBrush((tjs_uint32)(tjs_int)colorOrBrush);
     }
     else
     {
-        // 種別ごとに作り分ける
         ncbPropAccessor info(colorOrBrush);
         BrushType type = (BrushType)info.getIntValue(TJS_N("type"), BrushTypeSolidColor);
         switch (type)
         {
             case BrushTypeSolidColor:
-                return new BLBrush(info.getIntValue(TJS_N("color"), 0xFFFFFFFF));
+                return new SoftBrush(
+                    (tjs_uint32)info.getIntValue(TJS_N("color"), (tjs_int)0xFFFFFFFF));
             case BrushTypeHatchFill:
             {
                 HatchStyle hatchStyle =
                     (HatchStyle)info.getIntValue(TJS_N("hatchStyle"), HatchStyleHorizontal);
-                BLRgba32 foreColor((tjs_uint32)info.getIntValue(TJS_N("foreColor"), 0xFFFFFFFF));
-                BLRgba32 backColor((tjs_uint32)info.getIntValue(TJS_N("backColor"), 0xFF000000));
-                return new BLBrush(createHatchPattern(hatchStyle, foreColor, backColor));
+                tjs_uint32 foreColor =
+                    (tjs_uint32)info.getIntValue(TJS_N("foreColor"), (tjs_int)0xFFFFFFFF);
+                tjs_uint32 backColor =
+                    (tjs_uint32)info.getIntValue(TJS_N("backColor"), (tjs_int)0xFF000000);
+                plutovg_surface_t* pattern =
+                    createHatchPattern(hatchStyle, foreColor, backColor);
+                return new SoftBrush(pattern);
             }
             case BrushTypeTextureFill:
             {
                 ttstr imgname = info.GetValue(TJS_N("image"), ncbTypedefs::Tag<ttstr>());
-                BLImage image = loadImage(imgname.c_str());
-
-                if (!image.empty())
+                plutovg_surface_t* image = loadImage(imgname.c_str());
+                if (image)
                 {
-                    BLPattern pattern(image);
+                    WrapMode wrapMode =
+                        (WrapMode)info.getIntValue(TJS_N("wrapMode"), WrapModeTile);
+                    plutovg_texture_type_t texType = PLUTOVG_TEXTURE_TYPE_TILED;
+                    if (wrapMode == WrapModeClamp)
+                        texType = PLUTOVG_TEXTURE_TYPE_PLAIN;
 
-                    WrapMode wrapMode = (WrapMode)info.getIntValue(TJS_N("wrapMode"), WrapModeTile);
-                    switch (wrapMode)
-                    {
-                        case WrapModeTile:
-                            pattern.setExtendMode(BL_EXTEND_MODE_REPEAT);
-                            break;
-                        case WrapModeTileFlipX:
-                            pattern.setExtendMode(BL_EXTEND_MODE_REFLECT_X_REPEAT_Y);
-                            break;
-                        case WrapModeTileFlipY:
-                            pattern.setExtendMode(BL_EXTEND_MODE_REPEAT_X_REFLECT_Y);
-                            break;
-                        case WrapModeTileFlipXY:
-                            pattern.setExtendMode(BL_EXTEND_MODE_REFLECT);
-                            break;
-                        case WrapModeClamp:
-                            pattern.setExtendMode(BL_EXTEND_MODE_PAD);
-                            break;
-                        default:
-                            pattern.setExtendMode(BL_EXTEND_MODE_REPEAT);
-                            break;
-                    }
+                    SoftBrush* brush = new SoftBrush(image, texType);
 
                     tTJSVariant dstRectVar;
                     if (info.checkVariant(TJS_N("dstRect"), dstRectVar))
                     {
                         RectF dstRect = getRect(dstRectVar);
-                        if (dstRect.x != 0 || dstRect.y != 0 || dstRect.w != image.width() ||
-                            dstRect.h != image.height())
+                        int iw = plutovg_surface_get_width(image);
+                        int ih = plutovg_surface_get_height(image);
+                        if (dstRect.x != 0 || dstRect.y != 0 || dstRect.w != iw ||
+                            dstRect.h != ih)
                         {
-
-                            BLMatrix2D matrix;
-                            matrix.reset();
-                            matrix.scale(dstRect.w / image.width(), dstRect.h / image.height());
-                            matrix.translate(dstRect.x, dstRect.y);
-                            pattern.applyTransform(matrix);
+                            plutovg_matrix_init_identity(&brush->texMatrix);
+                            plutovg_matrix_scale(&brush->texMatrix, dstRect.w / iw,
+                                                 dstRect.h / ih);
+                            plutovg_matrix_translate(&brush->texMatrix, dstRect.x, dstRect.y);
+                            brush->hasTexMatrix = true;
                         }
                     }
-                    return new BLBrush(pattern);
+                    return brush;
                 }
                 break;
             }
             case BrushTypePathGradient:
             {
-                BLGradient gradient(BL_GRADIENT_TYPE_RADIAL);
                 std::vector<PointF> points;
                 getPoints(info, TJS_N("points"), points);
-                if ((int)points.size() == 0)
-                    TVPThrowExceptionMessage(TJS_N("must set poins"));
+                if (points.empty())
+                    TVPThrowExceptionMessage(TJS_N("must set points"));
 
-                // TODO
-                // WrapMode wrapMode = (WrapMode)info.getIntValue(L"wrapMode", WrapModeTile);
+                auto* gd = new SoftBrush::GradientData();
+                gd->isLinear = false;
+                gd->spread = PLUTOVG_SPREAD_METHOD_PAD;
 
-                // 共通パラメータ TODO
-                // commonBrushParameter(info, pbrush);
+                RectF bounds = calculateBounds(points);
+                gd->cx = bounds.x + bounds.w / 2;
+                gd->cy = bounds.y + bounds.h / 2;
+                gd->cr = std::max(bounds.w, bounds.h) / 2;
+                gd->fx = gd->cx;
+                gd->fy = gd->cy;
+                gd->fr = 0;
 
-                if (!points.empty())
+                tTJSVariant var;
+                if (info.checkVariant(TJS_N("centerColor"), var))
                 {
-                    RectF bounds = calculateBounds(points);
-                    float cx = bounds.x + bounds.w / 2;
-                    float cy = bounds.y + bounds.h / 2;
-                    float radius = std::max(bounds.w, bounds.h) / 2;
-
-                    gradient.setValues(BLConicGradientValues(cx, cy, radius));
-
-                    tTJSVariant var;
-                    // SetCenterColor
-                    if (info.checkVariant(TJS_N("centerColor"), var))
-                    {
-                        gradient.addStop(0.0, BLRgba32((tjs_uint32)(tjs_int)var));
-                    }
-                    // SetCenterPoint
-                    if (info.checkVariant(TJS_N("centerPoint"), var))
-                    {
-                        // TODO
-                    }
-                    // SetSurroundColors
-                    if (info.checkVariant(TJS_N("surroundColors"), var))
-                    {
-                        std::vector<tjs_uint32> colors;
-                        getColors(var, colors);
-                        if (!colors.empty())
-                        {
-                            gradient.addStop(1.0, BLRgba32(colors[0]));
-                        }
-                    }
-                    // SetFocusScales
-                    if (info.checkVariant(TJS_N("focusScales"), var))
-                    {
-                        // TODO
-                    }
-                    return new BLBrush(gradient);
+                    plutovg_gradient_stop_t stop;
+                    stop.offset = 0.0f;
+                    plutovg_color_init_argb32(&stop.color, (tjs_uint32)(tjs_int)var);
+                    gd->stops.push_back(stop);
                 }
-                break;
+                if (info.checkVariant(TJS_N("surroundColors"), var))
+                {
+                    std::vector<tjs_uint32> colors;
+                    getColors(var, colors);
+                    if (!colors.empty())
+                    {
+                        plutovg_gradient_stop_t stop;
+                        stop.offset = 1.0f;
+                        plutovg_color_init_argb32(&stop.color, colors[0]);
+                        gd->stops.push_back(stop);
+                    }
+                }
+                return new SoftBrush(gd);
             }
             case BrushTypeLinearGradient:
             {
-                BLGradient gradient(BL_GRADIENT_TYPE_LINEAR);
+                auto* gd = new SoftBrush::GradientData();
+                gd->isLinear = true;
+                gd->spread = PLUTOVG_SPREAD_METHOD_PAD;
 
                 tTJSVariant var;
-                if (info.checkVariant(TJS_N("point1"), var) &&
-                    info.checkVariant(TJS_N("point2"), var))
+                if (info.checkVariant(TJS_N("point1"), var))
                 {
                     PointF p1 = getPoint(var);
                     info.checkVariant(TJS_N("point2"), var);
                     PointF p2 = getPoint(var);
-                    gradient.setValues(BLLinearGradientValues(p1.x, p1.y, p2.x, p2.y));
+                    gd->x1 = p1.x;
+                    gd->y1 = p1.y;
+                    gd->x2 = p2.x;
+                    gd->y2 = p2.y;
                 }
                 else if (info.checkVariant(TJS_N("rect"), var))
                 {
                     RectF rect = getRect(var);
-                    float angle = info.getRealValue(TJS_N("angle"), 0.0f);
-
-                    float rad = angle * M_PI / 180.0f;
+                    float angle = (float)info.getRealValue(TJS_N("angle"), 0.0f);
+                    float rad = angle * (float)M_PI / 180.0f;
                     float cx = rect.x + rect.w / 2;
                     float cy = rect.y + rect.h / 2;
-                    float length = std::sqrt(rect.w * rect.w + rect.h * rect.h) / 2;
-
-                    gradient.setValues(BLLinearGradientValues(
-                        cx - std::cos(rad) * length, cy - std::sin(rad) * length,
-                        cx + std::cos(rad) * length, cy + std::sin(rad) * length));
+                    float length = sqrtf(rect.w * rect.w + rect.h * rect.h) / 2;
+                    gd->x1 = cx - cosf(rad) * length;
+                    gd->y1 = cy - sinf(rad) * length;
+                    gd->x2 = cx + cosf(rad) * length;
+                    gd->y2 = cy + sinf(rad) * length;
                 }
                 else
                 {
                     TVPThrowExceptionMessage(TJS_N("must set point1,2 or rect"));
                 }
 
-                gradient.addStop(
-                    0.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color1"), 0)));
-                gradient.addStop(
-                    1.0, BLRgba32((tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color2"), 0)));
+                plutovg_gradient_stop_t s0, s1;
+                s0.offset = 0.0f;
+                plutovg_color_init_argb32(&s0.color,
+                                          (tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color1"), 0));
+                gd->stops.push_back(s0);
+                s1.offset = 1.0f;
+                plutovg_color_init_argb32(&s1.color,
+                                          (tjs_uint32)(tjs_int)info.getIntValue(TJS_N("color2"), 0));
+                gd->stops.push_back(s1);
 
-                // 共通パラメータ TODO
-                // commonBrushParameter(info, pbrush);
-
-                return new BLBrush(gradient);
+                return new SoftBrush(gd);
             }
             default:
                 TVPThrowExceptionMessage(TJS_N("invalid brush type"));
                 break;
         }
     }
-    return new BLBrush();
+    return new SoftBrush();
 }
 
-/**
- * ブラシの追加
- * @param colorOrBrush ARGB色指定またはブラシ情報（辞書）
- * @param ox 表示オフセットX
- * @param oy 表示オフセットY
- */
+// ============================================================
+// Appearance::addBrush / addPen
+// ============================================================
 void Appearance::addBrush(tTJSVariant colorOrBrush, tjs_real ox, tjs_real oy)
 {
     drawInfos.push_back(DrawInfo(ox, oy, createBrush(colorOrBrush), 1));
 }
 
-/**
- * ペンの追加
- * @param colorOrBrush ARGB色指定またはブラシ情報（辞書）
- * @param widthOrOption ペン幅またはペン情報（辞書）
- * @param ox 表示オフセットX
- * @param oy 表示オフセットY
- */
-void Appearance::addPen(tTJSVariant colorOrBrush,
-                        tTJSVariant widthOrOption,
-                        tjs_real ox,
+void Appearance::addPen(tTJSVariant colorOrBrush, tTJSVariant widthOrOption, tjs_real ox,
                         tjs_real oy)
 {
-    BLPen* pen = nullptr;
-    tjs_real width = 1.0;
+    SoftPen* pen = nullptr;
+    tjs_real w = 1.0;
     if (colorOrBrush.Type() == tvtObject)
     {
-        BLBrush* brush = createBrush(colorOrBrush);
-        pen = new BLPen(brush, width);
-        delete brush;
+        SoftBrush* brush = createBrush(colorOrBrush);
+        pen = new SoftPen(brush, w);
     }
     else
     {
-        pen = new BLPen((tjs_uint32)(tjs_int)colorOrBrush, width);
+        pen = new SoftPen((tjs_uint32)(tjs_int)colorOrBrush, w);
     }
+
     if (widthOrOption.Type() != tvtObject)
     {
-        pen->strokeWidth = ((tjs_real)(tjs_real)widthOrOption);
+        pen->strokeWidth = (tjs_real)widthOrOption;
     }
     else
     {
         ncbPropAccessor info(widthOrOption);
-        tjs_real penWidth = 1.0;
         tTJSVariant var;
 
-        // SetWidth
         if (info.checkVariant(TJS_N("width"), var))
-        {
-            penWidth = (tjs_real)(tjs_real)var;
-        }
-        pen->strokeWidth = penWidth;
+            pen->strokeWidth = (tjs_real)var;
 
-        // SetAlignment
-        if (info.checkVariant(TJS_N("alignment"), var))
-        {
-            // TODO
-        }
-        // SetCompoundArray
-        if (info.checkVariant(TJS_N("compoundArray"), var))
-        {
-            // TODO
-        }
-
-        // SetDashCap
-        if (info.checkVariant(TJS_N("dashCap"), var))
-        {
-            // TODO
-        }
-        // SetDashOffset
         if (info.checkVariant(TJS_N("dashOffset"), var))
-        {
-            pen->strokeOptions.dashOffset = (tjs_real)(tjs_real)var;
-        }
+            pen->dashOffset = (float)(tjs_real)var;
 
-        // SetDashStyle
-        // SetDashPattern
         if (info.checkVariant(TJS_N("dashStyle"), var))
         {
             if (IsArray(var))
             {
                 std::vector<tjs_real> reals;
                 getReals(var, reals);
-                BLArray<double> bla;
-                for (size_t i = 0; i < reals.size(); i++)
-                {
-                    bla.append(reals.at(i));
-                }
-                pen->strokeOptions.dashArray = bla;
+                pen->dashArray.clear();
+                for (auto v : reals)
+                    pen->dashArray.push_back((float)v);
             }
             else
             {
                 DashStyle dashStyle = (DashStyle)(tjs_int)var;
-                BLArray<double> bla;
+                pen->dashArray.clear();
                 switch (dashStyle)
                 {
-
-                    case DashStyleSolid:
-                        break;
                     case DashStyleDash:
-                        bla.append(5.0f);
-                        bla.append(3.0f);
+                        pen->dashArray = {5.0f, 3.0f};
                         break;
                     case DashStyleDot:
-                        bla.append(1.0f);
-                        bla.append(3.0f);
+                        pen->dashArray = {1.0f, 3.0f};
                         break;
                     case DashStyleDashDot:
-                        bla.append(5.0f);
-                        bla.append(3.0f);
-                        bla.append(1.0f);
-                        bla.append(3.0f);
+                        pen->dashArray = {5.0f, 3.0f, 1.0f, 3.0f};
                         break;
                     case DashStyleDashDotDot:
-                        bla.append(5.0f);
-                        bla.append(3.0f);
-                        bla.append(1.0f);
-                        bla.append(3.0f);
-                        bla.append(1.0f);
-                        bla.append(3.0f);
+                        pen->dashArray = {5.0f, 3.0f, 1.0f, 3.0f, 1.0f, 3.0f};
                         break;
                     default:
                         break;
                 }
-                pen->strokeOptions.dashArray = bla;
             }
         }
 
-        // SetStartCap
-        // SetCustomStartCap
         if (info.checkVariant(TJS_N("startCap"), var))
         {
-            BLStrokeCap retCap;
-            BLPath custom;
-            if (getLineCap(var, retCap, custom, penWidth))
+            plutovg_line_cap_t cap;
+            plutovg_path_t* custom = nullptr;
+            if (getLineCap(var, cap, custom, pen->strokeWidth))
             {
-                if (custom.empty())
-                    pen->strokeOptions.startCap = retCap;
+                if (!custom)
+                    pen->lineCap = cap;
                 else
                 {
                     pen->startCapType = 1;
-                    pen->startCap = custom;
+                    pen->startCapPath = custom;
                 }
             }
         }
 
-        // SetEndCap
-        // SetCustomEndCap
         if (info.checkVariant(TJS_N("endCap"), var))
         {
-            BLStrokeCap retCap;
-            BLPath custom;
-            if (getLineCap(var, retCap, custom, penWidth))
+            plutovg_line_cap_t cap;
+            plutovg_path_t* custom = nullptr;
+            if (getLineCap(var, cap, custom, pen->strokeWidth))
             {
-                if (custom.empty())
-                    pen->strokeOptions.endCap = retCap;
+                if (!custom)
+                    pen->lineCap = cap;
                 else
                 {
                     pen->endCapType = 1;
-                    pen->endCap = custom;
+                    pen->endCapPath = custom;
                 }
             }
         }
 
-        // SetLineJoin
         if (info.checkVariant(TJS_N("lineJoin"), var))
         {
             LineJoin lineJoin = (LineJoin)(tjs_int)var;
             switch (lineJoin)
             {
                 case LineJoinMiter:
-                {
-                    pen->strokeOptions.join = BL_STROKE_JOIN_MITER_BEVEL;
-                    break;
-                }
-                case LineJoinBevel:
-                {
-                    pen->strokeOptions.join = BL_STROKE_JOIN_BEVEL;
-                    break;
-                }
-                case LineJoinRound:
-                {
-                    pen->strokeOptions.join = BL_STROKE_JOIN_ROUND;
-                    break;
-                }
                 case LineJoinMiterClipped:
-                {
-                    pen->strokeOptions.join = BL_STROKE_JOIN_MITER_CLIP;
+                    pen->lineJoin = PLUTOVG_LINE_JOIN_MITER;
                     break;
-                }
+                case LineJoinBevel:
+                    pen->lineJoin = PLUTOVG_LINE_JOIN_BEVEL;
+                    break;
+                case LineJoinRound:
+                    pen->lineJoin = PLUTOVG_LINE_JOIN_ROUND;
+                    break;
                 default:
-                    pen->strokeOptions.join = BL_STROKE_JOIN_MITER_BEVEL;
+                    pen->lineJoin = PLUTOVG_LINE_JOIN_MITER;
             }
-            pen->strokeOptions.join = (LineJoin)(tjs_int)var;
         }
 
-        // SetMiterLimit
         if (info.checkVariant(TJS_N("miterLimit"), var))
-        {
-            pen->strokeOptions.miterLimit = (tjs_real)(tjs_real)var;
-        }
+            pen->miterLimit = (float)(tjs_real)var;
     }
     drawInfos.push_back(DrawInfo(ox, oy, pen, 0));
 }
 
-bool Appearance::getLineCap(tTJSVariant& in, BLStrokeCap& cap, BLPath& custom, tjs_real pw)
+bool Appearance::getLineCap(tTJSVariant& in, plutovg_line_cap_t& cap, plutovg_path_t*& custom,
+                            tjs_real pw)
 {
+    custom = nullptr;
     switch (in.Type())
     {
         case tvtVoid:
@@ -1136,30 +852,17 @@ bool Appearance::getLineCap(tTJSVariant& in, BLStrokeCap& cap, BLPath& custom, t
             switch (lcap)
             {
                 case LineCapFlat:
-                {
-                    cap = BL_STROKE_CAP_BUTT;
+                    cap = PLUTOVG_LINE_CAP_BUTT;
                     break;
-                }
                 case LineCapRound:
-                {
-                    cap = BL_STROKE_CAP_ROUND;
+                    cap = PLUTOVG_LINE_CAP_ROUND;
                     break;
-                }
                 case LineCapSquare:
-                {
-                    cap = BL_STROKE_CAP_SQUARE;
+                    cap = PLUTOVG_LINE_CAP_SQUARE;
                     break;
-                }
-                case LineCapTriangle:
-                {
-                    cap = BL_STROKE_CAP_TRIANGLE;
-                    break;
-                }
                 default:
-                {
-                    cap = BL_STROKE_CAP_BUTT;
+                    cap = PLUTOVG_LINE_CAP_BUTT;
                     break;
-                }
             }
             break;
         }
@@ -1169,157 +872,99 @@ bool Appearance::getLineCap(tTJSVariant& in, BLStrokeCap& cap, BLPath& custom, t
             tjs_real width = pw, height = pw;
             tTJSVariant var;
             if (info.checkVariant(TJS_N("width"), var))
-                width = ((tjs_real)(tjs_real)var) * pw;
+                width = ((tjs_real)var) * pw;
             if (info.checkVariant(TJS_N("height"), var))
-                height = ((tjs_real)(tjs_real)var) * pw;
-            bool filled = (bool)info.getIntValue(TJS_N("filled"), 1);
-            tjs_real middleInset = 0;
-            if (info.checkVariant(TJS_N("middleInset"), var)) // TODO
-                middleInset = (tjs_real)(tjs_real)var;
+                height = ((tjs_real)var) * pw;
 
+            custom = plutovg_path_create();
+            plutovg_path_move_to(custom, (float)(-width / 2), (float)(-height));
+            plutovg_path_line_to(custom, 0, 0);
+            plutovg_path_line_to(custom, (float)(width / 2), (float)(-height));
+
+            bool filled = (bool)info.getIntValue(TJS_N("filled"), 1);
             if (filled)
-            {
-                custom.moveTo(-width / 2, -height);
-                custom.lineTo(0, 0);
-                custom.lineTo(width / 2, -height);
-                custom.close();
-            }
-            else
-            {
-                custom.moveTo(-width / 2, -height);
-                custom.lineTo(0, 0);
-                custom.lineTo(width / 2, -height);
-            }
+                plutovg_path_close(custom);
+            break;
         }
-        break;
         default:
             return false;
     }
     return true;
 }
 
+// ============================================================
+// Path implementation
+// ============================================================
 Path::Path()
 {
+    path = plutovg_path_create();
 }
 
 Path::~Path()
 {
+    if (path)
+        plutovg_path_destroy(path);
 }
 
-/**
- * 現在の図形を閉じずに次の図形を開始します
- */
 void Path::startFigure()
 {
     figureStarted = true;
 }
 
-/**
- * 現在の図形を閉じます
- */
 void Path::closeFigure()
 {
-    path.close();
+    plutovg_path_close(path);
 }
 
-/**
- * 円弧の描画
- * @param x 左上座標
- * @param y 左上座標
- * @param width 横幅
- * @param height 縦幅
- * @param startAngle 時計方向円弧開始位置
- * @param sweepAngle 描画角度
- */
-void Path::drawArc(tjs_real x,
-                   tjs_real y,
-                   tjs_real width,
-                   tjs_real height,
-                   tjs_real startAngle,
+void Path::drawArc(tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_real startAngle,
                    tjs_real sweepAngle)
 {
-    float startRad = startAngle * M_PI / 180.0f;
-    float sweepRad = sweepAngle * M_PI / 180.0f;
-    float rx = width / 2.0f;
-    float ry = height / 2.0f;
-    float cx = x + rx;
-    float cy = y + ry;
-    path.arcTo(cx, cy, rx, ry, startRad, sweepRad);
+    float startRad = (float)(startAngle * M_PI / 180.0);
+    float sweepRad = (float)(sweepAngle * M_PI / 180.0);
+    float rx = (float)(width / 2.0);
+    float ry = (float)(height / 2.0);
+    float cx = (float)(x + rx);
+    float cy = (float)(y + ry);
+    pathEllipticArc(path, cx, cy, rx, ry, startRad, sweepRad, !figureStarted);
+    figureStarted = true;
 }
 
-/**
- * ベジェ曲線の描画
- * @param app アピアランス
- * @param x1
- * @param y1
- * @param x2
- * @param y2
- * @param x3
- * @param y3
- * @param x4
- * @param y4
- */
-void Path::drawBezier(tjs_real x1,
-                      tjs_real y1,
-                      tjs_real x2,
-                      tjs_real y2,
-                      tjs_real x3,
-                      tjs_real y3,
-                      tjs_real x4,
-                      tjs_real y4)
+void Path::drawBezier(tjs_real x1, tjs_real y1, tjs_real x2, tjs_real y2, tjs_real x3,
+                      tjs_real y3, tjs_real x4, tjs_real y4)
 {
     if (!figureStarted)
     {
-        path.moveTo(x1, y1);
+        plutovg_path_move_to(path, (float)x1, (float)y1);
         figureStarted = true;
     }
-    path.cubicTo(x2, y2, x3, y3, x4, y4);
+    plutovg_path_cubic_to(path, (float)x2, (float)y2, (float)x3, (float)y3, (float)x4, (float)y4);
 }
 
-/**
- * 連続ベジェ曲線の描画
- * @param app アピアランス
- * @param points 点の配列
- */
 void Path::drawBeziers(tTJSVariant points)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
-
     if (ps.size() < 4 || (ps.size() - 1) % 3 != 0)
         return;
 
     if (!figureStarted && !ps.empty())
     {
-        path.moveTo(ps[0].x, ps[0].y);
+        plutovg_path_move_to(path, (float)ps[0].x, (float)ps[0].y);
         figureStarted = true;
     }
 
-    for (size_t i = 1; i < ps.size(); i += 3)
+    for (size_t i = 1; i + 2 < ps.size(); i += 3)
     {
-        if (i + 2 < ps.size())
-        {
-            path.cubicTo(ps[i].x, ps[i].y, ps[i + 1].x, ps[i + 1].y, ps[i + 2].x, ps[i + 2].y);
-        }
+        plutovg_path_cubic_to(path, (float)ps[i].x, (float)ps[i].y, (float)ps[i + 1].x,
+                              (float)ps[i + 1].y, (float)ps[i + 2].x, (float)ps[i + 2].y);
     }
 }
 
-/**
- * Closed cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- */
 void Path::drawClosedCurve(tTJSVariant points)
 {
     drawClosedCurve2(points, 0.5);
 }
 
-/**
- * Closed cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @pram tension tension
- */
 void Path::drawClosedCurve2(tTJSVariant points, tjs_real tension)
 {
     std::vector<PointF> ps;
@@ -1327,7 +972,6 @@ void Path::drawClosedCurve2(tTJSVariant points, tjs_real tension)
     if (ps.size() < 2)
         return;
 
-    // 计算Cardinal spline控制点
     for (size_t i = 0; i < ps.size(); i++)
     {
         PointF p0 = ps[(i + ps.size() - 1) % ps.size()];
@@ -1335,50 +979,30 @@ void Path::drawClosedCurve2(tTJSVariant points, tjs_real tension)
         PointF p2 = ps[(i + 1) % ps.size()];
         PointF p3 = ps[(i + 2) % ps.size()];
 
-        // Cardinal spline公式
         PointF cp1 = p1 + (p2 - p0) * tension / 3.0;
         PointF cp2 = p2 - (p3 - p1) * tension / 3.0;
 
         if (i == 0)
         {
-            path.moveTo(p1.x, p1.y);
+            plutovg_path_move_to(path, (float)p1.x, (float)p1.y);
             figureStarted = true;
         }
-        path.cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+        plutovg_path_cubic_to(path, (float)cp1.x, (float)cp1.y, (float)cp2.x, (float)cp2.y,
+                              (float)p2.x, (float)p2.y);
     }
-
-    path.close();
+    plutovg_path_close(path);
 }
 
-/**
- * cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- */
 void Path::drawCurve(tTJSVariant points)
 {
-    drawCurve3(points, 0, 0, -1);
+    drawCurve3(points, 0, -1, 0.5);
 }
 
-/**
- * cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @parma tension tension
- */
 void Path::drawCurve2(tTJSVariant points, tjs_real tension)
 {
-    drawCurve3(points, tension, 0, -1);
+    drawCurve3(points, 0, -1, tension);
 }
 
-/**
- * cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @param offset
- * @param numberOfSegments
- * @param tension tension
- */
 void Path::drawCurve3(tTJSVariant points, int offset, int numberOfSegments, tjs_real tension)
 {
     std::vector<PointF> ps;
@@ -1391,9 +1015,9 @@ void Path::drawCurve3(tTJSVariant points, int offset, int numberOfSegments, tjs_
     if (offset < 0 || offset + numberOfSegments >= (int)ps.size())
         return;
 
-    if (!figureStarted && offset < ps.size())
+    if (!figureStarted && offset < (int)ps.size())
     {
-        path.moveTo(ps[offset].x, ps[offset].y);
+        plutovg_path_move_to(path, (float)ps[offset].x, (float)ps[offset].y);
         figureStarted = true;
     }
 
@@ -1402,104 +1026,61 @@ void Path::drawCurve3(tTJSVariant points, int offset, int numberOfSegments, tjs_
         PointF p0 = (i > 0) ? ps[i - 1] : ps[i];
         PointF p1 = ps[i];
         PointF p2 = ps[i + 1];
-        PointF p3 = (i + 2 < ps.size()) ? ps[i + 2] : ps[i + 1];
+        PointF p3 = (i + 2 < (int)ps.size()) ? ps[i + 2] : ps[i + 1];
 
         PointF cp1 = p1 + (p2 - p0) * tension / 3.0f;
         PointF cp2 = p2 - (p3 - p1) * tension / 3.0f;
 
-        path.cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+        plutovg_path_cubic_to(path, (float)cp1.x, (float)cp1.y, (float)cp2.x, (float)cp2.y,
+                              (float)p2.x, (float)p2.y);
     }
 }
 
-/**
- * 円錐の描画
- * @param x 左上座標
- * @param y 左上座標
- * @param width 横幅
- * @param height 縦幅
- * @param startAngle 時計方向円弧開始位置
- * @param sweepAngle 描画角度
- */
-void Path::drawPie(tjs_real x,
-                   tjs_real y,
-                   tjs_real width,
-                   tjs_real height,
-                   tjs_real startAngle,
+void Path::drawPie(tjs_real x, tjs_real y, tjs_real width, tjs_real height, tjs_real startAngle,
                    tjs_real sweepAngle)
 {
-    float rx = width / 2.0f;
-    float ry = height / 2.0f;
-    float cx = x + rx;
-    float cy = y + ry;
+    float rx = (float)(width / 2.0);
+    float ry = (float)(height / 2.0);
+    float cx = (float)(x + rx);
+    float cy = (float)(y + ry);
+    float startRad = (float)(startAngle * M_PI / 180.0);
+    float sweepRad = (float)(sweepAngle * M_PI / 180.0);
 
-    float startRad = startAngle * M_PI / 180.0f;
-    float sweepRad = sweepAngle * M_PI / 180.0f;
-    float endRad = startRad + sweepRad;
-
-    // 移动到中心
-    path.moveTo(cx, cy);
+    plutovg_path_move_to(path, cx, cy);
     figureStarted = true;
 
-    // 画到起始点
-    float startX = cx + rx * cos(startRad);
-    float startY = cy + ry * sin(startRad);
-    path.lineTo(startX, startY);
-
-    // 画圆弧
-    path.arcTo(cx, cy, rx, ry, startRad, sweepRad);
-
-    // 回到中心并闭合
-    path.lineTo(cx, cy);
-    path.close();
+    float startX = cx + rx * cosf(startRad);
+    float startY = cy + ry * sinf(startRad);
+    plutovg_path_line_to(path, startX, startY);
+    pathEllipticArc(path, cx, cy, rx, ry, startRad, sweepRad);
+    plutovg_path_line_to(path, cx, cy);
+    plutovg_path_close(path);
 }
 
-/**
- * 楕円の描画
- * @param app アピアランス
- * @param x
- * @param y
- * @param width
- * @param height
- */
 void Path::drawEllipse(tjs_real x, tjs_real y, tjs_real width, tjs_real height)
 {
-    float cx = x + width / 2.0f;
-    float cy = y + height / 2.0f;
-    float rx = width / 2.0f;
-    float ry = height / 2.0f;
-
-    BLEllipse ellipse(cx, cy, rx, ry);
-    path.addEllipse(ellipse);
-    figureStarted = false; // 椭圆是独立图形
+    float cx = (float)(x + width / 2.0);
+    float cy = (float)(y + height / 2.0);
+    float rx = (float)(width / 2.0);
+    float ry = (float)(height / 2.0);
+    plutovg_path_add_ellipse(path, cx, cy, rx, ry);
+    figureStarted = false;
 }
 
-/**
- * 線分の描画
- * @param app アピアランス
- * @param x1 始点X座標
- * @param y1 始点Y座標
- * @param x2 終点X座標
- * @param y2 終点Y座標
- */
 void Path::drawLine(tjs_real x1, tjs_real y1, tjs_real x2, tjs_real y2)
 {
     if (!figureStarted)
     {
-        path.moveTo(x1, y1);
+        plutovg_path_move_to(path, (float)x1, (float)y1);
         figureStarted = true;
     }
     else
     {
-        path.lineTo(x1, y1);
+        plutovg_path_line_to(path, (float)x1, (float)y1);
     }
-    path.lineTo(x2, y2);
+    plutovg_path_line_to(path, (float)x2, (float)y2);
 }
 
-/**
- * 連続線分の描画
- * @param app アピアランス
- * @param points 点の配列
- */
 void Path::drawLines(tTJSVariant points)
 {
     std::vector<PointF> ps;
@@ -1509,22 +1090,14 @@ void Path::drawLines(tTJSVariant points)
 
     if (!figureStarted)
     {
-        path.moveTo(ps[0].x, ps[0].y);
+        plutovg_path_move_to(path, (float)ps[0].x, (float)ps[0].y);
         figureStarted = true;
     }
 
     for (size_t i = 1; i < ps.size(); i++)
-    {
-        path.lineTo(ps[i].x, ps[i].y);
-    }
+        plutovg_path_line_to(path, (float)ps[i].x, (float)ps[i].y);
 }
 
-/**
- * 多角形の描画
- * @param app アピアランス
- * @param points 点の配列
-
- */
 void Path::drawPolygon(tTJSVariant points)
 {
     std::vector<PointF> ps;
@@ -1532,74 +1105,164 @@ void Path::drawPolygon(tTJSVariant points)
     if (ps.empty())
         return;
 
-    path.moveTo(ps[0].x, ps[0].y);
+    plutovg_path_move_to(path, (float)ps[0].x, (float)ps[0].y);
     figureStarted = true;
 
     for (size_t i = 1; i < ps.size(); i++)
-    {
-        path.lineTo(ps[i].x, ps[i].y);
-    }
-
-    path.close();
+        plutovg_path_line_to(path, (float)ps[i].x, (float)ps[i].y);
+    plutovg_path_close(path);
 }
 
-/**
- * 矩形の描画
- * @param app アピアランス
- * @param x
- * @param y
- * @param width
- * @param height
- */
 void Path::drawRectangle(tjs_real x, tjs_real y, tjs_real width, tjs_real height)
 {
-    BLRect rect(x, y, width, height);
-    path.addRect(rect, BL_GEOMETRY_DIRECTION_CW);
+    plutovg_path_add_rect(path, (float)x, (float)y, (float)width, (float)height);
     figureStarted = false;
 }
 
-/**
- * 複数矩形の描画
- * @param app アピアランス
- * @param rects 矩形情報の配列
- */
 void Path::drawRectangles(tTJSVariant rects)
 {
     std::vector<RectF> rs;
     getRects(rects, rs);
-
     for (const auto& rect : rs)
-    {
-        path.addRect(BLRect(rect.x, rect.y, rect.w, rect.h), BL_GEOMETRY_DIRECTION_CW);
-    }
+        plutovg_path_add_rect(path, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
     figureStarted = false;
 }
 
-// --------------------------------------------------------
-// フォント描画系
-// --------------------------------------------------------
+// ============================================================
+// GdipImage implementation
+// ============================================================
+GdipImage::~GdipImage()
+{
+    if (_surface)
+        plutovg_surface_destroy(_surface);
+    for (auto& info : vectorGraph)
+    {
+        delete info.app;
+        if (info.path)
+            plutovg_path_destroy(info.path);
+    }
+}
 
+GdipImage* GdipImage::Clone()
+{
+    GdipImage* cloned = nullptr;
+    if (type == 0)
+    {
+        if (_surface)
+        {
+            int w = plutovg_surface_get_width(_surface);
+            int h = plutovg_surface_get_height(_surface);
+            plutovg_surface_t* newSurf = plutovg_surface_create(w, h);
+            // Copy pixel data
+            unsigned char* src = plutovg_surface_get_data(_surface);
+            unsigned char* dst = plutovg_surface_get_data(newSurf);
+            int stride = plutovg_surface_get_stride(_surface);
+            memcpy(dst, src, stride * h);
+            cloned = new GdipImage(newSurf);
+            plutovg_surface_destroy(newSurf); // GdipImage constructor references it
+        }
+    }
+    else if (type == 1)
+    {
+        cloned = new GdipImage(width, height);
+        for (auto& info : vectorGraph)
+        {
+            GdipImage::Info newInfo;
+            newInfo.app = info.app ? info.app->Clone() : nullptr;
+            newInfo.path = info.path ? plutovg_path_clone(info.path) : nullptr;
+            cloned->vectorGraph.push_back(newInfo);
+        }
+        cloned->transMtx = transMtx;
+    }
+    return cloned;
+}
+
+RectF GdipImage::GetBounds()
+{
+    if (type == 0)
+    {
+        if (!_surface)
+            return RectF(0, 0, 0, 0);
+        return RectF(0, 0, (tjs_real)width, (tjs_real)height);
+    }
+    else if (type == 1)
+    {
+        RectF last(0, 0, 0, 0);
+        for (auto& itm : vectorGraph)
+        {
+            if (itm.path && !pathIsEmpty(itm.path))
+            {
+                plutovg_rect_t ext;
+                plutovg_path_extents(itm.path, &ext, false);
+                RectF org = last;
+                RectF::Union(last, org, RectF(ext.x, ext.y, ext.w, ext.h));
+            }
+        }
+        return last;
+    }
+    return RectF(0, 0, 0, 0);
+}
+
+tjs_uint GdipImage::GetFlags()
+{
+    if (type == 0)
+    {
+        if (_surface)
+            return ImageFlagsHasAlpha | ImageFlagsColorSpaceRGB;
+    }
+    else if (type == 1)
+        return ImageFlagsReadOnly | ImageFlagsColorSpaceRGB;
+    return ImageFlagsNone;
+}
+
+Status GdipImage::RotateFlip(RotateFlipType rftype)
+{
+    switch (rftype)
+    {
+        case RotateNoneFlipNone:
+            return Ok;
+        case Rotate90FlipNone:
+            plutovg_matrix_init_rotate(&transMtx, (float)(M_PI * 0.5));
+            break;
+        case Rotate180FlipNone:
+            plutovg_matrix_init_rotate(&transMtx, (float)M_PI);
+            break;
+        case Rotate270FlipNone:
+            plutovg_matrix_init_rotate(&transMtx, (float)(M_PI * 1.5));
+            break;
+        case RotateNoneFlipX:
+            plutovg_matrix_init_scale(&transMtx, -1, 1);
+            break;
+        case RotateNoneFlipY:
+            plutovg_matrix_init_scale(&transMtx, 1, -1);
+            break;
+        default:
+            return NotImplemented;
+    }
+    return Ok;
+}
+
+// ============================================================
+// LayerExDraw core implementation
+// ============================================================
 void LayerExDraw::updateRect(RectF& rect)
 {
     if (updateWhenDraw)
     {
-        // 更新処理
-        tTVPRect rc(rect.x, rect.y, rect.x + rect.w, rect.y + rect.h);
+        tTVPRect rc((tjs_int)rect.x, (tjs_int)rect.y, (tjs_int)(rect.x + rect.w),
+                    (tjs_int)(rect.y + rect.h));
         _this->Update(rc);
     }
 }
 
-/**
- * コンストラクタ
- */
 LayerExDraw::LayerExDraw(DispatchT obj)
   : layerExBase_GL(obj),
     width(-1),
     height(-1),
     pitch(0),
     buffer(NULL),
-    bitmap(NULL),
-    context(NULL),
+    surface(NULL),
+    canvas(NULL),
     metaGraphics(NULL),
     clipLeft(-1),
     clipTop(-1),
@@ -1609,302 +1272,239 @@ LayerExDraw::LayerExDraw(DispatchT obj)
     textRenderingHint(TextRenderingHintAntiAlias),
     updateWhenDraw(true)
 {
-    viewTransform.reset();
-    transform.reset();
-    calcTransform.reset();
+    plutovg_matrix_init_identity(&viewTransform);
+    plutovg_matrix_init_identity(&transform);
+    plutovg_matrix_init_identity(&calcTransform);
 }
 
-/**
- * デストラクタ
- */
 LayerExDraw::~LayerExDraw()
 {
     destroyRecord();
-    if (context)
-        delete context;
-    if (bitmap)
-        delete bitmap;
+    if (canvas)
+        plutovg_canvas_destroy(canvas);
+    if (surface)
+        plutovg_surface_destroy(surface);
 }
 
 void LayerExDraw::reset()
 {
     layerExBase_GL::reset();
-    if (!(context && width == _width && height == _height && pitch == _pitch && buffer == _buffer))
+    if (!(canvas && width == _width && height == _height && pitch == _pitch && buffer == _buffer))
     {
-        if (context)
-            delete context;
-        if (bitmap)
-            delete bitmap;
+        if (canvas)
+        {
+            plutovg_canvas_destroy(canvas);
+            canvas = NULL;
+        }
+        if (surface)
+        {
+            plutovg_surface_destroy(surface);
+            surface = NULL;
+        }
         width = _width;
         height = _height;
         pitch = _pitch;
         buffer = _buffer;
-        bitmap = new BLImage;
-        bitmap->createFromData(width, height, BL_FORMAT_PRGB32, buffer, pitch);
-        context = new BLContext;
-        context->setCompOp(BL_COMP_OP_SRC_OVER);
-
-        clipWidth = clipHeight = -1;
+        if (buffer && width > 0 && height > 0)
+        {
+            surface = plutovg_surface_create_for_data(buffer, width, height, pitch);
+            canvas = plutovg_canvas_create(surface);
+            plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC_OVER);
+        }
+        clipLeft = clipTop = clipWidth = clipHeight = -1;
     }
-    if (_clipLeft != clipLeft || _clipTop != clipTop || _clipWidth != clipWidth ||
-        _clipHeight != clipHeight)
+    if (canvas && (_clipLeft != clipLeft || _clipTop != clipTop || _clipWidth != clipWidth ||
+                   _clipHeight != clipHeight))
     {
         clipLeft = _clipLeft;
         clipTop = _clipTop;
         clipWidth = _clipWidth;
         clipHeight = _clipHeight;
-        BLRect clipRect(clipLeft, clipTop, clipWidth, clipHeight);
-        context->clipToRect(clipRect);
+        plutovg_canvas_clip_rect(canvas, (float)clipLeft, (float)clipTop, (float)clipWidth,
+                                 (float)clipHeight);
     }
 }
 
 void LayerExDraw::updateViewTransform()
 {
-    calcTransform.reset();
-    calcTransform.transform(transform);
-    calcTransform.transform(viewTransform);
+    plutovg_matrix_init_identity(&calcTransform);
+    plutovg_matrix_t temp = calcTransform;
+    plutovg_matrix_multiply(&calcTransform, &transform, &viewTransform);
     redrawRecord();
 }
 
-/**
- * 表示トランスフォームの指定
- * @param matrix トランスフォームマトリックス
- */
 void LayerExDraw::setViewTransform(const GdipMatrix* trans)
 {
-    if (!viewTransform.equals(trans->_core))
+    if (memcmp(&viewTransform, &trans->_core, sizeof(plutovg_matrix_t)) != 0)
     {
-        viewTransform.reset();
-        viewTransform.transform(trans->_core);
+        viewTransform = trans->_core;
         updateViewTransform();
     }
 }
 
 void LayerExDraw::resetViewTransform()
 {
-    viewTransform.reset();
+    plutovg_matrix_init_identity(&viewTransform);
     updateViewTransform();
 }
 
 void LayerExDraw::rotateViewTransform(tjs_real angle)
 {
-    viewTransform = BLMatrix2D::makeRotation(angle);
+    plutovg_matrix_init_rotate(&viewTransform, (float)angle);
     updateViewTransform();
 }
 
 void LayerExDraw::scaleViewTransform(tjs_real sx, tjs_real sy)
 {
-    viewTransform = BLMatrix2D::makeScaling(sx, sy);
+    plutovg_matrix_init_scale(&viewTransform, (float)sx, (float)sy);
     updateViewTransform();
 }
 
 void LayerExDraw::translateViewTransform(tjs_real dx, tjs_real dy)
 {
-    viewTransform = BLMatrix2D::makeTranslation(dx, dy);
+    plutovg_matrix_init_translate(&viewTransform, (float)dx, (float)dy);
     updateViewTransform();
 }
 
 void LayerExDraw::updateTransform()
 {
-    calcTransform.reset();
-    calcTransform.transform(transform);
-    calcTransform.transform(viewTransform);
+    plutovg_matrix_multiply(&calcTransform, &transform, &viewTransform);
 }
 
-/**
- * トランスフォームの指定
- * @param matrix トランスフォームマトリックス
- */
 void LayerExDraw::setTransform(const GdipMatrix* trans)
 {
-    if (!transform.equals(trans->_core))
+    if (memcmp(&transform, &trans->_core, sizeof(plutovg_matrix_t)) != 0)
     {
-        transform.reset();
-        transform.transform(trans->_core);
+        transform = trans->_core;
         updateTransform();
     }
 }
 
 void LayerExDraw::resetTransform()
 {
-    transform.reset();
+    plutovg_matrix_init_identity(&transform);
     updateTransform();
 }
 
 void LayerExDraw::rotateTransform(tjs_real angle)
 {
-    transform = BLMatrix2D::makeRotation(angle);
+    plutovg_matrix_init_rotate(&transform, (float)angle);
     updateTransform();
 }
 
 void LayerExDraw::scaleTransform(tjs_real sx, tjs_real sy)
 {
-    transform = BLMatrix2D::makeScaling(sx, sy);
+    plutovg_matrix_init_scale(&transform, (float)sx, (float)sy);
     updateTransform();
 }
 
 void LayerExDraw::translateTransform(tjs_real dx, tjs_real dy)
 {
-    transform = BLMatrix2D::makeTranslation(dx, dy);
+    plutovg_matrix_init_translate(&transform, (float)dx, (float)dy);
     updateTransform();
 }
 
-/**
- * 画面の消去
- * @param argb 消去色
- */
+// ============================================================
+// Core drawing: clear, draw, fill, _drawPath
+// ============================================================
 void LayerExDraw::clear(tjs_uint32 argb)
 {
-    context->begin(*bitmap);
-    context->setFillStyle(BLRgba32(argb));
-    context->fillAll();
-    context->end();
+    if (!canvas)
+        return;
+    plutovg_canvas_save(canvas);
+    plutovg_canvas_reset_matrix(canvas);
+    plutovg_color_t color;
+    plutovg_color_init_argb32(&color, argb);
+    plutovg_canvas_set_color(canvas, &color);
+    plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC);
+    plutovg_canvas_fill_rect(canvas, 0, 0, (float)width, (float)height);
+    plutovg_canvas_restore(canvas);
+
     if (metaGraphics)
     {
         createRecord();
-        metaGraphics->bgColor = BLRgba32(argb);
+        metaGraphics->bgColor = argb;
     }
     _this->Update();
 }
 
-/**
- * パスの描画
- * @param app アピアランス
- * @param path パス
- */
 RectF LayerExDraw::drawPath(const Appearance* app, const Path* path)
 {
-    return _drawPath(app, &path->path);
+    return _drawPath(app, path->path);
 }
 
-static RectF transformRect(const BLMatrix2D& matrix, const RectF& rect)
+RectF LayerExDraw::getPathExtents(const Appearance* app, const plutovg_path_t* path)
 {
-    // 获取矩形的四个角点
-    BLPoint corners[4] = {BLPoint(rect.x, rect.y), BLPoint(rect.x + rect.w, rect.y),
-                          BLPoint(rect.x, rect.y + rect.h),
-                          BLPoint(rect.x + rect.w, rect.y + rect.h)};
-
-    // 变换所有点
-    for (int i = 0; i < 4; i++)
-    {
-        matrix.mapPoint(corners[i]);
-    }
-
-    // 计算变换后的边界
-    tjs_real minX = corners[0].x;
-    tjs_real maxX = corners[0].x;
-    tjs_real minY = corners[0].y;
-    tjs_real maxY = corners[0].y;
-
-    for (int i = 1; i < 4; i++)
-    {
-        if (corners[i].x < minX)
-            minX = corners[i].x;
-        if (corners[i].x > maxX)
-            maxX = corners[i].x;
-        if (corners[i].y < minY)
-            minY = corners[i].y;
-        if (corners[i].y > maxY)
-            maxY = corners[i].y;
-    }
-
-    return RectF(minX, minY, maxX - minX, maxY - minY);
-}
-
-/**
- * パスの領域情報を取得
- * @param app 表示表現
- * @param path 描画するパス
- */
-RectF LayerExDraw::getPathExtents(const Appearance* app, const BLPath* path)
-{
-    // TODO
     return RectF();
 }
 
-void LayerExDraw::draw(BLImage* ctx, const BLPen* pen, const BLMatrix2D* matrix, const BLPath* path)
+void LayerExDraw::draw(const SoftPen* pen, const plutovg_matrix_t* matrix,
+                       const plutovg_path_t* path)
 {
-    if (!context || !ctx || !pen)
+    if (!canvas || !pen || !path)
         return;
-    // 开始绘制
-    context->begin(*ctx);
-    // 设置矩阵
-    context->setTransform(calcTransform);
+
+    plutovg_canvas_save(canvas);
+    plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC_OVER);
+
+    // Set transform
+    plutovg_canvas_set_matrix(canvas, &calcTransform);
     if (matrix)
     {
-        context->applyTransform(*matrix);
-    }
-    // 设置描边选项
-    // context->setStrokeOptions(pen->strokeOptions);
-    context->setStrokeWidth(pen->strokeWidth);
-    // 设置描边样式
-    if (pen->brush) // TODO 不知道有啥用
-        ;
-    else
-        context->setStrokeStyle(pen->color);
-    // 描边
-    context->strokePath(*path);
-    // 是否有自定义键帽
-    if (pen->startCapType == 1) // TODO 第一个点得不到啊！！！
-        ;
-    if (pen->endCapType == 1)
-    {
-        BLPoint pt;
-        path->getLastVertex(&pt);
-        BLMatrix2D endPose = BLMatrix2D::makeTranslation(pt.x, pt.y);
-        context->applyTransform(endPose);
-        context->strokePath(pen->endCap);
+        plutovg_canvas_transform(canvas, matrix);
     }
 
-    // 结束
-    context->end();
+    // Set stroke style
+    pen->applyStrokeStyle(canvas);
+    pen->applyStrokeColor(canvas);
+
+    // Stroke
+    plutovg_canvas_stroke_path(canvas, path);
+
+    // Custom end cap
+    if (pen->endCapType == 1 && pen->endCapPath)
+    {
+        // Get last point of path
+        float px, py;
+        plutovg_path_get_current_point(path, &px, &py);
+        plutovg_matrix_t endPose;
+        plutovg_matrix_init_translate(&endPose, px, py);
+        plutovg_canvas_transform(canvas, &endPose);
+        plutovg_canvas_stroke_path(canvas, pen->endCapPath);
+    }
+
+    plutovg_canvas_restore(canvas);
 }
 
-void LayerExDraw::fill(BLImage* ctx,
-                       const BLBrush* brush,
-                       const BLMatrix2D* matrix,
-                       const BLPath* path)
+void LayerExDraw::fill(const SoftBrush* brush, const plutovg_matrix_t* matrix,
+                       const plutovg_path_t* path)
 {
-    if (!context || !ctx || !brush)
+    if (!canvas || !brush || !path)
         return;
-    // 开始绘制
-    context->begin(*bitmap);
-    // 设置矩阵
-    context->setTransform(calcTransform);
-    // 设置填充类型
-    switch (brush->type)
+
+    plutovg_canvas_save(canvas);
+    plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC_OVER);
+
+    // Set transform
+    plutovg_canvas_set_matrix(canvas, &calcTransform);
+    if (matrix)
     {
-        case BrushTypeSolidColor:
-            context->setFillStyle(brush->solidBrush);
-            break;
-        case BrushTypeHatchFill:
-        case BrushTypeTextureFill:
-            context->setFillStyle(brush->textureBrush);
-            break;
-        case BrushTypePathGradient:
-        case BrushTypeLinearGradient:
-            context->setFillStyle(brush->pathGradientBrush);
-            break;
-        default:
-            context->setFillStyle(BLRgba32(0, 0, 0, 255));
-            break;
+        plutovg_canvas_transform(canvas, matrix);
     }
-    // 填充
-    context->fillPath(*path);
-    // 结束
-    context->end();
+
+    // Set fill style
+    brush->applyToCanvas(canvas);
+
+    // Fill
+    plutovg_canvas_fill_path(canvas, path);
+
+    plutovg_canvas_restore(canvas);
 }
 
-/**
- * パスを描画する
- * @param app 表示表現
- * @param path 描画するパス
- * @return 更新領域情報
- */
-RectF LayerExDraw::_drawPath(const Appearance* app, const BLPath* path)
+RectF LayerExDraw::_drawPath(const Appearance* app, const plutovg_path_t* path)
 {
     RectF bounds;
-    if (!context || !app || !path || path->empty())
+    if (!canvas || !app || !path || pathIsEmpty(path))
         return bounds;
 
     for (const auto& drawInfo : app->drawInfos)
@@ -1916,23 +1516,23 @@ RectF LayerExDraw::_drawPath(const Appearance* app, const BLPath* path)
         {
             GdipImage::Info info;
             info.app = app->Clone();
-            info.path = new BLPath;
-            info.path->assign(*path);
+            info.path = plutovg_path_clone(path);
             metaGraphics->vectorGraph.push_back(info);
             metaGraphics->transMtx = transform;
         }
 
-        BLMatrix2D drawMatrix = BLMatrix2D::makeTranslation(drawInfo.ox, drawInfo.oy);
+        plutovg_matrix_t drawMatrix;
+        plutovg_matrix_init_translate(&drawMatrix, (float)drawInfo.ox, (float)drawInfo.oy);
 
         if (drawInfo.type == 0)
         {
-            BLPen* pen = static_cast<BLPen*>(drawInfo.info);
-            draw(bitmap, pen, &drawMatrix, path);
+            SoftPen* pen = static_cast<SoftPen*>(drawInfo.info);
+            draw(pen, &drawMatrix, path);
         }
         else
         {
-            BLBrush* brush = static_cast<BLBrush*>(drawInfo.info);
-            fill(bitmap, brush, &drawMatrix, path);
+            SoftBrush* brush = static_cast<SoftBrush*>(drawInfo.info);
+            fill(brush, &drawMatrix, path);
         }
     }
 
@@ -1940,644 +1540,432 @@ RectF LayerExDraw::_drawPath(const Appearance* app, const BLPath* path)
     return bounds;
 }
 
-/**
- * 円弧の描画
- * @param x 左上座標
- * @param y 左上座標
- * @param width 横幅
- * @param height 縦幅
- * @param startAngle 時計方向円弧開始位置
- * @param sweepAngle 描画角度
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawArc(const Appearance* app,
-                           tjs_real x,
-                           tjs_real y,
-                           tjs_real width,
-                           tjs_real height,
-                           tjs_real startAngle,
-                           tjs_real sweepAngle)
+// ============================================================
+// Shape drawing methods
+// ============================================================
+RectF LayerExDraw::drawArc(const Appearance* app, tjs_real x, tjs_real y, tjs_real w, tjs_real h,
+                           tjs_real startAngle, tjs_real sweepAngle)
 {
-    BLPath path;
-    float rx = width / 2.0f;
-    float ry = height / 2.0f;
-    float cx = x + rx;
-    float cy = y + ry;
-    float startRad = startAngle * M_PI / 180.0f;
-    float sweepRad = sweepAngle * M_PI / 180.0f;
-
-    path.moveTo(cx + rx * cos(startRad), cy + ry * sin(startRad));
-    path.arcTo(cx, cy, rx, ry, startRad, sweepRad);
-
-    return _drawPath(app, &path);
+    plutovg_path_t* p = plutovg_path_create();
+    float rx = (float)(w / 2.0), ry = (float)(h / 2.0);
+    float cx = (float)(x + rx), cy = (float)(y + ry);
+    float startRad = (float)(startAngle * M_PI / 180.0);
+    float sweepRad = (float)(sweepAngle * M_PI / 180.0);
+    float sx = cx + rx * cosf(startRad), sy = cy + ry * sinf(startRad);
+    plutovg_path_move_to(p, sx, sy);
+    pathEllipticArc(p, cx, cy, rx, ry, startRad, sweepRad);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * ベジェ曲線の描画
- * @param app アピアランス
- * @param x1
- * @param y1
- * @param x2
- * @param y2
- * @param x3
- * @param y3
- * @param x4
- * @param y4
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawBezier(const Appearance* app,
-                              tjs_real x1,
-                              tjs_real y1,
-                              tjs_real x2,
-                              tjs_real y2,
-                              tjs_real x3,
-                              tjs_real y3,
-                              tjs_real x4,
-                              tjs_real y4)
+RectF LayerExDraw::drawBezier(const Appearance* app, tjs_real x1, tjs_real y1, tjs_real x2,
+                              tjs_real y2, tjs_real x3, tjs_real y3, tjs_real x4, tjs_real y4)
 {
-    BLPath path;
-    path.moveTo(x1, y1);
-    path.cubicTo(x2, y2, x3, y3, x4, y4);
-
-    return _drawPath(app, &path);
+    plutovg_path_t* p = plutovg_path_create();
+    plutovg_path_move_to(p, (float)x1, (float)y1);
+    plutovg_path_cubic_to(p, (float)x2, (float)y2, (float)x3, (float)y3, (float)x4, (float)y4);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 連続ベジェ曲線の描画
- * @param app アピアランス
- * @param points 点の配列
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawBeziers(const Appearance* app, tTJSVariant points)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
-
     if (ps.size() < 4 || (ps.size() - 1) % 3 != 0)
         return RectF();
-
-    BLPath path;
-    path.moveTo(ps[0].x, ps[0].y);
-
-    for (size_t i = 1; i < ps.size(); i += 3)
-    {
-        if (i + 2 < ps.size())
-        {
-            path.cubicTo(ps[i].x, ps[i].y, ps[i + 1].x, ps[i + 1].y, ps[i + 2].x, ps[i + 2].y);
-        }
-    }
-
-    return _drawPath(app, &path);
+    plutovg_path_t* p = plutovg_path_create();
+    plutovg_path_move_to(p, (float)ps[0].x, (float)ps[0].y);
+    for (size_t i = 1; i + 2 < ps.size(); i += 3)
+        plutovg_path_cubic_to(p, (float)ps[i].x, (float)ps[i].y, (float)ps[i + 1].x,
+                              (float)ps[i + 1].y, (float)ps[i + 2].x, (float)ps[i + 2].y);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * Closed cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawClosedCurve(const Appearance* app, tTJSVariant points)
 {
-    return drawClosedCurve2(app, points, 0.5f);
+    return drawClosedCurve2(app, points, 0.5);
 }
 
-/**
- * Closed cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @pram tension tension
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawClosedCurve2(const Appearance* app, tTJSVariant points, tjs_real tension)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
-
     if (ps.size() < 2)
         return RectF();
 
-    BLPath path;
+    plutovg_path_t* p = plutovg_path_create();
     for (size_t i = 0; i < ps.size(); i++)
     {
         PointF p0 = ps[(i + ps.size() - 1) % ps.size()];
         PointF p1 = ps[i];
         PointF p2 = ps[(i + 1) % ps.size()];
         PointF p3 = ps[(i + 2) % ps.size()];
-
-        PointF cp1 = p1 + (p2 - p0) * tension / 3.0f;
-        PointF cp2 = p2 - (p3 - p1) * tension / 3.0f;
-
+        PointF cp1 = p1 + (p2 - p0) * tension / 3.0;
+        PointF cp2 = p2 - (p3 - p1) * tension / 3.0;
         if (i == 0)
-        {
-            path.moveTo(p1.x, p1.y);
-        }
-        path.cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+            plutovg_path_move_to(p, (float)p1.x, (float)p1.y);
+        plutovg_path_cubic_to(p, (float)cp1.x, (float)cp1.y, (float)cp2.x, (float)cp2.y,
+                              (float)p2.x, (float)p2.y);
     }
-    path.close();
-
-    return _drawPath(app, &path);
+    plutovg_path_close(p);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawCurve(const Appearance* app, tTJSVariant points)
 {
-    return drawCurve3(app, points, 0, -1, 0.5f);
+    return drawCurve3(app, points, 0, -1, 0.5);
 }
 
-/**
- * cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @parma tension tension
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawCurve2(const Appearance* app, tTJSVariant points, tjs_real tension)
 {
     return drawCurve3(app, points, 0, -1, tension);
 }
 
-/**
- * cardinal spline の描画
- * @param app アピアランス
- * @param points 点の配列
- * @param offset
- * @param numberOfSegments
- * @param tension tension
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawCurve3(
-    const Appearance* app, tTJSVariant points, int offset, int numberOfSegments, tjs_real tension)
+RectF LayerExDraw::drawCurve3(const Appearance* app, tTJSVariant points, int offset,
+                              int numberOfSegments, tjs_real tension)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
-
     if (ps.size() < 2)
         return RectF();
-
     if (numberOfSegments < 0)
-        numberOfSegments = static_cast<int>(ps.size()) - 1;
-
-    if (offset < 0 || offset + numberOfSegments >= static_cast<int>(ps.size()))
+        numberOfSegments = (int)ps.size() - 1;
+    if (offset < 0 || offset + numberOfSegments >= (int)ps.size())
         return RectF();
 
-    BLPath path;
-    path.moveTo(ps[offset].x, ps[offset].y);
-
+    plutovg_path_t* p = plutovg_path_create();
+    plutovg_path_move_to(p, (float)ps[offset].x, (float)ps[offset].y);
     for (int i = offset; i < offset + numberOfSegments; i++)
     {
         PointF p0 = (i > 0) ? ps[i - 1] : ps[i];
         PointF p1 = ps[i];
         PointF p2 = ps[i + 1];
-        PointF p3 = (i + 2 < ps.size()) ? ps[i + 2] : ps[i + 1];
-
+        PointF p3 = (i + 2 < (int)ps.size()) ? ps[i + 2] : ps[i + 1];
         PointF cp1 = p1 + (p2 - p0) * tension / 3.0f;
         PointF cp2 = p2 - (p3 - p1) * tension / 3.0f;
-
-        path.cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+        plutovg_path_cubic_to(p, (float)cp1.x, (float)cp1.y, (float)cp2.x, (float)cp2.y,
+                              (float)p2.x, (float)p2.y);
     }
-
-    return _drawPath(app, &path);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 円錐の描画
- * @param x 左上座標
- * @param y 左上座標
- * @param width 横幅
- * @param height 縦幅
- * @param startAngle 時計方向円弧開始位置
- * @param sweepAngle 描画角度
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawPie(const Appearance* app,
-                           tjs_real x,
-                           tjs_real y,
-                           tjs_real width,
-                           tjs_real height,
-                           tjs_real startAngle,
-                           tjs_real sweepAngle)
+RectF LayerExDraw::drawPie(const Appearance* app, tjs_real x, tjs_real y, tjs_real w, tjs_real h,
+                           tjs_real startAngle, tjs_real sweepAngle)
 {
-    BLPath path;
-    float rx = width / 2.0f;
-    float ry = height / 2.0f;
-    float cx = x + rx;
-    float cy = y + ry;
-    float startRad = startAngle * M_PI / 180.0f;
-    float sweepRad = sweepAngle * M_PI / 180.0f;
+    plutovg_path_t* p = plutovg_path_create();
+    float rx = (float)(w / 2.0), ry = (float)(h / 2.0);
+    float cx = (float)(x + rx), cy = (float)(y + ry);
+    float startRad = (float)(startAngle * M_PI / 180.0);
+    float sweepRad = (float)(sweepAngle * M_PI / 180.0);
 
-    path.moveTo(cx, cy);
-    path.lineTo(cx + rx * cos(startRad), cy + ry * sin(startRad));
-    path.arcTo(cx, cy, rx, ry, startRad, sweepRad);
-    path.close();
-
-    return _drawPath(app, &path);
+    plutovg_path_move_to(p, cx, cy);
+    float sx = cx + rx * cosf(startRad), sy = cy + ry * sinf(startRad);
+    plutovg_path_line_to(p, sx, sy);
+    pathEllipticArc(p, cx, cy, rx, ry, startRad, sweepRad);
+    plutovg_path_line_to(p, cx, cy);
+    plutovg_path_close(p);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 楕円の描画
- * @param app アピアランス
- * @param x
- * @param y
- * @param width
- * @param height
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawEllipse(
-    const Appearance* app, tjs_real x, tjs_real y, tjs_real width, tjs_real height)
+RectF LayerExDraw::drawEllipse(const Appearance* app, tjs_real x, tjs_real y, tjs_real w,
+                               tjs_real h)
 {
-    BLPath path;
-    BLEllipse ellipse(x + width / 2, y + height / 2, width / 2, height / 2);
-    path.addEllipse(ellipse);
-
-    return _drawPath(app, &path);
+    plutovg_path_t* p = plutovg_path_create();
+    float cx = (float)(x + w / 2.0), cy = (float)(y + h / 2.0);
+    float rx = (float)(w / 2.0), ry = (float)(h / 2.0);
+    plutovg_path_add_ellipse(p, cx, cy, rx, ry);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 線分の描画
- * @param app アピアランス
- * @param x1 始点X座標
- * @param y1 始点Y座標
- * @param x2 終点X座標
- * @param y2 終点Y座標
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawLine(
-    const Appearance* app, tjs_real x1, tjs_real y1, tjs_real x2, tjs_real y2)
+RectF LayerExDraw::drawLine(const Appearance* app, tjs_real x1, tjs_real y1, tjs_real x2,
+                            tjs_real y2)
 {
-    BLPath path;
-    path.moveTo(x1, y1);
-    path.lineTo(x2, y2);
-
-    return _drawPath(app, &path);
+    plutovg_path_t* p = plutovg_path_create();
+    plutovg_path_move_to(p, (float)x1, (float)y1);
+    plutovg_path_line_to(p, (float)x2, (float)y2);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 連続線分の描画
- * @param app アピアランス
- * @param points 点の配列
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawLines(const Appearance* app, tTJSVariant points)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
-
     if (ps.empty())
         return RectF();
-
-    BLPath path;
-    path.moveTo(ps[0].x, ps[0].y);
-
+    plutovg_path_t* p = plutovg_path_create();
+    plutovg_path_move_to(p, (float)ps[0].x, (float)ps[0].y);
     for (size_t i = 1; i < ps.size(); i++)
-    {
-        path.lineTo(ps[i].x, ps[i].y);
-    }
-
-    return _drawPath(app, &path);
+        plutovg_path_line_to(p, (float)ps[i].x, (float)ps[i].y);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 多角形の描画
- * @param app アピアランス
- * @param points 点の配列
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawPolygon(const Appearance* app, tTJSVariant points)
 {
     std::vector<PointF> ps;
     getPoints(points, ps);
-
     if (ps.empty())
         return RectF();
-
-    BLPath path;
-    path.moveTo(ps[0].x, ps[0].y);
-
+    plutovg_path_t* p = plutovg_path_create();
+    plutovg_path_move_to(p, (float)ps[0].x, (float)ps[0].y);
     for (size_t i = 1; i < ps.size(); i++)
-    {
-        path.lineTo(ps[i].x, ps[i].y);
-    }
-    path.close();
-
-    return _drawPath(app, &path);
+        plutovg_path_line_to(p, (float)ps[i].x, (float)ps[i].y);
+    plutovg_path_close(p);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 矩形の描画
- * @param app アピアランス
- * @param x
- * @param y
- * @param width
- * @param height
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawRectangle(
-    const Appearance* app, tjs_real x, tjs_real y, tjs_real width, tjs_real height)
+RectF LayerExDraw::drawRectangle(const Appearance* app, tjs_real x, tjs_real y, tjs_real w,
+                                 tjs_real h)
 {
-    BLPath path;
-    path.addRect(BLRect(x, y, width, height));
-
-    return _drawPath(app, &path);
+    plutovg_path_t* p = plutovg_path_create();
+    plutovg_path_add_rect(p, (float)x, (float)y, (float)w, (float)h);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
 }
 
-/**
- * 複数矩形の描画
- * @param app アピアランス
- * @param rects 矩形情報の配列
- * @return 更新領域情報
- */
 RectF LayerExDraw::drawRectangles(const Appearance* app, tTJSVariant rects)
 {
     std::vector<RectF> rs;
     getRects(rects, rs);
-
-    BLPath path;
+    plutovg_path_t* p = plutovg_path_create();
     for (const auto& rect : rs)
+        plutovg_path_add_rect(p, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
+    RectF ret = _drawPath(app, p);
+    plutovg_path_destroy(p);
+    return ret;
+}
+
+// ============================================================
+// Text drawing
+// ============================================================
+RectF LayerExDraw::drawPathString(const FontInfo* font, const Appearance* app, tjs_real x,
+                                  tjs_real y, const tjs_char* text)
+{
+    plutovg_font_face_t* face = font->getFontFace();
+    if (!face)
+        return RectF();
+
+    plutovg_path_t* textPath = plutovg_path_create();
+    float emSize = (float)font->getEmSize();
+    float xpos  = (float)x;
+    float yBase = (float)y + (float)font->getAscent() - (float)font->getDescent();
+    size_t len = TJS_strlen(text);
+
+    plutovg_text_iterator_t it;
+    plutovg_text_iterator_init(&it, text, (int)len, PLUTOVG_TEXT_ENCODING_UTF8);
+    float aw = 0, lsb = 0;
+    plutovg_rect_t ext = {0, 0, 0, 0};
+    while (plutovg_text_iterator_has_next(&it))
     {
-        path.addRect(BLRect(rect.x, rect.y, rect.w, rect.h));
+        plutovg_codepoint_t cp = plutovg_text_iterator_next(&it);
+        plutovg_font_face_get_glyph_metrics(face, emSize, cp, &aw, &lsb, &ext);
+        float adv = plutovg_font_face_get_glyph_path(face, emSize, xpos, yBase + ext.y, cp, textPath);
+        xpos += adv;
     }
 
-    return _drawPath(app, &path);
+    RectF ret = _drawPath(app, textPath);
+    plutovg_path_destroy(textPath);
+    return ret;
 }
 
-/**
- * 文字列のパスベースでの描画
- * @param font フォント
- * @param app アピアランス
- * @param x 描画位置X
- * @param y 描画位置Y
- * @param text 描画テキスト
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawPathString(
-    const FontInfo* font, const Appearance* app, tjs_real x, tjs_real y, const tjs_char* text)
-{
-    BLFont blFont = font->getBLFont();
-    if (blFont.empty())
-        return RectF();
-
-    BLPath path;
-    BLGlyphBuffer gb;
-    gb.setUtf8Text(text, TJS_strlen(text));
-    blFont.shape(gb);
-    blFont.getGlyphRunOutlines(gb.glyphRun(), BLMatrix2D::makeTranslation(x, y + font->getEmSize()),
-                               path);
-    return _drawPath(app, &path);
-}
-
-/**
- * 文字列の描画
- * @param font フォント
- * @param app アピアランス（ブラシのみ参照されます）
- * @param x 描画位置X
- * @param y 描画位置Y
- * @param text 描画テキスト
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawString(
-    const FontInfo* font, const Appearance* app, tjs_real x, tjs_real y, const tjs_char* text)
+RectF LayerExDraw::drawString(const FontInfo* font, const Appearance* app, tjs_real x, tjs_real y,
+                              const tjs_char* text)
 {
     RectF bounds;
-    BLFont blFont = font->getBLFont();
-    if (blFont.empty())
+    plutovg_font_face_t* face = font->getFontFace();
+    if (!face || !canvas)
         return RectF();
 
-    // 开始
-    context->begin(*bitmap);
-    // 设置矩阵
-    context->setTransform(calcTransform);
-    // 绘制字体
+    plutovg_canvas_save(canvas);
+    plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC_OVER);
+    plutovg_canvas_set_matrix(canvas, &calcTransform);
+    plutovg_canvas_set_font(canvas, face, (float)font->getEmSize());
+
+    size_t len = TJS_strlen(text);
+
     for (const auto& drawInfo : app->drawInfos)
     {
         if (!drawInfo.info)
             continue;
 
-        if (metaGraphics)
+        if (drawInfo.type == 1) // brush only
         {
-            // unsupport
-        }
-
-        if (drawInfo.type == 1)
-        {
-            // 只考虑笔刷
-            BLBrush* brush = static_cast<BLBrush*>(drawInfo.info);
+            SoftBrush* brush = static_cast<SoftBrush*>(drawInfo.info);
             if (!brush)
                 continue;
-            // 点
-            BLPoint position = BLPoint(x + drawInfo.ox, y + drawInfo.oy);
-            // 设置填充类型
-            switch (brush->type)
-            {
-                case BrushTypeSolidColor:
-                    context->setFillStyle(brush->solidBrush);
-                    break;
-                case BrushTypeHatchFill:
-                case BrushTypeTextureFill:
-                    context->setFillStyle(brush->textureBrush);
-                    break;
-                case BrushTypePathGradient:
-                case BrushTypeLinearGradient:
-                    context->setFillStyle(brush->pathGradientBrush);
-                    break;
-                default:
-                    context->setFillStyle(BLRgba32(0, 0, 0, 255));
-                    break;
-            }
-            // 绘制
-            context->fillUtf8Text(position, blFont, text, TJS_strlen(text));
+            brush->applyToCanvas(canvas);
+            plutovg_canvas_fill_text(canvas, text, (int)len, PLUTOVG_TEXT_ENCODING_UTF8,
+                                     (float)(x + drawInfo.ox),
+                                     (float)(y + drawInfo.oy));
         }
     }
-    context->end();
+
+    plutovg_canvas_restore(canvas);
 
     updateRect(bounds);
     return bounds;
 }
 
-/**
- * 文字列の描画領域情報の取得
- * @param font フォント
- * @param text 描画テキスト
- * @return 描画領域情報
- */
 RectF LayerExDraw::measureString(const FontInfo* font, const tjs_char* text)
 {
-    BLFont blFont = font->getBLFont();
-    if (blFont.empty())
+    plutovg_font_face_t* face = font->getFontFace();
+    if (!face)
         return RectF();
 
-    BLTextMetrics tm;
-    BLGlyphBuffer gb;
-    gb.setUtf8Text(text, TJS_strlen(text));
-    blFont.shape(gb);
-    blFont.getTextMetrics(gb, tm);
-
-    return RectF(tm.boundingBox.x0, tm.boundingBox.y0, tm.boundingBox.x1 - tm.boundingBox.x0,
-                 tm.boundingBox.y1 - tm.boundingBox.y0);
+    plutovg_rect_t extents;
+    size_t len = TJS_strlen(text);
+    plutovg_font_face_text_extents(face, (float)font->getEmSize(), text, (int)len,
+                                    PLUTOVG_TEXT_ENCODING_UTF8, &extents);
+    return RectF(extents.x, extents.y, extents.w, extents.h);
 }
 
-/**
- * 文字列に外接する領域情報の取得
- * @param font フォント
- * @param text 描画テキスト
- * @return 領域情報の辞書 left, top, width, height
- */
 RectF LayerExDraw::measureStringInternal(const FontInfo* font, const tjs_char* text)
 {
     return measureString(font, text);
 }
 
-/**
- * 画像の描画。コピー先は元画像の Bounds を配慮した位置、サイズは Pixel 指定になります。
- * @param x コピー先原点
- * @param y  コピー先原点
- * @param src コピー元画像
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawImage(tjs_real x, tjs_real y, GdipImage* src)
+RectF LayerExDraw::drawPathString2(const FontInfo* font, const Appearance* app, tjs_real x,
+                                   tjs_real y, const tjs_char* text)
 {
-    return drawImageRect(x, y, src, 0, 0, src->_core.width(), src->_core.height());
+    return RectF(); // TODO
 }
 
-/**
- * 画像の矩形コピー
- * @param dleft コピー先左端
- * @param dtop  コピー先上端
- * @param src コピー元画像
- * @param sleft 元矩形の左端
- * @param stop  元矩形の上端
- * @param swidth 元矩形の横幅
- * @param sheight  元矩形の縦幅
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawImageRect(tjs_real dleft,
-                                 tjs_real dtop,
-                                 GdipImage* src,
-                                 tjs_real sleft,
-                                 tjs_real stop,
-                                 tjs_real swidth,
-                                 tjs_real sheight)
+RectF LayerExDraw::measureString2(const FontInfo* font, const tjs_char* text)
+{
+    return RectF(); // TODO
+}
+
+RectF LayerExDraw::measureStringInternal2(const FontInfo* font, const tjs_char* text)
+{
+    return RectF(); // TODO
+}
+
+void LayerExDraw::getGlyphOutline(const FontInfo* fontInfo, PointF& offset, plutovg_path_t* path,
+                                  tjs_uint glyph)
+{
+    // TODO
+}
+
+void LayerExDraw::getTextOutline(const FontInfo* fontInfo, PointF& offset, plutovg_path_t* path,
+                                 ttstr text)
+{
+    // TODO
+}
+
+// ============================================================
+// Image drawing
+// ============================================================
+RectF LayerExDraw::drawImage(tjs_real x, tjs_real y, GdipImage* src)
+{
+    if (!src)
+        return RectF();
+    return drawImageRect(x, y, src, 0, 0, (tjs_real)src->width, (tjs_real)src->height);
+}
+
+RectF LayerExDraw::drawImageRect(tjs_real dleft, tjs_real dtop, GdipImage* src, tjs_real sleft,
+                                 tjs_real stop, tjs_real swidth, tjs_real sheight)
 {
     return drawImageAffine(src, sleft, stop, swidth, sheight, true, 1, 0, 0, 1, dleft, dtop);
 }
 
-/**
- * 画像の拡大縮小コピー
- * @param dleft コピー先左端
- * @param dtop  コピー先上端
- * @param dwidth コピー先の横幅
- * @param dheight  コピー先の縦幅
- * @param src コピー元画像
- * @param sleft 元矩形の左端
- * @param stop  元矩形の上端
- * @param swidth 元矩形の横幅
- * @param sheight  元矩形の縦幅
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawImageStretch(tjs_real dleft,
-                                    tjs_real dtop,
-                                    tjs_real dwidth,
-                                    tjs_real dheight,
-                                    GdipImage* src,
-                                    tjs_real sleft,
-                                    tjs_real stop,
-                                    tjs_real swidth,
-                                    tjs_real sheight)
+RectF LayerExDraw::drawImageStretch(tjs_real dleft, tjs_real dtop, tjs_real dwidth,
+                                    tjs_real dheight, GdipImage* src, tjs_real sleft, tjs_real stop,
+                                    tjs_real swidth, tjs_real sheight)
 {
     return drawImageAffine(src, sleft, stop, swidth, sheight, true, dwidth / swidth, 0, 0,
                            dheight / sheight, dleft, dtop);
 }
 
-/**
- * 画像のアフィン変換コピー
- * @param sleft 元矩形の左端
- * @param stop  元矩形の上端
- * @param swidth 元矩形の横幅
- * @param sheight  元矩形の縦幅
- * @param affine アフィンパラメータの種類(true:変換行列, false:座標指定),
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawImageAffine(GdipImage* src,
-                                   tjs_real sleft,
-                                   tjs_real stop,
-                                   tjs_real swidth,
-                                   tjs_real sheight,
-                                   bool affine,
-                                   tjs_real A,
-                                   tjs_real B,
-                                   tjs_real C,
-                                   tjs_real D,
-                                   tjs_real E,
-                                   tjs_real F)
+RectF LayerExDraw::drawImageAffine(GdipImage* src, tjs_real sleft, tjs_real stop, tjs_real swidth,
+                                   tjs_real sheight, bool affine, tjs_real A, tjs_real B,
+                                   tjs_real C, tjs_real D, tjs_real E, tjs_real F)
 {
     RectF bounds;
+    if (!canvas || !src)
+        return bounds;
 
-    BLMatrix2D matrix;
+    plutovg_matrix_t matrix;
     if (affine)
     {
-        matrix.reset(A, B, C, D, E, F);
+        plutovg_matrix_init(&matrix, (float)A, (float)B, (float)C, (float)D, (float)E, (float)F);
     }
     else
     {
-        tjs_real a = C - A;
-        tjs_real b = D - B;
-        tjs_real c = E - A;
-        tjs_real d = F - B;
-        tjs_real e = A;
-        tjs_real f = B;
-        matrix.reset(a, b, c, d, e, f);
+        tjs_real a = C - A, b = D - B, c = E - A, d = F - B, e = A, f = B;
+        plutovg_matrix_init(&matrix, (float)a, (float)b, (float)c, (float)d, (float)e, (float)f);
     }
 
-    if (src->type == 0) // 常规图像
+    if (src->type == 0)
     {
-        if (!src->_core || src->_core.empty())
-            return RectF();
+        if (!src->_surface)
+            return bounds;
 
-        BLRectI srcRect(sleft, stop, swidth, sheight);
-        context->begin(*bitmap);
-        context->setTransform(matrix);
-        context->blitImage(BLPoint(0, 0), src->_core, srcRect);
-        context->end();
-        if (metaGraphics)
-        {
-            // unsupport
-            // 下次换一个位图系统吧，buffer图还是不太行
-        }
+        const int srcLeft = (int)sleft;
+        const int srcTop = (int)stop;
+        const int srcWidth = (int)swidth;
+        const int srcHeight = (int)sheight;
+        if (srcWidth <= 0 || srcHeight <= 0)
+            return bounds;
+
+        plutovg_canvas_save(canvas);
+        plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC_OVER);
+        plutovg_canvas_set_matrix(canvas, &matrix);
+        plutovg_matrix_t textureMatrix;
+        plutovg_matrix_init_translate(&textureMatrix, (float)(-srcLeft), (float)(-srcTop));
+        plutovg_canvas_set_texture(canvas, src->_surface, PLUTOVG_TEXTURE_TYPE_PLAIN, 1.0f,
+                                   &textureMatrix);
+        plutovg_canvas_fill_rect(canvas, 0.0f, 0.0f, (float)srcWidth, (float)srcHeight);
+        plutovg_canvas_restore(canvas);
     }
     else if (src->type == 1)
     {
-        BLMatrix2D savedMtx = calcTransform;
+        // Vector: replay
+        plutovg_matrix_t savedMtx = calcTransform;
         calcTransform = matrix;
-        BLMatrix2D srcRectTransform = BLMatrix2D::makeIdentity();
-        srcRectTransform.scale(swidth / src->GetWidth(), sheight / src->GetHeight());
-        srcRectTransform.translate(-sleft, -stop);
-        calcTransform.transform(srcRectTransform);
-        calcTransform.transform(src->transMtx);
-        for (auto infoItm : src->vectorGraph)
-        {
-            if (!context || !infoItm.app || !infoItm.path || infoItm.path->empty())
-                continue;
+        plutovg_matrix_t srcRectTransform;
+        plutovg_matrix_init_scale(&srcRectTransform, (float)(swidth / src->GetWidth()),
+                                  (float)(sheight / src->GetHeight()));
+        plutovg_matrix_translate(&srcRectTransform, (float)(-sleft), (float)(-stop));
 
+        plutovg_matrix_t temp = calcTransform;
+        plutovg_matrix_multiply(&calcTransform, &temp, &srcRectTransform);
+        temp = calcTransform;
+        plutovg_matrix_multiply(&calcTransform, &temp, &src->transMtx);
+
+        for (auto& infoItm : src->vectorGraph)
+        {
+            if (!canvas || !infoItm.app || !infoItm.path || pathIsEmpty(infoItm.path))
+                continue;
             for (const auto& drawInfo : infoItm.app->drawInfos)
             {
                 if (!drawInfo.info)
                     continue;
-
-                BLMatrix2D drawMatrix = BLMatrix2D::makeTranslation(drawInfo.ox, drawInfo.oy);
+                plutovg_matrix_t drawMatrix;
+                plutovg_matrix_init_translate(&drawMatrix, (float)drawInfo.ox,
+                                              (float)drawInfo.oy);
                 if (drawInfo.type == 0)
-                {
-                    BLPen* pen = static_cast<BLPen*>(drawInfo.info);
-                    draw(bitmap, pen, &drawMatrix, infoItm.path);
-                }
+                    draw(static_cast<SoftPen*>(drawInfo.info), &drawMatrix, infoItm.path);
                 else
-                {
-                    BLBrush* brush = static_cast<BLBrush*>(drawInfo.info);
-                    fill(bitmap, brush, &drawMatrix, infoItm.path);
-                }
+                    fill(static_cast<SoftBrush*>(drawInfo.info), &drawMatrix, infoItm.path);
             }
         }
         calcTransform = savedMtx;
@@ -2587,32 +1975,20 @@ RectF LayerExDraw::drawImageAffine(GdipImage* src,
     return bounds;
 }
 
+// ============================================================
+// Record (metafile) operations
+// ============================================================
 void LayerExDraw::createRecord()
 {
     destroyRecord();
-    if (!metaGraphics)
-    {
-        metaGraphics = new GdipImage(width, height);
-    }
+    metaGraphics = new GdipImage(width, height);
 }
 
-/**
- * 記録内容の現在の解像度での再描画
- */
-bool LayerExDraw::redrawRecord()
+void LayerExDraw::recreateRecord()
 {
-    // 再描画処理
-    GdipImage* image = getRecordImage();
-    if (image)
-    {
-        delete image;
-        return true;
-    }
-    return false;
+    createRecord();
 }
-/**
- * デストラクタ
- */
+
 void LayerExDraw::destroyRecord()
 {
     if (metaGraphics)
@@ -2622,241 +1998,106 @@ void LayerExDraw::destroyRecord()
     }
 }
 
-/**
- * @param record 描画内容を記録するかどうか
- */
 void LayerExDraw::setRecord(bool record)
 {
     if (record)
     {
         if (!metaGraphics)
-        {
             createRecord();
-        }
     }
     else
     {
         if (metaGraphics)
-        {
             destroyRecord();
-        }
     }
 }
 
 bool LayerExDraw::redraw(GdipImage* image)
 {
-    if (image)
+    if (!image || !canvas)
+        return false;
+    // Clear and redraw
+    plutovg_canvas_save(canvas);
+    plutovg_canvas_reset_matrix(canvas);
+    plutovg_color_t clearColor;
+    plutovg_color_init_argb32(&clearColor, 0);
+    plutovg_canvas_set_color(canvas, &clearColor);
+    plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC);
+    plutovg_canvas_fill_rect(canvas, 0, 0, (float)width, (float)height);
+    plutovg_canvas_restore(canvas);
+
+    if (image->_surface)
     {
-        RectF bounds = image->GetBounds();
-        BLRect ret(bounds.x, bounds.y, bounds.w, bounds.h);
-        if (metaGraphics)
-        {
-            // unsupport
-        }
-        context->begin(*bitmap);
-        context->setFillStyle(BLRgba32(0x0));
-        context->clearAll();
-        context->setTransform(viewTransform);
-        context->blitImage(ret, image->_core);
-        context->setTransform(calcTransform);
-        context->end();
-        _this->Update();
-        return true;
+        plutovg_canvas_save(canvas);
+        plutovg_canvas_set_operator(canvas, PLUTOVG_OPERATOR_SRC_OVER);
+        plutovg_canvas_set_matrix(canvas, &viewTransform);
+        plutovg_canvas_set_texture(canvas, image->_surface, PLUTOVG_TEXTURE_TYPE_PLAIN, 1.0f, nullptr);
+        plutovg_canvas_fill_rect(canvas, 0, 0, (float)image->width, (float)image->height);
+        plutovg_canvas_set_matrix(canvas, &calcTransform);
+        plutovg_canvas_restore(canvas);
     }
-    return false;
+    _this->Update();
+    return true;
 }
 
-/**
- * 記録内容を Image として取得
- * @return 成功したら true
- */
 GdipImage* LayerExDraw::getRecordImage()
 {
     GdipImage* image = NULL;
     if (metaGraphics)
     {
-        image = new GdipImage(*metaGraphics);
+        image = metaGraphics->Clone();
         if (image)
-        {
             redraw(image);
-        }
     }
     return image;
 }
 
-/**
- * 記録内容の保存
- * @param filename 保存ファイル名
- * @return 成功したら true
- */
-bool LayerExDraw::saveRecord(const tjs_char* filename)
+bool LayerExDraw::redrawRecord()
 {
-    bool ret = false;
-    if (bitmap)
+    GdipImage* image = getRecordImage();
+    if (image)
     {
-        BLArray<uint8_t> bmpdata;
-        BLImageCodec codc;
-        ttstr ext = TVPExtractStorageExt(filename);
-        if (codc.findByExtension(ext.AsStdString().c_str()) == BL_SUCCESS ||
-            codc.findByExtension("bmp") == BL_SUCCESS)
-        {
-            bitmap->writeToData(bmpdata, codc);
-            tTJSBinaryStream* out = TVPCreateBinaryStreamForWrite(filename, "");
-            if (out)
-            {
-                out->WriteBuffer(bmpdata.data(), bmpdata.size());
-                delete out;
-            }
-        }
-        // 再描画処理
-        GdipImage* image = getRecordImage();
-        if (image)
-        {
-            delete image;
-        }
+        delete image;
+        return true;
     }
-    return ret;
-}
-
-/**
- * 記録内容の読み込み
- * @param filename 読み込みファイル名
- * @return 成功したら true
- */
-bool LayerExDraw::loadRecord(const tjs_char* filename)
-{
-    bool ret = false;
-    // TODO
-    // Image *image;
-    // if (filename && (image = loadImage(filename))) {
-    //	createRecord();
-    //	ret =  redraw(image);
-    //	delete image;
-    //}
     return false;
 }
 
-/**
- * グリフアウトラインの取得
- * @param font フォント
- * @param offset オフセット
- * @param path グリフを書き出すパス
- * @param glyph 描画するグリフ
- */
-void LayerExDraw::getGlyphOutline(const FontInfo* fontInfo,
-                                  PointF& offset,
-                                  BLPath* path,
-                                  tjs_uint glyph)
+bool LayerExDraw::saveRecord(const tjs_char* filename)
 {
-    // TODO
+    if (!surface)
+        return false;
+    // Save to PNG via plutovg
+    // Note: TJS uses UTF-8 char paths
+    ttstr fn(filename);
+    bool ret = plutovg_surface_write_to_png(surface, fn.c_str());
+    GdipImage* image = getRecordImage();
+    if (image)
+        delete image;
+    return ret;
 }
 
-/*
- * テキストアウトラインの取得
- * @param font フォント
- * @param offset オフセット
- * @param path グリフを書き出すパス
- * @param text 描画するテキスト
- */
-void LayerExDraw::getTextOutline(const FontInfo* fontInfo, PointF& offset, BLPath* path, ttstr text)
+bool LayerExDraw::loadRecord(const tjs_char* filename)
 {
-    // TODO
+    return false; // TODO
 }
 
-/**
- * 文字列の描画更新領域情報の取得(OpenTypeフォント対応)
- * @param font フォント
- * @param text 描画テキスト
- * @return 更新領域情報の辞書 left, top, width, height
- */
-RectF LayerExDraw::measureString2(const FontInfo* font, const tjs_char* text)
-{
-    // TODO
-    return RectF();
-}
+// ============================================================
+// NCB Registration
+// ============================================================
 
-/**
- * 文字列に外接する領域情報の取得(OpenTypeのPostScriptフォント対応)
- * @param font フォント
- * @param text 描画テキスト
- * @return 更新領域情報の辞書 left, top, width, height
- */
-RectF LayerExDraw::measureStringInternal2(const FontInfo* font, const tjs_char* text)
-{
-    // TODO
-    return RectF();
-}
-
-/**
- * 文字列の描画(OpenTypeフォント対応)
- * @param font フォント
- * @param app アピアランス
- * @param x 描画位置X
- * @param y 描画位置Y
- * @param text 描画テキスト
- * @return 更新領域情報
- */
-RectF LayerExDraw::drawPathString2(
-    const FontInfo* font, const Appearance* app, tjs_real x, tjs_real y, const tjs_char* text)
-{
-    // TODO
-    return RectF();
-}
-
-// ----------------------------------- クラスの登録
-/**
- * ログ出力用
- */
-// void
-// message_log(const char* format, ...)
-//{
-//	va_list args;
-//	va_start(args, format);
-//	char msg[1024];
-//	_vsnprintf_s(msg, 1024, _TRUNCATE, format, args);
-//	TVPAddLog(ttstr(msg));
-//	va_end(args);
-// }
-
-/**
- * エラーログ出力用
- */
-// void
-// error_log(const char* format, ...)
-//{
-//	va_list args;
-//	va_start(args, format);
-//	char msg[1024];
-//	_vsnprintf_s(msg, 1024, _TRUNCATE, format, args);
-//	TVPAddImportantLog(ttstr(msg));
-//	va_end(args);
-// }
-
-// ----------------------------------------------------------------
-// 実体型の登録
-// 数値パラメータ系は配列か辞書を使えるような特殊コンバータを構築
-// ----------------------------------------------------------------
-
-// 両方自前コンバータ
-#define NCB_SET_CONVERTOR_BOTH(type, convertor) \
-    NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true); \
+#define NCB_SET_CONVERTOR_BOTH(type, convertor)            \
+    NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true);  \
     NCB_TYPECONV_DSTMAP_SET(type, convertor<type>, true)
 
-// SRCだけ自前コンバータ
-#define NCB_SET_CONVERTOR_SRC(type, convertor) \
-    NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true); \
+#define NCB_SET_CONVERTOR_SRC(type, convertor)                          \
+    NCB_TYPECONV_SRCMAP_SET(type, convertor<type>, true);               \
     NCB_TYPECONV_DSTMAP_SET(type, ncbNativeObjectBoxing::Unboxing, true)
 
-// DSTだけ自前コンバータ
-#define NCB_SET_CONVERTOR_DST(type, convertor) \
-    NCB_TYPECONV_SRCMAP_SET(type, ncbNativeObjectBoxing::Boxing, true); \
+#define NCB_SET_CONVERTOR_DST(type, convertor)                          \
+    NCB_TYPECONV_SRCMAP_SET(type, ncbNativeObjectBoxing::Boxing, true);  \
     NCB_TYPECONV_DSTMAP_SET(type, convertor<type>, true)
 
-/**
- * 配列かどうかの判定
- * @param var VARIANT
- * @return 配列なら true
- */
 bool IsArray(const tTJSVariant& var)
 {
     if (var.Type() == tvtObject)
@@ -2867,37 +2108,25 @@ bool IsArray(const tTJSVariant& var)
     return false;
 }
 
-// メンバ変数をプロパティとして登録
-#define NCB_MEMBER_PROPERTY(name, type, membername) \
-    struct AutoProp_##name \
-    { \
-        static void ProxySet(Class* inst, type value) \
-        { \
-            inst->membername = value; \
-        } \
-        static type ProxyGet(Class* inst) \
-        { \
-            return inst->membername; \
-        } \
-    }; \
+#define NCB_MEMBER_PROPERTY(name, type, membername)                            \
+    struct AutoProp_##name                                                     \
+    {                                                                          \
+        static void ProxySet(Class* inst, type value) { inst->membername = value; } \
+        static type ProxyGet(Class* inst) { return inst->membername; }          \
+    };                                                                         \
     NCB_PROPERTY_PROXY(name, AutoProp_##name::ProxyGet, AutoProp_##name::ProxySet)
 
-// ポインタ引数型の getter を変換登録
-#define NCB_ARG_PROPERTY_RO(name, type, methodname) \
-    struct AutoProp_##name \
-    { \
-        static type ProxyGet(Class* inst) \
-        { \
-            type var; \
-            inst->methodname(var); \
-            return var; \
-        } \
-    }; \
+#define NCB_ARG_PROPERTY_RO(name, type, methodname)             \
+    struct AutoProp_##name                                      \
+    {                                                           \
+        static type ProxyGet(Class* inst)                       \
+        {                                                       \
+            type var;                                           \
+            inst->methodname(var);                              \
+            return var;                                         \
+        }                                                       \
+    };                                                          \
     Property(TJS_N(#name), &AutoProp_##name::ProxyGet, (int)0, Proxy)
-
-// ------------------------------------------------------
-// 型コンバータ登録
-// ------------------------------------------------------
 
 NCB_TYPECONV_CAST_INTEGER(Status);
 NCB_TYPECONV_CAST_INTEGER(MatrixOrder);
@@ -2925,14 +2154,10 @@ struct PointFConvertor
             {
                 ncbPropAccessor info(src);
                 if (IsArray(src))
-                {
                     dst = PointF((tjs_real)info.getRealValue(0), (tjs_real)info.getRealValue(1));
-                }
                 else
-                {
                     dst = PointF((tjs_real)info.getRealValue(TJS_N("x")),
                                  (tjs_real)info.getRealValue(TJS_N("y")));
-                }
             }
         }
         else
@@ -2982,17 +2207,13 @@ struct RectFConvertor
             {
                 ncbPropAccessor info(src);
                 if (IsArray(src))
-                {
                     dst = RectF((tjs_real)info.getRealValue(0), (tjs_real)info.getRealValue(1),
                                 (tjs_real)info.getRealValue(2), (tjs_real)info.getRealValue(3));
-                }
                 else
-                {
                     dst = RectF((tjs_real)info.getRealValue(TJS_N("x")),
                                 (tjs_real)info.getRealValue(TJS_N("y")),
                                 (tjs_real)info.getRealValue(TJS_N("width")),
                                 (tjs_real)info.getRealValue(TJS_N("height")));
-                }
             }
         }
         else
@@ -3038,13 +2259,7 @@ NCB_REGISTER_SUBCLASS_DELAY(RectF)
     NCB_METHOD(Union);
 };
 
-// --------------------------------------------------------------------
-// GDI+のデフォルトコンストラクタ/コピーコンストラクタを持たない型の登録
-// --------------------------------------------------------------------
-
-/**
- * GDI+オブジェクトのラッピング用テンプレートクラス
- */
+// ------------------------------------------------------- GdipWrapper
 template<class T>
 class GdipWrapper
 {
@@ -3055,48 +2270,29 @@ protected:
     GdipClassT* obj;
 
 public:
-    // デフォルトコンストラクタ
     GdipWrapper() : obj(NULL) {}
-
-    // 関数の帰り値としてのオブジェクト生成時用。
-    // そのまま渡されたポインタを使う
     GdipWrapper(GdipClassT* obj) : obj(obj) {}
-
-    // コピーコンストラクタ
-    // 内蔵オブジェクトは Cloneする
     GdipWrapper(const GdipWrapper& orig) : obj(NULL)
     {
         if (orig.obj)
-        {
             obj = orig.obj->Clone();
-        }
     }
-
-    // デストラクタ
     ~GdipWrapper()
     {
         if (obj)
-        {
             delete obj;
-        }
     }
-
     GdipClassT* getGdipObject() { return obj; }
-
     void setGdipObject(GdipClassT* src)
     {
         if (obj)
-        {
             delete obj;
-        }
         obj = src;
     }
-
     struct BridgeFunctor
     {
         GdipClassT* operator()(WrapperT* p) const { return p->getGdipObject(); }
     };
-
     template<class CastT>
     struct CastBridgeFunctor
     {
@@ -3104,9 +2300,6 @@ public:
     };
 };
 
-/**
- * GDI+オブジェクトをラッピングしたクラス用のコンバータ（汎用）
- */
 template<class T>
 struct GdipTypeConvertor
 {
@@ -3116,7 +2309,8 @@ struct GdipTypeConvertor
     typedef ncbInstanceAdaptor<WrapperT> AdaptorT;
 
 protected:
-    GdipClassT* result; // 結果の一時保持用
+    GdipClassT* result;
+
 public:
     GdipTypeConvertor() : result(NULL) {}
     ~GdipTypeConvertor() { delete result; }
@@ -3125,13 +2319,9 @@ public:
     {
         WrapperT* obj;
         if (src.Type() == tvtObject && (obj = AdaptorT::GetNativeInstance(src.AsObjectNoAddRef())))
-        {
             dst = obj->getGdipObject();
-        }
         else
-        {
             dst = NULL;
-        }
     }
 
     void operator()(tTJSVariant& dst, const GdipClassP& src)
@@ -3156,56 +2346,45 @@ public:
     }
 };
 
-// コンバータ登録用登録用マクロ
-
-#define NCB_GDIP_CONVERTOR(type) \
-    NCB_SET_CONVERTOR(type*, GdipTypeConvertor<type>); \
+#define NCB_GDIP_CONVERTOR(type)                                          \
+    NCB_SET_CONVERTOR(type*, GdipTypeConvertor<type>);                     \
     NCB_SET_CONVERTOR(const type*, GdipTypeConvertor<const type>)
 
-#define NCB_GDIP_CONVERTOR2(type, convertor) \
-    NCB_SET_CONVERTOR(type*, convertor<type>); \
+#define NCB_GDIP_CONVERTOR2(type, convertor)                              \
+    NCB_SET_CONVERTOR(type*, convertor<type>);                             \
     NCB_SET_CONVERTOR(const type*, convertor<const type>)
 
-// ラッピング処理用
-#define NCB_REGISTER_GDIP_SUBCLASS(Class) \
-    NCB_GDIP_CONVERTOR(Class); \
-    NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) \
-    { \
+#define NCB_REGISTER_GDIP_SUBCLASS(Class)                                  \
+    NCB_GDIP_CONVERTOR(Class);                                             \
+    NCB_REGISTER_SUBCLASS(GdipWrapper<Class>)                              \
+    {                                                                      \
         typedef Class GdipClass;
-#define NCB_REGISTER_GDIP_SUBCLASS2(Class, Convertor) \
-    NCB_GDIP_CONVERTOR2(Class, Convertor); \
-    NCB_REGISTER_SUBCLASS(GdipWrapper<Class>) \
-    { \
+#define NCB_REGISTER_GDIP_SUBCLASS2(Class, Convertor)                      \
+    NCB_GDIP_CONVERTOR2(Class, Convertor);                                 \
+    NCB_REGISTER_SUBCLASS(GdipWrapper<Class>)                              \
+    {                                                                      \
         typedef Class GdipClass;
 #define NCB_GDIP_METHOD(name) \
     Method(TJS_N(#name), &GdipClass::name, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
-#define NCB_GDIP_MCAST(ret, method, args) static_cast<ret(GdipClass::*) args>(&GdipClass::method)
+#define NCB_GDIP_MCAST(ret, method, args) static_cast<ret (GdipClass::*) args>(&GdipClass::method)
 #define NCB_GDIP_METHOD2(name, ret, method, args) \
     Method(TJS_N(#name), NCB_GDIP_MCAST(ret, method, args), \
            Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
-#define NCB_GDIP_PROPERTY(name, get, set) \
+#define NCB_GDIP_PROPERTY(name, get, set)   \
     Property(TJS_N(#name), &GdipClass::get, &GdipClass::set, \
              Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
-// XXX うまくうごかない
-#define NCB_GDIP_PROPERTY_RO(name, get) \
+#define NCB_GDIP_PROPERTY_RO(name, get)     \
     Property(TJS_N(#name), &GdipClass::get, (int)0, Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
-#define NCB_GDIP_MEMBER_PROPERTY(name, type, membername) \
-    struct AutoProp_##name \
-    { \
-        static void ProxySet(GdipClass* inst, type value) \
-        { \
-            inst->membername = value; \
-        } \
-        static type ProxyGet(GdipClass* inst) \
-        { \
-            return inst->membername; \
-        } \
-    }; \
+#define NCB_GDIP_MEMBER_PROPERTY(name, type, membername)                       \
+    struct AutoProp_##name                                                      \
+    {                                                                           \
+        static void ProxySet(GdipClass* inst, type value) { inst->membername = value; } \
+        static type ProxyGet(GdipClass* inst) { return inst->membername; }       \
+    };                                                                          \
     Property(TJS_N(#name), AutoProp_##name::ProxyGet, AutoProp_##name::ProxySet, \
              Bridge<GdipWrapper<GdipClass>::BridgeFunctor>())
 
 // ------------------------------------------------------- Matrix
-
 template<class T>
 struct MatrixConvertor : public GdipTypeConvertor<T>
 {
@@ -3221,23 +2400,24 @@ struct MatrixConvertor : public GdipTypeConvertor<T>
             else
             {
                 ncbPropAccessor info(src);
+                plutovg_matrix_t m;
                 if (IsArray(src))
                 {
-                    this->result = new GdipMatrix(
-                        BLMatrix2D((tjs_real)info.getRealValue(0), (tjs_real)info.getRealValue(1),
-                                   (tjs_real)info.getRealValue(2), (tjs_real)info.getRealValue(3),
-                                   (tjs_real)info.getRealValue(4), (tjs_real)info.getRealValue(5)));
+                    plutovg_matrix_init(&m, (float)info.getRealValue(0),
+                                        (float)info.getRealValue(1), (float)info.getRealValue(2),
+                                        (float)info.getRealValue(3), (float)info.getRealValue(4),
+                                        (float)info.getRealValue(5));
                 }
                 else
                 {
-                    this->result =
-                        new GdipMatrix(BLMatrix2D((tjs_real)info.getRealValue(TJS_N("m11")),
-                                                  (tjs_real)info.getRealValue(TJS_N("m12")),
-                                                  (tjs_real)info.getRealValue(TJS_N("m21")),
-                                                  (tjs_real)info.getRealValue(TJS_N("m22")),
-                                                  (tjs_real)info.getRealValue(TJS_N("dx")),
-                                                  (tjs_real)info.getRealValue(TJS_N("dy"))));
+                    plutovg_matrix_init(&m, (float)info.getRealValue(TJS_N("m11")),
+                                        (float)info.getRealValue(TJS_N("m12")),
+                                        (float)info.getRealValue(TJS_N("m21")),
+                                        (float)info.getRealValue(TJS_N("m22")),
+                                        (float)info.getRealValue(TJS_N("dx")),
+                                        (float)info.getRealValue(TJS_N("dy")));
                 }
+                this->result = new GdipMatrix(m);
                 dst = this->result;
             }
         }
@@ -3248,115 +2428,48 @@ struct MatrixConvertor : public GdipTypeConvertor<T>
     }
 };
 
-static tjs_error MatrixFactory(GdipWrapper<GdipMatrix>** result,
-                               tjs_int numparams,
-                               tTJSVariant** params,
-                               iTJSDispatch2* objthis)
+static tjs_error MatrixFactory(GdipWrapper<GdipMatrix>** result, tjs_int numparams,
+                               tTJSVariant** params, iTJSDispatch2* objthis)
 {
-    BLMatrix2D* matrix = NULL;
-    RectF* rect = NULL;
-    PointF* point = NULL;
+    plutovg_matrix_t m;
     if (numparams == 0)
     {
-        matrix = new BLMatrix2D();
-    }
-    else if (numparams == 2 &&
-             (params[0]->Type() == tvtObject &&
-              (rect =
-                   ncbInstanceAdaptor<RectF>::GetNativeInstance(params[0]->AsObjectNoAddRef()))) &&
-             (params[1]->Type() == tvtObject &&
-              (point =
-                   ncbInstanceAdaptor<PointF>::GetNativeInstance(params[0]->AsObjectNoAddRef()))))
-    {
-        ncbPropAccessor rectObj(*params[0]);
-        ncbPropAccessor pointsObj(*params[1]);
-        RectF srcRect = getRect(*params[0]);
-        std::vector<PointF> destPoints;
-        getPoints(*params[1], destPoints);
-        if (destPoints.size() >= 3)
-        {
-            float srcWidth = srcRect.w;
-            float srcHeight = srcRect.h;
-            float dx1 = destPoints[0].x;
-            float dy1 = destPoints[0].y;
-            float dx2 = destPoints[1].x;
-            float dy2 = destPoints[1].y;
-            float dx3 = destPoints[2].x;
-            float dy3 = destPoints[2].y;
-            float sx1 = srcRect.x;
-            float sy1 = srcRect.y;
-            float sx2 = srcRect.x + srcWidth;
-            float sy2 = srcRect.y;
-            float sx3 = srcRect.x;
-            float sy3 = srcRect.y + srcHeight;
-
-            float denom = sx1 * (sy2 - sy3) + sx2 * (sy3 - sy1) + sx3 * (sy1 - sy2);
-
-            if (fabs(denom) < 1e-10)
-            {
-                matrix = new BLMatrix2D();
-            }
-            else
-            {
-                float a = (dx1 * (sy2 - sy3) + dx2 * (sy3 - sy1) + dx3 * (sy1 - sy2)) / denom;
-                float b = (dy1 * (sy2 - sy3) + dy2 * (sy3 - sy1) + dy3 * (sy1 - sy2)) / denom;
-                float c = (dx1 * (sx3 - sx2) + dx2 * (sx1 - sx3) + dx3 * (sx2 - sx1)) / denom;
-                float d = (dy1 * (sx3 - sx2) + dy2 * (sx1 - sx3) + dy3 * (sx2 - sx1)) / denom;
-                float e = (dx1 * (sx2 * sy3 - sx3 * sy2) + dx2 * (sx3 * sy1 - sx1 * sy3) +
-                           dx3 * (sx1 * sy2 - sx2 * sy1)) /
-                          denom;
-                float f = (dy1 * (sx2 * sy3 - sx3 * sy2) + dy2 * (sx3 * sy1 - sx1 * sy3) +
-                           dy3 * (sx1 * sy2 - sx2 * sy1)) /
-                          denom;
-
-                matrix = new BLMatrix2D(a, b, c, d, e, f);
-            }
-        }
-        else
-        {
-            matrix = new BLMatrix2D();
-        }
+        plutovg_matrix_init_identity(&m);
     }
     else if (numparams == 6)
     {
-        matrix = new BLMatrix2D((tjs_real)params[0]->AsReal(), (tjs_real)params[1]->AsReal(),
-                                (tjs_real)params[2]->AsReal(), (tjs_real)params[3]->AsReal(),
-                                (tjs_real)params[4]->AsReal(), (tjs_real)params[5]->AsReal());
+        plutovg_matrix_init(&m, (float)params[0]->AsReal(), (float)params[1]->AsReal(),
+                            (float)params[2]->AsReal(), (float)params[3]->AsReal(),
+                            (float)params[4]->AsReal(), (float)params[5]->AsReal());
     }
     else
     {
         return TJS_E_INVALIDPARAM;
     }
-    *result = new GdipWrapper<GdipMatrix>(new GdipMatrix(BLMatrix2D(*matrix)));
+    *result = new GdipWrapper<GdipMatrix>(new GdipMatrix(m));
     return TJS_S_OK;
 }
 
 NCB_REGISTER_GDIP_SUBCLASS2(GdipMatrix, MatrixConvertor)
-Factory(MatrixFactory);
-NCB_GDIP_METHOD(OffsetX);
-NCB_GDIP_METHOD(OffsetY);
-NCB_GDIP_METHOD(Equals);
-NCB_GDIP_METHOD(SetElements);
-NCB_GDIP_METHOD(GetLastStatus);
-NCB_GDIP_METHOD(Invert);
-NCB_GDIP_METHOD(IsIdentity);
-NCB_GDIP_METHOD(IsInvertible);
-NCB_GDIP_METHOD(Multiply);
-NCB_GDIP_METHOD(Reset);
-NCB_GDIP_METHOD(Rotate);
-NCB_GDIP_METHOD(RotateAt);
-NCB_GDIP_METHOD(Scale);
-NCB_GDIP_METHOD(Shear);
-NCB_GDIP_METHOD(Translate);
-}
-;
+    Factory(MatrixFactory);
+    NCB_GDIP_METHOD(OffsetX);
+    NCB_GDIP_METHOD(OffsetY);
+    NCB_GDIP_METHOD(Equals);
+    NCB_GDIP_METHOD(SetElements);
+    NCB_GDIP_METHOD(GetLastStatus);
+    NCB_GDIP_METHOD(Invert);
+    NCB_GDIP_METHOD(IsIdentity);
+    NCB_GDIP_METHOD(IsInvertible);
+    NCB_GDIP_METHOD(Multiply);
+    NCB_GDIP_METHOD(Reset);
+    NCB_GDIP_METHOD(Rotate);
+    NCB_GDIP_METHOD(RotateAt);
+    NCB_GDIP_METHOD(Scale);
+    NCB_GDIP_METHOD(Shear);
+    NCB_GDIP_METHOD(Translate);
+};
 
 // ------------------------------------------------------- Image
-
-/**
- * イメージ用コンバータ
- * 文字列からも変更可能
- */
 template<class T>
 struct ImageConvertor : public GdipTypeConvertor<T>
 {
@@ -3374,18 +2487,18 @@ struct ImageConvertor : public GdipTypeConvertor<T>
                 LayerExDraw* layer =
                     ncbInstanceAdaptor<LayerExDraw>::GetNativeInstance(src.AsObjectNoAddRef());
                 if (layer)
-                {
                     dst = *layer;
-                }
                 else
-                {
                     dst = NULL;
-                }
             }
         }
         else if (src.Type() == tvtString)
-        { // 文字列から生成
-            dst = this->result = new GdipImage(loadImage(src.GetString()));
+        {
+            plutovg_surface_t* surf = loadImage(src.GetString());
+            if (surf)
+                dst = this->result = new GdipImage(surf);
+            else
+                dst = NULL;
         }
         else
         {
@@ -3394,10 +2507,8 @@ struct ImageConvertor : public GdipTypeConvertor<T>
     }
 };
 
-static tjs_error ImageFactory(GdipWrapper<GdipImage>** result,
-                              tjs_int numparams,
-                              tTJSVariant** params,
-                              iTJSDispatch2* objthis)
+static tjs_error ImageFactory(GdipWrapper<GdipImage>** result, tjs_int numparams,
+                              tTJSVariant** params, iTJSDispatch2* objthis)
 {
     if (numparams == 0)
     {
@@ -3406,10 +2517,11 @@ static tjs_error ImageFactory(GdipWrapper<GdipImage>** result,
     }
     else if (numparams > 0 && params[0]->Type() == tvtString)
     {
-        BLImage image = loadImage(params[0]->GetString());
-        if (!image.empty())
+        plutovg_surface_t* surf = loadImage(params[0]->GetString());
+        if (surf)
         {
-            *result = new GdipWrapper<GdipImage>(new GdipImage(image));
+            *result = new GdipWrapper<GdipImage>(new GdipImage(surf));
+            plutovg_surface_destroy(surf); // GdipImage takes a reference
             return TJS_S_OK;
         }
         else
@@ -3422,9 +2534,11 @@ static tjs_error ImageFactory(GdipWrapper<GdipImage>** result,
 
 static void ImageLoad(GdipWrapper<GdipImage>* obj, const tjs_char* filename)
 {
-    GdipImage* image = new GdipImage(loadImage(filename));
-    if (image)
+    plutovg_surface_t* surf = loadImage(filename);
+    if (surf)
     {
+        GdipImage* image = new GdipImage(surf);
+        plutovg_surface_destroy(surf);
         obj->setGdipObject(image);
     }
     else
@@ -3475,26 +2589,22 @@ static tTJSVariant ImageBounds(GdipWrapper<GdipImage>* obj)
 }
 
 NCB_REGISTER_GDIP_SUBCLASS2(GdipImage, ImageConvertor)
-Factory(ImageFactory);
-NCB_METHOD_PROXY(load, ImageLoad);
-NCB_METHOD_PROXY(Clone, ImageClone);
-NCB_METHOD_PROXY(GetBounds, ImageBounds);
-NCB_GDIP_METHOD(GetFlags);
-NCB_GDIP_METHOD(GetHeight);
-NCB_GDIP_METHOD(GetHorizontalResolution);
-NCB_GDIP_METHOD(GetLastStatus);
-NCB_GDIP_METHOD(GetPixelFormat);
-NCB_GDIP_METHOD(GetType);
-NCB_GDIP_METHOD(GetVerticalResolution);
-NCB_GDIP_METHOD(GetWidth);
-NCB_GDIP_METHOD(RotateFlip);
-}
-;
+    Factory(ImageFactory);
+    NCB_METHOD_PROXY(load, ImageLoad);
+    NCB_METHOD_PROXY(Clone, ImageClone);
+    NCB_METHOD_PROXY(GetBounds, ImageBounds);
+    NCB_GDIP_METHOD(GetFlags);
+    NCB_GDIP_METHOD(GetHeight);
+    NCB_GDIP_METHOD(GetHorizontalResolution);
+    NCB_GDIP_METHOD(GetLastStatus);
+    NCB_GDIP_METHOD(GetPixelFormat);
+    NCB_GDIP_METHOD(GetType);
+    NCB_GDIP_METHOD(GetVerticalResolution);
+    NCB_GDIP_METHOD(GetWidth);
+    NCB_GDIP_METHOD(RotateFlip);
+};
 
-// ------------------------------------------------------
-// 自前記述クラス登録
-// ------------------------------------------------------
-
+// ------------------------------------------------------- Subclass registrations
 NCB_REGISTER_SUBCLASS(FontInfo)
 {
     NCB_CONSTRUCTOR((const tjs_char*, tjs_real, tjs_int));
@@ -3539,231 +2649,141 @@ NCB_REGISTER_SUBCLASS(Path)
     NCB_METHOD(drawRectangles);
 };
 
+// ------------------------------------------------------- GdiPlus namespace
 #define ENUM(n) Variant(#n, (int)n)
 #define NCB_SUBCLASS_NAME(name) NCB_SUBCLASS(name, name)
 #define NCB_GDIP_SUBCLASS(Class) NCB_SUBCLASS(Class, GdipWrapper<Class>)
 
 NCB_REGISTER_CLASS(GdiPlus)
 {
-    // enums
-
     // Status
-    ENUM(Ok);
-    ENUM(GenericError);
-    ENUM(InvalidParameter);
-    ENUM(OutOfMemory);
-    ENUM(ObjectBusy);
-    ENUM(InsufficientBuffer);
-    ENUM(NotImplemented);
-    ENUM(Win32Error);
-    ENUM(WrongState);
-    ENUM(Aborted);
-    ENUM(FileNotFound);
-    ENUM(ValueOverflow);
-    ENUM(AccessDenied);
-    ENUM(UnknownImageFormat);
-    ENUM(FontFamilyNotFound);
-    ENUM(FontStyleNotFound);
-    ENUM(NotTrueTypeFont);
-    ENUM(UnsupportedGdiplusVersion);
-    ENUM(GdiplusNotInitialized);
-    ENUM(PropertyNotFound);
-    ENUM(PropertyNotSupported);
-    ENUM(ProfileNotFound);
+    ENUM(Ok); ENUM(GenericError); ENUM(InvalidParameter); ENUM(OutOfMemory);
+    ENUM(ObjectBusy); ENUM(InsufficientBuffer); ENUM(NotImplemented);
+    ENUM(Win32Error); ENUM(WrongState); ENUM(Aborted); ENUM(FileNotFound);
+    ENUM(ValueOverflow); ENUM(AccessDenied); ENUM(UnknownImageFormat);
+    ENUM(FontFamilyNotFound); ENUM(FontStyleNotFound); ENUM(NotTrueTypeFont);
+    ENUM(UnsupportedGdiplusVersion); ENUM(GdiplusNotInitialized);
+    ENUM(PropertyNotFound); ENUM(PropertyNotSupported); ENUM(ProfileNotFound);
 
-    ENUM(FontStyleRegular);
-    ENUM(FontStyleBold);
-    ENUM(FontStyleItalic);
-    ENUM(FontStyleBoldItalic);
-    ENUM(FontStyleUnderline);
-    ENUM(FontStyleStrikeout);
+    // FontStyle
+    ENUM(FontStyleRegular); ENUM(FontStyleBold); ENUM(FontStyleItalic);
+    ENUM(FontStyleBoldItalic); ENUM(FontStyleUnderline); ENUM(FontStyleStrikeout);
 
-    ENUM(BrushTypeSolidColor);
-    ENUM(BrushTypeHatchFill);
-    ENUM(BrushTypeTextureFill);
-    ENUM(BrushTypePathGradient);
-    ENUM(BrushTypeLinearGradient);
+    // BrushType
+    ENUM(BrushTypeSolidColor); ENUM(BrushTypeHatchFill); ENUM(BrushTypeTextureFill);
+    ENUM(BrushTypePathGradient); ENUM(BrushTypeLinearGradient);
 
-    ENUM(DashCapFlat);
-    ENUM(DashCapRound);
-    ENUM(DashCapTriangle);
+    // DashCap
+    ENUM(DashCapFlat); ENUM(DashCapRound); ENUM(DashCapTriangle);
 
-    ENUM(DashStyleSolid);
-    ENUM(DashStyleDash);
-    ENUM(DashStyleDot);
-    ENUM(DashStyleDashDot);
-    ENUM(DashStyleDashDotDot);
+    // DashStyle
+    ENUM(DashStyleSolid); ENUM(DashStyleDash); ENUM(DashStyleDot);
+    ENUM(DashStyleDashDot); ENUM(DashStyleDashDotDot);
 
-    ENUM(HatchStyleHorizontal);
-    ENUM(HatchStyleVertical);
-    ENUM(HatchStyleForwardDiagonal);
-    ENUM(HatchStyleBackwardDiagonal);
-    ENUM(HatchStyleCross);
-    ENUM(HatchStyleDiagonalCross);
-    ENUM(HatchStyle05Percent);
-    ENUM(HatchStyle10Percent);
-    ENUM(HatchStyle20Percent);
-    ENUM(HatchStyle25Percent);
-    ENUM(HatchStyle30Percent);
-    ENUM(HatchStyle40Percent);
-    ENUM(HatchStyle50Percent);
-    ENUM(HatchStyle60Percent);
-    ENUM(HatchStyle70Percent);
-    ENUM(HatchStyle75Percent);
-    ENUM(HatchStyle80Percent);
-    ENUM(HatchStyle90Percent);
-    ENUM(HatchStyleLightDownwardDiagonal);
-    ENUM(HatchStyleLightUpwardDiagonal);
-    ENUM(HatchStyleDarkDownwardDiagonal);
-    ENUM(HatchStyleDarkUpwardDiagonal);
-    ENUM(HatchStyleWideDownwardDiagonal);
-    ENUM(HatchStyleWideUpwardDiagonal);
-    ENUM(HatchStyleLightVertical);
-    ENUM(HatchStyleLightHorizontal);
-    ENUM(HatchStyleNarrowVertical);
-    ENUM(HatchStyleNarrowHorizontal);
-    ENUM(HatchStyleDarkVertical);
-    ENUM(HatchStyleDarkHorizontal);
-    ENUM(HatchStyleDashedDownwardDiagonal);
-    ENUM(HatchStyleDashedUpwardDiagonal);
-    ENUM(HatchStyleDashedHorizontal);
-    ENUM(HatchStyleDashedVertical);
-    ENUM(HatchStyleSmallConfetti);
-    ENUM(HatchStyleLargeConfetti);
-    ENUM(HatchStyleZigZag);
-    ENUM(HatchStyleWave);
-    ENUM(HatchStyleDiagonalBrick);
-    ENUM(HatchStyleHorizontalBrick);
-    ENUM(HatchStyleWeave);
-    ENUM(HatchStylePlaid);
-    ENUM(HatchStyleDivot);
-    ENUM(HatchStyleDottedGrid);
-    ENUM(HatchStyleDottedDiamond);
-    ENUM(HatchStyleShingle);
-    ENUM(HatchStyleTrellis);
-    ENUM(HatchStyleSphere);
-    ENUM(HatchStyleSmallGrid);
-    ENUM(HatchStyleSmallCheckerBoard);
-    ENUM(HatchStyleLargeCheckerBoard);
-    ENUM(HatchStyleOutlinedDiamond);
-    ENUM(HatchStyleSolidDiamond);
-    ENUM(HatchStyleTotal);
-    ENUM(HatchStyleLargeGrid);
-    ENUM(HatchStyleMin);
-    ENUM(HatchStyleMax);
+    // HatchStyle
+    ENUM(HatchStyleHorizontal); ENUM(HatchStyleVertical);
+    ENUM(HatchStyleForwardDiagonal); ENUM(HatchStyleBackwardDiagonal);
+    ENUM(HatchStyleCross); ENUM(HatchStyleDiagonalCross);
+    ENUM(HatchStyle05Percent); ENUM(HatchStyle10Percent); ENUM(HatchStyle20Percent);
+    ENUM(HatchStyle25Percent); ENUM(HatchStyle30Percent); ENUM(HatchStyle40Percent);
+    ENUM(HatchStyle50Percent); ENUM(HatchStyle60Percent); ENUM(HatchStyle70Percent);
+    ENUM(HatchStyle75Percent); ENUM(HatchStyle80Percent); ENUM(HatchStyle90Percent);
+    ENUM(HatchStyleLightDownwardDiagonal); ENUM(HatchStyleLightUpwardDiagonal);
+    ENUM(HatchStyleDarkDownwardDiagonal); ENUM(HatchStyleDarkUpwardDiagonal);
+    ENUM(HatchStyleWideDownwardDiagonal); ENUM(HatchStyleWideUpwardDiagonal);
+    ENUM(HatchStyleLightVertical); ENUM(HatchStyleLightHorizontal);
+    ENUM(HatchStyleNarrowVertical); ENUM(HatchStyleNarrowHorizontal);
+    ENUM(HatchStyleDarkVertical); ENUM(HatchStyleDarkHorizontal);
+    ENUM(HatchStyleDashedDownwardDiagonal); ENUM(HatchStyleDashedUpwardDiagonal);
+    ENUM(HatchStyleDashedHorizontal); ENUM(HatchStyleDashedVertical);
+    ENUM(HatchStyleSmallConfetti); ENUM(HatchStyleLargeConfetti);
+    ENUM(HatchStyleZigZag); ENUM(HatchStyleWave);
+    ENUM(HatchStyleDiagonalBrick); ENUM(HatchStyleHorizontalBrick);
+    ENUM(HatchStyleWeave); ENUM(HatchStylePlaid); ENUM(HatchStyleDivot);
+    ENUM(HatchStyleDottedGrid); ENUM(HatchStyleDottedDiamond);
+    ENUM(HatchStyleShingle); ENUM(HatchStyleTrellis); ENUM(HatchStyleSphere);
+    ENUM(HatchStyleSmallGrid); ENUM(HatchStyleSmallCheckerBoard);
+    ENUM(HatchStyleLargeCheckerBoard); ENUM(HatchStyleOutlinedDiamond);
+    ENUM(HatchStyleSolidDiamond); ENUM(HatchStyleTotal);
+    ENUM(HatchStyleLargeGrid); ENUM(HatchStyleMin); ENUM(HatchStyleMax);
 
-    ENUM(LinearGradientModeHorizontal);
-    ENUM(LinearGradientModeVertical);
-    ENUM(LinearGradientModeForwardDiagonal);
-    ENUM(LinearGradientModeBackwardDiagonal);
+    // LinearGradientMode
+    ENUM(LinearGradientModeHorizontal); ENUM(LinearGradientModeVertical);
+    ENUM(LinearGradientModeForwardDiagonal); ENUM(LinearGradientModeBackwardDiagonal);
 
-    ENUM(LineCapFlat);
-    ENUM(LineCapSquare);
-    ENUM(LineCapRound);
-    ENUM(LineCapTriangle);
-    ENUM(LineCapNoAnchor);
-    ENUM(LineCapSquareAnchor);
-    ENUM(LineCapRoundAnchor);
-    ENUM(LineCapDiamondAnchor);
-    ENUM(LineCapArrowAnchor);
+    // LineCap
+    ENUM(LineCapFlat); ENUM(LineCapSquare); ENUM(LineCapRound); ENUM(LineCapTriangle);
+    ENUM(LineCapNoAnchor); ENUM(LineCapSquareAnchor); ENUM(LineCapRoundAnchor);
+    ENUM(LineCapDiamondAnchor); ENUM(LineCapArrowAnchor);
 
-    ENUM(LineJoinMiter);
-    ENUM(LineJoinBevel);
-    ENUM(LineJoinRound);
-    ENUM(LineJoinMiterClipped);
+    // LineJoin
+    ENUM(LineJoinMiter); ENUM(LineJoinBevel); ENUM(LineJoinRound); ENUM(LineJoinMiterClipped);
 
-    ENUM(PenAlignmentCenter);
-    ENUM(PenAlignmentInset);
+    // PenAlignment
+    ENUM(PenAlignmentCenter); ENUM(PenAlignmentInset);
 
-    ENUM(WrapModeTile);
-    ENUM(WrapModeTileFlipX);
-    ENUM(WrapModeTileFlipY);
-    ENUM(WrapModeTileFlipXY);
-    ENUM(WrapModeClamp);
+    // WrapMode
+    ENUM(WrapModeTile); ENUM(WrapModeTileFlipX); ENUM(WrapModeTileFlipY);
+    ENUM(WrapModeTileFlipXY); ENUM(WrapModeClamp);
 
-    ENUM(MatrixOrderPrepend);
-    ENUM(MatrixOrderAppend);
+    // MatrixOrder
+    ENUM(MatrixOrderPrepend); ENUM(MatrixOrderAppend);
 
-    ENUM(ImageTypeUnknown);
-    ENUM(ImageTypeBitmap);
-    ENUM(ImageTypeMetafile);
+    // ImageType
+    ENUM(ImageTypeUnknown); ENUM(ImageTypeBitmap); ENUM(ImageTypeMetafile);
 
-    ENUM(RotateNoneFlipNone);
-    ENUM(Rotate90FlipNone);
-    ENUM(Rotate180FlipNone);
-    ENUM(Rotate270FlipNone);
-    ENUM(RotateNoneFlipX);
-    ENUM(Rotate90FlipX);
-    ENUM(Rotate180FlipX);
-    ENUM(Rotate270FlipX);
-    ENUM(RotateNoneFlipY);
-    ENUM(Rotate90FlipY);
-    ENUM(Rotate180FlipY);
-    ENUM(Rotate270FlipY);
-    ENUM(RotateNoneFlipXY);
-    ENUM(Rotate90FlipXY);
-    ENUM(Rotate180FlipXY);
-    ENUM(Rotate270FlipXY);
+    // RotateFlipType
+    ENUM(RotateNoneFlipNone); ENUM(Rotate90FlipNone); ENUM(Rotate180FlipNone);
+    ENUM(Rotate270FlipNone); ENUM(RotateNoneFlipX); ENUM(Rotate90FlipX);
+    ENUM(Rotate180FlipX); ENUM(Rotate270FlipX);
+    ENUM(RotateNoneFlipY); ENUM(Rotate90FlipY); ENUM(Rotate180FlipY); ENUM(Rotate270FlipY);
+    ENUM(RotateNoneFlipXY); ENUM(Rotate90FlipXY); ENUM(Rotate180FlipXY); ENUM(Rotate270FlipXY);
 
-    ENUM(SmoothingModeInvalid);
-    ENUM(SmoothingModeDefault);
-    ENUM(SmoothingModeHighSpeed);
-    ENUM(SmoothingModeHighQuality);
-    ENUM(SmoothingModeNone);
-    ENUM(SmoothingModeAntiAlias);
+    // SmoothingMode
+    ENUM(SmoothingModeInvalid); ENUM(SmoothingModeDefault);
+    ENUM(SmoothingModeHighSpeed); ENUM(SmoothingModeHighQuality);
+    ENUM(SmoothingModeNone); ENUM(SmoothingModeAntiAlias);
 
-    ENUM(TextRenderingHintSystemDefault);
-    ENUM(TextRenderingHintSingleBitPerPixelGridFit);
-    ENUM(TextRenderingHintSingleBitPerPixel);
-    ENUM(TextRenderingHintAntiAliasGridFit);
-    ENUM(TextRenderingHintAntiAlias);
-    ENUM(TextRenderingHintClearTypeGridFit);
+    // TextRenderingHint
+    ENUM(TextRenderingHintSystemDefault); ENUM(TextRenderingHintSingleBitPerPixelGridFit);
+    ENUM(TextRenderingHintSingleBitPerPixel); ENUM(TextRenderingHintAntiAliasGridFit);
+    ENUM(TextRenderingHintAntiAlias); ENUM(TextRenderingHintClearTypeGridFit);
 
-    // statics
+    // Static methods
     NCB_METHOD(addPrivateFont);
     NCB_METHOD(getFontList);
 
-    // classes
+    // Subclasses
     NCB_SUBCLASS_NAME(PointF);
     NCB_SUBCLASS_NAME(RectF);
-
     SubClass(TJS_N("Image"), TypeWrap<GdipWrapper<GdipImage>>());
     SubClass(TJS_N("Matrix"), TypeWrap<GdipWrapper<GdipMatrix>>());
-
     NCB_SUBCLASS(Font, FontInfo);
     NCB_SUBCLASS(Appearance, Appearance);
     NCB_SUBCLASS(Path, Path);
 }
 
-NCB_GET_INSTANCE_HOOK(LayerExDraw){
-    // インスタンスゲッタ
-    NCB_INSTANCE_GETTER(objthis){
-        // objthis を iTJSDispatch2* 型の引数とする
-        ClassT* obj = GetNativeInstance(objthis); // ネイティブインスタンスポインタ取得
-if (!obj)
+// ------------------------------------------------------- LayerExDraw hook
+NCB_GET_INSTANCE_HOOK(LayerExDraw)
 {
-    obj = new ClassT(objthis); // ない場合は生成する
-    SetNativeInstance(objthis, obj); // objthis に obj をネイティブインスタンスとして登録する
-}
-obj->reset();
-return obj;
-}
-// デストラクタ（実際のメソッドが呼ばれた後に呼ばれる）
-~NCB_GET_INSTANCE_HOOK_CLASS()
-{
-}
-}
-;
+    NCB_INSTANCE_GETTER(objthis)
+    {
+        ClassT* obj = GetNativeInstance(objthis);
+        if (!obj)
+        {
+            obj = new ClassT(objthis);
+            SetNativeInstance(objthis, obj);
+        }
+        obj->reset();
+        return obj;
+    }
+    ~NCB_GET_INSTANCE_HOOK_CLASS() {}
+};
 
 #define LAYEREX_METHOD(type, name) \
     Method(TJS_N(#name), &Type::name, Bridge<LayerExDraw::BridgeFunctor<type>>())
 
-/**
- * Image はラッピングする必要があるので rawcallback で対応
- */
-static tjs_error GetRecordImage(tTJSVariant* result,
-                                tjs_int numparams,
-                                tTJSVariant** param,
+static tjs_error GetRecordImage(tTJSVariant* result, tjs_int numparams, tTJSVariant** param,
                                 iTJSDispatch2* objthis)
 {
     LayerExDraw* obj = ncbInstanceAdaptor<LayerExDraw>::GetNativeInstance(objthis, true);
@@ -3793,7 +2813,6 @@ static tjs_error GetRecordImage(tTJSVariant* result,
     return TJS_S_OK;
 }
 
-// フックつきアタッチ
 NCB_ATTACH_CLASS_WITH_HOOK(LayerExDraw, Layer)
 {
     NCB_PROPERTY(updateWhenDraw, getUpdateWhenDraw, setUpdateWhenDraw);
@@ -3845,8 +2864,6 @@ NCB_ATTACH_CLASS_WITH_HOOK(LayerExDraw, Layer)
     NCB_METHOD(saveRecord);
     NCB_METHOD(loadRecord);
 }
-
-// ----------------------------------- 起動・開放処理
 
 NCB_PRE_REGIST_CALLBACK(initGdiPlus);
 NCB_POST_UNREGIST_CALLBACK(deInitGdiPlus);

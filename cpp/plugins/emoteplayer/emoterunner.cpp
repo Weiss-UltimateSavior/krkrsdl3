@@ -23,121 +23,45 @@ namespace emoteplayer
 
 static GLuint emotenodeprogram = 0;
 static GLuint emotenodeVAO = 0;
+static GLuint emotenodeVBO = 0;
+static GLuint emotenodeIBO = 0;
+static size_t emotenodeVBOSize = 0;
+static size_t emotenodeIBOSize = 0;
+
+// GLES 2.0 compatible shaders (no tessellation)
 #if _KRKRSDL3_GL
 static const char* vertexShaderSrc = R"(
-            #version 430 core
+            #version 330 core
             layout (location = 0) in vec2 aPos;
+            layout (location = 1) in vec2 aTexCoord;
+            out vec2 texCoord;
 
             void main()
             {
                 gl_Position = vec4(aPos.xy, 0.0, 1.0);
-            }
-            )";
-static const char* tessControlShaderSrc = R"(
-            #version 430 core
-            layout (vertices = 16) out;
-
-            void main()
-            {
-                gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-
-                if (gl_InvocationID == 0)
-                {
-                    gl_TessLevelInner[0] = 8.0;
-                    gl_TessLevelInner[1] = 8.0;
-                    gl_TessLevelOuter[0] = 16.0;
-                    gl_TessLevelOuter[1] = 16.0;
-                    gl_TessLevelOuter[2] = 16.0;
-                    gl_TessLevelOuter[3] = 16.0;
-                }
-            }
-            )";
-static const char* tessEvaluationShaderSrc = R"(
-            #version 430 core
-            layout(quads, equal_spacing, ccw) in;
-
-            out vec2 tessCoord;
-
-            // 最大渲染深度64，应该是够用了
-            uniform int surfaceCount;
-            uniform mat4 transforms[64];
-            uniform vec2 controlPoints[64][16];
-
-            float B0(float t) { return (1.0 - t) * (1.0 - t) * (1.0 - t); }
-            float B1(float t) { return 3.0 * t * (1.0 - t) * (1.0 - t); }
-            float B2(float t) { return 3.0 * t * t * (1.0 - t); }
-            float B3(float t) { return t * t * t; }
-            vec2 bezierSurface(vec2 uv, int idx) {
-                float u = uv.x;
-                float v = uv.y;
-
-                vec2 result = vec2(0.0);
-
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
-                        int index = i * 4 + j;
-
-                        // 计算基函数乘积
-                        float bu = 0.0;
-                        float bv = 0.0;
-
-                        if (i == 0) bu = B0(u);
-                        else if (i == 1) bu = B1(u);
-                        else if (i == 2) bu = B2(u);
-                        else if (i == 3) bu = B3(u);
-
-                        if (j == 0) bv = B0(v);
-                        else if (j == 1) bv = B1(v);
-                        else if (j == 2) bv = B2(v);
-                        else if (j == 3) bv = B3(v);
-
-                        float basis = bu * bv;
-                        vec2 controlPoint = controlPoints[idx][index];
-                        result += controlPoint * basis;
-                    }
-                }
-
-                return result;
-            }
-
-            void main(void)
-            {
-                float u = gl_TessCoord.x;
-                float v = gl_TessCoord.y;
-
-                vec4 lastPt = vec4(u, v, 0, 0);
-                for (int i = 0; i < surfaceCount; i++) {
-                    if (i > 0) {
-                        lastPt = vec4(1.0 - (lastPt.y / 2.0 + 0.5), 0.5 + lastPt.x / 2.0, 0, 0);
-                    }
-                    vec2 position = bezierSurface(lastPt.xy, i);
-                    lastPt = transforms[i] * vec4(position.xy, 0, 1);
-                }
-                gl_Position = lastPt * vec4(1.0, -1.0, 1.0, 1.0);
-
-                tessCoord = vec2(gl_TessCoord.y, gl_TessCoord.x);
+                texCoord = aTexCoord;
             }
             )";
 static const char* fragmentShaderSrc = R"(
-            #version 430 core
+            #version 330 core
             out vec4 FragColor;
-            in vec2 tessCoord;
+            in vec2 texCoord;
             uniform sampler2D texture1;
-            uniform bool enableMask = false;
+            uniform bool enableMask;
             uniform vec2 viewportSize;
             uniform sampler2D maskTexture;
-            uniform float opa = 1.0;
-            uniform bool enableColor = false;
+            uniform float opa;
+            uniform bool enableColor;
             uniform vec4 uniformColor;
             void main()
             {
-                vec4 maskColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                vec4 maskColor = vec4(1.0f);
                 if (enableMask) {
                     vec2 normalizedCoord = gl_FragCoord.xy / viewportSize;
                     maskColor = texture(maskTexture, normalizedCoord);
                 }
 
-                vec4 color = texture(texture1, tessCoord);
+                vec4 color = texture(texture1, texCoord);
                 if (enableMask && maskColor.a < 0.5) {
                     discard;
                 } else {
@@ -151,116 +75,36 @@ static const char* fragmentShaderSrc = R"(
             }
         )";
 #else
-static const char* vertexShaderSrc = R"(#version 320 es
-            layout (location = 0) in vec2 aPos;
+static const char* vertexShaderSrc = R"(#version 100
+            attribute vec2 aPos;
+            attribute vec2 aTexCoord;
+            varying vec2 texCoord;
 
             void main()
             {
                 gl_Position = vec4(aPos.xy, 0.0, 1.0);
+                texCoord = aTexCoord;
             }
             )";
-static const char* tessControlShaderSrc = R"(#version 320 es
-            layout (vertices = 16) out;
-
-            void main()
-            {
-                gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-
-                if (gl_InvocationID == 0)
-                {
-                    gl_TessLevelInner[0] = 8.0;
-                    gl_TessLevelInner[1] = 8.0;
-                    gl_TessLevelOuter[0] = 16.0;
-                    gl_TessLevelOuter[1] = 16.0;
-                    gl_TessLevelOuter[2] = 16.0;
-                    gl_TessLevelOuter[3] = 16.0;
-                }
-            }
-            )";
-static const char* tessEvaluationShaderSrc = R"(#version 320 es
-            layout(quads, equal_spacing, ccw) in;
-
-            out vec2 tessCoord;
-
-            // 最大渲染深度20，应该是够用了?
-            uniform int surfaceCount;
-            uniform mat4 transforms[20];
-            uniform vec2 controlPoints[20][16];
-
-            float B0(float t) { return (1.0 - t) * (1.0 - t) * (1.0 - t); }
-            float B1(float t) { return 3.0 * t * (1.0 - t) * (1.0 - t); }
-            float B2(float t) { return 3.0 * t * t * (1.0 - t); }
-            float B3(float t) { return t * t * t; }
-            vec2 bezierSurface(vec2 uv, int idx) {
-                float u = uv.x;
-                float v = uv.y;
-
-                vec2 result = vec2(0.0);
-
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
-                        int index = i * 4 + j;
-
-                        // 计算基函数乘积
-                        float bu = 0.0;
-                        float bv = 0.0;
-
-                        if (i == 0) bu = B0(u);
-                        else if (i == 1) bu = B1(u);
-                        else if (i == 2) bu = B2(u);
-                        else if (i == 3) bu = B3(u);
-
-                        if (j == 0) bv = B0(v);
-                        else if (j == 1) bv = B1(v);
-                        else if (j == 2) bv = B2(v);
-                        else if (j == 3) bv = B3(v);
-
-                        float basis = bu * bv;
-                        vec2 controlPoint = controlPoints[idx][index];
-                        result += controlPoint * basis;
-                    }
-                }
-
-                return result;
-            }
-
-            void main(void)
-            {
-                float u = gl_TessCoord.x;
-                float v = gl_TessCoord.y;
-
-                vec4 lastPt = vec4(u, v, 0, 0);
-                for (int i = 0; i < surfaceCount; i++) {
-                    if (i > 0) {
-                        lastPt = vec4(1.0 - (lastPt.y / 2.0 + 0.5), 0.5 + lastPt.x / 2.0, 0.0, 0.0);
-                    }
-                    vec2 position = bezierSurface(lastPt.xy, i);
-                    lastPt = transforms[i] * vec4(position.xy, 0, 1);
-                }
-                gl_Position = lastPt * vec4(1.0, -1.0, 1.0, 1.0);
-
-                tessCoord = vec2(gl_TessCoord.y, gl_TessCoord.x);
-            }
-            )";
-static const char* fragmentShaderSrc = R"(#version 320 es
-            out mediump vec4 FragColor;
-            in mediump vec2 tessCoord;
+static const char* fragmentShaderSrc = R"(#version 100
+            precision mediump float;
+            varying vec2 texCoord;
             uniform sampler2D texture1;
             uniform bool enableMask;
-            uniform mediump vec2 viewportSize;
+            uniform vec2 viewportSize;
             uniform sampler2D maskTexture;
-            uniform mediump float opa;
+            uniform float opa;
             uniform bool enableColor;
-            uniform mediump vec4 uniformColor;
+            uniform vec4 uniformColor;
             void main()
             {
-                mediump vec4 maskColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                vec4 maskColor = vec4(1.0);
                 if (enableMask) {
-                    mediump vec2 normalizedCoord = gl_FragCoord.xy / viewportSize;
-                    maskColor = texture(maskTexture, normalizedCoord);
+                    vec2 normalizedCoord = gl_FragCoord.xy / viewportSize;
+                    maskColor = texture2D(maskTexture, normalizedCoord);
                 }
 
-                mediump vec4 color = texture(texture1, tessCoord);
+                vec4 color = texture2D(texture1, texCoord);
                 if (enableMask && maskColor.a < 0.5) {
                     discard;
                 } else {
@@ -269,7 +113,7 @@ static const char* fragmentShaderSrc = R"(#version 320 es
                         color = vec4(uniformColor.xyz, uniformColor.a * color.a);
                     }
                     color.a = color.a * opa;
-                    FragColor = vec4(color.rgba);
+                    gl_FragColor = color;
                 }
             }
         )";
@@ -292,13 +136,9 @@ GLuint compileShader(GLenum type, const char* src)
 GLuint createRenderProgram()
 {
     GLuint vs = compileShader(GL_VERTEX_SHADER, vertexShaderSrc);
-    GLuint tcs = compileShader(GL_TESS_CONTROL_SHADER, tessControlShaderSrc);
-    GLuint tes = compileShader(GL_TESS_EVALUATION_SHADER, tessEvaluationShaderSrc);
     GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
     GLuint prog = glCreateProgram();
     glAttachShader(prog, vs);
-    glAttachShader(prog, tcs);
-    glAttachShader(prog, tes);
     glAttachShader(prog, fs);
     glLinkProgram(prog);
     GLint success;
@@ -310,8 +150,6 @@ GLuint createRenderProgram()
         SDL_Log("Program link error: %s", log);
     }
     glDeleteShader(vs);
-    glDeleteShader(tcs);
-    glDeleteShader(tes);
     glDeleteShader(fs);
     return prog;
 }
@@ -352,7 +190,11 @@ GLfloat default_control_points[32] = {
 void glBaseSet()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+#if _KRKRSDL3_GL
+    glClearDepth(-1.0f);
+#else
     glClearDepthf(-1.0f);
+#endif
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_GEQUAL);
     glEnable(GL_BLEND);
@@ -372,7 +214,11 @@ void glBaseSet()
 void glBaseSetWithoutClear()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+#if _KRKRSDL3_GL
+    glClearDepth(-1.0f);
+#else
     glClearDepthf(-1.0f);
+#endif
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_GEQUAL);
     glEnable(GL_BLEND);
@@ -387,6 +233,130 @@ void glBaseSetWithoutClear()
     }
     glUseProgram(emotenodeprogram);
     glBindVertexArray(emotenodeVAO);
+}
+
+#pragma endregion
+
+#pragma region BezierHelpers
+
+// Cubic Bezier basis functions
+static float B0(float t) { return (1.0f - t) * (1.0f - t) * (1.0f - t); }
+static float B1(float t) { return 3.0f * t * (1.0f - t) * (1.0f - t); }
+static float B2(float t) { return 3.0f * t * t * (1.0f - t); }
+static float B3(float t) { return t * t * t; }
+
+// Evaluate a single bicubic Bezier patch at (u, v)
+// controlPts[32] = 16 control points × 2 floats (x, y) stored row-major
+static void evalBezierSurface(const float controlPts[32], float u, float v,
+    float& outX, float& outY)
+{
+    float bu[4] = { B0(u), B1(u), B2(u), B3(u) };
+    float bv[4] = { B0(v), B1(v), B2(v), B3(v) };
+    float rx = 0.0f, ry = 0.0f;
+    for (int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
+            int idx = (row * 4 + col) * 2;
+            float basis = bu[row] * bv[col];
+            rx += controlPts[idx] * basis;
+            ry += controlPts[idx + 1] * basis;
+        }
+    }
+    outX = rx;
+    outY = ry;
+}
+
+// Evaluate the full surface chain (same logic as the old tess eval shader)
+// Start with UV (u,v), iterate surfaces from innermost to outermost,
+// applying bezier deformation and matrix transform at each level.
+// The outermost surface (index 0) includes projection and outputs clip space [-1,1].
+// Inner surfaces have model-only matrices and output pixel space (relative to parent);
+// their output is normalized back to UV [0,1] (with axis swap) for the next surface.
+static void evaluateSurfaceChain(
+    const std::vector<emoteRender>& renderMethod,
+    float u, float v,
+    float& outClipX, float& outClipY)
+{
+    float lastX = u;
+    float lastY = v;
+    int surfaceCount = (int)renderMethod.size();
+
+    // Iterate in reverse: renderMethod[surfaceCount-1] is innermost (first in shader)
+    for (int i = surfaceCount - 1; i >= 0; i--) {
+        // Evaluate bezier surface
+        float bx, by;
+        if (renderMethod[i].type == 1)
+        {
+            evalBezierSurface(renderMethod[i].controlPts, lastX, lastY, bx, by);
+        }
+        else
+        {
+            bx = lastY;
+            by = lastX;
+        }
+
+        // Apply transformation matrix
+        glm::vec4 trans = renderMethod[i].matTrans * glm::vec4(bx, by, 0.0f, 1.0f);
+
+        if (i > 0) {
+            // Inner surfaces have model-only matrices; output is in parent's pixel space.
+            // Normalize back to UV [0,1] (with axis swap: parent-Y→U, parent-X→V)
+            // for the next (outer) surface's Bezier input.
+            const auto& parent = renderMethod[i - 1];
+            lastX = (trans.y + parent.originY) / parent.height;   // Y → U
+            lastY = (trans.x + parent.originX) / parent.width;    // X → V
+        } else {
+            // Outermost surface includes projection → output is in clip space
+            lastX = trans.x;
+            lastY = trans.y;
+        }
+    }
+
+    // Final Y flip (same as shader: gl_Position = lastPt * vec4(1, -1, 1, 1))
+    outClipX = lastX;
+    outClipY = -lastY;
+}
+
+// Build subdivided mesh for a given icon node
+static void buildSubdivMesh(
+    const std::vector<emoteRender>& renderMethod,
+    int divX, int divY,
+    std::vector<emotenoderef::MeshVertex>& outVerts,
+    std::vector<uint16_t>& outIndices)
+{
+    outVerts.clear();
+    outIndices.clear();
+
+    // Generate vertices
+    outVerts.reserve((divX + 1) * (divY + 1));
+    for (int gy = 0; gy <= divY; gy++) {
+        float v = (float)gy / (float)divY;
+        for (int gx = 0; gx <= divX; gx++) {
+            float u = (float)gx / (float)divX;
+            float clipX, clipY;
+            evaluateSurfaceChain(renderMethod, u, v, clipX, clipY);
+            // tessCoord in old shader was (gl_TessCoord.y, gl_TessCoord.x) = (v, u)
+            outVerts.push_back({ clipX, clipY, v, u });
+        }
+    }
+
+    // Generate triangle indices (2 triangles per quad)
+    outIndices.reserve(divX * divY * 6);
+    for (int gy = 0; gy < divY; gy++) {
+        for (int gx = 0; gx < divX; gx++) {
+            uint16_t i0 = (uint16_t)(gy * (divX + 1) + gx);
+            uint16_t i1 = (uint16_t)(gy * (divX + 1) + gx + 1);
+            uint16_t i2 = (uint16_t)((gy + 1) * (divX + 1) + gx);
+            uint16_t i3 = (uint16_t)((gy + 1) * (divX + 1) + gx + 1);
+            // Triangle 1: p0-p1-p2
+            outIndices.push_back(i0);
+            outIndices.push_back(i1);
+            outIndices.push_back(i2);
+            // Triangle 2: p1-p3-p2
+            outIndices.push_back(i1);
+            outIndices.push_back(i3);
+            outIndices.push_back(i2);
+        }
+    }
 }
 
 #pragma endregion
@@ -806,15 +776,11 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
                     emt.matTrans = demuxMat * model;
                     emt.opa *= renderMethod.back().opa;
                     renderMethod.pop_back();
-                    // 绘制层解耦
+                    // 继承自父 layout 的边界信息
                     originX = renderMethod.back().originX;
                     originY = renderMethod.back().originY;
                     width = renderMethod.back().width;
                     height = renderMethod.back().height;
-                    emt.matTrans =
-                        glm::inverse(glm::ortho(-originX, width - originX, height - originY,
-                                                -originY, lim.zMax, -lim.zMax)) *
-                        emt.matTrans;
                 }
                 else // 正常更新矩阵
                 {
@@ -848,14 +814,20 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
                     emt.type = 1;
                 }
 
-                // 更新矩阵
-                glm::mat4 projection =
-                    glm::ortho(-lim.originX, lim.width - lim.originX, lim.height - lim.originY,
-                               -lim.originY, lim.zMax, -lim.zMax);
                 model =
                     glm::translate(model, glm::vec3(-originX - currOx, -originY - currOy, 0.0f));
                 model = glm::scale(model, glm::vec3(width, height, 1.0f));
-                emt.matTrans = projection * emt.matTrans * model;
+                if (renderMethod.empty())
+                { // 更新矩阵：仅最外层包含 projection，内层 surface 只保留 model 变换
+                    glm::mat4 projection =
+                        glm::ortho(-lim.originX, lim.width - lim.originX, lim.height - lim.originY,
+                                   -lim.originY, lim.zMax, -lim.zMax);
+                    emt.matTrans = projection * emt.matTrans * model;
+                }
+                else
+                {
+                    emt.matTrans = emt.matTrans * model;
+                }
 
                 // fbo信息
                 emt.originX = originX;
@@ -896,15 +868,22 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
                     emt.opa *= renderMethod.back().opa;
                     renderMethod.pop_back();
                 }
-                else // 正常更新矩阵
+                else
                 {
-                    glm::mat4 projection =
-                        glm::ortho(-lim.originX, lim.width - lim.originX, lim.height - lim.originY,
-                                   -lim.originY, lim.zMax, -lim.zMax);
                     model = glm::translate(model,
                                            glm::vec3(-originX - currOx, -originY - currOy, 0.0f));
                     model = glm::scale(model, glm::vec3(width, height, 1.0f));
-                    emt.matTrans = projection * model;
+                    if (renderMethod.empty())
+                    { // 正常更新矩阵：仅最外层加 projection
+                        glm::mat4 projection =
+                            glm::ortho(-lim.originX, lim.width - lim.originX,
+                                       lim.height - lim.originY, -lim.originY, lim.zMax, -lim.zMax);
+                        emt.matTrans = projection * model;
+                    }
+                    else
+                    {
+                        emt.matTrans = model;
+                    }
                 }
 
                 // fbo信息
@@ -928,17 +907,23 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
         glm::vec4 tmpVec1(0, 0, 0, 0), tmpVec2(1, 1, 0, 0);
         for (int32_t i = renderMethod.size() - 1; i >= 0; i--)
         {
-            // 不想改了，这里自适应一下吧
-            // [0,1]-matTrans->[-1,1]-compute->[0,1]
+            // 内层 surface 输出在父级像素空间 → 归一化回 UV [0,1]
             if (i != renderMethod.size() - 1)
             {
-                tmpVec1 = glm::vec4(tmpVec1.x / 2 + 0.5, 1 - (tmpVec1.y / 2 + 0.5), 0, 0);
-                tmpVec2 = glm::vec4(tmpVec2.x / 2 + 0.5, 1 - (tmpVec2.y / 2 + 0.5), 0, 0);
+                const auto& cur = renderMethod.at(i);
+                tmpVec1 = glm::vec4(
+                    (tmpVec1.x + cur.originX) / cur.width,
+                    (tmpVec1.y + cur.originY) / cur.height,
+                    0, 0);
+                tmpVec2 = glm::vec4(
+                    (tmpVec2.x + cur.originX) / cur.width,
+                    (tmpVec2.y + cur.originY) / cur.height,
+                    0, 0);
             }
             tmpVec1 = renderMethod.at(i).matTrans * glm::vec4(tmpVec1.x, tmpVec1.y, 0.0f, 1.0f);
             tmpVec2 = renderMethod.at(i).matTrans * glm::vec4(tmpVec2.x, tmpVec2.y, 0.0f, 1.0f);
         }
-        // 边界缩放
+        // 边界缩放（最外层 surface 输出 clip → screen）
         pt1.x = (tmpVec1.x / 2.0 + 0.5) * currentNode->_filePtr->_screenSize.width;
         pt1.y = (1 - (tmpVec1.y / 2.0 + 0.5)) * currentNode->_filePtr->_screenSize.height;
         pt2.x = (tmpVec2.x / 2.0 + 0.5) * currentNode->_filePtr->_screenSize.width;
@@ -965,17 +950,23 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
             glm::vec4 tmpVec1(0, 0, 0, 0), tmpVec2(1, 1, 0, 0);
             for (int32_t i = renderMethod.size() - 1; i >= 0; i--)
             {
-                // 不想改了，这里自适应一下吧
-                // [0,1]-matTrans->[-1,1]-compute->[0,1]
+                // 内层 surface 输出在父级像素空间 → 归一化回 UV [0,1]
                 if (i != renderMethod.size() - 1)
                 {
-                    tmpVec1 = glm::vec4(tmpVec1.x / 2 + 0.5, 1 - (tmpVec1.y / 2 + 0.5), 0, 0);
-                    tmpVec2 = glm::vec4(tmpVec2.x / 2 + 0.5, 1 - (tmpVec2.y / 2 + 0.5), 0, 0);
+                    const auto& cur = renderMethod.at(i);
+                    tmpVec1 = glm::vec4(
+                        (tmpVec1.x + cur.originX) / cur.width,
+                        (tmpVec1.y + cur.originY) / cur.height,
+                        0, 0);
+                    tmpVec2 = glm::vec4(
+                        (tmpVec2.x + cur.originX) / cur.width,
+                        (tmpVec2.y + cur.originY) / cur.height,
+                        0, 0);
                 }
                 tmpVec1 = renderMethod.at(i).matTrans * glm::vec4(tmpVec1.x, tmpVec1.y, 0.0f, 1.0f);
                 tmpVec2 = renderMethod.at(i).matTrans * glm::vec4(tmpVec2.x, tmpVec2.y, 0.0f, 1.0f);
             }
-            // 边界缩放
+            // 边界缩放（最外层 surface 输出 clip → screen）
             pt1.x = (tmpVec1.x / 2.0 + 0.5) * currentNode->_filePtr->_screenSize.width;
             pt1.y = (1 - (tmpVec1.y / 2.0 + 0.5)) * currentNode->_filePtr->_screenSize.height;
             pt2.x = (tmpVec2.x / 2.0 + 0.5) * currentNode->_filePtr->_screenSize.width;
@@ -999,6 +990,22 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
                 tmprect.shapeType = 2; // rect默认
             refMtn->shapeNodeAreas.push_back(tmprect);
         }
+    }
+
+    // 对于icon节点，在CPU上计算细分网格
+    if (isIcon && isNeedDraw && renderMethod.size() > 0)
+    {
+        // 确定细分等级
+        int div = currentNode ? (int)currentNode->meshDivision : 0;
+        if (div < 2) div = 8; // 默认8x8，匹配原曲面细分着色器的细分等级
+        _meshDivX = div;
+        _meshDivY = div;
+        buildSubdivMesh(renderMethod, _meshDivX, _meshDivY, _meshVertices, _meshIndices);
+    }
+    else
+    {
+        _meshVertices.clear();
+        _meshIndices.clear();
     }
 
     // 传递给子类: 通过_parentMotion查找对应ref，避免创建重复状态
@@ -1033,6 +1040,10 @@ void emotenoderef::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint e
     if (!isNeedDraw || !isIcon || renderMethod.size() < 1 || currentNode->removed)
         return; // 跳过无需绘制的 和 非icon的 和 无method 的节点
 
+    // 跳过空网格
+    if (_meshVertices.empty() || _meshIndices.empty())
+        return;
+
     //  提前绘制好蒙版texture
     if (renderMethod.at(0).hasStencil && exFbo != 0) // 进行Stencil过滤 不考虑复合蒙版的情况了
     {
@@ -1049,17 +1060,11 @@ void emotenoderef::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint e
     glBindFramebuffer(GL_FRAMEBUFFER, targetFbo);
     glUseProgram(emotenodeprogram);
     glViewport(0, 0, lim.width, lim.height);
-#if _KRKRSDL3_GL
-    if (renderMethod.size() > 64)
-#else
-    if (renderMethod.size() > 24)
-#endif
-    {
-        SDL_Log("render:%s failed!!!", currentNode->label.c_str());
-        return;
-    }
 
     // bm
+    float totalOpa = currOpa;
+    for (size_t i = 0; i < renderMethod.size(); i++)
+        totalOpa *= renderMethod.at(i).opa;
     bool enableColor = false;
     float uniformColor[4] = {0};
     switch (currbm)
@@ -1112,29 +1117,41 @@ void emotenoderef::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint e
             glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
         }
     }
-    // renderMethod
-    glUniform1i(glGetUniformLocation(emotenodeprogram, "surfaceCount"), renderMethod.size());
-    int idxCnt = 0;
-    float totalOpa = currOpa;
-    for (int32_t i = renderMethod.size() - 1; i >= 0; i--)
-    {
-        // opa
-        totalOpa *= renderMethod.at(i).opa;
-        // transform
-        char uniformName[32];
-        sprintf(uniformName, "transforms[%d]", idxCnt);
-        glUniformMatrix4fv(glGetUniformLocation(emotenodeprogram, uniformName), 1, GL_FALSE,
-                           glm::value_ptr(renderMethod.at(i).matTrans));
-        // controlPoints
-        sprintf(uniformName, "controlPoints[%d]", idxCnt);
-        if (renderMethod.at(i).type == 1)
-            glUniform2fv(glGetUniformLocation(emotenodeprogram, uniformName), 16,
-                         renderMethod.at(i).controlPts);
-        else
-            glUniform2fv(glGetUniformLocation(emotenodeprogram, uniformName), 16,
-                         default_control_points);
-        idxCnt++;
+
+    // 上传网格数据到VBO/IBO
+    size_t vertexBytes = _meshVertices.size() * sizeof(MeshVertex);
+    size_t indexBytes = _meshIndices.size() * sizeof(uint16_t);
+
+    if (emotenodeVBO == 0)
+        glGenBuffers(1, &emotenodeVBO);
+    if (emotenodeIBO == 0)
+        glGenBuffers(1, &emotenodeIBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, emotenodeVBO);
+    if (vertexBytes > emotenodeVBOSize) {
+        glBufferData(GL_ARRAY_BUFFER, vertexBytes, _meshVertices.data(), GL_DYNAMIC_DRAW);
+        emotenodeVBOSize = vertexBytes;
+    } else {
+        glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBytes, _meshVertices.data());
     }
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, emotenodeIBO);
+    if (indexBytes > emotenodeIBOSize) {
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, _meshIndices.data(), GL_STATIC_DRAW);
+        emotenodeIBOSize = indexBytes;
+    } else if (_meshIndices.size() > 0) {
+        // IBO typically doesn't change if mesh division is constant; update just in case
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBytes, _meshIndices.data());
+    }
+
+    // 设置顶点属性
+    // aPos: location 0, vec2 (float x 2)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, x));
+    glEnableVertexAttribArray(0);
+    // aTexCoord: location 1, vec2 (float x 2)
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertex), (void*)offsetof(MeshVertex, u));
+    glEnableVertexAttribArray(1);
+
     // opa
     glUniform1f(glGetUniformLocation(emotenodeprogram, "opa"), totalOpa);
     // texture
@@ -1149,7 +1166,7 @@ void emotenoderef::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint e
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, exTex);
         glUniform1i(glGetUniformLocation(emotenodeprogram, "maskTexture"), 1);
-        glDrawArrays(GL_PATCHES, 0, 16);
+        glDrawElements(GL_TRIANGLES, (GLsizei)_meshIndices.size(), GL_UNSIGNED_SHORT, 0);
     }
     else
     {
@@ -1160,7 +1177,7 @@ void emotenoderef::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint e
         glUniform1i(glGetUniformLocation(emotenodeprogram, "enableColor"), enableColor);
         glUniform4f(glGetUniformLocation(emotenodeprogram, "uniformColor"), uniformColor[0],
                     uniformColor[1], uniformColor[2], uniformColor[3]);
-        glDrawArrays(GL_PATCHES, 0, 16);
+        glDrawElements(GL_TRIANGLES, (GLsizei)_meshIndices.size(), GL_UNSIGNED_SHORT, 0);
     }
 }
 float emotenoderef::getCurrentRenderZ()
@@ -1680,19 +1697,8 @@ emoteVar* emoteengine::findVarByName(const std::string& name)
     }
     return nullptr;
 }
-static bool startswith(const std::string& str, const std::string& prefix)
-{
-    return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
-}
-static bool endswith(const std::string& str, const std::string& suffix)
-{
-    return str.size() >= suffix.size() &&
-           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
 void emoteengine::setVariable(const std::string& name, tjs_real value)
 {
-    SDL_Log("key->%s val->%f", name.c_str(), value);
-
     // 所有file
     std::vector<emotefile*> allFiles = _attach;
     allFiles.push_back(_mainfile);

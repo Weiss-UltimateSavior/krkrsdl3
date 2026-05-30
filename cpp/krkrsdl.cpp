@@ -6,7 +6,7 @@
 #include "glad/glad.h"
 #else
 #include "glad/glad_egl.h"
-#include <GLES3/gl32.h>
+#include <GLES3/gl3.h>
 #endif
 
 #include <map>
@@ -47,13 +47,13 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     tvp_window = SDL_CreateWindowWithProperties(props);
 
 #ifdef _KRKRSDL3_GL
-    // 使用opengl4.3
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    // 使用opengl3.3
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #else
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 #endif
     tvp_glContext = SDL_GL_CreateContext(tvp_window);
