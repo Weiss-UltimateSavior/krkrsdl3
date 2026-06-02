@@ -1,170 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    全局设置面板 - 完全重新设计
+    统一管理所有全局参数
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/gameconfig_background"
-    android:orientation="vertical">
+    android:background="@color/bg_medium"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <LinearLayout
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="全局设置"
+        android:textColor="@color/primary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/text_muted" />
+
+    <!-- 渲染器选择 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="渲染器"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <RadioGroup
+        android:id="@+id/group_renderer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:orientation="horizontal">
 
-        <CheckBox
-            android:id="@+id/button_stretchfull"
+        <RadioButton
+            android:id="@+id/button_render_software"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="stretch fullscreen" />
-
-        <CheckBox
-            android:id="@+id/button_ignorecutout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:checked="true"
-            android:text="ignore cutout (android 9 +)" />
+            android:text="软件渲染 (software)"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
 
-    </LinearLayout>
+        <RadioButton
+            android:id="@+id/button_render_gl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="硬件渲染 (gl)"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+    </RadioGroup>
 
-    <LinearLayout
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/bg_card" />
+
+    <!-- 其他功能 -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/button_gles2sharpness"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="use gles2 sharpness (hardware renderer)" />
-
-        <EditText
-            android:id="@+id/text_gles2sharpness"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="0.2"
-            android:ems="10"
-            android:inputType="number|textPersonName|numberDecimal"
-            android:text="10.0" />
-    </LinearLayout>
-
-    <CheckBox
-        android:id="@+id/button_disablevideo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="disable video (skip video command)" />
+        android:text="其他"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
 
     <CheckBox
         android:id="@+id/button_scopedsavedir"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="savedir in scoped storage (if gamedir readonly)" />
+        android:layout_marginTop="4dp"
+        android:text="隔离存档目录"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
 
     <CheckBox
         android:id="@+id/button_alloweditargs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="allow edit start args (for debug and custom command)" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <RadioGroup
-            android:id="@+id/group_encoding"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/button_gbk"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="gbk" />
-
-            <RadioButton
-                android:id="@+id/button_sjis"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="sjis" />
-
-            <RadioButton
-                android:id="@+id/button_utf8"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="utf8" />
-        </RadioGroup>
-    </LinearLayout>
+        android:text="允许编辑启动参数"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
 
     <View
-        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/teal_200" />
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@color/bg_card" />
 
+    <!-- 底部信息 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingTop="3dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autoLink="web"
-                android:text="https://space.bilibili.com/1528719466/dynamic" />
+            <Button
+                android:id="@+id/button_checkupdate"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@drawable/btn_primary"
+                android:text="检查更新"
+android:textColor="@color/white"
+            android:textSize="11sp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="right"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/button_checkupdate"
-                    style="@style/Widget.AppCompat.Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:backgroundTint="#00C853"
-                    android:text="Check Update"
-                    android:textColor="#FFFFFF"
-                    android:textSize="10sp" />
-
-                <Button
-                    android:id="@+id/button_about"
-                    style="@style/Widget.AppCompat.Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:backgroundTint="#00C853"
-                    android:text="About"
-                    android:textColor="#FFFFFF"
-                    android:textSize="10sp" />
-
-            </LinearLayout>
+            <Button
+                android:id="@+id/button_about"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/btn_secondary"
+                android:text="关于"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/text_version"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:fontFamily="sans-serif-black"
             android:gravity="center"
             android:text="@string/app_version"
-            android:textColor="#0091EA"
-            android:textSize="20sp" />
+            android:textColor="@color/primary"
+            android:textSize="24sp" />
     </LinearLayout>
 
 </LinearLayout>

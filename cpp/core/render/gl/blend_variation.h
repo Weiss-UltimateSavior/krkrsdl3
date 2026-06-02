@@ -26,9 +26,9 @@ template<class blend_func>
 struct normal_op
 {
     blend_func func_;
-    inline normal_op() {}
-    inline normal_op(tjs_uint32 opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr normal_op() noexcept {}
+    constexpr normal_op(tjs_uint32 opa) noexcept {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
         tjs_uint32 a = (s >> 24);
         return func_(d, s, a);
@@ -41,9 +41,9 @@ struct translucent_op
 {
     const tjs_int opa_;
     blend_func func_;
-    inline translucent_op() : opa_(255) {}
-    inline translucent_op(tjs_uint32 opa) : opa_(opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr translucent_op() noexcept : opa_(255) {}
+    constexpr translucent_op(tjs_uint32 opa) noexcept : opa_(opa) {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
         tjs_uint32 a = ((s >> 24) * opa_) >> 8;
         return func_(d, s, a);
@@ -55,9 +55,9 @@ struct translucent_nsa_op
 {
     const tjs_int opa_;
     blend_func func_;
-    inline translucent_nsa_op() : opa_(255) {}
-    inline translucent_nsa_op(tjs_uint32 opa) : opa_(opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const { return func_(d, s, opa_); }
+    constexpr translucent_nsa_op() noexcept : opa_(255) {}
+    constexpr translucent_nsa_op(tjs_uint32 opa) noexcept : opa_(opa) {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept { return func_(d, s, opa_); }
 };
 //--------------------------------------------------------------------------------------------------------
 // destアルファを保護するバージョン
@@ -65,9 +65,9 @@ template<class blend_func>
 struct hda_op
 {
     blend_func func_;
-    inline hda_op() {}
-    inline hda_op(tjs_uint32 opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr hda_op() noexcept {}
+    constexpr hda_op(tjs_uint32 opa) noexcept {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
         tjs_uint32 a = (s >> 24);
         return (func_(d, s, a) & 0x00ffffff) | (d & 0xff000000);
@@ -78,9 +78,9 @@ template<class blend_func>
 struct hda_nsa_op
 {
     blend_func func_;
-    inline hda_nsa_op() {}
-    inline hda_nsa_op(tjs_uint32 opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr hda_nsa_op() noexcept {}
+    constexpr hda_nsa_op(tjs_uint32 opa) noexcept {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
         return (func_(d, s) & 0x00ffffff) | (d & 0xff000000);
     }
@@ -92,9 +92,9 @@ struct hda_translucent_op
 {
     const tjs_uint32 opa_;
     blend_func func_;
-    inline hda_translucent_op() : opa_(255) {}
-    inline hda_translucent_op(tjs_uint32 opa) : opa_(opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr hda_translucent_op() noexcept : opa_(255) {}
+    constexpr hda_translucent_op(tjs_uint32 opa) noexcept : opa_(opa) {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
         tjs_uint32 a = ((s >> 24) * opa_) >> 8;
         return (func_(d, s, a) & 0x00ffffff) | (d & 0xff000000);
@@ -106,9 +106,9 @@ struct hda_translucent_nsa_op
 {
     const tjs_uint32 opa_;
     blend_func func_;
-    inline hda_translucent_nsa_op() : opa_(255) {}
-    inline hda_translucent_nsa_op(tjs_uint32 opa) : opa_(opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr hda_translucent_nsa_op() noexcept : opa_(255) {}
+    constexpr hda_translucent_nsa_op(tjs_uint32 opa) noexcept : opa_(opa) {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
         return (func_(d, s, opa_) & 0x00ffffff) | (d & 0xff000000);
     }
@@ -119,9 +119,9 @@ template<class blend_func>
 struct dest_alpha_op
 {
     blend_func func_;
-    inline dest_alpha_op() {}
-    inline dest_alpha_op(tjs_uint32 opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr dest_alpha_op() noexcept {}
+    constexpr dest_alpha_op(tjs_uint32 opa) noexcept {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
 #ifdef NOT_USE_TABLE
         tjs_uint32 sa = s >> 24;
@@ -167,9 +167,9 @@ struct dest_alpha_translucent_op
 {
     const tjs_int opa_;
     blend_func func_;
-    inline dest_alpha_translucent_op() : opa_(255) {}
-    inline dest_alpha_translucent_op(tjs_uint32 opa) : opa_(opa) {}
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const
+    constexpr dest_alpha_translucent_op() noexcept : opa_(255) {}
+    constexpr dest_alpha_translucent_op(tjs_uint32 opa) noexcept : opa_(opa) {}
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s) const noexcept
     {
 #ifdef NOT_USE_TABLE
         tjs_uint32 sa = ((s >> 24) * opa_) >> 8;

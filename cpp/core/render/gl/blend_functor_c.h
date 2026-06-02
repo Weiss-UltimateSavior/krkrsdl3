@@ -19,25 +19,25 @@
 #include "blend_variation.h"
 
 #define DEFINE_BLEND_VARIATION(FUNC) \
-    typedef normal_op<FUNC##_func> FUNC##_functor; \
-    typedef translucent_op<FUNC##_func> FUNC##_o_functor; \
-    typedef hda_op<FUNC##_func> FUNC##_HDA_functor; \
-    typedef hda_translucent_op<FUNC##_func> FUNC##_HDA_o_functor; \
-    typedef dest_alpha_op<FUNC##_func> FUNC##_d_functor; \
-    typedef dest_alpha_translucent_op<FUNC##_func> FUNC##_do_functor;
+    using FUNC##_functor      = normal_op<FUNC##_func>; \
+    using FUNC##_o_functor    = translucent_op<FUNC##_func>; \
+    using FUNC##_HDA_functor  = hda_op<FUNC##_func>; \
+    using FUNC##_HDA_o_functor = hda_translucent_op<FUNC##_func>; \
+    using FUNC##_d_functor    = dest_alpha_op<FUNC##_func>; \
+    using FUNC##_do_functor   = dest_alpha_translucent_op<FUNC##_func>;
 
 /** 4パターンのバージョン */
 #define DEFINE_BLEND_MIN_VARIATION(FUNC) \
-    typedef translucent_nsa_op<FUNC##_func> FUNC##_o_functor; \
-    typedef hda_nsa_op<FUNC##_functor> FUNC##_HDA_functor; \
-    typedef hda_translucent_nsa_op<FUNC##_func> FUNC##_HDA_o_functor;
+    using FUNC##_o_functor    = translucent_nsa_op<FUNC##_func>; \
+    using FUNC##_HDA_functor  = hda_nsa_op<FUNC##_functor>; \
+    using FUNC##_HDA_o_functor = hda_translucent_nsa_op<FUNC##_func>;
 
 /** 4パターンのPS系バージョン */
 #define DEFINE_BLEND_PS_VARIATION(FUNC) \
-    typedef normal_op<FUNC##_func> FUNC##_functor; \
-    typedef translucent_op<FUNC##_func> FUNC##_o_functor; \
-    typedef hda_op<FUNC##_func> FUNC##_HDA_functor; \
-    typedef hda_translucent_op<FUNC##_func> FUNC##_HDA_o_functor;
+    using FUNC##_functor      = normal_op<FUNC##_func>; \
+    using FUNC##_o_functor    = translucent_op<FUNC##_func>; \
+    using FUNC##_HDA_functor  = hda_op<FUNC##_func>; \
+    using FUNC##_HDA_o_functor = hda_translucent_op<FUNC##_func>;
 
 extern "C"
 {
@@ -65,7 +65,7 @@ extern "C"
 /** アルファブレンド */
 struct alpha_blend_func
 {
-    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s, tjs_uint32 a) const
+    inline tjs_uint32 operator()(tjs_uint32 d, tjs_uint32 s, tjs_uint32 a) const noexcept
     {
         tjs_uint32 d1 = d & 0xff00ff;
         d1 = (d1 + (((s & 0xff00ff) - d1) * a >> 8)) & 0xff00ff;

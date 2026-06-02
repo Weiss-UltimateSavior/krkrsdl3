@@ -16,7 +16,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.OnscripterYuri"
+        android:theme="@style/Theme.KRKRSDL3"
         android:forceDarkAllowed="false"
         android:requestLegacyExternalStorage="true"
         tools:targetApi="31" >

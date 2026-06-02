@@ -3,12 +3,10 @@ set(KRKRSDL_ENVIRON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cpp/environ)
 set(KRKRSDL_ENVIRON_SRC
     ${KRKRSDL_ENVIRON_PATH}/DetectCPU.cpp
     ${KRKRSDL_ENVIRON_PATH}/KeyCodeConv.cpp
-    ${KRKRSDL_ENVIRON_PATH}/KRMovieOverlay.cpp
     ${KRKRSDL_ENVIRON_PATH}/MainWindowLayer.cpp
     ${KRKRSDL_ENVIRON_PATH}/Other.cpp
     ${KRKRSDL_ENVIRON_PATH}/TVPConfig.cpp
     ${KRKRSDL_ENVIRON_PATH}/WaveMixer.cpp
-    ${KRKRSDL_ENVIRON_PATH}/gl/tvpgl.cpp
     )
 	
 if(ANDROID)

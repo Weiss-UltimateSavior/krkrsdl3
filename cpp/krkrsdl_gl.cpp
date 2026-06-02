@@ -242,8 +242,7 @@ void SDL_GL_UpdateTexture(SDL_Sprite* sp, uint8_t* buff, int width, int height, 
     glBindTexture(GL_TEXTURE_2D, sp->texture);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch / 4);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buff);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buff);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }

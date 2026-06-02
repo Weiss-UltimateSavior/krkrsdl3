@@ -25,7 +25,7 @@
 #include "TVPApplication.h"
 #include "TVPConfig.h"
 
-#include "public/ResampleImage.h"
+#include "ResampleImage.h"
 
 iTVPRenderManager* TVPGetSoftwareRenderManager();
 

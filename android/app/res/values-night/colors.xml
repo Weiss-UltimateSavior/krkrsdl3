@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- 夜间模式（深色）配色 - 黑蓝经典 -->
+    <color name="primary">#1565C0</color>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="secondary">#42A5F5</color>
+    <color name="accent">#2196F3</color>
+
+    <color name="bg_dark">#0A0A0A</color>
+    <color name="bg_medium">#121212</color>
+    <color name="bg_card">#1E1E2E</color>
+    <color name="bg_input">#1A1A2A</color>
+
+    <color name="text_primary">#E3F2FD</color>
+    <color name="text_secondary">#90CAF9</color>
+    <color name="text_muted">#5A7A9A</color>
+
+    <color name="success">#66BB6A</color>
+    <color name="warning">#FFD54F</color>
+    <color name="error">#ef5350</color>
+
+    <color name="path_internal">#66BB6A</color>
+    <color name="path_external">#FFD740</color>
+    <color name="path_saf">#4DD0E1</color>
+    <color name="path_error">#FF5252</color>
+
+    <!-- 兼容 -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="background">#202020</color>
-    <color name="gameconfig_background">#4C7131</color>
-    <color name="gamepath_color">#9B6161</color>
 </resources>

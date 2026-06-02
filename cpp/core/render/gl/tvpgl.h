@@ -19,18 +19,14 @@
         o : blend with opacity
 */
 
-/*[*/
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-    /*]*/
 
-    /*[*/
-    typedef struct
+    // Gamma adjustment data
+    typedef struct tTVPGLGammaAdjustData
     {
-        /* structure used for adjustment of gamma levels */
-
         float RGamma;   /* R gamma   ( 0.10 -- 1.00 -- 9.99) */
         tjs_int RFloor; /* output floor value  ( 0 -- 255 ) */
         tjs_int RCeil;  /* output ceil value ( 0 -- 255 ) */
@@ -41,17 +37,17 @@ extern "C"
         tjs_int BFloor;
         tjs_int BCeil;
     } tTVPGLGammaAdjustData;
-    /*]*/
 
-#if 1
+// Legacy function declaration macros (used by tvpgl.cpp and RenderManager.cpp)
 #define TVP_GL_FUNC_DECL(rettype, funcname, arg) rettype funcname arg
 #define TVP_GL_FUNC_EXTERN_DECL(rettype, funcname, arg) extern rettype funcname arg
 #define TVP_GL_FUNC_PTR_DECL(rettype, funcname, arg) rettype(*funcname) arg
-#define TVP_GL_FUNC_PTR_EXTERN_DECL_(rettype, funcname, arg) \
-    extern rettype(*funcname) arg; \
-    extern rettype funcname##_c arg;
-#define TVP_GL_FUNC_PTR_EXTERN_DECL TVP_GL_FUNC_PTR_EXTERN_DECL_
-#endif
+
+// Function pointer declaration with C fallback.
+// Each blend function has both a platform-optimized ptr and a C fallback (##_c).
+#define TVP_GL_FUNC_PTR_EXTERN_DECL(rettype, funcname, arglist) \
+    extern rettype(*funcname) arglist;                          \
+    extern rettype funcname##_c arglist;
 
     extern unsigned char TVPDivTable[256 * 256];
     extern unsigned char TVP252DitherPalette[3][256];
@@ -59,18 +55,18 @@ extern "C"
 #define TVP_TLG6_H_BLOCK_SIZE 8
 #define TVP_TLG6_W_BLOCK_SIZE 8
 
-/* put platform dependent declaration here */
-
-/* add here compiler specific inline directives */
+// Legacy inline macro (used by tvpgl.cpp)
 #if defined(__BORLANDC__) || (_MSC_VER)
 #define TVP_INLINE_FUNC __inline
 #else
-#define TVP_INLINE_FUNC
+#define TVP_INLINE_FUNC inline
 #endif
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPSaturatedAdd(tjs_uint32 a, tjs_uint32 b)
+    // -----------------------------------------------------------------------
+    // Saturated 8-bit byte addition across four channels packed in uint32
+    // -----------------------------------------------------------------------
+    static inline tjs_uint32 TVPSaturatedAdd(tjs_uint32 a, tjs_uint32 b) noexcept
     {
-        /* Add each byte of packed 8bit values in two 32bit uint32, with saturation. */
         tjs_uint32 tmp = ((a & b) + (((a ^ b) >> 1) & 0x7f7f7f7f)) & 0x80808080;
         tmp = (tmp << 1) - (tmp >> 7);
         return (a + b - tmp) | tmp;
@@ -82,7 +78,7 @@ extern "C"
             _o          :    with opacity
     */
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_n_a(tjs_uint32 dest, tjs_uint32 src)
+    static inline tjs_uint32 TVPAddAlphaBlend_n_a(tjs_uint32 dest, tjs_uint32 src) noexcept
     {
         tjs_uint32 sopa = (~src) >> 24;
         return TVPSaturatedAdd((((dest & 0xff00ff) * sopa >> 8) & 0xff00ff) +
@@ -90,28 +86,28 @@ extern "C"
                                src);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_HDA_n_a(tjs_uint32 dest, tjs_uint32 src)
+    static inline tjs_uint32 TVPAddAlphaBlend_HDA_n_a(tjs_uint32 dest, tjs_uint32 src) noexcept
     {
         return (dest & 0xff000000) + (TVPAddAlphaBlend_n_a(dest, src) & 0xffffff);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_n_a_o(tjs_uint32 dest,
+    static inline tjs_uint32 TVPAddAlphaBlend_n_a_o(tjs_uint32 dest,
                                                              tjs_uint32 src,
-                                                             tjs_int opa)
+                                                             tjs_int opa) noexcept
     {
         src = (((src & 0xff00ff) * opa >> 8) & 0xff00ff) +
               (((src >> 8) & 0xff00ff) * opa & 0xff00ff00);
         return TVPAddAlphaBlend_n_a(dest, src);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_HDA_n_a_o(tjs_uint32 dest,
+    static inline tjs_uint32 TVPAddAlphaBlend_HDA_n_a_o(tjs_uint32 dest,
                                                                  tjs_uint32 src,
-                                                                 tjs_int opa)
+                                                                 tjs_int opa) noexcept
     {
         return (dest & 0xff000000) + (TVPAddAlphaBlend_n_a_o(dest, src, opa) & 0xffffff);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_a_a(tjs_uint32 dest, tjs_uint32 src)
+    static inline tjs_uint32 TVPAddAlphaBlend_a_a(tjs_uint32 dest, tjs_uint32 src) noexcept
     {
         /*
                 Di = sat(Si, (1-Sa)*Di)
@@ -129,10 +125,10 @@ extern "C"
                                               src);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_a_ca(tjs_uint32 dest,
+    static inline tjs_uint32 TVPAddAlphaBlend_a_ca(tjs_uint32 dest,
                                                             tjs_uint32 sopa,
                                                             tjs_uint32 sopa_inv,
-                                                            tjs_uint32 src)
+                                                            tjs_uint32 src) noexcept
     {
         /*
                 Di = sat(Si, (1-Sa)*Di)
@@ -147,41 +143,41 @@ extern "C"
                                               src);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_a_a_o(tjs_uint32 dest,
+    static inline tjs_uint32 TVPAddAlphaBlend_a_a_o(tjs_uint32 dest,
                                                              tjs_uint32 src,
-                                                             tjs_int opa)
+                                                             tjs_int opa) noexcept
     {
         src = (((src & 0xff00ff) * opa >> 8) & 0xff00ff) +
               (((src >> 8) & 0xff00ff) * opa & 0xff00ff00);
         return TVPAddAlphaBlend_a_a(dest, src);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPMulColor(tjs_uint32 color, tjs_uint32 fac)
+    static inline tjs_uint32 TVPMulColor(tjs_uint32 color, tjs_uint32 fac) noexcept
     {
         return (((((color & 0x00ff00) * fac) & 0x00ff0000) +
                  (((color & 0xff00ff) * fac) & 0xff00ff00)) >>
                 8);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAlphaAndColorToAdditiveAlpha(tjs_uint32 alpha,
-                                                                      tjs_uint32 color)
+    static inline tjs_uint32 TVPAlphaAndColorToAdditiveAlpha(tjs_uint32 alpha,
+                                                                      tjs_uint32 color) noexcept
     {
         return TVPMulColor(color, alpha) + (color & 0xff000000);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAlphaToAdditiveAlpha(tjs_uint32 a)
+    static inline tjs_uint32 TVPAlphaToAdditiveAlpha(tjs_uint32 a) noexcept
     {
         return TVPAlphaAndColorToAdditiveAlpha(a >> 24, a);
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_a_d(tjs_uint32 dest, tjs_uint32 src)
+    static inline tjs_uint32 TVPAddAlphaBlend_a_d(tjs_uint32 dest, tjs_uint32 src) noexcept
     {
         return TVPAddAlphaBlend_a_a(dest, TVPAlphaToAdditiveAlpha(src));
     }
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPAddAlphaBlend_a_d_o(tjs_uint32 dest,
+    static inline tjs_uint32 TVPAddAlphaBlend_a_d_o(tjs_uint32 dest,
                                                              tjs_uint32 src,
-                                                             tjs_int opa)
+                                                             tjs_int opa) noexcept
     {
         src = (src & 0xffffff) + ((((src >> 24) * opa) >> 8) << 24);
         return TVPAddAlphaBlend_a_d(dest, src);
@@ -189,7 +185,7 @@ extern "C"
 
     /* TVPAddAlphaBlend_d_a is not yet implemented because the expression may loose precision. */
 
-    static tjs_uint32 TVP_INLINE_FUNC TVPBlendARGB(tjs_uint32 b, tjs_uint32 a, tjs_int ratio)
+    static inline tjs_uint32 TVPBlendARGB(tjs_uint32 b, tjs_uint32 a, tjs_int ratio) noexcept
     {
         /* returns a * ratio + b * (1 - ratio) */
         tjs_uint32 b2;
@@ -200,14 +196,12 @@ extern "C"
         return t + (((b2 + ((((a & 0xff00ff00) >> 8) - b2) * ratio >> 8)) << 8) & 0xff00ff00);
     }
 
-    /*[*/
-    typedef struct
+    struct tTVPGLGammaAdjustTempData
     {
         tjs_uint8 B[256];
         tjs_uint8 G[256];
         tjs_uint8 R[256];
-    } tTVPGLGammaAdjustTempData;
-    /*]*/
+    };
     /* begin function list */
     TVP_GL_FUNC_PTR_EXTERN_DECL(void,
                                 TVPAlphaBlend,

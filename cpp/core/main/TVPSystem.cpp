@@ -1389,6 +1389,20 @@ void TVPAfterSystemInit()
             TVPAutoSaveBookMark = true;
         }
     }
+    // check renderer option
+    if (TVPGetCommandLine(TJS_N("-renderer"), &opt))
+    {
+        ttstr str(opt);
+        if (str == TJS_N("opengl") || str == TJS_N("gl") || str == TJS_N("gpu"))
+            GameSetting::renderer = "opengl";
+        else if (str == TJS_N("software") || str == TJS_N("sw"))
+            GameSetting::renderer = "software";
+        else
+            TVPAddLog(ttstr(TJS_N("Unknown renderer '")) + str +
+                      TJS_N("', using default '") + ttstr(GameSetting::renderer) +
+                      TJS_N("'"));
+    }
+
     // check TVPGraphicSplitOperation option
     std::string _val = GameSetting::renderer;
     if (_val != "software")

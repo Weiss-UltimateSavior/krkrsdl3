@@ -24,17 +24,6 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/media/font/FreeTypeImp.cpp
     ${KRKRSDL_CORE_PATH}/media/font/PrerenderedFont.cpp
     ${KRKRSDL_CORE_PATH}/media/font/TVPFont.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/ComplexRect.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/DrawDevice.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/LayerBitmap.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/LayerManager.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/LayerTreeOwner.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/RenderManager.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/TransIntf.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/TVPColor.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/public/blend_function.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/public/ResampleImage.cpp
-    ${KRKRSDL_CORE_PATH}/media/graphics/public/WeightFunctor.cpp
     ${KRKRSDL_CORE_PATH}/media/image/BitmapInfomation.cpp
     ${KRKRSDL_CORE_PATH}/media/image/GraphicsLoadThread.cpp
     ${KRKRSDL_CORE_PATH}/media/image/LoadJPEG.cpp
@@ -50,6 +39,7 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/media/movie/InputStream.cpp
     ${KRKRSDL_CORE_PATH}/media/movie/krffmpeg.cpp
     ${KRKRSDL_CORE_PATH}/media/movie/KRMovieLayer.cpp
+	${KRKRSDL_CORE_PATH}/media/movie/KRMovieOverlay.cpp
     ${KRKRSDL_CORE_PATH}/media/movie/KRStreamInfo.cpp
     ${KRKRSDL_CORE_PATH}/media/movie/Message.cpp
     ${KRKRSDL_CORE_PATH}/media/movie/MessageQueue.cpp
@@ -66,6 +56,17 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/msg/Log.cpp
     ${KRKRSDL_CORE_PATH}/msg/TVPDebug.cpp
     ${KRKRSDL_CORE_PATH}/msg/TVPMsg.cpp
+	${KRKRSDL_CORE_PATH}/render/gl/blend_function.cpp
+	${KRKRSDL_CORE_PATH}/render/gl/tvpgl.cpp
+	${KRKRSDL_CORE_PATH}/render/ComplexRect.cpp
+    ${KRKRSDL_CORE_PATH}/render/DrawDevice.cpp
+    ${KRKRSDL_CORE_PATH}/render/LayerBitmap.cpp
+    ${KRKRSDL_CORE_PATH}/render/LayerManager.cpp
+    ${KRKRSDL_CORE_PATH}/render/LayerTreeOwner.cpp
+    ${KRKRSDL_CORE_PATH}/render/RenderManager.cpp
+    ${KRKRSDL_CORE_PATH}/render/RenderManagerGL.cpp
+    ${KRKRSDL_CORE_PATH}/render/TransIntf.cpp
+    ${KRKRSDL_CORE_PATH}/render/TVPColor.cpp
     ${KRKRSDL_CORE_PATH}/script/tjsNativeAsyncTrigger.cpp
     ${KRKRSDL_CORE_PATH}/script/tjsNativeBasicDrawDevice.cpp
     ${KRKRSDL_CORE_PATH}/script/tjsNativeBitmap.cpp
@@ -132,9 +133,11 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/utils/PhaseVocoderDSP.cpp
     ${KRKRSDL_CORE_PATH}/utils/Random.cpp
     ${KRKRSDL_CORE_PATH}/utils/RealFFT.cpp
+	${KRKRSDL_CORE_PATH}/utils/ResampleImage.cpp
     ${KRKRSDL_CORE_PATH}/utils/TickCount.cpp
     ${KRKRSDL_CORE_PATH}/utils/TVPTimer.cpp
     ${KRKRSDL_CORE_PATH}/utils/VelocityTracker.cpp
+	${KRKRSDL_CORE_PATH}/utils/WeightFunctor.cpp
 	${KRKRSDL_CORE_PATH}/utils/math/md5.c
 	${KRKRSDL_CORE_PATH}/utils/math/xxhash.c
 	${KRKRSDL_CORE_PATH}/utils/math/xxtea.cpp

@@ -94,12 +94,12 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${KRKRSDL_CORE_PATH}/archive
 	${KRKRSDL_CORE_PATH}/main
 	${KRKRSDL_CORE_PATH}/media/font
-	${KRKRSDL_CORE_PATH}/media/graphics/public
-	${KRKRSDL_CORE_PATH}/media/graphics
 	${KRKRSDL_CORE_PATH}/media/image
 	${KRKRSDL_CORE_PATH}/media/movie
 	${KRKRSDL_CORE_PATH}/media/sound
 	${KRKRSDL_CORE_PATH}/msg
+	${KRKRSDL_CORE_PATH}/render/public
+	${KRKRSDL_CORE_PATH}/render
 	${KRKRSDL_CORE_PATH}/script
 	${KRKRSDL_CORE_PATH}/tjs2
 	${KRKRSDL_CORE_PATH}/utils

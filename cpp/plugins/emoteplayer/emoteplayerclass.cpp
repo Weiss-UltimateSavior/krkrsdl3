@@ -619,9 +619,6 @@ void EmotePlayer::unserialize(tTJSVariant data)
 }
 void EmotePlayer::play(tTJSString name, int flag)
 {
-    if (_playing)
-        return;
-    // SDL_Log("play-->%s", name.AsStdString().c_str());
     if (emtEngine._mainfile != nullptr && !isMotion) // motionKey的启动模式
     {
         // motion
