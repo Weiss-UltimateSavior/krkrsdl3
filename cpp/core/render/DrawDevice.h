@@ -168,7 +168,7 @@ public:
 
     //! @brief		(Window→DrawDevice) キーによる入力
     //! @param		key		文字コード
-    virtual void OnKeyPress(tjs_char key) = 0;
+    virtual void OnKeyPress(tjs_uint16 key) = 0;
 
     //! @brief		(Window→DrawDevice) マウスホイールが回転した
     //! @param		shift	シフトキーの状態
@@ -491,7 +491,7 @@ public:
     virtual void OnMouseOutOfWindow();
     virtual void OnKeyDown(tjs_uint key, tjs_uint32 shift);
     virtual void OnKeyUp(tjs_uint key, tjs_uint32 shift);
-    virtual void OnKeyPress(tjs_char key);
+    virtual void OnKeyPress(tjs_uint16 key);
     virtual void OnMouseWheel(tjs_uint32 shift, tjs_int delta, tjs_int x, tjs_int y);
     virtual void OnTouchDown(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id);
     virtual void OnTouchUp(tjs_real x, tjs_real y, tjs_real cx, tjs_real cy, tjs_uint32 id);

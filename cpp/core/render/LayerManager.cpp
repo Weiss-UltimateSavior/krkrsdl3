@@ -1163,7 +1163,7 @@ void tTVPLayerManager::PrimaryKeyUp(tjs_uint key, tjs_uint32 shift)
         Primary->DefaultKeyUp(key, shift);
 }
 //---------------------------------------------------------------------------
-void tTVPLayerManager::PrimaryKeyPress(tjs_char key)
+void tTVPLayerManager::PrimaryKeyPress(tjs_uint16 key)
 {
     if (FocusedLayer)
         FocusedLayer->FireKeyPress(key);

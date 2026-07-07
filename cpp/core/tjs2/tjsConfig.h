@@ -77,6 +77,7 @@ tjs_int64 TVPWideCharToUtf8String(const tjs_wchar* in, char* out, size_t max_len
 bool TVP_utf8_to_utf16(const char* in, tjs_wchar* out);
 tjs_int64 TVPUtf8ToWideCharString(const char* in, tjs_wchar* out);
 tjs_int64 TVPUtf8ToWideCharString(const char* in, tjs_uint length, tjs_wchar* out);
+uint16_t utf8_to_unicode(const char* utf8);
 std::vector<uint32_t> decodeUTF8ToTTF(const char* utf8_str);
 std::vector<tjs_wchar> decodeUTF8ToTTFe(const char* utf8_str);
 tjs_int64 utf8_char_len(const char* str);

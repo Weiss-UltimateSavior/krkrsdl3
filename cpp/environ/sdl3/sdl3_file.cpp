@@ -391,6 +391,66 @@ std::vector<std::string> TVPGetAppStoragePath()
     return ret;
 }
 
+bool TVPCheckExistentLocalFile(const ttstr& name)
+{
+    if (name.IsEmpty()) return false;
+    
+    SDL_PathInfo info;
+    if (!SDL_GetPathInfo(name.c_str(), &info)) {
+        return false;
+    }
+    return info.type == SDL_PATHTYPE_FILE;
+}
+
+bool TVPCheckExistentLocalFolder(const ttstr& name)
+{
+    if (name.IsEmpty()) return false;
+    
+    SDL_PathInfo info;
+    if (!SDL_GetPathInfo(name.c_str(), &info)) {
+        return false;
+    }
+    return info.type == SDL_PATHTYPE_DIRECTORY;
+}
+
+std::string TVPSearchPath(const std::string& filename, const std::string& searchpath)
+{
+    std::vector<std::string> paths;
+    std::string pathStr =
+        searchpath.empty() ? (SDL_getenv("PATH") ? SDL_getenv("PATH") : "") : searchpath;
+    if (pathStr.empty())
+        return "";
+
+    std::stringstream ss(pathStr);
+    std::string p;
+    while (std::getline(ss, p, ';'))
+    {
+        if (!p.empty())
+            paths.push_back(p);
+    }
+
+    for (const auto& p : paths)
+    {
+        std::string fullpath = p;
+        if (!fullpath.empty() && fullpath.back() != '/' && fullpath.back() != '\\')
+        {
+#ifdef _KRKRSDL3_WINDOWS
+            fullpath += '\\';
+#else
+            fullpath += '/';
+#endif
+        }
+        fullpath += filename;
+
+        SDL_PathInfo info;
+        if (SDL_GetPathInfo(fullpath.c_str(), &info) && info.type == SDL_PATHTYPE_FILE)
+        {
+            return fullpath;
+        }
+    }
+    return "";
+}
+
 bool TVPDeleteFile(const std::string& filename)
 {
     return SDL_RemovePath(filename.c_str());

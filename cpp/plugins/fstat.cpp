@@ -5,8 +5,6 @@
 #include "Platform.h"
 #include "md5.h"
 
-#include <filesystem>
-
 #define NCB_MODULE_NAME TJS_N("fstat.dll")
 
 #ifndef _KRKRSDL3_WINDOWS
@@ -39,55 +37,6 @@ global.FILE_ATTRIBUTE_DIRECTORY = 0x00000010,
 global.FILE_ATTRIBUTE_ARCHIVE = 0x00000020,
 global.FILE_ATTRIBUTE_NORMAL = 0x00000080,
 global.FILE_ATTRIBUTE_TEMPORARY = 0x00000100;)";
-
-static std::string _searchPath(const std::string& filename, const std::string& searchpath)
-{
-    std::vector<std::string> paths;
-
-    if (!searchpath.empty())
-    {
-#ifdef _KRKRSDL3_WINDOWS
-        char delimiter = ';';
-#else
-        char delimiter = ':';
-#endif
-        std::stringstream ss(searchpath);
-        std::string p;
-        while (std::getline(ss, p, delimiter))
-        {
-            if (!p.empty())
-                paths.push_back(p);
-        }
-    }
-    else
-    {
-        const char* env_path = std::getenv("PATH");
-        if (env_path)
-        {
-#ifdef _KRKRSDL3_WINDOWS
-            char delimiter = ';';
-#else
-            char delimiter = ':';
-#endif
-            std::stringstream ss(env_path);
-            std::string p;
-            while (std::getline(ss, p, delimiter))
-            {
-                if (!p.empty())
-                    paths.push_back(p);
-            }
-        }
-    }
-    for (const auto& p : paths)
-    {
-        std::filesystem::path full = std::filesystem::path(p) / filename;
-        if (std::filesystem::exists(full) && std::filesystem::is_regular_file(full))
-        {
-            return std::filesystem::absolute(full).string();
-        }
-    }
-    return "";
-}
 
 /**
  * メソッド追加用
@@ -425,15 +374,10 @@ public:
      */
     static bool truncateFile(const tjs_char* file, tjs_int size)
     {
-        try
-        {
-            std::filesystem::resize_file(ttstr(file).AsStdString(), size);
-        }
-        catch (...)
-        {
+        ttstr path = TVPGetLocallyAccessibleName(file);
+        if (path.IsEmpty())
             return false;
-        }
-        return true;
+        return TVPTruncateFile(path.AsStdString(), (size_t)size);
     }
 
     /**
@@ -493,28 +437,27 @@ public:
     static void _dirtree(
         const ttstr& path, const ttstr& subdir, iTJSDispatch2* array, tjs_int& count, bool dironly)
     {
-        std::filesystem::path fsPath(path.c_str());
-        if (!std::filesystem::exists(fsPath) || !std::filesystem::is_directory(fsPath))
+        if (!TVPCheckExistentLocalFolder(path))
             return;
 
-        for (auto& entry : std::filesystem::directory_iterator(fsPath))
-        {
-            auto name = entry.path().filename().string();
-            if (name == "." || name == "..")
-                continue;
+        TVPListDir(path.AsStdString(),
+                   [&](const std::string& name, int mode)
+                   {
+                       if (name == "." || name == "..")
+                           return;
 
-            if (entry.is_directory())
-            {
-                ttstr fullName = subdir + name + TJS_N("/");
-                setDirListFile(array, count++, fullName, entry);
-                _dirtree(path + name + TJS_N("/"), fullName, array, count, dironly);
-            }
-            else if (!dironly)
-            {
-                ttstr fullName = subdir + name;
-                setDirListFile(array, count++, fullName, entry);
-            }
-        }
+                       if (mode & S_IFDIR)
+                       {
+                           ttstr fullName = subdir + ttstr(name) + TJS_N("/");
+                           setDirListFile(array, count++, fullName);
+                           _dirtree(path + ttstr(name) + TJS_N("/"), fullName, array, count, dironly);
+                       }
+                       else if (!dironly)
+                       {
+                           ttstr fullName = subdir + ttstr(name);
+                           setDirListFile(array, count++, fullName);
+                       }
+                   });
     }
 
     /**
@@ -536,7 +479,8 @@ public:
     typedef bool (*DirListCallback)(iTJSDispatch2* array,
                                     tjs_int count,
                                     const ttstr& file,
-                                    const std::filesystem::directory_entry& entry);
+                                    const tTVPLocalFileInfo* info,
+                                    const std::string& dirpath);
 
 private:
     static tTJSVariant _dirlist(ttstr dir, DirListCallback cb)
@@ -550,25 +494,22 @@ private:
         }
         TVPGetLocalName(dir);
 
+        if (!TVPCheckExistentLocalFolder(dir))
+        {
+            TVPThrowExceptionMessage(TJS_N("Directory not found."));
+        }
+
         iTJSDispatch2* array = TJSCreateArrayObject();
         tTJSVariant result;
+        tjs_int count = 0;
+        std::string dirpath = dir.AsStdString();
 
-        try
-        {
-            std::filesystem::path path(dir.c_str());
-            if (!std::filesystem::exists(path) || !std::filesystem::is_directory(path))
-            {
-                TVPThrowExceptionMessage(TJS_N("Directory not found."));
-            }
-
-            tjs_int count = 0;
-            for (auto& entry : std::filesystem::directory_iterator(path))
-            {
-                ttstr file = entry.path().filename().string();
-                if ((*cb)(array, count, file, entry))
-                    count++;
-            }
-        } catch (...) { }
+        TVPGetLocalFileListAt(dir,
+                              [&](const ttstr& file, tTVPLocalFileInfo* info)
+                              {
+                                  if ((*cb)(array, count, file, info, dirpath))
+                                      count++;
+                              });
 
         result = tTJSVariant(array, array);
         array->Release();
@@ -579,7 +520,8 @@ private:
     static bool setDirListFile(iTJSDispatch2* array,
                                tjs_int count,
                                const ttstr& file,
-                               const std::filesystem::directory_entry& entry)
+                               const tTVPLocalFileInfo* info = nullptr,
+                               const std::string& dirpath = std::string())
     {
         // [dirlist] 配列に追加する
         tTJSVariant val(file);
@@ -590,58 +532,48 @@ private:
     static bool setDirListInfo(iTJSDispatch2* array,
                                tjs_int count,
                                const ttstr& file,
-                               const std::filesystem::directory_entry& entry)
+                               const tTVPLocalFileInfo* info,
+                               const std::string& dirpath)
     {
         iTJSDispatch2* dict = TJSCreateDictionaryObject();
         if (!dict)
             return false;
 
-        try
-        {
-            // 文件名
-            tTJSVariant vname = file;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_N("name"), nullptr, &vname, dict);
+        // 文件名
+        tTJSVariant vname = file;
+        dict->PropSet(TJS_MEMBERENSURE, TJS_N("name"), nullptr, &vname, dict);
 
-            // 文件大小
-            int64_t size = entry.is_regular_file() ? entry.file_size() : 0;
-            tTJSVariant vsize = size;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_N("size"), nullptr, &vsize, dict);
+        // 文件大小
+        int64_t size = (info && (info->Mode & S_IFREG)) ? (int64_t)info->Size : 0;
+        tTJSVariant vsize = size;
+        dict->PropSet(TJS_MEMBERENSURE, TJS_N("size"), nullptr, &vsize, dict);
 
-            // 文件属性（权限 & 类型）
-            int32_t attrib = static_cast<int32_t>(entry.status().permissions());
-            tTJSVariant vattr = attrib;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_N("attrib"), nullptr, &vattr, dict);
-
-            // 文件时间
-            auto ftime = entry.last_write_time(); // mtime
-            auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-                ftime - decltype(ftime)::clock::now() + std::chrono::system_clock::now());
-            int64_t mtime = std::chrono::system_clock::to_time_t(sctp);
-
-            tTJSVariant vmtime = mtime;
-            dict->PropSet(TJS_MEMBERENSURE, TJS_N("mtime"), nullptr, &vmtime, dict);
-
-            // Unix 没有直接的创建时间，ctime 用 st_ctime
-            // 或文件系统支持的创建时间
-            tTJSVariant vctime = static_cast<tjs_int64>(mtime);
-            dict->PropSet(TJS_MEMBERENSURE, TJS_N("ctime"), nullptr, &vctime, dict);
-
-            // atime
-            // 如果系统支持 nanoseconds: use std::filesystem::last_access_time
-            // (C++23) 或 stat
-            tTJSVariant vatime = mtime; // 可以用 mtime 代替
-            dict->PropSet(TJS_MEMBERENSURE, TJS_N("atime"), nullptr, &vatime, dict);
-
-            tTJSVariant val(dict, dict);
-            array->PropSetByNum(0, count, &val, array);
-
-            dict->Release();
+        // 文件属性
+        uint16_t attrib = 0;
+        if (info) {
+            std::string fullpath = dirpath + info->NativeName;
+            attrib = TVPGetFileAttributes(fullpath);
         }
-        catch (...)
-        {
-            dict->Release();
-            throw;
-        }
+        tTJSVariant vattr = attrib;
+        dict->PropSet(TJS_MEMBERENSURE, TJS_N("attrib"), nullptr, &vattr, dict);
+
+        // 文件时间
+        int64_t mtime = info ? (int64_t)info->ModifyTime : 0;
+        tTJSVariant vmtime = mtime;
+        dict->PropSet(TJS_MEMBERENSURE, TJS_N("mtime"), nullptr, &vmtime, dict);
+
+        int64_t ctime = info ? (int64_t)info->CreationTime : mtime;
+        tTJSVariant vctime = ctime;
+        dict->PropSet(TJS_MEMBERENSURE, TJS_N("ctime"), nullptr, &vctime, dict);
+
+        int64_t atime = info ? (int64_t)info->AccessTime : mtime;
+        tTJSVariant vatime = atime;
+        dict->PropSet(TJS_MEMBERENSURE, TJS_N("atime"), nullptr, &vatime, dict);
+
+        tTJSVariant val(dict, dict);
+        array->PropSetByNum(0, count, &val, dict);
+
+        dict->Release();
         return true;
     }
 
@@ -687,7 +619,7 @@ public:
         }
         dir = TVPNormalizeStorageName(dir);
         TVPGetLocalName(dir);
-        const bool r = std::filesystem::create_directories(dir.AsStdString());
+        const bool r = TVPCreateFolders(dir);
         if (!r)
         {
             TVPAddLog(ttstr(TJS_N("createDirectory : ")) + dir + TJS_N(" failed."));
@@ -708,7 +640,7 @@ public:
                 TJS_N("'/' must be specified at the end of given directory name."));
         }
         TVPGetLocalName(dir);
-        const bool r = std::filesystem::create_directories(dir.AsStdString());
+        const bool r = TVPCreateFolders(dir);
         if (!r)
         {
             TVPAddLog(ttstr(TJS_N("createDirectory : ")) + dir + TJS_N(" failed."));
@@ -738,30 +670,11 @@ public:
         filename = TVPNormalizeStorageName(filename);
         TVPGetLocalName(filename);
 
-        try
-        {
-            std::filesystem::path filepath(filename.c_str());
-            if (!std::filesystem::exists(filepath))
-            {
-                return false;
-            }
-            std::filesystem::permissions(filepath, std::filesystem::perms::all);
-
-            // 设置只读属性
-            if (attr & 0x01)
-            {
-                std::filesystem::permissions(filepath,
-                                             std::filesystem::perms::owner_read |
-                                                 std::filesystem::perms::group_read |
-                                                 std::filesystem::perms::others_read,
-                                             std::filesystem::perm_options::remove);
-            }
-        }
-        catch (const std::filesystem::filesystem_error&)
-        {
+        uint16_t cur = TVPGetFileAttributes(filename.AsStdString());
+        if (cur == 0xFFFF)
             return false;
-        }
-        return true;
+
+        return TVPSetFileAttributes(filename.AsStdString(), attr | (cur & ~1), 0x01);
     }
 
     /**
@@ -775,25 +688,11 @@ public:
         filename = TVPNormalizeStorageName(filename);
         TVPGetLocalName(filename);
 
-        try
-        {
-            std::filesystem::path filepath(filename.c_str());
-            if (!std::filesystem::exists(filepath))
-            {
-                return false;
-            }
-
-            std::filesystem::permissions(filepath,
-                                         std::filesystem::perms::owner_all |
-                                             std::filesystem::perms::group_all |
-                                             std::filesystem::perms::others_all,
-                                         std::filesystem::perm_options::replace);
-        }
-        catch (const std::filesystem::filesystem_error&)
-        {
+        uint16_t cur = TVPGetFileAttributes(filename.AsStdString());
+        if (cur == 0xFFFF)
             return false;
-        }
-        return true;
+
+        return TVPSetFileAttributes(filename.AsStdString(), cur & ~1, 0x01);
     }
 
     /**
@@ -806,34 +705,7 @@ public:
         filename = TVPNormalizeStorageName(filename);
         TVPGetLocalName(filename);
 
-        tjs_uint16 attr = 0;
-
-        try
-        {
-            std::filesystem::path filepath(filename.c_str());
-
-            if (!std::filesystem::exists(filepath))
-            {
-                return 0xFFFF;
-            }
-
-            if (std::filesystem::is_directory(filepath))
-            {
-                attr |= 0x10;
-            }
-
-            auto perms = std::filesystem::status(filepath).permissions();
-            if ((perms & std::filesystem::perms::owner_write) == std::filesystem::perms::none &&
-                (perms & std::filesystem::perms::group_write) == std::filesystem::perms::none &&
-                (perms & std::filesystem::perms::others_write) == std::filesystem::perms::none)
-            {
-                attr |= 0x01;
-            }
-        }
-        catch (const std::filesystem::filesystem_error&)
-        {
-            return 0xFFFF;
-        }
+        uint16_t attr = TVPGetFileAttributes(filename.AsStdString());
         return attr;
     }
 
@@ -914,8 +786,7 @@ public:
         }
         dir = TVPNormalizeStorageName(dir);
         TVPGetLocalName(dir);
-        const std::string& p = dir.AsStdString();
-        return std::filesystem::exists(p) && std::filesystem::is_directory(p);
+        return TVPCheckExistentLocalFolder(dir);
     }
 
     /**
@@ -993,10 +864,16 @@ public:
     {
         filename = TVPNormalizeStorageName(filename);
         TVPGetLocalName(filename);
-        std::filesystem::path p = filename.AsStdString();
-        if (!std::filesystem::exists(p))
-            return "";                // 文件不存在返回空
-        return p.filename().string(); // 返回文件名部分
+        if(!TVPCheckExistentLocalFile(filename))
+            return "";
+
+        std::string path = filename.AsStdString();
+        size_t pos = path.find_last_of("/\\");
+        if (pos != std::string::npos)
+        {
+            return path.substr(pos + 1);
+        }
+        return path;
     }
 
     /**
@@ -1063,9 +940,9 @@ public:
         ttstr searchpath;
         if (TJS_PARAM_EXIST(1))
             searchpath = *param[1];
-        if (const std::string& tmp = _searchPath(
-                filename.AsStdString(), searchpath.length() ? searchpath.AsStdString() : "");
-            tmp.length() > 0)
+        const std::string& tmp = TVPSearchPath(filename.AsStdString(),
+                                               searchpath.length() ? searchpath.AsStdString() : "");
+        if (tmp.length() > 0)
         {
             if (result)
                 *result = TVPNormalizeStorageName(tmp);

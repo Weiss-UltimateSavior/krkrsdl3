@@ -663,7 +663,7 @@ public:
 private:
     void FireKeyDown(tjs_uint key, tjs_uint32 shift);
     void FireKeyUp(tjs_uint key, tjs_uint32 shift);
-    void FireKeyPress(tjs_char key);
+    void FireKeyPress(tjs_uint16 key);
     void FireMouseWheel(tjs_uint32 shift, tjs_int delta, tjs_int x, tjs_int y);
 
 public:
@@ -671,7 +671,7 @@ public:
                         tjs_uint32 shift); // default keyboard behavior
     void DefaultKeyUp(tjs_uint key,
                       tjs_uint32 shift); // default keyboard behavior
-    void DefaultKeyPress(tjs_char key);  // default keyboard behavior
+    void DefaultKeyPress(tjs_uint16 key);  // default keyboard behavior
 
     //--------------------------------------------------- cache management --
 private:

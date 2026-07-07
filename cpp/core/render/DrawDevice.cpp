@@ -243,7 +243,7 @@ void tTVPBasicDrawDevice::OnKeyUp(tjs_uint key, tjs_uint32 shift)
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void tTVPBasicDrawDevice::OnKeyPress(tjs_char key)
+void tTVPBasicDrawDevice::OnKeyPress(tjs_uint16 key)
 {
     if (!Manager)
         return;

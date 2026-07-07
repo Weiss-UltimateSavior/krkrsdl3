@@ -452,4 +452,51 @@ void TVPInvokeMenu(int x, int y, void* _menu)
         ProcessMenuCommand(cmdId);
     }
 }
+
+bool TVPTruncateFile(const std::string& path, size_t size)
+{
+    std::wstring wpath = UTF8ToWide(path.c_str());
+    if (wpath.empty()) return false;
+    HANDLE h = CreateFileW(wpath.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE)
+        return false;
+    LARGE_INTEGER li;
+    li.QuadPart = size;
+    bool ok = SetFilePointerEx(h, li, NULL, FILE_BEGIN) && SetEndOfFile(h);
+    CloseHandle(h);
+    return ok;
+}
+
+uint16_t TVPGetFileAttributes(const std::string& path)
+{
+    std::wstring wpath = UTF8ToWide(path.c_str());
+    if (wpath.empty()) return 0xFFFF;
+    DWORD wa = GetFileAttributesW(wpath.c_str());
+    if (wa == INVALID_FILE_ATTRIBUTES)
+        return 0xFFFF;
+    uint16_t attr = 0;
+    if (wa & FILE_ATTRIBUTE_DIRECTORY)
+        attr |= 0x10;
+    if (wa & FILE_ATTRIBUTE_READONLY)
+        attr |= 0x01;
+    return attr;
+}
+
+bool TVPSetFileAttributes(const std::string& path, uint16_t attr, uint16_t mask)
+{
+    std::wstring wpath = UTF8ToWide(path.c_str());
+    if (wpath.empty()) return false;
+    DWORD wa = GetFileAttributesW(wpath.c_str());
+    if (wa == INVALID_FILE_ATTRIBUTES)
+        return false;
+    if (mask & 0x01)
+    {
+        if (attr & 0x01)
+            wa |= FILE_ATTRIBUTE_READONLY;
+        else
+            wa &= ~FILE_ATTRIBUTE_READONLY;
+    }
+    return SetFileAttributesW(wpath.c_str(), wa) != 0;
+}
 //---------------------------------------------------------------------------

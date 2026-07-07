@@ -12,7 +12,6 @@
 
 #include "SDL3/SDL.h"
 
-#include "KeyCodeConv.h"
 #include "../eventCallbackFun.h"
 
 extern SDL_Window* tvp_window;
@@ -763,6 +762,12 @@ public:
 
     virtual void OnKeyPress(tjs_uint16 vk, int repeat, bool prevkeystate, bool convertkey) override
     {
+        if (TJSNativeInstance && vk)
+        {
+            if (UseMouseKey && (vk == 0x1b || vk == 13 || vk == 32))
+                return;
+            TVPPostInputEvent(new tTVPOnKeyPressInputEvent(TJSNativeInstance, vk));
+        }
     }
 
     virtual tTVPImeMode GetDefaultImeMode() const override { return DefaultImeMode; }
@@ -1062,6 +1067,24 @@ void KRKR_Trig_KeyUp(int vk)
 {
     if (_currentWindowLayer != NULL)
         _currentWindowLayer->onKeyUpEvent(vk);
+}
+void KRKR_Trig_TextInput(std::string text)
+{
+    if (_currentWindowLayer != NULL)
+    {
+        tjs_wchar chwd = 0;
+        const char* ptr = text.data();
+        const char* ptrEnd = text.data() + text.size();
+        while(ptr < ptrEnd)
+        {
+            int len = utf8_char_len(ptr);
+            if (TVP_utf8_to_utf16(ptr, &chwd))
+                _currentWindowLayer->OnKeyPress(chwd, 0, false, false);
+            if (len <= 0)
+                len = 1;
+            ptr += len;
+        }
+    }
 }
 }
 

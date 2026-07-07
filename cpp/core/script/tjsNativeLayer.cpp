@@ -3891,13 +3891,29 @@ void tTJSNI_BaseLayer::FireKeyUp(tjs_uint key, tjs_uint32 shift)
     }
 }
 //---------------------------------------------------------------------------
-void tTJSNI_BaseLayer::FireKeyPress(tjs_char key)
+void tTJSNI_BaseLayer::FireKeyPress(tjs_uint16 key)
 {
     if (Owner && !Shutdown)
     {
-        tjs_char buf[2];
-        buf[0] = (tjs_char)key;
-        buf[1] = 0;
+        tjs_char buf[4];
+        if (key < 0x80)
+        {
+            buf[0] = (tjs_char)key;
+            buf[1] = 0;
+        }
+        else if (key < 0x800)
+        {
+            buf[0] = (tjs_char)(0xC0 | (key >> 6));
+            buf[1] = (tjs_char)(0x80 | (key & 0x3F));
+            buf[2] = 0;
+        }
+        else
+        {
+            buf[0] = (tjs_char)(0xE0 | (key >> 12));
+            buf[1] = (tjs_char)(0x80 | ((key >> 6) & 0x3F));
+            buf[2] = (tjs_char)(0x80 | (key & 0x3F));
+            buf[3] = 0;
+        }
         tTJSVariant param[2];
         param[0] = buf;
         param[1] = true;
@@ -3969,7 +3985,7 @@ void tTJSNI_BaseLayer::DefaultKeyUp(tjs_uint key, tjs_uint32 shift)
     }
 }
 //---------------------------------------------------------------------------
-void tTJSNI_BaseLayer::DefaultKeyPress(tjs_char key)
+void tTJSNI_BaseLayer::DefaultKeyPress(tjs_uint16 key)
 {
     // default keyboard behavior
     if (!Manager)
@@ -10126,11 +10142,11 @@ TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ onKeyPress)
     if (numparams < 2 || param[1]->operator bool())
     {
         ttstr p = *param[0];
-        tjs_char code;
+        uint16_t code;
         if (p.IsEmpty())
             code = 0;
         else
-            code = (tjs_char)*p.c_str();
+            code = utf8_to_unicode(p.c_str());
         _this->DefaultKeyPress(code);
     }
 

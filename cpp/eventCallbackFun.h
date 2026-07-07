@@ -22,6 +22,7 @@ void KRKR_Trig_MouseMove(int x, int y);
 void KRKR_Trig_MouseScroll(int dx, int dy, int x, int y);
 void KRKR_Trig_KeyDown(int vk);
 void KRKR_Trig_KeyUp(int vk);
+void KRKR_Trig_TextInput(std::string text);
 
 // OpenGL
 void fetchGLInfo();

@@ -179,13 +179,6 @@ ttstr TVPGetAppPath();
 // retrieve program path, in normalized storage name
 
 //---------------------------------------------------------------------------
-bool TVPCheckExistentLocalFolder(const ttstr& name);
-/* name must be an OS's NATIVE folder name */
-
-bool TVPCheckExistentLocalFile(const ttstr& name);
-/* name must be an OS's NATIVE file name */
-
-//---------------------------------------------------------------------------
 // utilities
 //---------------------------------------------------------------------------
 ttstr TVPStringFromBMPUnicode(const tjs_uint16* src, tjs_int maxlen = -1);

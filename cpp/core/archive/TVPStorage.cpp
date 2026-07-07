@@ -21,8 +21,6 @@
 #include "Random.h"
 #include "XP3Archive.h"
 
-#include <filesystem>
-
 #define TVP_DEFAULT_ARCHIVE_CACHE_NUM 64
 #define TVP_DEFAULT_AUTOPATH_CACHE_NUM 256
 
@@ -1165,30 +1163,6 @@ ttstr TVPGetAppPath()
 {
     static ttstr apppath(TVPExtractStoragePath(TVPProjectDir));
     return apppath;
-}
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// TVPCheckExistantLocalFile
-//---------------------------------------------------------------------------
-bool TVPCheckExistentLocalFile(const ttstr& name)
-{
-    std::error_code ec;
-    std::filesystem::path path = std::filesystem::u8path(name.c_str());
-    return std::filesystem::exists(path, ec) && 
-           std::filesystem::is_regular_file(path, ec);
-}
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// TVPCheckExistantLocalFolder
-//---------------------------------------------------------------------------
-bool TVPCheckExistentLocalFolder(const ttstr& name)
-{
-    std::error_code ec;
-    std::filesystem::path path = std::filesystem::u8path(name.c_str());
-    return std::filesystem::exists(path, ec) && 
-           std::filesystem::is_directory(path, ec);
 }
 //---------------------------------------------------------------------------
 

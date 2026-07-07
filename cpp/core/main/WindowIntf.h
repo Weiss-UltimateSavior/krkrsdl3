@@ -171,7 +171,7 @@ public:
     void OnMouseLeave();
     void OnKeyDown(tjs_uint key, tjs_uint32 shift);
     void OnKeyUp(tjs_uint key, tjs_uint32 shift);
-    void OnKeyPress(tjs_char key);
+    void OnKeyPress(tjs_uint16 key);
     void OnFileDrop(const tTJSVariant& array);
     void OnMouseWheel(tjs_uint32 shift, tjs_int delta, tjs_int x, tjs_int y);
     void OnPopupHide();
@@ -691,10 +691,10 @@ public:
 class tTVPOnKeyPressInputEvent : public tTVPBaseInputEvent
 {
     static tTVPUniqueTagForInputEvent Tag;
-    tjs_char Key;
+    tjs_uint16 Key;
 
 public:
-    tTVPOnKeyPressInputEvent(tTJSNI_BaseWindow* win, tjs_char key)
+    tTVPOnKeyPressInputEvent(tTJSNI_BaseWindow* win, tjs_uint16 key)
       : tTVPBaseInputEvent(win, Tag),
         Key(key){};
     void Deliver() const { ((tTJSNI_BaseWindow*)GetSource())->OnKeyPress(Key); }

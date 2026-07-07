@@ -15,6 +15,7 @@
 #include "TVPApplication.h"
 #include "RenderManager.h"
 #include "MainWindowLayer.h"
+#include "WindowIntf.h"
 #include "Platform.h"
 
 #include "eventCallbackFun.h"
@@ -110,115 +111,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     return SDL_APP_CONTINUE;
 }
 
-#if defined(_KRKRSDL3_WINDOWS) || defined(_KRKRSDL3_LINUX)
-
-SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
-{
-    switch (event->type)
-    {
-            // 退出
-        case SDL_EVENT_QUIT:
-            return SDL_APP_SUCCESS;
-            // 键盘事件
-        case SDL_EVENT_KEY_DOWN:
-        {
-            if (event->key.scancode == SDL_SCANCODE_F1)
-            {
-                int x = 0, y = 0;
-                SDL_GetWindowPosition(tvp_window, &x, &y);
-                TVPInvokeMenu(x, y);
-                break;
-            }
-
-            krkrsdl3::KRKR_Trig_KeyDown(event->key.scancode);
-            break;
-        }
-        case SDL_EVENT_KEY_UP:
-        {
-            krkrsdl3::KRKR_Trig_KeyUp(event->key.scancode);
-            break;
-        }
-            // 鼠标事件
-        case SDL_EVENT_MOUSE_BUTTON_DOWN:
-        {
-            tTVPMouseButton tmp = mbX1;
-            switch (event->button.button)
-            {
-                case SDL_BUTTON_RIGHT:
-                    tmp = mbRight;
-                    break;
-                case SDL_BUTTON_MIDDLE:
-                    tmp = mbMiddle;
-                    break;
-                case SDL_BUTTON_LEFT:
-                    tmp = mbLeft;
-                    break;
-                default:
-                    break;
-            }
-
-            if (tmp != mbX1)
-            {
-                SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
-                if (retSpr)
-                    krkrsdl3::KRKR_Trig_MouseDown(tmp,
-                                                  (event->button.x - retSpr->xPos) / retSpr->scale,
-                                                  (event->button.y - retSpr->yPos) / retSpr->scale);
-            }
-            break;
-        }
-        case SDL_EVENT_MOUSE_BUTTON_UP:
-        {
-            tTVPMouseButton tmp = mbX1;
-            switch (event->button.button)
-            {
-                case SDL_BUTTON_RIGHT:
-                    tmp = mbRight;
-                    break;
-                case SDL_BUTTON_MIDDLE:
-                    tmp = mbMiddle;
-                    break;
-                case SDL_BUTTON_LEFT:
-                    tmp = mbLeft;
-                    break;
-                default:
-                    break;
-            }
-
-            if (tmp != mbX1)
-            {
-                SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
-                if (retSpr)
-                    krkrsdl3::KRKR_Trig_MouseUp(tmp,
-                                                (event->button.x - retSpr->xPos) / retSpr->scale,
-                                                (event->button.y - retSpr->yPos) / retSpr->scale);
-            }
-            break;
-        }
-        case SDL_EVENT_MOUSE_MOTION:
-        {
-            SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
-            if (retSpr)
-                krkrsdl3::KRKR_Trig_MouseMove((event->motion.x - retSpr->xPos) / retSpr->scale,
-                                              (event->motion.y - retSpr->yPos) / retSpr->scale);
-            break;
-        }
-        case SDL_EVENT_MOUSE_WHEEL:
-        {
-            SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
-            if (retSpr)
-                krkrsdl3::KRKR_Trig_MouseScroll(event->wheel.x, event->wheel.y, event->wheel.x,
-                                                event->wheel.y);
-            break;
-        }
-        default:
-            break;
-    }
-    return SDL_APP_CONTINUE;
-}
-
-#elif defined(_KRKRSDL3_ANDROID)
-
+#ifdef _KRKRSDL3_ANDROID
 // 安卓专属事件机制
 enum TouchState
 {
@@ -364,16 +257,14 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
         {
             SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
             if (retSpr)
-                krkrsdl3::KRKR_Trig_MouseDown(tmp,
-                                              (pixelX - retSpr->xPos) / retSpr->scale,
+                krkrsdl3::KRKR_Trig_MouseDown(tmp, (pixelX - retSpr->xPos) / retSpr->scale,
                                               (pixelY - retSpr->yPos) / retSpr->scale);
         }
         else if (eventType == SDL_EVENT_MOUSE_BUTTON_UP)
         {
             SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
             if (retSpr)
-                krkrsdl3::KRKR_Trig_MouseUp(tmp,
-                                            (pixelX - retSpr->xPos) / retSpr->scale,
+                krkrsdl3::KRKR_Trig_MouseUp(tmp, (pixelX - retSpr->xPos) / retSpr->scale,
                                             (pixelY - retSpr->yPos) / retSpr->scale);
         }
     }
@@ -390,6 +281,7 @@ void sendMouseMotion(float pX, float pY)
         krkrsdl3::KRKR_Trig_MouseMove((pixelX - retSpr->xPos) / retSpr->scale,
                                       (pixelY - retSpr->yPos) / retSpr->scale);
 }
+#endif
 
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
@@ -397,7 +289,11 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     {
         // 退出
         case SDL_EVENT_QUIT:
-            return SDL_APP_SUCCESS;
+        {
+            tTJSNI_Window* tmpwind = TVPGetActiveWindow();
+            tmpwind->Close();
+            break;
+        }
         // 键盘事件
         case SDL_EVENT_KEY_DOWN:
         {
@@ -417,6 +313,88 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             krkrsdl3::KRKR_Trig_KeyUp(event->key.scancode);
             break;
         }
+        // 文字输入
+        case SDL_EVENT_TEXT_INPUT:
+        {
+            std::string data(event->text.text);
+            krkrsdl3::KRKR_Trig_TextInput(data);
+            break;
+        }
+#if defined(_KRKRSDL3_WINDOWS) || defined(_KRKRSDL3_LINUX)
+        // 鼠标事件
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        {
+            tTVPMouseButton tmp = mbX1;
+            switch (event->button.button)
+            {
+                case SDL_BUTTON_RIGHT:
+                    tmp = mbRight;
+                    break;
+                case SDL_BUTTON_MIDDLE:
+                    tmp = mbMiddle;
+                    break;
+                case SDL_BUTTON_LEFT:
+                    tmp = mbLeft;
+                    break;
+                default:
+                    break;
+            }
+
+            if (tmp != mbX1)
+            {
+                SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
+                if (retSpr)
+                    krkrsdl3::KRKR_Trig_MouseDown(tmp,
+                                                  (event->button.x - retSpr->xPos) / retSpr->scale,
+                                                  (event->button.y - retSpr->yPos) / retSpr->scale);
+            }
+            break;
+        }
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+        {
+            tTVPMouseButton tmp = mbX1;
+            switch (event->button.button)
+            {
+                case SDL_BUTTON_RIGHT:
+                    tmp = mbRight;
+                    break;
+                case SDL_BUTTON_MIDDLE:
+                    tmp = mbMiddle;
+                    break;
+                case SDL_BUTTON_LEFT:
+                    tmp = mbLeft;
+                    break;
+                default:
+                    break;
+            }
+
+            if (tmp != mbX1)
+            {
+                SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
+                if (retSpr)
+                    krkrsdl3::KRKR_Trig_MouseUp(tmp,
+                                                (event->button.x - retSpr->xPos) / retSpr->scale,
+                                                (event->button.y - retSpr->yPos) / retSpr->scale);
+            }
+            break;
+        }
+        case SDL_EVENT_MOUSE_MOTION:
+        {
+            SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
+            if (retSpr)
+                krkrsdl3::KRKR_Trig_MouseMove((event->motion.x - retSpr->xPos) / retSpr->scale,
+                                              (event->motion.y - retSpr->yPos) / retSpr->scale);
+            break;
+        }
+        case SDL_EVENT_MOUSE_WHEEL:
+        {
+            SDL_Sprite* retSpr = krkrsdl3::KRKR_Get_Current_Sprite();
+            if (retSpr)
+                krkrsdl3::KRKR_Trig_MouseScroll(event->wheel.x, event->wheel.y, event->wheel.x,
+                                                event->wheel.y);
+            break;
+        }
+#elif defined(_KRKRSDL3_ANDROID)
         // 触屏事件
         case SDL_EVENT_FINGER_DOWN:
             handleFingerDown(event->tfinger);
@@ -427,13 +405,12 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         case SDL_EVENT_FINGER_MOTION:
             handleFingerMotion(event->tfinger);
             break;
+#endif
         default:
             break;
     }
     return SDL_APP_CONTINUE;
 }
-
-#endif
 
 std::vector<SDL_Sprite*> renderTexture;
 static SDL_FRect rectBuff;

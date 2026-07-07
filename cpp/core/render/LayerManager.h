@@ -112,7 +112,7 @@ public:
 
     //! @brief		キーによる入力
     //! @param		key		文字コード
-    virtual void NotifyKeyPress(tjs_char key) = 0;
+    virtual void NotifyKeyPress(tjs_uint16 key) = 0;
 
     //! @brief		マウスホイールが回転した
     //! @param		shift	シフトキーの状態
@@ -393,7 +393,7 @@ public:
         PrimaryKeyDown(key, shift);
     }
     virtual void NotifyKeyUp(tjs_uint key, tjs_uint32 shift) override { PrimaryKeyUp(key, shift); }
-    virtual void NotifyKeyPress(tjs_char key) override { PrimaryKeyPress(key); }
+    virtual void NotifyKeyPress(tjs_uint16 key) override { PrimaryKeyPress(key); }
     virtual void NotifyMouseWheel(tjs_uint32 shift, tjs_int delta, tjs_int x, tjs_int y) override
     {
         PrimaryMouseWheel(shift, delta, x, y);
@@ -505,7 +505,7 @@ public:
     void NotifyNodeEnabledState();
     void PrimaryKeyDown(tjs_uint key, tjs_uint32 shift);
     void PrimaryKeyUp(tjs_uint key, tjs_uint32 shift);
-    void PrimaryKeyPress(tjs_char key);
+    void PrimaryKeyPress(tjs_uint16 key);
     void PrimaryMouseWheel(tjs_uint32 shift, tjs_int delta, tjs_int x, tjs_int y);
 
     void AddUpdateRegion(const tTVPComplexRect& rects);

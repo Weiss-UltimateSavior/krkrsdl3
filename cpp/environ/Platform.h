@@ -38,6 +38,10 @@ iTVPStorageMedia* TVPCreateFileMedia();
 //
 std::string TVPGetDefaultFileDir();
 std::vector<std::string> TVPGetAppStoragePath();
+//
+bool TVPCheckExistentLocalFolder(const ttstr& name);
+bool TVPCheckExistentLocalFile(const ttstr& name);
+std::string TVPSearchPath(const std::string& filename, const std::string& searchpath);
 // 
 bool TVPDeleteFile(const std::string& filename);
 bool TVPDeleteFolder(const std::string& foldername);
@@ -48,6 +52,9 @@ void TVPListDir(const std::string& folder, std::function<void(const std::string&
 void TVPGetLocalFileListAt(const ttstr& name,
                            const std::function<void(const ttstr&, tTVPLocalFileInfo*)>& cb);
 bool TVPCreateFolders(const ttstr& folder);
+bool TVPTruncateFile(const std::string& path, size_t size);
+uint16_t TVPGetFileAttributes(const std::string& path);
+bool TVPSetFileAttributes(const std::string& path, uint16_t attr, uint16_t mask);
 //
 tTVPMemoryStream* GetResourceStream(const ttstr& filename);
 //

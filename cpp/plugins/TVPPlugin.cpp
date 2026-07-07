@@ -228,6 +228,7 @@ void TVPLoadInternalPlugins()
     // 如果插件不冲突，实际上可以加载全部
     ncbAutoRegister::AllRegist();
     ncbAutoRegister::LoadModule(TJS_N("xp3filter.dll"));
+    ncbAutoRegister::LoadModule(TJS_N("win32dialog.dll"));
     ncbAutoRegister::LoadModule(TJS_N("varfile.dll"));
     ncbAutoRegister::LoadModule(TJS_N("shrinkCopy.dll"));
 }

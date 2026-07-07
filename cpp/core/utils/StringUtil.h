@@ -3,38 +3,7 @@
 #define __STRING_UTILITY_H__
 
 #include <string>
-#include <iostream>
 #include <algorithm>
-#include <locale>
-
-struct equal_char_ignorecase
-{
-    inline bool operator()(char x, char y) const
-    {
-        std::locale loc;
-        return std::tolower(x, loc) == std::tolower(y, loc);
-    }
-};
-
-inline bool icomp(const std::string& x, const std::string& y)
-{
-    return x.size() == y.size() &&
-           std::equal(x.begin(), x.end(), y.begin(), equal_char_ignorecase());
-}
-
-struct equal_wchar_ignorecase
-{
-    inline bool operator()(wchar_t x, wchar_t y) const
-    {
-        std::locale loc;
-        return std::tolower(x, loc) == std::tolower(y, loc);
-    }
-};
-inline bool icomp(const std::wstring& x, const std::wstring& y)
-{
-    return x.size() == y.size() &&
-           std::equal(x.begin(), x.end(), y.begin(), equal_wchar_ignorecase());
-}
 
 static int ttstr_find_first_not_of(const ttstr& str, const ttstr& r)
 {

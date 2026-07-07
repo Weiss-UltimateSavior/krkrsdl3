@@ -4,8 +4,10 @@
 #include <fstream>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <dirent.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #include "TVPMsg.h"
 
@@ -301,5 +303,44 @@ void TVPPreNormalizeStorageName(ttstr& name)
             return;
         }
     }
+}
+
+bool TVPTruncateFile(const std::string& path, size_t size)
+{
+    int fd = open(path.c_str(), O_WRONLY);
+    if (fd < 0)
+        return false;
+    bool ok = (ftruncate(fd, (off_t)size) == 0);
+    close(fd);
+    return ok;
+}
+
+uint16_t TVPGetFileAttributes(const std::string& path)
+{
+    struct stat st;
+    if (stat(path.c_str(), &st) != 0)
+        return 0xFFFF;
+    uint16_t attr = 0;
+    if (S_ISDIR(st.st_mode))
+        attr |= 0x10;
+    if (access(path.c_str(), W_OK) != 0)
+        attr |= 0x01;
+    return attr;
+}
+
+bool TVPSetFileAttributes(const std::string& path, uint16_t attr, uint16_t mask)
+{
+    struct stat st;
+    if (stat(path.c_str(), &st) != 0)
+        return false;
+    mode_t mode = st.st_mode;
+    if (mask & 0x01)
+    {
+        if (attr & 0x01)
+            mode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
+        else
+            mode |= (S_IWUSR | S_IWGRP | S_IWOTH);
+    }
+    return chmod(path.c_str(), mode) == 0;
 }
 //---------------------------------------------------------------------------
