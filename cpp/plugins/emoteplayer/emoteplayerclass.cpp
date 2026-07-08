@@ -7,10 +7,11 @@
 
 #include "tjsCommHead.h"
 #include "tjsNativeLayer.h"
+#include "TVPSettings.h"
 
 namespace emoteplayer
 {
-extern GLuint createEmptyTexture(int width, int height);
+extern uint64_t createEmptyTexture(int width, int height);
 extern GLuint createEmptyDepthTexture(int width, int height);
 extern GLuint createFBO(GLuint texture, GLuint depthtexture);
 extern void glBaseSet();
@@ -193,7 +194,7 @@ SeparateLayerAdaptor::SeparateLayerAdaptor(iTJSDispatch2* targetLayer)
     if (TJS_FAILED(_this->Construct(2, params, this)))
         TVPThrowExceptionMessage(TVPSpecifyLayer);
     // 获取父类实例
-    tTJSNI_BaseLayer* ths = NULL;
+    tTJSNI_Layer* ths = NULL;
     if (targetLayer->NativeInstanceSupport(TJS_NIS_GETINSTANCE, tTJSNC_Layer::ClassID,
                                            (iTJSNativeInstance**)&ths) < 0 ||
         ths == NULL)
@@ -215,18 +216,21 @@ void SeparateLayerAdaptor::assign(iTJSDispatch2* anotherAdaptor)
 }
 void SeparateLayerAdaptor::clear()
 {
-    if (fbotexture != 0 && glIsTexture(fbotexture) == GL_TRUE)
-        glDeleteTextures(1, &fbotexture);
-    if (fbodepthtexture != 0 && glIsTexture(fbodepthtexture) == GL_TRUE)
-        glDeleteTextures(1, &fbodepthtexture);
-    if (superfbotexture != 0 && glIsTexture(superfbotexture) == GL_TRUE)
-        glDeleteTextures(1, &superfbotexture);
-    if (superfbodepthtexture != 0 && glIsTexture(superfbodepthtexture) == GL_TRUE)
-        glDeleteTextures(1, &superfbodepthtexture);
-    if (fbo != 0 || glIsFramebuffer(fbo) == GL_TRUE)
-        glDeleteFramebuffers(1, &fbo);
-    if (superfbo != 0 || glIsFramebuffer(superfbo) == GL_TRUE)
-        glDeleteFramebuffers(1, &superfbo);
+    if (TVPSettings.renderer == "opengl")
+    {
+        if (fbotexture != 0 && glIsTexture(fbotexture) == GL_TRUE)
+            glDeleteTextures(1, &fbotexture);
+        if (fbodepthtexture != 0 && glIsTexture(fbodepthtexture) == GL_TRUE)
+            glDeleteTextures(1, &fbodepthtexture);
+        if (superfbotexture != 0 && glIsTexture(superfbotexture) == GL_TRUE)
+            glDeleteTextures(1, &superfbotexture);
+        if (superfbodepthtexture != 0 && glIsTexture(superfbodepthtexture) == GL_TRUE)
+            glDeleteTextures(1, &superfbodepthtexture);
+        if (fbo != 0 || glIsFramebuffer(fbo) == GL_TRUE)
+            glDeleteFramebuffers(1, &fbo);
+        if (superfbo != 0 || glIsFramebuffer(superfbo) == GL_TRUE)
+            glDeleteFramebuffers(1, &superfbo);
+    }
     if (_this != nullptr)
     {
         _this->Invalidate();
@@ -543,22 +547,27 @@ tjs_uint32 TmpMotionObj::ClassID = (tjs_uint32)-1;
 #define getprop(d, p) getprop_t(d, p, )
 EmotePlayer::~EmotePlayer()
 {
-    if (fbotexture != 0 && glIsTexture(fbotexture) == GL_TRUE)
-        glDeleteTextures(1, &fbotexture);
-    if (fbodepthtexture != 0 && glIsTexture(fbodepthtexture) == GL_TRUE)
-        glDeleteTextures(1, &fbodepthtexture);
-    if (superfbotexture != 0 && glIsTexture(superfbotexture) == GL_TRUE)
-        glDeleteTextures(1, &superfbotexture);
-    if (superfbodepthtexture != 0 && glIsTexture(superfbodepthtexture) == GL_TRUE)
-        glDeleteTextures(1, &superfbodepthtexture);
-    if (fbo != 0 || glIsFramebuffer(fbo) == GL_TRUE)
-        glDeleteFramebuffers(1, &fbo);
-    if (superfbo != 0 || glIsFramebuffer(superfbo) == GL_TRUE)
-        glDeleteFramebuffers(1, &superfbo);
+    if (TVPSettings.renderer == "opengl")
+    {
+        if (fbotexture != 0 && glIsTexture(fbotexture) == GL_TRUE)
+            glDeleteTextures(1, &fbotexture);
+        if (fbodepthtexture != 0 && glIsTexture(fbodepthtexture) == GL_TRUE)
+            glDeleteTextures(1, &fbodepthtexture);
+        if (superfbotexture != 0 && glIsTexture(superfbotexture) == GL_TRUE)
+            glDeleteTextures(1, &superfbotexture);
+        if (superfbodepthtexture != 0 && glIsTexture(superfbodepthtexture) == GL_TRUE)
+            glDeleteTextures(1, &superfbodepthtexture);
+        if (fbo != 0 || glIsFramebuffer(fbo) == GL_TRUE)
+            glDeleteFramebuffers(1, &fbo);
+        if (superfbo != 0 || glIsFramebuffer(superfbo) == GL_TRUE)
+            glDeleteFramebuffers(1, &superfbo);
+    }
     if (m_BmpBits != nullptr)
         delete (tTVPBaseTexture*)m_BmpBits;
     if (m_bmpData != nullptr)
         delete[] m_bmpData;
+    if (m_bmpDataMask != nullptr)
+        delete[] m_bmpDataMask;
 }
 int32_t EmotePlayer::get_loopTime()
 {
@@ -722,11 +731,18 @@ void EmotePlayer::clear(iTJSDispatch2* layer, tjs_uint32 neutralColor)
     if (ths == NULL)
         return;
 
-    if (withoutAdaptor)
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    else if (self && self->fbo)
-        glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (TVPSettings.renderer == "opengl")
+    {
+        if (withoutAdaptor)
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        else if (self && self->fbo)
+            glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+    else
+    {
+        std::memset(m_bmpData, 0, (size_t)_width * _height * 4);
+    }
 }
 void EmotePlayer::progress(tjs_real mstime)
 {
@@ -804,48 +820,46 @@ void EmotePlayer::draw(iTJSDispatch2* objthis)
     if (emtEngine._mainfile != nullptr && emtEngine._mainmotion != nullptr)
     {
         ResetDrawArea(ths->GetWidth(), ths->GetHeight());
-        if (withoutAdaptor)
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        else
+        if (TVPSettings.renderer == "opengl")
         {
-            self->checkDrawArea(ths->GetWidth(), ths->GetHeight());
-            glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
+            if (withoutAdaptor)
+                glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+            else
+            {
+                self->checkDrawArea(ths->GetWidth(), ths->GetHeight());
+                glBindFramebuffer(GL_FRAMEBUFFER, self->fbo);
+            }
+            glBaseSetWithoutClear();
+            if (isSelfClear)
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            else
+                glClear(GL_DEPTH_BUFFER_BIT);
+            // 使用emoteengine::draw进行绘制(使用progress阶段缓存的独立ref树)
+            if (withoutAdaptor)
+                emtEngine.draw(fbo, _limitArea, superfbo, superfbotexture);
+            else
+                emtEngine.draw(self->fbo, _limitArea, self->superfbo, self->superfbotexture);
+            if (m_bmpData != nullptr && m_BmpBits != nullptr)
+            {
+                // read
+                glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, m_bmpData);
+                tjs_uint8* buff = (tjs_uint8*)ths->GetMainImagePixelBufferForWrite();
+                if (buff)
+                    std::memcpy(buff, m_bmpData, _width * _height * 4);
+                ths->Update();
+            }
         }
-        glBaseSetWithoutClear();
-        if (isSelfClear)
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         else
-            glClear(GL_DEPTH_BUFFER_BIT);
-        // 使用emoteengine::draw进行绘制(使用progress阶段缓存的独立ref树)
-        if (withoutAdaptor)
-            emtEngine.draw(fbo, _limitArea, superfbo, superfbotexture);
-        else
-            emtEngine.draw(self->fbo, _limitArea, self->superfbo, self->superfbotexture);
-        if (m_bmpData != nullptr && m_BmpBits != nullptr)
         {
-            // read
-            glReadPixels(0, 0, _width, _height, GL_RGBA, GL_UNSIGNED_BYTE, m_bmpData);
-            tjs_uint8* buff = (tjs_uint8*)ths->GetMainImagePixelBufferForWrite();
-            // for (size_t i = 0; i < _width * _height; i++)
-            //{
-            //     if (m_bmpData[4 * i] == 0x00 && m_bmpData[4 * i + 1] == 0x00 &&
-            //         m_bmpData[4 * i + 2] == 0x00 && m_bmpData[4 * i + 3] != 0xFF)
-            //     {
-            //         memset(buff + 4 * i, 0, 4);
-            //     }
-            //     else if (m_bmpData[4 * i + 3] > 0x00)
-            //     {
-            //         memcpy(buff + 4 * i, m_bmpData + 4 * i, 3);
-            //         buff[4 * i + 3] = 0xFF;
-            //     }
-            //     else
-            //     {
-            //         memcpy(buff + 4 * i, m_bmpData + 4 * i, 4);
-            //     }
-            //
-            // }
-            memcpy(buff, m_bmpData, _width * _height * 4);
-            ths->Update();
+            if (m_bmpData != nullptr && m_BmpBits != nullptr)
+            {
+                std::memset(m_bmpData, 0, (size_t)_width * _height * 4);
+                emtEngine.drawSoftware(m_bmpData, _limitArea, m_bmpDataMask);
+                tjs_uint8* buff = (tjs_uint8*)ths->GetMainImagePixelBufferForWrite();
+                if (buff)
+                    std::memcpy(buff, m_bmpData, (size_t)_width * _height * 4);
+                ths->Update();
+            }
         }
     }
 }
@@ -1320,8 +1334,15 @@ void EmotePlayer::ResetDrawArea(tjs_int width, tjs_int height)
         // transForm
         updateTransMat();
         // setopengl
-        if (withoutAdaptor)
+        if (TVPSettings.renderer == "opengl" && withoutAdaptor)
             setOpenGLDrawArea(_width, _height);
+        else
+        {
+            // 创建蒙版遮罩用于软渲染
+            if (m_bmpDataMask != nullptr)
+                delete[] m_bmpDataMask;
+            m_bmpDataMask = new tjs_uint8[_width * _height * 4];
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 #include "emoterunner.h"
 
 #include "Platform.h"
+#include "TVPSettings.h"
 
 #define GLM_ASSERT_VALID(matrix) \
     do \
@@ -921,6 +922,11 @@ void emotenoderef::progress(float tick, std::vector<emoteRender>& renderList, em
         }
     }
 }
+void emotenoderef::drawSoftware(uint8_t* buf, emotelimit lim, uint8_t* bufmask)
+{
+    // 软渲染未实现
+}
+
 void emotenoderef::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint exTex)
 {
     if (!isNeedDraw || !isIcon || renderMethod.size() < 1 || currentNode->removed)
@@ -1200,6 +1206,55 @@ void emotemotionref::progress(float tick, std::vector<emoteRender>& renderList, 
         }
     }
 }
+void emotemotionref::drawSoftware(uint8_t* buf, emotelimit lim, uint8_t* bufmask)
+{
+    if (_nodeCache.empty()) return;
+
+    // 递归收集所有可绘制ref(展开嵌套子motion)
+    std::vector<emotenoderef*> drawList;
+    // 先展开所有的motion情形
+    std::vector<emotenoderef*> stack;
+    for (auto it = _nodeCache.begin();
+        it != _nodeCache.end(); ++it)
+    {
+        stack.push_back(&(*it));
+    }
+    // 再递归获取全部
+    while (!stack.empty())
+    {
+        emotenoderef* current = stack.back();
+        stack.pop_back();
+
+        if (current->currentMtn == nullptr)
+        {
+            drawList.push_back(current);
+        }
+        else
+        {
+            for (auto it = current->currentMtnRef->_nodeCache.begin();
+                 it != current->currentMtnRef->_nodeCache.end();
+                 ++it)
+            {
+                stack.push_back(&(*it));
+            }
+        }
+    }
+
+    // 按z排序(同dev分支)
+    std::stable_sort(drawList.begin(), drawList.end(),
+                     [](emotenoderef* a, emotenoderef* b)
+                     { return a->getCurrentRenderZ() < b->getCurrentRenderZ(); });
+
+    // 绘制
+    for (auto r : drawList)
+    {
+        if (r != nullptr)
+        {
+            r->drawSoftware(buf, lim, bufmask);
+        }
+    }
+}
+
 void emotemotionref::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint exTex)
 {
     if (_nodeCache.empty()) return;
@@ -1250,7 +1305,7 @@ void emotemotionref::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint
 }
 bool emotemotionref::contains(tjs_real x, tjs_real y)
 {
-    // 检查icon节点的shapeList
+     // 检查icon节点的shapeList
     for (auto mtnRec : shapeList)
     {
         if (x >= mtnRec.left && x < mtnRec.left + mtnRec.width && y >= mtnRec.top && y < mtnRec.top + mtnRec.height)
@@ -1285,12 +1340,16 @@ void emoteengine::progress(float tick, std::vector<emoteRender>& renderList, emo
     // 收集shape信息
     shapeList = _mainMotionRef->getShapeList();
 }
+void emoteengine::drawSoftware(uint8_t* buf, emotelimit lim, uint8_t* bufmask)
+{
+    if (_mainMotionRef)
+        _mainMotionRef->drawSoftware(buf, lim, bufmask);
+}
+
 void emoteengine::draw(GLuint targetFbo, emotelimit lim, GLuint exFbo, GLuint exTex)
 {
     if (_mainMotionRef)
-    {
         _mainMotionRef->draw(targetFbo, lim, exFbo, exTex);
-    }
 }
 bool emoteengine::getTickByName(const std::string& name, tjs_real& retVal)
 {

@@ -8,27 +8,26 @@
 📁android/ # 安卓工程文件夹
 📁cpp/ # 主要代码文件夹
 ├── 📁 core/ # 核心代码
-    ├── 📁 tjs2/   # tjs2语言内核代码
-    ├── 📁 script/ # tjs2 native绑定代码
-    ├── 📁 main/   # 引擎运行内核代码 窗体/事件循环/线程等
-    ├── 📁 msg/    # 调试信息/提示信息
     ├── 📁 archive/# 数据包格式相关代码
+    ├── 📁 main/   # 引擎运行内核代码 窗体/事件循环/线程等
     ├── 📁 media/  # 媒体文件格式相关代码
         ├── 📁 font/      # 字体系统
-        ├── 📁 graphics/  # Layer渲染
         ├── 📁 image/     # 图片解码
         ├── 📁 movie/     # 视频解码
         ├── 📁 sound/     # 音频解码
+    ├── 📁 msg/    # 调试信息/提示信息
+    ├── 📁 render/ # 渲染相关代码
+    ├── 📁 script/ # tjs2 native绑定代码
     ├── 📁 utils/  # 工具包
 ├── 📁 environ/ # 不同系统/芯片架构之间的差异化代码
 ├── 📁 plugins/ # 扩展插件代码
-├── 📄 krkrsdl.cpp       # 启动文件
-├── 📄 krkrsdl_gl.cpp    # 渲染后端文件
-├── 📄 krkrsdl_menu.cpp  # 菜单功能文件
+├── 📁 tjs2/    # tjs2语言内核代码
+├── 📄 cmake_console    # tjs2编译脚本
+├── 📄 cmake_main.txt   # 全量编译脚本
 📁Res/   # 程序资源文件
+📁script # 各平台的程序构建脚本
 📁vcpkg/ # 自定义vcpkg依赖
 📄.clang-format # 格式化代码风格定义文件
-📄build-*** # 各平台的程序构建脚本
 📄CMakeLists.txt/CMakePresets.json # CMake配置文件
 📄vcpkg.json/vcpkg-configuration.json # vcpkg配置文件
 ```

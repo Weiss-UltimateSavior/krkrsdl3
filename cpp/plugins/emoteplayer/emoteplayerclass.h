@@ -205,6 +205,7 @@ private:
     // data
     void* m_BmpBits = nullptr;
     tjs_uint8* m_bmpData = nullptr;
+    tjs_uint8* m_bmpDataMask = nullptr;
     // canvas
     bool withoutAdaptor = false;
     void setOpenGLDrawArea(tjs_int width, tjs_int height);

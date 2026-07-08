@@ -74,11 +74,7 @@ ttstr tTJSMessageMapper::CreateMessageMapString()
         script += name.EscapeC();
         script += TJS_N("\", \"");
         script += ttstr((const tjs_char*)(*holder)).EscapeC();
-#ifdef TJS_TEXT_OUT_CRLF
-        script += TJS_N("\");\r\n");
-#else
         script += TJS_N("\");\n");
-#endif
     }
     return script;
 }

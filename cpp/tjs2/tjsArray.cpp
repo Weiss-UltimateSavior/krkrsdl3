@@ -418,11 +418,7 @@ tTJSArrayClass::tTJSArrayClass() : tTJSNativeClass(TJS_N("Array"))
         try
         {
             tTJSArrayNI::tArrayItemIterator i = ni->Items.begin();
-#ifdef TJS_TEXT_OUT_CRLF
-            const static ttstr cr(TJS_N("\r\n"));
-#else
             const static ttstr cr(TJS_N("\n"));
-#endif
 
             while (i != ni->Items.end())
             {
@@ -1151,11 +1147,7 @@ void tTJSArrayNI::SaveStructuredData(std::vector<iTJSDispatch2*>& stack,
                                      iTJSTextWriteStream& stream,
                                      const ttstr& indentstr)
 {
-#ifdef TJS_TEXT_OUT_CRLF
-    stream.Write(TJS_N("(const) [\r\n"));
-#else
     stream.Write(TJS_N("(const) [\n"));
-#endif
 
     ttstr indentstr2 = indentstr + TJS_N(" ");
 
@@ -1175,17 +1167,10 @@ void tTJSArrayNI::SaveStructuredData(std::vector<iTJSDispatch2*>& stack,
         {
             stream.Write(TJSVariantToExpressionString(*i));
         }
-#ifdef TJS_TEXT_OUT_CRLF
-        if (c != Items.size() - 1) // unless last
-            stream.Write(TJS_N(",\r\n"));
-        else
-            stream.Write(TJS_N("\r\n"));
-#else
         if (c != Items.size() - 1) // unless last
             stream.Write(TJS_N(",\n"));
         else
             stream.Write(TJS_N("\n"));
-#endif
 
         c++;
     }

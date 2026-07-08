@@ -2,6 +2,7 @@
 
 #include "Platform.h"
 #include "TVPApplication.h"
+#include "UtilStreams.h"
 
 #include <sys/utsname.h>
 #include <fstream>
@@ -88,7 +89,7 @@ ttstr TVPGetOSName()
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-void TVPInvokeMenu(int x, int y, void* _menu = NULL)
+void TVPInvokeMenu(int x, int y, void* _menu)
 {
 
 }

@@ -252,6 +252,9 @@ public:
     virtual tjs_uint Write(const void* buffer, tjs_uint write_size) = 0;
     /* returns actually written size */
 
+    virtual bool Flush() = 0;
+    /* returns flush status */
+
     virtual void SetEndOfStorage();
     // the default behavior is raising a exception
     /* if error, raises exception */

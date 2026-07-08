@@ -11,7 +11,6 @@
 #ifndef PluginImplH
 #define PluginImplH
 //---------------------------------------------------------------------------
-#include <memory.h>
 #include <set>
 
 #include "TVPPlugin.h"
@@ -19,19 +18,6 @@
 void TVPLoadPlugin(const ttstr& name);
 bool TVPUnloadPlugin(const ttstr& name);
 extern std::set<ttstr> TVPRegisteredPlugins;
-
-inline extern void* TVP_malloc(size_t size)
-{
-    return malloc(size);
-}
-inline extern void* TVP_realloc(void* pp, size_t size)
-{
-    return realloc(pp, size);
-}
-inline extern void TVP_free(void* pp)
-{
-    return free(pp);
-}
 extern tjs_int TVPGetAutoLoadPluginCount();
 //---------------------------------------------------------------------------
 

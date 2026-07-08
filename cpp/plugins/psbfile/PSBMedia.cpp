@@ -1,6 +1,7 @@
 #include "PSBMedia.h"
 #include "UtilStreams.h"
 #include "PSBFile.h"
+#include "Platform.h"
 
 PSB::PSBMedia* psbVar = nullptr;
 
@@ -68,13 +69,13 @@ tTJSBinaryStream* PSBMedia::Open(const ttstr& name, tjs_uint32 flags)
 void PSBMedia::GetListAt(const ttstr& name, iTVPStorageLister* lister)
 {
     // nothing to do
-    SDL_Log("TODO PSB:GetListAt");
+    TVPConsoleLog("TODO PSB:GetListAt");
 }
 
 void PSBMedia::GetLocallyAccessibleName(ttstr& name)
 {
     // nothing to do
-    SDL_Log("TODO PSB:GetLocallyAccessibleName");
+    TVPConsoleLog("TODO PSB:GetLocallyAccessibleName");
 }
 
 void PSBMedia::AddPSBFile(const ttstr& name, PSBMediaInfo data)

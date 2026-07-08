@@ -4,17 +4,15 @@
 #include "VelocityTracker.h"
 #include "Platform.h"
 #include "PlatformThread.h"
+#include "PlatformView.h"
 #include "Random.h"
 #include "TVPApplication.h"
 #include "RenderManager.h"
 #include "WindowIntf.h"
 #include "TVPSystem.h"
 
-#include "SDL3/SDL.h"
-
-#include "../eventCallbackFun.h"
-
-extern SDL_Window* tvp_window;
+#include "eventCallbackFun.h"
+#include "TVPCompositor.h"
 
 class TVPWindowLayer;
 static TVPWindowLayer *_firstWindowLayer = NULL, *_lastWindowLayer = NULL, *_currentWindowLayer;
@@ -60,145 +58,6 @@ static int TVPConvertMouseBtnToVKCode(tTVPMouseButton _mouseBtn)
     }
     return btncode;
 }
-static int TVPConvertKeyCodeToVKCode(int keyCode)
-{
-#define CASE(x) \
-    case SDL_SCANCODE_##x: \
-        return VK_##x
-
-    SDL_Scancode tmp = (SDL_Scancode)keyCode;
-    switch (tmp)
-    {
-        CASE(0);
-        CASE(1);
-        CASE(2);
-        CASE(3);
-        CASE(4);
-        CASE(5);
-        CASE(6);
-        CASE(7);
-        CASE(8);
-        CASE(9);
-        CASE(A);
-        CASE(B);
-        CASE(C);
-        CASE(D);
-        CASE(E);
-        CASE(F);
-        CASE(G);
-        CASE(H);
-        CASE(I);
-        CASE(J);
-        CASE(K);
-        CASE(L);
-        CASE(M);
-        CASE(N);
-        CASE(O);
-        CASE(P);
-        CASE(Q);
-        CASE(R);
-        CASE(S);
-        CASE(T);
-        CASE(U);
-        CASE(V);
-        CASE(W);
-        CASE(X);
-        CASE(Y);
-        CASE(Z);
-        CASE(F1);
-        CASE(F2);
-        CASE(F3);
-        CASE(F4);
-        CASE(F5);
-        CASE(F6);
-        CASE(F7);
-        CASE(F8);
-        CASE(F9);
-        CASE(F10);
-        CASE(F11);
-        CASE(F12);
-        CASE(PAUSE);
-        CASE(ESCAPE);
-        CASE(CANCEL);
-        CASE(INSERT);
-        CASE(HOME);
-        CASE(DELETE);
-        CASE(END);
-        CASE(SPACE);
-        case SDL_SCANCODE_PRINTSCREEN:
-            return VK_PRINT;
-            CASE(TAB);
-            CASE(RETURN);
-        case SDL_SCANCODE_SCROLLLOCK:
-            return VK_SCROLL;
-        case SDL_SCANCODE_SYSREQ:
-            return VK_SNAPSHOT;
-        case SDL_SCANCODE_BACKSPACE:
-            return VK_BACK;
-        case SDL_SCANCODE_CAPSLOCK:
-            return VK_CAPITAL;
-        case SDL_SCANCODE_LSHIFT:
-            return VK_SHIFT; // LR the same
-        case SDL_SCANCODE_RSHIFT:
-            return VK_SHIFT;
-        case SDL_SCANCODE_LCTRL:
-            return VK_CONTROL; // LR the same
-        case SDL_SCANCODE_RCTRL:
-            return VK_CONTROL;
-        case SDL_SCANCODE_LALT:
-            return VK_MENU;
-        case SDL_SCANCODE_RALT:
-            return VK_MENU;
-        case SDL_SCANCODE_MENU:
-            return VK_APPS;
-        case SDL_SCANCODE_PAGEUP:
-            return VK_PRIOR;
-        case SDL_SCANCODE_PAGEDOWN:
-            return VK_NEXT;
-        case SDL_SCANCODE_LEFT:
-            return VK_LEFT;
-        case SDL_SCANCODE_RIGHT:
-            return VK_RIGHT;
-        case SDL_SCANCODE_UP:
-            return VK_UP;
-        case SDL_SCANCODE_DOWN:
-            return VK_DOWN;
-        case SDL_SCANCODE_NUMLOCKCLEAR:
-            return VK_NUMLOCK;
-        case SDL_SCANCODE_KP_PLUS:
-            return VK_ADD;
-        case SDL_SCANCODE_KP_MINUS:
-            return VK_SUBTRACT;
-        case SDL_SCANCODE_KP_MULTIPLY:
-            return VK_MULTIPLY;
-        case SDL_SCANCODE_KP_DIVIDE:
-            return VK_DIVIDE;
-        case SDL_SCANCODE_KP_ENTER:
-            return VK_RETURN;
-        case SDL_SCANCODE_COMMA:
-            return VK_OEM_COMMA;
-        case SDL_SCANCODE_MINUS:
-            return VK_OEM_MINUS;
-        case SDL_SCANCODE_PERIOD:
-            return VK_OEM_PERIOD;
-        case SDL_SCANCODE_EQUALS:
-            return VK_OEM_PLUS;
-        case SDL_SCANCODE_SLASH:
-            return VK_OEM_2;
-        case SDL_SCANCODE_SEMICOLON:
-            return VK_OEM_1;
-        case SDL_SCANCODE_BACKSLASH:
-            return VK_OEM_5;
-        case SDL_SCANCODE_LEFTBRACKET:
-            return VK_OEM_4;
-        case SDL_SCANCODE_RIGHTBRACKET:
-            return VK_OEM_6;
-        case SDL_SCANCODE_MEDIA_PLAY:
-            return VK_PLAY;
-        default:
-            return 0;
-    }
-}
 static tjs_uint32 TVPGetCurrentShiftKeyState()
 {
     tjs_uint32 f = 0;
@@ -227,31 +86,6 @@ static void AdjustNumerAndDenom(tjs_int& n, tjs_int& d)
     }
     n = n / a;
     d = d / a;
-}
-
-extern "C" SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event);
-extern "C" SDL_AppResult SDL_AppIterate(void* appstate);
-
-int TVPDrawSceneOnce(int interval)
-{
-    static tjs_uint64 lastTick = TVPGetRoughTickCount32();
-    tjs_uint64 curTick = TVPGetRoughTickCount32();
-    int remain = interval - (curTick - lastTick);
-    if (remain <= 0)
-    {
-        SDL_AppIterate(NULL);
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            SDL_AppEvent(NULL, &event);
-        }
-        lastTick = curTick;
-        return 0;
-    }
-    else
-    {
-        return remain;
-    }
 }
 
 class TVPWindowLayer : public iWindowLayer
@@ -285,7 +119,7 @@ class TVPWindowLayer : public iWindowLayer
     tTVPImeMode DefaultImeMode = ::imDisable;
 
 public:
-    SDL_Sprite* pSprite = NULL;
+    TVPSprite* pSprite = NULL;
     TVPWindowLayer *_prevWindow, *_nextWindow;
     TVPWindowLayer(tTJSNI_Window* w) : TJSNativeInstance(w)
     {
@@ -325,10 +159,10 @@ public:
 
         if (pSprite != NULL)
         {
-            if (pSprite->texture != 0)
+            if (pSprite->texture.gpuTexture != 0)
             {
-                krkrsdl3::SDL_GL_DepartTexture(pSprite);
-                krkrsdl3::SDL_GL_DestroyTexture(pSprite);
+                krkrsdl3::TVPDepartTexture(pSprite);
+                krkrsdl3::TVPDestroyTexture(pSprite);
             }
             delete pSprite;
         }
@@ -343,13 +177,13 @@ public:
                 int h = TJSNativeInstance->GetHeight();
                 if (w <= 0 || h <= 0)
                 {
-                    SDL_GetWindowSize(tvp_window, &w, &h);
+                    TVPGetWindowSize(&w, &h);
                 }
-                pSprite = new SDL_Sprite;
+                pSprite = new TVPSprite;
                 pSprite->width = w;
                 pSprite->height = h;
-                krkrsdl3::SDL_GL_CreateTexture(*pSprite);
-                krkrsdl3::SDL_GL_JoinTexture(pSprite);
+                krkrsdl3::TVPCreateTexture(*pSprite);
+                krkrsdl3::TVPJoinTexture(pSprite);
             }
         }
 
@@ -589,7 +423,7 @@ public:
 
     virtual void SetCaption(const std::string& s) override
     {
-        SDL_SetWindowTitle(tvp_window, s.c_str());
+        TVPSetWindowTitle(s.c_str());
         _caption = s;
     }
 
@@ -597,16 +431,16 @@ public:
     {
         if (pSprite->width != LayerWidth || pSprite->height != LayerHeight)
         {
-            krkrsdl3::SDL_GL_DestroyTexture(pSprite);
+            krkrsdl3::TVPDestroyTexture(pSprite);
             pSprite->width = LayerWidth;
             pSprite->height = LayerHeight;
-            krkrsdl3::SDL_GL_CreateTexture(*pSprite);
+            krkrsdl3::TVPCreateTexture(*pSprite);
         }
         pSprite->width = LayerWidth;
         pSprite->height = LayerHeight;
         if (this == _firstWindowLayer)
         {
-            SDL_SetWindowSize(tvp_window, LayerWidth, LayerHeight);
+            TVPSetWindowSize(LayerWidth, LayerHeight);
         }
     }
 
@@ -635,7 +469,7 @@ public:
 
     virtual void GetWinSize(tjs_int& w, tjs_int& h) override
     {
-        SDL_GetWindowSize(tvp_window, &w, &h);
+        TVPGetWindowSize(&w, &h);
     }
 
     virtual tjs_int GetWidth() const override { return LayerWidth; }
@@ -652,7 +486,7 @@ public:
     {
         if (this == _firstWindowLayer)
         {
-            SDL_SetWindowFullscreen(tvp_window, isFull);
+            TVPSetWindowFullscreen(isFull);
             isFullScreen = isFull;
         }
     }
@@ -673,7 +507,7 @@ public:
     {
         if (!tex)
             return;
-        if (pSprite->texture == 0)
+        if (pSprite->texture.gpuTexture == 0)
             return;
 
         {
@@ -685,7 +519,7 @@ public:
             tjs_uint8* picData = nullptr;
             tjs_int pic_pitch;
             bool isNeedFree = tex->GetTextureData(&picData, pic_pitch);
-            krkrsdl3::SDL_GL_UpdateTexture(pSprite, picData, pSprite->width, pSprite->height,
+            krkrsdl3::TVPUpdateTexture(pSprite, picData, pSprite->width, pSprite->height,
                                            pic_pitch);
             if (isNeedFree)
                 free(picData);
@@ -1032,7 +866,7 @@ public:
 // events
 namespace krkrsdl3
 {
-SDL_Sprite* KRKR_Get_Current_Sprite()
+TVPSprite* KRKR_Get_Current_Sprite()
 {
     if (_currentWindowLayer != NULL)
         return _currentWindowLayer->pSprite;
@@ -1041,17 +875,32 @@ SDL_Sprite* KRKR_Get_Current_Sprite()
 void KRKR_Trig_MouseDown(tTVPMouseButton mouseId, int x, int y)
 {
     if (_currentWindowLayer != NULL)
-        _currentWindowLayer->onMouseDownEvent(mouseId, x, y);
+    {
+        TVPSprite* tmp = _currentWindowLayer->pSprite;
+        if (tmp != NULL)
+            _currentWindowLayer->onMouseDownEvent(mouseId, (x - tmp->xPos) / tmp->scale,
+                                                  (y - tmp->yPos) / tmp->scale);
+    }
 }
 void KRKR_Trig_MouseUp(tTVPMouseButton mouseId, int x, int y)
 {
     if (_currentWindowLayer != NULL)
-        _currentWindowLayer->onMouseUpEvent(mouseId, x, y);
+    {
+        TVPSprite* tmp = _currentWindowLayer->pSprite;
+        if (tmp != NULL)
+            _currentWindowLayer->onMouseUpEvent(mouseId, (x - tmp->xPos) / tmp->scale,
+                                                (y - tmp->yPos) / tmp->scale);
+    }
 }
 void KRKR_Trig_MouseMove(int x, int y)
 {
     if (_currentWindowLayer != NULL)
-        _currentWindowLayer->onMouseMoveEvent(x, y);
+    {
+        TVPSprite* tmp = _currentWindowLayer->pSprite;
+        if (tmp != NULL)
+            _currentWindowLayer->onMouseMoveEvent((x - tmp->xPos) / tmp->scale,
+                                                  (y - tmp->yPos) / tmp->scale);
+    }
 }
 void KRKR_Trig_MouseScroll(int dx, int dy, int x, int y)
 {
@@ -1061,12 +910,20 @@ void KRKR_Trig_MouseScroll(int dx, int dy, int x, int y)
 void KRKR_Trig_KeyDown(int vk)
 {
     if (_currentWindowLayer != NULL)
-        _currentWindowLayer->onKeyDownEvent(vk);
+    {
+        TVPSprite* tmp = _currentWindowLayer->pSprite;
+        if (tmp != NULL)
+            _currentWindowLayer->onKeyDownEvent(vk);
+    }
 }
 void KRKR_Trig_KeyUp(int vk)
 {
     if (_currentWindowLayer != NULL)
-        _currentWindowLayer->onKeyUpEvent(vk);
+    {
+        TVPSprite* tmp = _currentWindowLayer->pSprite;
+        if (tmp != NULL)
+            _currentWindowLayer->onKeyUpEvent(vk);
+    }
 }
 void KRKR_Trig_TextInput(std::string text)
 {

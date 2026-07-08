@@ -19,11 +19,10 @@
 #include "PlatformFile.h"
 #include "XP3Archive.h"
 #include "MainWindowLayer.h"
+#include "TVPSettings.h"
 
 #include "tjsLex.h"
 #include "tjsNativeLayer.h"
-
-#include "../eventCallbackFun.h"
 
 //---------------------------------------------------------------------------
 // TVPFireOnApplicationActivateEvent
@@ -1535,24 +1534,5 @@ void TVPEnsureDataPathDirectory()
                                                     (const tjs_char*)TVPFaild));
         }
     }
-}
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-bool TVPGetCommandLine(const tjs_char* name, tTJSVariant* value)
-{
-    std::string ret;
-    if (krkrsdl3::KRKR_GetCommandLine(name, &ret))
-    {
-        *value = ttstr(ret);
-        return true;
-    }
-    else
-        return false;
-}
-//---------------------------------------------------------------------------
-void TVPSetCommandLine(const tjs_char* name, const ttstr& value)
-{
-    krkrsdl3::KRKR_SetCommandLine(name, value.c_str());
 }
 //---------------------------------------------------------------------------

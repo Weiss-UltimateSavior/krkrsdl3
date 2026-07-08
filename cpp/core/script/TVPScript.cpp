@@ -50,7 +50,111 @@
 #include "tjsNativeWindow.h"
 #include "tjsNativeBasicDrawDevice.h"
 #include "tjsNativeMenuItem.h"
-#include "Extension.h"
+#include "TVPSettings.h"
+
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// -- -- -- -- -- - tTVPAtInstallClass
+//---------------------------------------------------------------------------
+extern void TVPAddClassHandler(const tjs_char* name,
+                               iTJSDispatch2* (*handler)(iTJSDispatch2*),
+                               const tjs_char* dependences);
+struct tTVPAtInstallClass
+{
+    tTVPAtInstallClass(const tjs_char* name,
+                       iTJSDispatch2* (*handler)(iTJSDispatch2*),
+                       const tjs_char* dependences)
+    {
+        TVPAddClassHandler(name, handler, dependences);
+    }
+};
+
+//---------------------------------------------------------------------------
+// TVPAddClassHandler related
+//---------------------------------------------------------------------------
+struct tTVPAtClassInstallInfo
+{
+    tTVPAtClassInstallInfo(const tjs_char* name,
+                           iTJSDispatch2* (*handler)(iTJSDispatch2*),
+                           const tjs_char* dependences)
+    {
+        Name = name, Handler = handler;
+        if (dependences)
+        {
+            ttstr dep(dependences);
+            const tjs_char* start = dependences;
+            const tjs_char* cur = dependences;
+            while (*cur)
+            {
+                if ((*cur) == TJS_N(','))
+                {
+                    if (start != cur)
+                    {
+                        Dependences.push_back(ttstr(start, cur - start));
+                    }
+                    start = cur + 1;
+                }
+                cur++;
+            }
+            if (start != cur)
+            {
+                Dependences.push_back(ttstr(start, cur - start));
+            }
+        }
+    }
+    const tjs_char* Name;
+    iTJSDispatch2* (*Handler)(iTJSDispatch2*);
+    std::vector<ttstr> Dependences; // 依存クラスリスト
+};
+static std::vector<tTVPAtClassInstallInfo>* TVPAtClassInstallInfos = NULL;
+static bool TVPAtInstallClass = false;
+//---------------------------------------------------------------------------
+void TVPAddClassHandler(const tjs_char* name,
+                        iTJSDispatch2* (*handler)(iTJSDispatch2*),
+                        const tjs_char* dependences)
+{
+    if (TVPAtInstallClass)
+        return;
+
+    if (!TVPAtClassInstallInfos)
+        TVPAtClassInstallInfos = new std::vector<tTVPAtClassInstallInfo>();
+    TVPAtClassInstallInfos->push_back(tTVPAtClassInstallInfo(name, handler, dependences));
+}
+//---------------------------------------------------------------------------
+/*
+
+以下のような書式で、cpp に入れておくと、VM初期化後、クラスを追加する段階で追加してくれます。
+静的リンクするとクラス追加されるpluginの様な機能です。
+pluginは実行時にクラス等追加しますが、extensionはビルドする時に、入れるクラスを選択する形です。
+static tTVPAtInstallClass TVPInstallClassFoo
+        (TJS_N("ClassFoo"), TVPCreateNativeClass_ClassFoo,TJS_N("Window,Layer"));
+呼び出される関数にはglobalが渡されるので、必要であればそこからメンバなど取得します。
+登録は呼び出し側が返り値のiTJSDispatch2をglobalに登録するので、呼び出された関数内で登録する必要
+はありません。
+登録時依存クラスを3番目に指定可能ですが、現在のところ無視されています。
+*/
+void TVPCauseAtInstallExtensionClass(iTJSDispatch2* global)
+{
+    if (TVPAtInstallClass)
+        return;
+    TVPAtInstallClass = true;
+
+    if (TVPAtClassInstallInfos)
+    {
+        iTJSDispatch2* dsp;
+        tTJSVariant val;
+        std::vector<tTVPAtClassInstallInfo>::iterator i;
+        for (i = TVPAtClassInstallInfos->begin(); i != TVPAtClassInstallInfos->end(); i++)
+        {
+            dsp = i->Handler(global);
+            val = tTJSVariant(dsp /*, dsp*/);
+            dsp->Release();
+            global->PropSet(TJS_MEMBERENSURE | TJS_IGNOREPROP, i->Name, NULL, &val, global);
+        }
+        delete TVPAtClassInstallInfos;
+        TVPAtClassInstallInfos = NULL;
+    }
+}
+//---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 // Script system initialization script
@@ -885,11 +989,7 @@ void TVPCompileStorage(const ttstr& name,
 //---------------------------------------------------------------------------
 void TVPCreateMessageMapFile(const ttstr& filename)
 {
-#ifdef TJS_TEXT_OUT_CRLF
-    ttstr script(TJS_N("{\r\n\tvar r = System.assignMessage;\r\n"));
-#else
     ttstr script(TJS_N("{\n\tvar r = System.assignMessage;\n"));
-#endif
 
     script += TJSCreateMessageMapString();
 

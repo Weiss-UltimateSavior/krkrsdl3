@@ -11,9 +11,9 @@
 */
 
 #include "ioapi.h"
-#include <SDL3/SDL_iostream.h>
 #include <fcntl.h>
 #include <stdint.h>
+#include "PlatformFile.h"
 
 voidpf call_zopen64 (const zlib_filefunc64_32_def* pfilefunc,const void*filename,int mode)
 {
@@ -81,16 +81,16 @@ static int     ZCALLBACK ferror_file_func OF((voidpf opaque, voidpf stream));
 
 static voidpf ZCALLBACK fopen_file_func (voidpf opaque, const char* filename, int mode)
 {
-    const char* sdl_mode = NULL;
+    uint32_t modemask = 0;
     if ((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER) == ZLIB_FILEFUNC_MODE_READ)
-        sdl_mode = "rb";
+        modemask = TJS_BS_READ;
     else if (mode & ZLIB_FILEFUNC_MODE_EXISTING)
-        sdl_mode = "rb+";
+        modemask = TJS_BS_UPDATE;
     else if (mode & ZLIB_FILEFUNC_MODE_CREATE)
-        sdl_mode = "wb+";
+        modemask = TJS_BS_WRITE;
     else
         return NULL;
-    SDL_IOStream* rw = SDL_IOFromFile(filename, sdl_mode);
+    tTVPLocalFileStream* rw = new tTVPLocalFileStream("", filename, modemask);
     return (voidpf)rw;
 }
 
@@ -102,17 +102,17 @@ static voidpf ZCALLBACK fopen64_file_func (voidpf opaque, const void* filename, 
 
 static uLong ZCALLBACK fread_file_func (voidpf opaque, voidpf stream, void* buf, uLong size)
 {
-    return (uLong)SDL_ReadIO((SDL_IOStream*)stream, buf, size);
+    return (uLong)((tTVPLocalFileStream*)stream)->Read(buf, size);
 }
 
 static uLong ZCALLBACK fwrite_file_func (voidpf opaque, voidpf stream, const void* buf, uLong size)
 {
-    return (uLong)SDL_WriteIO((SDL_IOStream*)stream, buf, size);
+    return (uLong)((tTVPLocalFileStream*)stream)->Write(buf, size);
 }
 
 static ZPOS64_T ZCALLBACK ftell64_file_func (voidpf opaque, voidpf stream)
 {
-    return (ZPOS64_T)SDL_SeekIO((SDL_IOStream*)stream, 0, SDL_IO_SEEK_CUR);
+    return (ZPOS64_T)((tTVPLocalFileStream*)stream)->Seek(0, TJS_BS_SEEK_CUR);
 }
 
 static long ZCALLBACK ftell_file_func (voidpf opaque, voidpf stream)
@@ -122,52 +122,49 @@ static long ZCALLBACK ftell_file_func (voidpf opaque, voidpf stream)
 
 static long ZCALLBACK fseek_file_func (voidpf  opaque, voidpf stream, uLong offset, int origin)
 {
-    SDL_IOWhence fseek_origin;
+    int fseek_origin;
     long ret;
     switch (origin)
     {
     case ZLIB_FILEFUNC_SEEK_CUR :
-        fseek_origin = SDL_IO_SEEK_CUR;
+        fseek_origin = TJS_BS_SEEK_CUR;
         break;
     case ZLIB_FILEFUNC_SEEK_END :
-        fseek_origin = SDL_IO_SEEK_END;
+        fseek_origin = TJS_BS_SEEK_END;
         break;
     case ZLIB_FILEFUNC_SEEK_SET :
-        fseek_origin = SDL_IO_SEEK_SET;
+        fseek_origin = TJS_BS_SEEK_SET;
         break;
     default: return -1;
     }
-    ret = 0;
-    SDL_SeekIO((SDL_IOStream*)stream, offset, fseek_origin);
-    return ret;
+    return ((tTVPLocalFileStream*)stream)->Seek(offset, fseek_origin);
 }
 
 static long ZCALLBACK fseek64_file_func (voidpf  opaque, voidpf stream, ZPOS64_T offset, int origin)
 {
-    SDL_IOWhence fseek_origin;
+    int fseek_origin;
     switch (origin)
     {
-    case ZLIB_FILEFUNC_SEEK_CUR :
-        fseek_origin = SDL_IO_SEEK_CUR;
-        break;
-    case ZLIB_FILEFUNC_SEEK_END :
-        fseek_origin = SDL_IO_SEEK_END;
-        break;
-    case ZLIB_FILEFUNC_SEEK_SET :
-        fseek_origin = SDL_IO_SEEK_SET;
-        break;
-    default: return -1;
+        case ZLIB_FILEFUNC_SEEK_CUR:
+            fseek_origin = TJS_BS_SEEK_CUR;
+            break;
+        case ZLIB_FILEFUNC_SEEK_END:
+            fseek_origin = TJS_BS_SEEK_END;
+            break;
+        case ZLIB_FILEFUNC_SEEK_SET:
+            fseek_origin = TJS_BS_SEEK_SET;
+            break;
+        default:
+            return -1;
     }
-    SDL_SeekIO((SDL_IOStream*)stream, offset, fseek_origin);
-    return 0;
+    return ((tTVPLocalFileStream*)stream)->Seek(offset, fseek_origin);
 }
 
 
 static int ZCALLBACK fclose_file_func (voidpf opaque, voidpf stream)
 {
-    int ret;
-    ret = SDL_CloseIO((SDL_IOStream*)stream);
-    return ret;
+    delete ((tTVPLocalFileStream*)stream);
+    return 0;
 }
 
 static int ZCALLBACK ferror_file_func (voidpf opaque, voidpf stream)

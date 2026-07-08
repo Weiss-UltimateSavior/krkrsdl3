@@ -92,6 +92,8 @@ tjs_int TJS_iswalpha(const char* chs);
 
 int TJS_strcmp(const tjs_char* src, const tjs_char* dst);
 int TJS_strncmp(const tjs_char* first, const tjs_char* last, size_t count);
+int TJS_strcasecmp(const tjs_char* s1, const tjs_char* s2);
+int TJS_strncasecmp(const tjs_char* s1, const tjs_char* s2, size_t n);
 tjs_char* TJS_strncpy(tjs_char* dest, const tjs_char* source, size_t count);
 tjs_char* TJS_strcat(tjs_char* dst, const tjs_char* src);
 tjs_char* TJS_strstr(const tjs_char* wcs1, const tjs_char* wcs2);

@@ -65,7 +65,7 @@ bool tTJSNI_PsbFile::loadFromStream(tTJSBinaryStream* _filePtr, const ttstr& fil
     char sign[4];
     filePtr->Read(sign, 4);
     sign[3] = '\0';
-    if (SDL_strcasecmp(sign, "MDF") == 0)
+    if (TJS_strcasecmp(sign, "MDF") == 0)
     {
         // uncompress data
         uLongf uncompressedSize = filePtr->ReadI32LE();

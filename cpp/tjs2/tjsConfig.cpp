@@ -1361,6 +1361,46 @@ int TJS_strncmp(const tjs_char* first, const tjs_char* last, size_t count)
     return strncmp(first, last, count);
 }
 
+int TJS_strcasecmp(const tjs_char* s1, const tjs_char* s2)
+{
+    if (s1 == s2) return 0;
+    if (s1 == NULL) return -1;
+    if (s2 == NULL) return 1;
+    
+    while (*s1 && *s2) {
+        char c1 = *s1;
+        char c2 = *s2;
+        if (c1 >= 'A' && c1 <= 'Z') c1 += 32;
+        if (c2 >= 'A' && c2 <= 'Z') c2 += 32;
+        if (c1 != c2) return (c1 > c2) ? 1 : -1;
+        s1++; s2++;
+    }
+    if (*s1) return 1;
+    if (*s2) return -1;
+    return 0;
+}
+
+int TJS_strncasecmp(const tjs_char* s1, const tjs_char* s2, size_t n)
+{
+    if (s1 == s2 || n == 0) return 0;
+    if (s1 == NULL) return -1;
+    if (s2 == NULL) return 1;
+    
+    while (n-- > 0 && *s1 && *s2) {
+        char c1 = *s1;
+        char c2 = *s2;
+        if (c1 >= 'A' && c1 <= 'Z') c1 += 32;
+        if (c2 >= 'A' && c2 <= 'Z') c2 += 32;
+        if (c1 != c2) return (c1 > c2) ? 1 : -1;
+        s1++; s2++;
+    }
+    
+    if (n == (size_t)-1) return 0;
+    if (*s1) return 1;
+    if (*s2) return -1;
+    return 0;
+}
+
 tjs_char* TJS_strncpy(tjs_char* dest, const tjs_char* source, size_t count)
 {
     tjs_char* start = dest;

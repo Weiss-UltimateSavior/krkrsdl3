@@ -108,6 +108,18 @@ public:
         }
     }
 
+    virtual bool Flush()
+    {
+        if (stream)
+        {
+            return stream->Flush();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     // IStream
     virtual tjs_uint64 Seek(tjs_int64 dlibMove, tjs_int dwOrigin)
     {

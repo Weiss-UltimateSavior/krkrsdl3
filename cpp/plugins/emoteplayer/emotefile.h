@@ -392,7 +392,7 @@ public:
     double texHeight = 0;
 
     uint8_t* data = nullptr; // icon数据
-    GLuint selftexture = 0; //  图片纹理
+    uint64_t selftexture = 0;  // 图片纹理
 
 private:
     emotefile* _filePtr = nullptr;

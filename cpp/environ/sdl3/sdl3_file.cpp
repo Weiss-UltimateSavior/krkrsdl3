@@ -216,8 +216,7 @@ static SDL_EnumerationResult SDLCALL TVPFileinfoCb(void* userdata,
 tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
                                          const ttstr& localname,
                                          tjs_uint32 flag)
-  : MemBuffer(nullptr),
-    FileName(localname),
+  : FileName(localname),
     Handle(nullptr)
 {
     tjs_uint32 access = flag & TJS_BS_ACCESS_MASK;
@@ -236,8 +235,6 @@ tTVPLocalFileStream::tTVPLocalFileStream(const ttstr& origname,
                 TVPThrowExceptionMessage(TVPCannotOpenStorage, origname);
             }
         }
-        MemBuffer = new tTVPMemoryStream();
-        return;
     }
 
     const char* mode = nullptr;
@@ -351,6 +348,15 @@ tjs_uint tTVPLocalFileStream::Write(const void* buffer, tjs_uint write_size)
         return MemBuffer->Write(buffer, write_size);
     }
     return static_cast<tjs_uint>(SDL_WriteIO((SDL_IOStream*)Handle, buffer, write_size));
+}
+//---------------------------------------------------------------------------
+bool tTVPLocalFileStream::Flush()
+{
+    if (MemBuffer)
+    {
+        return MemBuffer->Flush();
+    }
+    return SDL_FlushIO((SDL_IOStream*)Handle);
 }
 //---------------------------------------------------------------------------
 void tTVPLocalFileStream::SetEndOfStorage()

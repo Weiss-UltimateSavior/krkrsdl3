@@ -1,8 +1,6 @@
 #pragma once
 
-#include <condition_variable>
 #include <functional>
-#include <SDL3/SDL_thread.h>
 
 //---------------------------------------------------------------------------
 // tTVPThreadPriority

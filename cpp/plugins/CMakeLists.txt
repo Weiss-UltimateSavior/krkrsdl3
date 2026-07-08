@@ -8,7 +8,6 @@ set(KRKRSDL_PLUGINS_SRC
     ${KRKRSDL_PLUGINS_PATH}/dirlist.cpp
     ${KRKRSDL_PLUGINS_PATH}/DrawDeviceD3D.cpp
     ${KRKRSDL_PLUGINS_PATH}/expat.cpp
-    ${KRKRSDL_PLUGINS_PATH}/Extension.cpp
     ${KRKRSDL_PLUGINS_PATH}/fftgraph.cpp
     ${KRKRSDL_PLUGINS_PATH}/fstat.cpp
     ${KRKRSDL_PLUGINS_PATH}/FuncStubs.cpp

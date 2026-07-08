@@ -17,7 +17,7 @@ NS_KRMOVIE_BEGIN
 
 VideoPresentOverlay::VideoPresentOverlay()
 {
-    pSprite = new SDL_Sprite;
+    pSprite = new TVPSprite;
     pSprite->isVisible = true;
     pSprite->type = 2;
     pSprite->xPos = 0;
@@ -28,10 +28,10 @@ VideoPresentOverlay::~VideoPresentOverlay()
 {
     if (pSprite != NULL)
     {
-        if (pSprite->texture != 0)
+        if (pSprite->texture.gpuTexture != 0)
         {
-            krkrsdl3::SDL_GL_DepartTexture(pSprite);
-            krkrsdl3::SDL_GL_DestroyTexture(pSprite);
+            krkrsdl3::TVPDepartTexture(pSprite);
+            krkrsdl3::TVPDestroyTexture(pSprite);
         }
         delete pSprite;
     }
@@ -82,15 +82,15 @@ void VideoPresentOverlay::OnContinuousCallback(tjs_uint64 tick)
     if (pic.rgba == NULL)
         return;
     {
-        if (pSprite->texture == 0)
+        if (pSprite->texture.gpuTexture == 0)
         {
             pSprite->width = pic.width;
             pSprite->height = pic.height;
-            krkrsdl3::SDL_GL_CreateTexture(*pSprite);
-            krkrsdl3::SDL_GL_JoinTexture(pSprite);
+            krkrsdl3::TVPCreateTexture(*pSprite);
+            krkrsdl3::TVPJoinTexture(pSprite);
         }
         int pitch = pic.width * 4;
-        krkrsdl3::SDL_GL_UpdateTexture(pSprite, pic.rgba, pic.width, pic.height, pitch);
+        krkrsdl3::TVPUpdateTexture(pSprite, pic.rgba, pic.width, pic.height, pitch);
     }
 }
 

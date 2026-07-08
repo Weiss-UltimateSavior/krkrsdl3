@@ -61,9 +61,11 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/render/LayerBitmap.cpp
     ${KRKRSDL_CORE_PATH}/render/LayerManager.cpp
     ${KRKRSDL_CORE_PATH}/render/LayerTreeOwner.cpp
+    ${KRKRSDL_CORE_PATH}/render/MainWindowLayer.cpp
     ${KRKRSDL_CORE_PATH}/render/RenderManager.cpp
     ${KRKRSDL_CORE_PATH}/render/TransIntf.cpp
-    ${KRKRSDL_CORE_PATH}/render/TVPColor.cpp
+	${KRKRSDL_CORE_PATH}/render/TVPColor.cpp
+    ${KRKRSDL_CORE_PATH}/render/TVPCompositor.cpp
     ${KRKRSDL_CORE_PATH}/script/tjsNativeAsyncTrigger.cpp
     ${KRKRSDL_CORE_PATH}/script/tjsNativeBasicDrawDevice.cpp
     ${KRKRSDL_CORE_PATH}/script/tjsNativeBitmap.cpp
@@ -89,49 +91,12 @@ set(KRKRSDL_CORE_SRC
     ${KRKRSDL_CORE_PATH}/script/tjsNativeWaveSoundBuffer.cpp
     ${KRKRSDL_CORE_PATH}/script/tjsNativeWindow.cpp
     ${KRKRSDL_CORE_PATH}/script/TVPScript.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjs.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjs.tab.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsArray.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsBinarySerializer.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsByteCodeLoader.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsCompileControl.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsConfig.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsConstArrayData.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsDate.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsdate.tab.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsDateParser.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsDebug.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsDictionary.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsDisassemble.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsError.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsException.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsGlobalStringMap.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsInterCodeExec.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsInterCodeGen.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsInterface.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsLex.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsMath.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsMessage.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsMT19937ar-cok.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsNamespace.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsNative.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsObject.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsObjectExtendable.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsOctPack.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjspp.tab.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsRandomGenerator.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsRegExp.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsScriptBlock.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsScriptCache.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsString.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsUtils.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsVariant.cpp
-    ${KRKRSDL_CORE_PATH}/tjs2/tjsVariantString.cpp
     ${KRKRSDL_CORE_PATH}/utils/PhaseVocoderDSP.cpp
     ${KRKRSDL_CORE_PATH}/utils/Random.cpp
     ${KRKRSDL_CORE_PATH}/utils/RealFFT.cpp
 	${KRKRSDL_CORE_PATH}/utils/ResampleImage.cpp
     ${KRKRSDL_CORE_PATH}/utils/TickCount.cpp
+    ${KRKRSDL_CORE_PATH}/utils/TVPSettings.cpp
     ${KRKRSDL_CORE_PATH}/utils/TVPTimer.cpp
     ${KRKRSDL_CORE_PATH}/utils/VelocityTracker.cpp
 	${KRKRSDL_CORE_PATH}/utils/WeightFunctor.cpp

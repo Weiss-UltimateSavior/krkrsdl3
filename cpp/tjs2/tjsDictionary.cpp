@@ -450,11 +450,7 @@ void tTJSDictionaryNI::SaveStructuredData(std::vector<iTJSDispatch2*>& stack,
                                           iTJSTextWriteStream& stream,
                                           const ttstr& indentstr)
 {
-#ifdef TJS_TEXT_OUT_CRLF
-    stream.Write(TJS_N("(const) %[\r\n"));
-#else
     stream.Write(TJS_N("(const) %[\n"));
-#endif
     ttstr indentstr2 = indentstr + TJS_N(" ");
 
     tSaveStructCallback callback;
@@ -465,13 +461,9 @@ void tTJSDictionaryNI::SaveStructuredData(std::vector<iTJSDispatch2*>& stack,
     tTJSVariantClosure clo(&callback, NULL);
     Owner->EnumMembers(TJS_IGNOREPROP, &clo, Owner);
 
-#ifdef TJS_TEXT_OUT_CRLF
-    if (!callback.First)
-        stream.Write(TJS_N("\r\n"));
-#else
     if (!callback.First)
         stream.Write(TJS_N("\n"));
-#endif
+
     stream.Write(indentstr);
     stream.Write(TJS_N("]"));
 }
@@ -498,13 +490,8 @@ tjs_error tTJSDictionaryNI::tSaveStructCallback::FuncCall(tjs_uint32 flag,
         return TJS_S_OK;
     }
 
-#ifdef TJS_TEXT_OUT_CRLF
-    if (!First)
-        Stream->Write(TJS_N(",\r\n"));
-#else
     if (!First)
         Stream->Write(TJS_N(",\n"));
-#endif
 
     First = false;
 

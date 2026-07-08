@@ -76,44 +76,21 @@ TJS_MSG_DECL(TJSNotReconstructiveRandomizeData,
 TJS_MSG_DECL(TJSSymbol, TJS_N("識別子"))
 TJS_MSG_DECL(TJSCallHistoryIsFromOutOfTJS2Script, TJS_N("[TJSスクリプト管理外]"))
 TJS_MSG_DECL(TJSNObjectsWasNotFreed, TJS_N("合計 %1 個のオブジェクトが解放されていません"))
-#ifdef TJS_TEXT_OUT_CRLF
-TJS_MSG_DECL(TJSObjectCreationHistoryDelimiter, TJS_N("\r\n                     "))
-#else
 TJS_MSG_DECL(TJSObjectCreationHistoryDelimiter, TJS_N("\n                     "))
-#endif
-#ifdef TJS_TEXT_OUT_CRLF
-TJS_MSG_DECL(TJSObjectWasNotFreed,
-             TJS_N("オブジェクト %1 [%2] "
-                   "が解放されていません。オブジェクト作成時の呼び出し履歴は以下の通りです:\r\n    "
-                   "                 %3"))
-#else
 TJS_MSG_DECL(TJSObjectWasNotFreed,
              TJS_N("オブジェクト %1 [%2] "
                    "が解放されていません。オブジェクト作成時の呼び出し履歴は以下の通りです:\n      "
                    "               %3"))
-#endif
 TJS_MSG_DECL(TJSGroupByObjectTypeAndHistory,
              TJS_N("オブジェクトのタイプとオブジェクト作成時の履歴による分類"))
 TJS_MSG_DECL(TJSGroupByObjectType, TJS_N("オブジェクトのタイプによる分類"))
-#ifdef TJS_TEXT_OUT_CRLF
-TJS_MSG_DECL(TJSObjectCountingMessageGroupByObjectTypeAndHistory,
-             TJS_N("%1 個 : [%2]\r\n                     %3"))
-#else
 TJS_MSG_DECL(TJSObjectCountingMessageGroupByObjectTypeAndHistory,
              TJS_N("%1 個 : [%2]\n                     %3"))
-#endif
 TJS_MSG_DECL(TJSObjectCountingMessageTJSGroupByObjectType, TJS_N("%1 個 : [%2]"))
-#ifdef TJS_TEXT_OUT_CRLF
-TJS_MSG_DECL(TJSWarnRunningCodeOnDeletingObject,
-             TJS_N("%4: 削除中のオブジェクト %1[%2] "
-                   "上でコードが実行されています。このオブジェクトの作成時の呼び出し履歴は以下の通"
-                   "りです:\r\n                     %3"))
-#else
 TJS_MSG_DECL(TJSWarnRunningCodeOnDeletingObject,
              TJS_N("%4: 削除中のオブジェクト %1[%2] "
                    "上でコードが実行されています。このオブジェクトの作成時の呼び出し履歴は以下の通"
                    "りです:\n                     %3"))
-#endif
 TJS_MSG_DECL(TJSWriteError, TJS_N("書き込みエラーが発生しました"))
 TJS_MSG_DECL(TJSReadError,
              TJS_N("読み込みエラーが発生しました。ファイルが破損している可能性や、デバイスからの読"

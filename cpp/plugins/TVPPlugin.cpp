@@ -31,8 +31,6 @@
 #include "FuncStubs.h"
 
 #include "TVPApplication.h"
-#include "SDL3/SDL.h"
-#include <set>
 
 //---------------------------------------------------------------------------
 bool TVPLoadInternalPlugin(const ttstr& _name);
@@ -67,7 +65,7 @@ static void TVPSearchPluginsAt(std::vector<tTVPFoundPlugin>& list, std::string f
                {
                    if (mask & S_IFREG)
                    {
-                       if (!SDL_strcasecmp(filename.c_str() + filename.length() - 4, ".tpm"))
+                       if (!TJS_strcasecmp(filename.c_str() + filename.length() - 4, ".tpm"))
                        {
                            tTVPFoundPlugin fp;
                            fp.Path = folder;
@@ -113,36 +111,6 @@ void TVPLoadPluigins(void)
 tjs_int TVPGetAutoLoadPluginCount()
 {
     return TVPAutoLoadPluginCount;
-}
-//---------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-// some service functions for plugin
-//---------------------------------------------------------------------------
-#include <zlib.h>
-int ZLIB_uncompress(unsigned char* dest,
-                    unsigned long* destlen,
-                    const unsigned char* source,
-                    unsigned long sourcelen)
-{
-    return uncompress(dest, destlen, source, sourcelen);
-}
-//---------------------------------------------------------------------------
-int ZLIB_compress(unsigned char* dest,
-                  unsigned long* destlen,
-                  const unsigned char* source,
-                  unsigned long sourcelen)
-{
-    return compress(dest, destlen, source, sourcelen);
-}
-//---------------------------------------------------------------------------
-int ZLIB_compress2(unsigned char* dest,
-                   unsigned long* destlen,
-                   const unsigned char* source,
-                   unsigned long sourcelen,
-                   int level)
-{
-    return compress2(dest, destlen, source, sourcelen, level);
 }
 //---------------------------------------------------------------------------
 

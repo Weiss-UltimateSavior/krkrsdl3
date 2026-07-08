@@ -12,6 +12,7 @@
 #include "TVPGraphicsLoader.h"
 #include "TVPMsg.h"
 #include "Random.h"
+#include "TVPSettings.h"
 
 #include "tjsNativeLayer.h"
 

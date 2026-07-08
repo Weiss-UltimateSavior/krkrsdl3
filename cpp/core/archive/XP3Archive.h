@@ -184,6 +184,7 @@ public:
     tjs_uint64 Seek(tjs_int64 offset, tjs_int whence);
     tjs_uint Read(void* buffer, tjs_uint read_size);
     tjs_uint Write(const void* buffer, tjs_uint write_size);
+    bool Flush() { return false; };
     const std::string GetFileName();
     tjs_uint64 GetSize();
 };

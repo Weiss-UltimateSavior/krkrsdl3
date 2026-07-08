@@ -17,6 +17,7 @@
 #include "Platform.h"
 #include "PlatformAudio.h"
 #include "PlatformFile.h"
+#include "TVPSettings.h"
 
 #define TVP_SB_BEAT_INTERVAL 60
 

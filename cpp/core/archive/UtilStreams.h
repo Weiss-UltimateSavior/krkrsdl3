@@ -105,6 +105,7 @@ public:
 
     tjs_uint Read(void* buffer, tjs_uint read_size);
     tjs_uint Write(const void* buffer, tjs_uint write_size);
+    bool Flush() { return true; };
     void SetEndOfStorage();
 
     const std::string GetFileName() { return ""; }

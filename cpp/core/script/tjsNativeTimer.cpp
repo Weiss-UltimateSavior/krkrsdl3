@@ -5,6 +5,7 @@
 #include "PlatformThread.h"
 #include "PlatformMutex.h"
 #include "NativeEventQueue.h"
+#include "TVPSettings.h"
 
 #include <algorithm>
 

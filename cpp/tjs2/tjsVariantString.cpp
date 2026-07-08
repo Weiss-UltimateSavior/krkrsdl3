@@ -112,7 +112,9 @@ tjs_int TJSGetShorterStrLen(const tjs_char* str, tjs_int max)
 #define HEAP_FLAG_USING 0x01
 #define HEAP_FLAG_DELETE 0x02
 #define HEAP_CAPACITY_INC 4096
+#ifndef _ONLYCONSOLE // TODO Console模式为单线程，无竞争
 static tTJSSpinLock TJSStringHeapCS;
+#endif
 static std::vector<tTJSVariantString*>* TJSStringHeapList = NULL;
 static tTJSVariantString** TJSStringHeapFreeCellList = NULL;
 // static tjs_uint TJSStringHeapFreeCellListCapacity = 0;
@@ -290,7 +292,9 @@ void TJSCompactStringHeap()
         return;
 
     { // thread-protected
+#ifndef _ONLYCONSOLE
         tTJSSpinLockHolder csh(TJSStringHeapCS);
+#endif
 
 #ifndef __CODEGUARD__
         // may be very slow when used with codeguard
@@ -408,7 +412,9 @@ tTJSVariantString* TJSAllocStringHeap(void)
     }
 
     { // thread-protected
+#ifndef _ONLYCONSOLE
         tTJSSpinLockHolder csh(TJSStringHeapCS);
+#endif
 
 #ifdef TJS_VS_USE_SYSTEM_NEW
         tTJSVariantString* ret = new tTJSVariantString();
@@ -437,7 +443,9 @@ void TJSDeallocStringHeap(tTJSVariantString* vs)
     // free vs
 
     { // thread-pretected
+#ifndef _ONLYCONSOLE
         tTJSSpinLockHolder csh(TJSStringHeapCS);
+#endif
 
 #ifdef TJS_DEBUG_CHECK_STRING_HEAP_INTEGRITY
         {

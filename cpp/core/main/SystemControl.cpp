@@ -13,6 +13,7 @@
 #include "TVPApplication.h"
 #include "Platform.h"
 #include "Random.h"
+#include "TVPSettings.h"
 
 tTVPSystemControl* TVPSystemControl;
 bool TVPSystemControlAlive = false;

@@ -3,7 +3,6 @@
 #include "ncbind/ncbind.hpp"
 #include "sqlite3.h"
 #include "xp3_vfs.h"
-#include "SDL3/SDL_stdinc.h"
 
 #include "TVPStorage.h"
 #include "TVPEvent.h"
@@ -571,7 +570,7 @@ protected:
 				int count = sqlite3_column_count(stmt);
 				for (int i=0; i<count; i++) {
 					const char *col_name = sqlite3_column_name(stmt, i);
-					if (col_name && SDL_strcasecmp(col, col_name) == 0) {
+					if (col_name && TJS_strcasecmp(col, col_name) == 0) {
 						return i;
 					}
 				}

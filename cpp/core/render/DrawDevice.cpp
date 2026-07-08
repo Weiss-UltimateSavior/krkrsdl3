@@ -17,6 +17,7 @@
 #include "WindowIntf.h"
 #include "TVPDebug.h"
 #include "TVPSystem.h"
+#include "TVPSettings.h"
 
 //---------------------------------------------------------------------------
 // オプション

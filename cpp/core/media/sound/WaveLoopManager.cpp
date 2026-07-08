@@ -21,8 +21,6 @@
 #include "WaveIntf.h"
 #include "PlatformMutex.h"
 
-#include <SDL3/SDL_stdinc.h>
-
 //---------------------------------------------------------------------------
 const int TVPWaveLoopLinkGiveUpCount = 10;
 // This is for preventing infinite loop caused by recursive links.
@@ -1013,22 +1011,22 @@ bool tTVPWaveLoopManager::GetInt64(char* s, tjs_int64& v)
 bool tTVPWaveLoopManager::GetBool(char* s, bool& v)
 {
     // convert string to boolean
-    if (!SDL_strcasecmp(s, "True"))
+    if (!TJS_strcasecmp(s, "True"))
     {
         v = true;
         return true;
     }
-    if (!SDL_strcasecmp(s, "False"))
+    if (!TJS_strcasecmp(s, "False"))
     {
         v = false;
         return true;
     }
-    if (!SDL_strcasecmp(s, "Yes"))
+    if (!TJS_strcasecmp(s, "Yes"))
     {
         v = true;
         return true;
     }
-    if (!SDL_strcasecmp(s, "No"))
+    if (!TJS_strcasecmp(s, "No"))
     {
         v = false;
         return true;
@@ -1039,37 +1037,37 @@ bool tTVPWaveLoopManager::GetBool(char* s, bool& v)
 bool tTVPWaveLoopManager::GetCondition(char* s, tTVPWaveLoopLinkCondition& v)
 {
     // get condition value
-    if (!SDL_strcasecmp(s, "no"))
+    if (!TJS_strcasecmp(s, "no"))
     {
         v = llcNone;
         return true;
     }
-    if (!SDL_strcasecmp(s, "eq"))
+    if (!TJS_strcasecmp(s, "eq"))
     {
         v = llcEqual;
         return true;
     }
-    if (!SDL_strcasecmp(s, "ne"))
+    if (!TJS_strcasecmp(s, "ne"))
     {
         v = llcNotEqual;
         return true;
     }
-    if (!SDL_strcasecmp(s, "gt"))
+    if (!TJS_strcasecmp(s, "gt"))
     {
         v = llcGreater;
         return true;
     }
-    if (!SDL_strcasecmp(s, "ge"))
+    if (!TJS_strcasecmp(s, "ge"))
     {
         v = llcGreaterOrEqual;
         return true;
     }
-    if (!SDL_strcasecmp(s, "lt"))
+    if (!TJS_strcasecmp(s, "lt"))
     {
         v = llcLesser;
         return true;
     }
-    if (!SDL_strcasecmp(s, "le"))
+    if (!TJS_strcasecmp(s, "le"))
     {
         v = llcLesserOrEqual;
         return true;
@@ -1187,32 +1185,32 @@ bool tTVPWaveLoopManager::ReadLinkInformation(char*& p, tTVPWaveLoopLink& link)
         if (!GetEntityToken(p, &name, &value))
             return false;
 
-        if (!SDL_strcasecmp(name, "From"))
+        if (!TJS_strcasecmp(name, "From"))
         {
             if (!GetInt64(value, link.From))
                 return false;
         }
-        else if (!SDL_strcasecmp(name, "To"))
+        else if (!TJS_strcasecmp(name, "To"))
         {
             if (!GetInt64(value, link.To))
                 return false;
         }
-        else if (!SDL_strcasecmp(name, "Smooth"))
+        else if (!TJS_strcasecmp(name, "Smooth"))
         {
             if (!GetBool(value, link.Smooth))
                 return false;
         }
-        else if (!SDL_strcasecmp(name, "Condition"))
+        else if (!TJS_strcasecmp(name, "Condition"))
         {
             if (!GetCondition(value, link.Condition))
                 return false;
         }
-        else if (!SDL_strcasecmp(name, "RefValue"))
+        else if (!TJS_strcasecmp(name, "RefValue"))
         {
             if (!GetInt(value, link.RefValue))
                 return false;
         }
-        else if (!SDL_strcasecmp(name, "CondVar"))
+        else if (!TJS_strcasecmp(name, "CondVar"))
         {
             if (!GetInt(value, link.CondVar))
                 return false;
@@ -1268,12 +1266,12 @@ bool tTVPWaveLoopManager::ReadLabelInformation(char*& p, tTVPWaveLabel& label)
         if (!GetEntityToken(p, &name, &value))
             return false;
 
-        if (!SDL_strcasecmp(name, "Position"))
+        if (!TJS_strcasecmp(name, "Position"))
         {
             if (!GetInt64(value, label.Position))
                 return false;
         }
-        else if (!SDL_strcasecmp(name, "Name"))
+        else if (!TJS_strcasecmp(name, "Name"))
         {
             if (!GetString(value, label.Name))
                 return false;
@@ -1370,7 +1368,7 @@ bool tTVPWaveLoopManager::ReadInformation(char* p)
                 break;
 
             // read id (Link or Label)
-            if (!SDL_strncasecmp(p, "Link", 4) && !isalpha(p[4]))
+            if (!TJS_strncasecmp(p, "Link", 4) && !isalpha(p[4]))
             {
                 p += 4;
                 while (isspace(*p))
@@ -1382,7 +1380,7 @@ bool tTVPWaveLoopManager::ReadInformation(char* p)
                     return false;
                 Links.emplace_back(link);
             }
-            else if (!SDL_strncasecmp(p, "Label", 5) && !isalpha(p[5]))
+            else if (!TJS_strncasecmp(p, "Label", 5) && !isalpha(p[5]))
             {
                 p += 5;
                 while (isspace(*p))

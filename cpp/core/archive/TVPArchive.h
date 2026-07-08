@@ -129,6 +129,7 @@ public:
         return read_size;
     }
     virtual tjs_uint Write(const void* buffer, tjs_uint write_size) { return 0; }
+    virtual bool Flush() { return false; };
     virtual const std::string GetFileName() { return ""; }
     virtual tjs_uint64 GetSize() { return DataLength; }
 };

@@ -5,10 +5,10 @@
 #include "Platform.h"
 #include "tjsArray.h"
 #include "tjsDictionary.h"
+#include "TVPSettings.h"
 
 #include "xp3filter.h"
 
-#include <SDL3/SDL_stdinc.h>
 #include <zlib.h>
 
 #include <sstream>
@@ -302,19 +302,24 @@ namespace emoteplayer
 {
 #pragma region glprogram
 
-GLuint createEmptyTexture(int width, int height)
+uint64_t createEmptyTexture(int width, int height)
 {
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    if (TVPSettings.renderer == "opengl")
+    {
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    return texture;
+        return texture;
+    }
+    // 软渲染由data保存数据
+    return 0;
 }
 
 #pragma endregion
@@ -1470,9 +1475,10 @@ emoteicon::~emoteicon()
 {
     if (data != nullptr)
         delete[] data;
-    if (selftexture != 0 && glIsTexture(selftexture) == GL_TRUE)
+    if (TVPSettings.renderer == "opengl" && selftexture != 0 &&
+        glIsTexture((GLuint)selftexture) == GL_TRUE)
     {
-        glDeleteTextures(1, &selftexture);
+        glDeleteTextures(1, (GLuint*)&selftexture);
     }
 }
 void emoteicon::ensureLoad()
@@ -1486,40 +1492,46 @@ void emoteicon::ensureLoad()
         selftexture = createEmptyTexture(width, height);
         // 读取像素数据
         _filePtr->readIconTobuffer(data, width * height * 4, width * 4, this);
-        glBindTexture(GL_TEXTURE_2D, selftexture);
+
+        // GPU渲染
+        if (TVPSettings.renderer == "opengl")
+        {
+            glBindTexture(GL_TEXTURE_2D, selftexture);
 #if _KRKRSDL3_GL
-        if (_filePtr->colorType == 0)
-        {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
-                         data);
-        }
-        else if (_filePtr->colorType == 1)
-        {
+            if (_filePtr->colorType == 0)
+            {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE,
+                             data);
+            }
+            else if (_filePtr->colorType == 1)
+            {
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                             data);
+            }
+            else
+            {
+                TVPConsoleLog("unknow colorType");
+            }
+#else
+            if (_filePtr->colorType == 0)
+            {
+                // 色彩转化
+                for (size_t i = 0; i < width * height; i++)
+                {
+                    uint8_t tmp = data[4 * i];
+                    data[4 * i] = data[4 * i + 2];
+                    data[4 * i + 2] = tmp;
+                }
+            }
+            else if (_filePtr->colorType != 1)
+            {
+                TVPConsoleLog("unknow colorType");
+            }
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                          data);
-        }
-        else
-        {
-            TVPConsoleLog("unknow colorType");
-        }
-#else
-        if (_filePtr->colorType == 0)
-        {
-            // 色彩转化
-            for (size_t i = 0; i < width * height; i++)
-            {
-                uint8_t tmp = data[4 * i];
-                data[4 * i] = data[4 * i + 2];
-                data[4 * i + 2] = tmp;
-            }
-        }
-        else if (_filePtr->colorType != 1)
-        {
-            TVPConsoleLog("unknow colorType");
-        }
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 #endif
-        glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
     }
 }
 
@@ -1620,14 +1632,14 @@ bool emotefile::load(const ttstr& filePath)
     filePtr->Read(sign, 5);
     sign[4] = '\0';
     char lzfs[] = {0x04, 0x22, 0x4d, 0x18, 0x00};
-    if (SDL_strcasecmp(sign, lzfs) == 0) // lzfs
+    if (TJS_strcasecmp(sign, lzfs) == 0) // lzfs
     {
         filePtr = Lz4Stream::GetLz4Stream(filePtr);
     }
     else
     {
         sign[3] = '\0';
-        if (SDL_strcasecmp(sign, "MDF") == 0)
+        if (TJS_strcasecmp(sign, "MDF") == 0)
         {
             // uncompress data
             uLongf uncompressedSize = filePtr->ReadI32LE();

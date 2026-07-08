@@ -52,6 +52,7 @@ tTVPThread::~tTVPThread()
     SDL_DestroyCondition(THR_IMPL->cond);
     SDL_DestroyMutex(THR_IMPL->mutex);
     delete THR_IMPL;
+    _impl = NULL;
 }
 //---------------------------------------------------------------------------
 void tTVPThread::Terminate()
@@ -88,6 +89,8 @@ int tTVPThread::StartProc(void* arg)
 {
     tTVPThread* _this = static_cast<tTVPThread*>(arg);
     TVPThreadImpl* impl = (TVPThreadImpl*)_this->_impl;
+    if (!impl)
+        return 0;
 
     // 等待恢复
     if (_this->Suspended)

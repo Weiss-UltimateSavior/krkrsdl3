@@ -4,8 +4,7 @@
 #include "TVPEvent.h"
 #include "ComplexRect.h"
 
-#include "SDL3/SDL.h"
-#include "../eventCallbackFun.h"
+#include "TVPCompositor.h"
 
 struct SwsContext;
 class iTVPSoundBuffer;
@@ -15,7 +14,7 @@ NS_KRMOVIE_BEGIN
 class VideoPresentOverlay : public TVPMoviePlayer, public tTVPContinuousEventCallbackIntf
 {
 protected:
-    SDL_Sprite* pSprite;
+    TVPSprite* pSprite;
 
     VideoPresentOverlay();
     ~VideoPresentOverlay();

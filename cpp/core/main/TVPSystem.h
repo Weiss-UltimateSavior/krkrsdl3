@@ -80,21 +80,6 @@ struct tTVPAtExit
 #define TVP_ATEXIT_PRI_CLEANUP 10000
 //---------------------------------------------------------------------------
 
-//---------------------------------------------------------------------------
-// Command line parameter operations (implement in each platform)
-//---------------------------------------------------------------------------
-extern bool TVPGetCommandLine(const tjs_char* name, tTJSVariant* value = 0);
-// retrieves command line parameter named "name".
-// command line parameter format must be "-name=value"
-// returns false if the the parameter is not exist, otherwise
-// sets the value to "value" and returns true.
-extern tjs_int TVPGetCommandLineArgumentGeneration();
-// retrieves command line argument generation count. you can check
-// whether the command line options has changed, by comparing this value
-// to your value which is remembered when of previous call of this.
-extern void TVPSetCommandLine(const tjs_char* name, const ttstr& value);
-// sets command line to the specified value.
-// note that this function does not check any consistency or correctness of the value.
 
 //---------------------------------------------------------------------------
 
