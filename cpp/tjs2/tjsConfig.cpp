@@ -310,7 +310,7 @@ tjs_int TJS_timezone()
 #elif defined(_KRKRSDL3_ANDROID)
     localtime_r(&now, &local_tm);
     gmtime_r(&now, &utc_tm);
-#elif defined(_KRKRSDL3_LINUX)
+#elif defined(_KRKRSDL3_LINUX) || defined(_KRKRSDL3_EMSCRIPTEN)
     localtime_r(&now, &local_tm);
     gmtime_r(&now, &utc_tm);
 #else

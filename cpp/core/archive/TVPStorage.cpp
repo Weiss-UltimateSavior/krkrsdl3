@@ -975,6 +975,15 @@ ttstr TVPGetPlacedPath(const ttstr& name)
 
     TVPRebuildAutoPathTable(); // ensure auto path table
     ttstr* result = TVPAutoPathTable.Find(storagename);
+    if (!result)
+    {
+        ttstr lowername = storagename;
+        {
+            tjs_char* p = lowername.Independ();
+            while (*p) { if (*p >= TJS_N('A') && *p <= TJS_N('Z')) *p += TJS_N('a') - TJS_N('A'); p++; }
+        }
+        result = TVPAutoPathTable.Find(lowername);
+    }
     if (!result) result = TVPAutoPathTable.Find(name);
     if (result)
     {

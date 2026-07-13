@@ -1,7 +1,6 @@
 #include "tjsCommHead.h"
 #include "ncbind/ncbind.hpp"
 #include "LayerExBase.hpp"
-#include "KRMovieLayer.h"
 #include "TVPStorage.h"
 #include "TVPApplication.h"
 
@@ -54,11 +53,11 @@ class AffineSourceMovie extends AffineSource {\
         kag.conductor.trigger(\"movie_world_foremovie\");\
 	}\
 	function clone(newwindow, instance) {\
-        if (newwindow == = void)\
+        if (newwindow === void)\
         {\
             newwindow = _window;\
         }\
-        if (instance == = void)\
+        if (instance === void)\
         {\
             instance = new global.AffineSourceMovie(newwindow);\
         }\

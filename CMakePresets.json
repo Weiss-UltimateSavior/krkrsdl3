@@ -28,6 +28,7 @@
         {
             "name": "Windows Config MSVC",
             "generator": "Visual Studio 17 2022",
+            "architecture": "x64",
             "cacheVariables": {
                 "WINDOWS": true,
                 "MSVC": true,
@@ -39,6 +40,27 @@
                 "rhs": "Windows"
             },
             "binaryDir": "${sourceDir}/out/windows-msvc",
+            "vendor": {
+				"microsoft.com/VisualStudioSettings/CMake/1.0": {
+					"hostOS": ["Windows"]
+				}
+			}
+        },
+        {
+            "name": "Windows Config 32",
+            "generator": "Visual Studio 17 2022",
+            "architecture": "Win32",
+            "cacheVariables": {
+                "WINDOWS": true,
+                "MSVC": true,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "binaryDir": "${sourceDir}/out/windows-32",
             "vendor": {
 				"microsoft.com/VisualStudioSettings/CMake/1.0": {
 					"hostOS": ["Windows"]
@@ -100,6 +122,21 @@
                 "rhs": "Linux"
             },
             "binaryDir": "${sourceDir}/out/linux-console"
+        },
+		{
+            "name": "Emscripten Config",
+            "generator": "Ninja Multi-Config",
+            "cacheVariables": {
+                "CMAKE_SYSTEM_NAME" : "Emscripten",
+                "CMAKE_SYSTEM_VERSION" : "1",
+                "CMAKE_C_COMPILER": "emcc.bat",
+                "CMAKE_CXX_COMPILER": "em++.bat",
+                "EMSCRIPTEN": true,
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+                "CMAKE_TOOLCHAIN_FILE": "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            },
+            "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+            "binaryDir": "${sourceDir}/out/emscripten"
         }
     ],
     "buildPresets": [
@@ -121,6 +158,16 @@
         {
             "name": "Windows Release Build MSVC",
             "configurePreset": "Windows Config MSVC",
+            "configuration": "Release"
+        },
+        {
+            "name": "Windows Debug Build 32",
+            "configurePreset": "Windows Config 32",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Windows Release Build 32",
+            "configurePreset": "Windows Config 32",
             "configuration": "Release"
         },
 		{
@@ -151,6 +198,16 @@
         {
             "name": "Linux Release Build Console",
             "configurePreset": "Linux Config Console",
+            "configuration": "Release"
+        },
+        {
+            "name": "Emscripten Debug Build",
+            "configurePreset": "Emscripten Config",
+            "configuration": "Debug"
+        },
+        {
+            "name": "Emscripten Release Build",
+            "configurePreset": "Emscripten Config",
             "configuration": "Release"
         }
     ]

@@ -16,6 +16,11 @@
 #include "PlatformThread.h"
 #include "PlatformMutex.h"
 
+#ifdef _KRKRSDL3_EMSCRIPTEN
+#include <emscripten.h>
+#include <time.h>
+#endif
+
 //---------------------------------------------------------------------------
 // 64bit may enough to hold usual time count.
 // ( 32bit is clearly insufficient )
@@ -44,6 +49,10 @@ static uint32_t TVPCheckTickOverflow()
 }
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
+
+#if !defined(_KRKRSDL3_EMSCRIPTEN)
+// WASM single-thread: no watch thread needed
 //---------------------------------------------------------------------------
 class tTVPWatchThread : public tTVPThread
 {
@@ -106,11 +115,25 @@ static void TVPWatchThreadUninit()
 }
 //---------------------------------------------------------------------------
 static tTVPAtExit TVPWatchThreadUninitAtExit(TVP_ATEXIT_PRI_SHUTDOWN, TVPWatchThreadUninit);
+#endif
 //---------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
 // TVPGetTickCount
 //---------------------------------------------------------------------------
+#if defined(_KRKRSDL3_EMSCRIPTEN)
+// WASM single-thread: use clock_gettime instead of thread-based watch
+tjs_uint64 TVPGetTickCount()
+{
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (tjs_uint64)ts.tv_sec * 1000 + (tjs_uint64)ts.tv_nsec / 1000000;
+}
+void TVPStartTickCount()
+{
+    // no-op in WASM single-thread mode
+}
+#else
 tjs_uint64 TVPGetTickCount()
 {
     TVPWatchThreadInit();
@@ -129,3 +152,4 @@ void TVPStartTickCount()
     TVPWatchThreadInit();
 }
 //---------------------------------------------------------------------------
+#endif

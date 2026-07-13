@@ -1174,7 +1174,12 @@ static enum tTVPForceConvertMode { fcmNone, fcm16bit, fcm16bitMono } TVPForceCon
 static tjs_int TVPPrimarySBCreateTryLevel = -1;
 static bool TVPExpandToQuad = false;
 static tjs_int TVPL1BufferLength = 1000; // in ms
-static tjs_int TVPL2BufferLength = 1000; // in ms
+static tjs_int TVPL2BufferLength = 
+#ifdef _KRKRSDL3_EMSCRIPTEN
+    3000; // WASM: 解码线程与主线程共享 CPU，3 秒缓冲防止欠载
+#else
+    1000;
+#endif
 static bool TVPDirectSoundUse3D = false;
 static tjs_int TVPVolumeLogFactor = 3322;
 static bool TVPPrimarySoundBufferPlaying = false;

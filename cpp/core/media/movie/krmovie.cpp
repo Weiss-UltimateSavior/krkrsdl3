@@ -3,8 +3,7 @@
 #include "krmovie.h"
 #include "TVPMsg.h"
 #include "TVPStorage.h"
-#include "CodecVideo.h"
-#include "VideoPlayerAudio.h"
+#include "TVPEvent.h"
 #include "PlatformVideo.h"
 #include "krnull.h"
 

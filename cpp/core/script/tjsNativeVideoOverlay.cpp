@@ -7,7 +7,6 @@
 #include "WindowIntf.h"
 
 #include "krmovie.h"
-#include "krffmpeg.h"
 
 #include "tjsNativeLayer.h"
 #include "tjsNativeWindow.h"

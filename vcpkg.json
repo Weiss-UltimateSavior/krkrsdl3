@@ -2,7 +2,10 @@
     "dependencies": [
         "oniguruma",
         "zlib",
-        "ffmpeg",
+        {
+            "name" : "ffmpeg",
+            "platform": "!emscripten"
+        },
         "libpng",
         "libwebp",
         "libjpeg-turbo",
@@ -22,15 +25,9 @@
         {
             "name": "glad",
             "features": ["egl", "loader"],
-            "platform": "android"
+            "platform": "android | emscripten"
         }
     ],
     "builtin-baseline": "d87340acc46bdeda386037b38aca30136e667e47",
-    "overrides": [
-        {
-            "name": "ffmpeg",
-            "version": "7.1.2",
-            "port-version": 5
-        }
-    ]
+    "overrides": []
 }

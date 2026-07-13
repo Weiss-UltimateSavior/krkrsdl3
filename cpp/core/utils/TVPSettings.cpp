@@ -102,7 +102,10 @@ static void TVPInitProgramArgumentsAndDataPath(int tvp_argc, char* tvp_argv[])
 
 void TVPParseArguments(int argc, char* argv[])
 {
-#ifdef _KRKRSDL3_LIB
+#if defined(_KRKRSDL3_EMSCRIPTEN)
+    // WASM: all files are preloaded to MEMFS root /
+    TVPNativeProjectDir = "/";
+#elif defined(_KRKRSDL3_LIB)
     TVPNativeProjectDir = std::string(argv[1]);
 #else
     size_t lastSlash = std::string(argv[0]).find_last_of("/\\");

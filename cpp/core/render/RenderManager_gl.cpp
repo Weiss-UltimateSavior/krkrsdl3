@@ -1786,7 +1786,7 @@ public:
                 glUniform3f(id, Value[0], Value[1], Value[2]);
                 break;
             case 4:
-                glUniform4f(id, Value[0], Value[1], Value[2], Value[4]);
+                glUniform4f(id, Value[0], Value[1], Value[2], Value[3]);
                 break;
         }
     }

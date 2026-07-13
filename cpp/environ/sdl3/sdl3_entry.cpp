@@ -32,6 +32,7 @@
 SDL_Window* tvp_window;
 SDL_Renderer* tvp_renderer = NULL;
 static SDL_GLContext tvp_glContext = NULL;
+static int winWidth = 1280, winHeight = 720;
 
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
@@ -56,8 +57,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "TVP Engine");
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
     SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, 1280);
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, 720);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, winWidth);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, winHeight);
     if (TVPSettings.renderer == "opengl")
         SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     else
@@ -82,13 +83,15 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         // 使用SDL3上下文
 #if _KRKRSDL3_GL
         if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-#else
+#elif !defined(_KRKRSDL3_EMSCRIPTEN)
         if (!gladLoadEGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 #endif
+#if !defined(_KRKRSDL3_EMSCRIPTEN) || defined(_KRKRSDL3_GL)
         {
             SDL_Log("Failed to initialize GLAD");
             return SDL_APP_FAILURE;
         }
+#endif
         SDL_GL_MakeCurrent(tvp_window, tvp_glContext);
         SDL_GL_SetSwapInterval(1);
         // GL相关信息初始化
@@ -127,8 +130,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     return SDL_APP_CONTINUE;
 }
 
-#ifdef _KRKRSDL3_ANDROID
-// 安卓专属事件机制
+#if defined(_KRKRSDL3_ANDROID) || defined(_KRKRSDL3_EMSCRIPTEN)
+// 触屏事件机制（Android / WASM 移动端）
 enum TouchState
 {
     STATE_IDLE,
@@ -326,7 +329,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             krkrsdl3::KRKR_Trig_TextInput(data);
             break;
         }
-#if defined(_KRKRSDL3_WINDOWS) || defined(_KRKRSDL3_LINUX)
+#if defined(_KRKRSDL3_WINDOWS) || defined(_KRKRSDL3_LINUX) || defined(_KRKRSDL3_EMSCRIPTEN)
         // 鼠标事件
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
@@ -387,7 +390,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                                                 event->wheel.y);
             break;
         }
-#elif defined(_KRKRSDL3_ANDROID)
+#endif
+#if defined(_KRKRSDL3_ANDROID) || defined(_KRKRSDL3_EMSCRIPTEN)
         // 触屏事件
         case SDL_EVENT_FINGER_DOWN:
             handleFingerDown(event->tfinger);

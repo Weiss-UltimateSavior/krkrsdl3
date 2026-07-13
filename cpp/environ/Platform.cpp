@@ -24,7 +24,9 @@ void TVPExitApplication(int code)
 //---------------------------------------------------------------------------
 #if defined(__GNUC__) || defined(__clang__)
 #ifndef _KRKRSDL3_ANDROID
+#ifndef _KRKRSDL3_EMSCRIPTEN
 #include <cpuid.h>
+#endif
 #endif
 #endif
 #ifdef _KRKRSDL3_WINDOWS

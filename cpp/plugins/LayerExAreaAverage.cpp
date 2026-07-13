@@ -38,7 +38,7 @@ struct layerExAreaAverage
         objthis->PropGet(0, TJS_N("mainImageBufferPitch"), NULL, &val, objthis);
         dPitch = (tjs_int)val;
         objthis->PropGet(0, TJS_N("mainImageBufferForWrite"), NULL, &val, objthis);
-        dBuffer = (tjs_uint8*)(tjs_intptr_t)val;
+        dBuffer = (tjs_uint8*)(tjs_intptr_t)(tjs_int64)val;
 
         //	転送先の位置、サイズを取得
         tjs_int dLeft, dTop, dWidth, dHeight;
@@ -58,7 +58,7 @@ struct layerExAreaAverage
         srcobj->PropGet(0, TJS_N("mainImageBufferPitch"), NULL, &val, srcobj);
         sPitch = (tjs_int)val;
         srcobj->PropGet(0, TJS_N("mainImageBuffer"), NULL, &val, srcobj);
-        sBuffer = (tjs_uint8*)(tjs_intptr_t)val;
+        sBuffer = (tjs_uint8*)(tjs_intptr_t)(tjs_int64)val;
 
         //	転送元の位置、サイズを取得
         tjs_int sLeft, sTop, sWidth, sHeight;

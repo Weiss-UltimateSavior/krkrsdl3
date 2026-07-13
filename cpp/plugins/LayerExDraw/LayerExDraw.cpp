@@ -2320,8 +2320,6 @@ public:
         WrapperT* obj;
         if (src.Type() == tvtObject && (obj = AdaptorT::GetNativeInstance(src.AsObjectNoAddRef())))
             dst = obj->getGdipObject();
-        else
-            dst = NULL;
     }
 
     void operator()(tTJSVariant& dst, const GdipClassP& src)
@@ -2333,10 +2331,6 @@ public:
             {
                 dst = tTJSVariant(adpobj, adpobj);
                 adpobj->Release();
-            }
-            else
-            {
-                dst = NULL;
             }
         }
         else
@@ -2421,10 +2415,6 @@ struct MatrixConvertor : public GdipTypeConvertor<T>
                 dst = this->result;
             }
         }
-        else
-        {
-            dst = NULL;
-        }
     }
 };
 
@@ -2488,8 +2478,6 @@ struct ImageConvertor : public GdipTypeConvertor<T>
                     ncbInstanceAdaptor<LayerExDraw>::GetNativeInstance(src.AsObjectNoAddRef());
                 if (layer)
                     dst = *layer;
-                else
-                    dst = NULL;
             }
         }
         else if (src.Type() == tvtString)
@@ -2497,12 +2485,6 @@ struct ImageConvertor : public GdipTypeConvertor<T>
             plutovg_surface_t* surf = loadImage(src.GetString());
             if (surf)
                 dst = this->result = new GdipImage(surf);
-            else
-                dst = NULL;
-        }
-        else
-        {
-            dst = NULL;
         }
     }
 };

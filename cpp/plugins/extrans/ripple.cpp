@@ -437,7 +437,7 @@ static void TVPRippleTransform_c_b(const tjs_uint16* displacemap,
     }
 }
 //---------------------------------------------------------------------------
-#if _MSC_VER
+#if _MSC_VER && defined(__x86_64__)
 #include <intrin.h>
 static void TVPRippleTransform_sse2_f(const tjs_uint16* displacemap,
                                       const tjs_uint16* driftmap,
@@ -1042,7 +1042,7 @@ static tTVPRippleTransformFunc TVPRippleTransform_b = TVPRippleTransform_c_b;
 static void TVPInitRippleTransformFuncs()
 {
     tjs_uint32 cputype = TVPGetCPUType();
-#if _MSC_VER
+#if _MSC_VER && defined(__x86_64__)
 #ifndef _M_X64
     if (cputype & TVP_CPU_HAS_MMX)
     {

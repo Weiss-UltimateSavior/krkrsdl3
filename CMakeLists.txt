@@ -22,10 +22,16 @@ if(ANDROID)
     set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE $ENV{ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake)
 elseif(LINUX)
     set(VCPKG_TARGET_TRIPLET "x64-linux-release")
+elseif(EMSCRIPTEN)
+    set(VCPKG_TARGET_TRIPLET "wasm32-emscripten")
 elseif(WINDOWS)
     if(MSVC)
         add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-        set(VCPKG_TARGET_TRIPLET "x64-windows")
+        if(CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
+            set(VCPKG_TARGET_TRIPLET "x64-windows")
+        elseif(CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")
+            set(VCPKG_TARGET_TRIPLET "x86-windows")
+        endif()
     else()
         set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic")
     endif()
@@ -59,6 +65,12 @@ elseif(LINUX)
         -D_KRKRSDL3_LINUX=1
         -D_KRKRSDL3_GL=1
         -D_KRKRSDL3_CMD=1
+    )
+elseif(EMSCRIPTEN)
+    add_definitions(
+        -D_KRKRSDL3_EMSCRIPTEN=1
+        -D_KRKRSDL3_EGL=1
+        -D_KRKRSDL3_LIB=1
     )
 elseif(WINDOWS)
     add_definitions(

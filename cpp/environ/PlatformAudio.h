@@ -3,7 +3,12 @@
 #include "WaveIntf.h"
 #include <list>
 
+#ifdef _KRKRSDL3_EMSCRIPTEN
+// WASM 下增大缓冲数量：主线程繁忙时音频回调延迟大，需要更多缓冲防止卡顿
+#define TVPAL_BUFFER_COUNT 16
+#else
 #define TVPAL_BUFFER_COUNT 4
+#endif
 
 class iTVPSoundBuffer
 {
