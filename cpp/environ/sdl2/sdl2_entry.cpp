@@ -1,9 +1,4 @@
-#define SDL_MAIN_USE_CALLBACKS
-#include <SDL3/SDL_main.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_render.h>
-#include <SDL3/SDL_log.h>
-#include <SDL3/SDL_timer.h>
+#include <SDL.h>
 #ifdef _KRKRSDL3_GL
 #include "glad/glad.h"
 #else
@@ -38,117 +33,19 @@ static SDL_Renderer* tvp_renderer = NULL;
 static SDL_GLContext tvp_glContext = NULL;
 static int winWidth = 1280, winHeight = 720;
 
-SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
-{
-    // exeName gameNamey args
-    if (argc < 2)
-    {
-        SDL_Log("At least two parameters are required.");
-        return SDL_APP_FAILURE;
-    }
-
-    // 参数解析
-    if (!TVPParseArguments(argc, argv))
-        return SDL_APP_FAILURE;
-
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
-    { // for format converter
-        SDL_Log("Fail to initialize SDL.");
-        return SDL_APP_FAILURE;
-    }
-
-    // 窗口
-    SDL_PropertiesID props = SDL_CreateProperties();
-    SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "TVP Engine");
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, winWidth);
-    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, winHeight);
-    if (TVPSettings.renderer == "opengl")
-        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    else
-        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, SDL_WINDOW_RESIZABLE);
-    tvp_window = SDL_CreateWindowWithProperties(props);
-
-    if (TVPSettings.renderer == "opengl")
-    {
-#ifdef _KRKRSDL3_GL
-        // 使用opengl3.3
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#else
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-#endif
-        tvp_glContext = SDL_GL_CreateContext(tvp_window);
-        if (tvp_glContext == NULL)
-            return SDL_APP_FAILURE;
-        // 使用SDL3上下文
-#if _KRKRSDL3_GL
-        if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-#elif !defined(_KRKRSDL3_EMSCRIPTEN)
-        if (!gladLoadEGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-#endif
-#if !defined(_KRKRSDL3_EMSCRIPTEN) || defined(_KRKRSDL3_GL)
-        {
-            SDL_Log("Failed to initialize GLAD");
-            return SDL_APP_FAILURE;
-        }
-#endif
-        SDL_GL_MakeCurrent(tvp_window, tvp_glContext);
-        SDL_GL_SetSwapInterval(1);
-        // GL相关信息初始化
-        krkrsdl3::fetchGLInfo();
-    }
-    else
-    {
-        // SDL模拟软渲染器，虽然可能选择GPU，但对于App来说是软渲染
-        tvp_renderer = SDL_CreateRenderer(tvp_window, NULL);
-        SDL_SetRenderVSync(tvp_renderer, 1);
-        SDL_Log("SWRender Backend: %s", SDL_GetRendererName(tvp_renderer));
-    }
-
-    // 初始化时不显示
-    SDL_HideWindow(tvp_window);
-    SDL_DestroyProperties(props);
-
-    // 启动游戏
-    if (!::Application->StartApplication())
-    {
-        SDL_Log("Game Start Failed.");
-        return SDL_APP_FAILURE;
-    }
-
-    // 隐藏命令行
-#ifndef _DEBUG
-#ifdef _KRKRSDL3_WINDOWS
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
-#endif
-#endif
-    SDL_ShowWindow(tvp_window);
-
-    // 初始帧数
-    SDL_AppIterate(NULL);
-
-    return SDL_APP_CONTINUE;
-}
-
 #if defined(_KRKRSDL3_ANDROID) || defined(_KRKRSDL3_EMSCRIPTEN)
-// 触屏事件机制（Android / WASM 移动端）
 enum TouchState
 {
     STATE_IDLE,
-    STATE_SINGLE_FINGER, // 单指状态（处理左键和移动）
-    STATE_MULTI_FINGER,  // 多指状态（处理右键）
+    STATE_SINGLE_FINGER,
+    STATE_MULTI_FINGER,
     STATE_MENU
 };
 struct Finger
 {
     SDL_FingerID id;
-    float x, y;           // 归一化坐标
-    float startX, startY; // 按下时的位置
+    float x, y;
+    float startX, startY;
     Uint64 downTime;
     bool active;
     bool moved;
@@ -165,28 +62,25 @@ void sendMouseMotion(float pX, float pY);
 void handleFingerDown(const SDL_TouchFingerEvent& e)
 {
     Finger f;
-    f.id = e.fingerID;
+    f.id = e.fingerId;
     f.x = f.startX = e.x;
     f.y = f.startY = e.y;
     f.downTime = SDL_GetTicks();
     f.active = true;
     f.moved = false;
 
-    fingers[e.fingerID] = f;
+    fingers[e.fingerId] = f;
 
     if (fingers.size() == 1)
     {
-        // 单击->左键
         _state = STATE_SINGLE_FINGER;
     }
     else if (fingers.size() == 2)
     {
-        // 双击->右键
         _state = STATE_MULTI_FINGER;
     }
     else
     {
-        // 三击->菜单
         _state = STATE_MENU;
         int windowWidth, windowHeight;
         SDL_GetWindowSize(tvp_window, &windowWidth, &windowHeight);
@@ -199,7 +93,7 @@ void handleFingerDown(const SDL_TouchFingerEvent& e)
 }
 void handleFingerUp(const SDL_TouchFingerEvent& e)
 {
-    auto it = fingers.find(e.fingerID);
+    auto it = fingers.find(e.fingerId);
     if (it == fingers.end())
         return;
 
@@ -211,14 +105,14 @@ void handleFingerUp(const SDL_TouchFingerEvent& e)
         if (_state == STATE_SINGLE_FINGER)
         {
             if (!f.moved)
-                sendMouseEvent(SDL_BUTTON_LEFT, SDL_EVENT_MOUSE_BUTTON_DOWN, f.x, f.y);
-            sendMouseEvent(SDL_BUTTON_LEFT, SDL_EVENT_MOUSE_BUTTON_UP, f.x, f.y);
+                sendMouseEvent(SDL_BUTTON_LEFT, SDL_MOUSEBUTTONDOWN, f.x, f.y);
+            sendMouseEvent(SDL_BUTTON_LEFT, SDL_MOUSEBUTTONUP, f.x, f.y);
         }
         else if (_state == STATE_MULTI_FINGER)
         {
             if (!f.moved)
-                sendMouseEvent(SDL_BUTTON_RIGHT, SDL_EVENT_MOUSE_BUTTON_DOWN, f.x, f.y);
-            sendMouseEvent(SDL_BUTTON_RIGHT, SDL_EVENT_MOUSE_BUTTON_UP, f.x, f.y);
+                sendMouseEvent(SDL_BUTTON_RIGHT, SDL_MOUSEBUTTONDOWN, f.x, f.y);
+            sendMouseEvent(SDL_BUTTON_RIGHT, SDL_MOUSEBUTTONUP, f.x, f.y);
         }
         _state = STATE_IDLE;
     }
@@ -227,26 +121,24 @@ void handleFingerUp(const SDL_TouchFingerEvent& e)
 }
 void handleFingerMotion(const SDL_TouchFingerEvent& e)
 {
-    auto it = fingers.find(e.fingerID);
+    auto it = fingers.find(e.fingerId);
     if (it == fingers.end())
         return;
 
     Finger& f = it->second;
 
-    // 检查是否移动
     float dx = e.x - f.startX;
     float dy = e.y - f.startY;
     float moveDist = dx * dx + dy * dy;
 
     if (moveDist > 0.0001f)
-    { // 移动阈值
+    {
         f.moved = true;
         f.x = e.x;
         f.y = e.y;
 
         if (_state == STATE_SINGLE_FINGER)
         {
-            // 单指移动，发送鼠标移动
             sendMouseMotion(f.x, f.y);
         }
     }
@@ -277,13 +169,13 @@ void sendMouseEvent(int button, int eventType, float pX, float pY)
 
     if (tmp != mbX1)
     {
-        if (eventType == SDL_EVENT_MOUSE_BUTTON_DOWN)
+        if (eventType == SDL_MOUSEBUTTONDOWN)
         {
             krkrsdl3::KRKR_Trig_MouseDown(tmp, pixelX, pixelY);
         }
-        else if (eventType == SDL_EVENT_MOUSE_BUTTON_UP)
+        else if (eventType == SDL_MOUSEBUTTONUP)
         {
-            krkrsdl3::KRKR_Trig_MouseUp(tmp, pixelX,pixelY);
+            krkrsdl3::KRKR_Trig_MouseUp(tmp, pixelX, pixelY);
         }
     }
 }
@@ -293,25 +185,24 @@ void sendMouseMotion(float pX, float pY)
     SDL_GetWindowSize(tvp_window, &windowWidth, &windowHeight);
     int pixelX = static_cast<int>(pX * windowWidth);
     int pixelY = static_cast<int>(pY * windowHeight);
-    krkrsdl3::KRKR_Trig_MouseMove(pixelX,pixelY);
+    krkrsdl3::KRKR_Trig_MouseMove(pixelX, pixelY);
 }
 #endif
 
-SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
+static void ProcessEvent(SDL_Event* event)
 {
     switch (event->type)
     {
-        // 退出
-        case SDL_EVENT_QUIT:
+        case SDL_QUIT:
         {
             tTJSNI_Window* tmpwind = TVPGetActiveWindow();
-            tmpwind->Close();
+            if (tmpwind)
+                tmpwind->Close();
             break;
         }
-        // 键盘事件
-        case SDL_EVENT_KEY_DOWN:
+        case SDL_KEYDOWN:
         {
-            if (event->key.scancode == SDL_SCANCODE_F1)
+            if (event->key.keysym.scancode == SDL_SCANCODE_F1)
             {
                 int x = 0, y = 0;
                 SDL_GetWindowPosition(tvp_window, &x, &y);
@@ -319,24 +210,22 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
                 break;
             }
 
-            krkrsdl3::KRKR_Trig_KeyDown(event->key.scancode);
+            krkrsdl3::KRKR_Trig_KeyDown(event->key.keysym.scancode);
             break;
         }
-        case SDL_EVENT_KEY_UP:
+        case SDL_KEYUP:
         {
-            krkrsdl3::KRKR_Trig_KeyUp(event->key.scancode);
+            krkrsdl3::KRKR_Trig_KeyUp(event->key.keysym.scancode);
             break;
         }
-        // 文字输入
-        case SDL_EVENT_TEXT_INPUT:
+        case SDL_TEXTINPUT:
         {
             std::string data(event->text.text);
             krkrsdl3::KRKR_Trig_TextInput(data);
             break;
         }
 #if defined(_KRKRSDL3_WINDOWS) || defined(_KRKRSDL3_LINUX) || defined(_KRKRSDL3_EMSCRIPTEN)
-        // 鼠标事件
-        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_MOUSEBUTTONDOWN:
         {
             tTVPMouseButton tmp = mbX1;
             switch (event->button.button)
@@ -360,7 +249,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             }
             break;
         }
-        case SDL_EVENT_MOUSE_BUTTON_UP:
+        case SDL_MOUSEBUTTONUP:
         {
             tTVPMouseButton tmp = mbX1;
             switch (event->button.button)
@@ -384,12 +273,12 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
             }
             break;
         }
-        case SDL_EVENT_MOUSE_MOTION:
+        case SDL_MOUSEMOTION:
         {
             krkrsdl3::KRKR_Trig_MouseMove(event->motion.x, event->motion.y);
             break;
         }
-        case SDL_EVENT_MOUSE_WHEEL:
+        case SDL_MOUSEWHEEL:
         {
             krkrsdl3::KRKR_Trig_MouseScroll(event->wheel.x, event->wheel.y, event->wheel.x,
                                                 event->wheel.y);
@@ -397,61 +286,144 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         }
 #endif
 #if defined(_KRKRSDL3_ANDROID) || defined(_KRKRSDL3_EMSCRIPTEN)
-        // 触屏事件
-        case SDL_EVENT_FINGER_DOWN:
+        case SDL_FINGERDOWN:
             handleFingerDown(event->tfinger);
             break;
-        case SDL_EVENT_FINGER_UP:
+        case SDL_FINGERUP:
             handleFingerUp(event->tfinger);
             break;
-        case SDL_EVENT_FINGER_MOTION:
+        case SDL_FINGERMOTION:
             handleFingerMotion(event->tfinger);
             break;
 #endif
         default:
             break;
     }
-    return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_AppIterate(void* appstate)
+static void RenderFrame()
 {
     ::Application->Run();
     iTVPTexture2D::RecycleProcess();
-    // 写入缓冲区
     int RW = 1280, RH = 720;
     SDL_GetWindowSize(tvp_window, &RW, &RH);
     if (TVPSettings.renderer == "opengl")
     {
-        // 合成器完成渲染
         krkrsdl3::TVPRenderOnce(RW, RH);
-        // 渲染
         SDL_GL_SwapWindow(tvp_window);
     }
     else
     {
-        // 写入缓冲区
         SDL_SetRenderDrawColor(tvp_renderer, 0, 0, 0, 0);
         SDL_RenderClear(tvp_renderer);
-        // 合成器完成渲染
         krkrsdl3::TVPRenderOnce(RW, RH);
-        // 渲染
         SDL_RenderPresent(tvp_renderer);
     }
-    return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult SDL_Fail()
+int main(int argc, char* argv[])
 {
-    SDL_LogError(SDL_LOG_CATEGORY_CUSTOM, "Error %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-}
+    if (argc < 2)
+    {
+        SDL_Log("At least two parameters are required.");
+        return 1;
+    }
 
-void SDL_AppQuit(void* appstate, SDL_AppResult result)
-{
+    if (!TVPParseArguments(argc, argv))
+        return 1;
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+    {
+        SDL_Log("Fail to initialize SDL.");
+        return 1;
+    }
+
+    Uint32 windowFlags = SDL_WINDOW_RESIZABLE;
+    if (TVPSettings.renderer == "opengl")
+        windowFlags |= SDL_WINDOW_OPENGL;
+
+    tvp_window = SDL_CreateWindow("TVP Engine",
+                                  SDL_WINDOWPOS_CENTERED,
+                                  SDL_WINDOWPOS_CENTERED,
+                                  winWidth, winHeight,
+                                  windowFlags);
+
+    if (TVPSettings.renderer == "opengl")
+    {
+#ifdef _KRKRSDL3_GL
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#else
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#endif
+        tvp_glContext = SDL_GL_CreateContext(tvp_window);
+        if (tvp_glContext == NULL)
+            return 1;
+#if _KRKRSDL3_GL
+        if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
+#elif !defined(_KRKRSDL3_EMSCRIPTEN)
+        if (!gladLoadEGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
+#endif
+#if !defined(_KRKRSDL3_EMSCRIPTEN) || defined(_KRKRSDL3_GL)
+        {
+            SDL_Log("Failed to initialize GLAD");
+            return 1;
+        }
+#endif
+        SDL_GL_MakeCurrent(tvp_window, tvp_glContext);
+        SDL_GL_SetSwapInterval(1);
+        krkrsdl3::fetchGLInfo();
+    }
+    else
+    {
+        tvp_renderer = SDL_CreateRenderer(tvp_window, -1, SDL_RENDERER_ACCELERATED);
+        if (tvp_renderer)
+            SDL_RenderSetVSync(tvp_renderer, 1);
+        else
+            tvp_renderer = SDL_CreateRenderer(tvp_window, -1, SDL_RENDERER_SOFTWARE);
+
+        SDL_RendererInfo info;
+        if (SDL_GetRendererInfo(tvp_renderer, &info) == 0)
+            SDL_Log("SWRender Backend: %s", info.name);
+    }
+
+    SDL_HideWindow(tvp_window);
+
+    if (!::Application->StartApplication())
+    {
+        SDL_Log("Game Start Failed.");
+        return 1;
+    }
+
+#ifndef _DEBUG
+#ifdef _KRKRSDL3_WINDOWS
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
+#endif
+#endif
+    SDL_ShowWindow(tvp_window);
+
+    RenderFrame();
+
+    bool running = true;
+    while (running)
+    {
+        SDL_Event event;
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT)
+                running = false;
+            ProcessEvent(&event);
+        }
+        RenderFrame();
+    }
+
     SDL_DestroyWindow(tvp_window);
     SDL_Log("Game quit successfully!");
     SDL_Quit();
+    return 0;
 }
 
 void TVPSetWindowTitle(const char* title)
@@ -466,7 +438,7 @@ std::string TVPGetWindowTitle()
 
 void TVPSetWindowFullscreen(bool isFullscreen)
 {
-    SDL_SetWindowFullscreen(tvp_window, isFullscreen);
+    SDL_SetWindowFullscreen(tvp_window, isFullscreen ? SDL_WINDOW_FULLSCREEN : 0);
 }
 
 void TVPGetWindowSize(int* w, int* h)
@@ -486,11 +458,11 @@ int TVPDrawSceneOnce(int interval)
     int remain = interval - (curTick - lastTick);
     if (remain <= 0)
     {
-        SDL_AppIterate(NULL);
+        RenderFrame();
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            SDL_AppEvent(NULL, &event);
+            ProcessEvent(&event);
         }
         lastTick = curTick;
         return 0;
@@ -503,12 +475,12 @@ int TVPDrawSceneOnce(int interval)
 
 void TVPShowIME(int x, int y, int w, int h)
 {
-    SDL_StartTextInput(tvp_window);
+    SDL_StartTextInput();
 }
 
 void TVPHideIME()
 {
-    SDL_StopTextInput(tvp_window);
+    SDL_StopTextInput();
 }
 
 int TVPConvertKeyCodeToVKCode(int keyCode)
@@ -589,11 +561,11 @@ int TVPConvertKeyCodeToVKCode(int keyCode)
         case SDL_SCANCODE_CAPSLOCK:
             return VK_CAPITAL;
         case SDL_SCANCODE_LSHIFT:
-            return VK_SHIFT; // LR the same
+            return VK_SHIFT;
         case SDL_SCANCODE_RSHIFT:
             return VK_SHIFT;
         case SDL_SCANCODE_LCTRL:
-            return VK_CONTROL; // LR the same
+            return VK_CONTROL;
         case SDL_SCANCODE_RCTRL:
             return VK_CONTROL;
         case SDL_SCANCODE_LALT:
@@ -644,7 +616,7 @@ int TVPConvertKeyCodeToVKCode(int keyCode)
             return VK_OEM_4;
         case SDL_SCANCODE_RIGHTBRACKET:
             return VK_OEM_6;
-        case SDL_SCANCODE_MEDIA_PLAY:
+        case SDL_SCANCODE_AUDIOPLAY:
             return VK_PLAY;
         default:
             return 0;
@@ -658,11 +630,11 @@ std::vector<std::string> TVPListAllRenderBackend()
     int count = SDL_GetNumRenderDrivers();
     for (int i = 0; i < count; i++)
     {
-        const char* name = SDL_GetRenderDriver(i);
-        if (name)
+        SDL_RendererInfo info;
+        if (SDL_GetRenderDriverInfo(i, &info) == 0 && info.name)
         {
-            backends.push_back(name);
-            log += " " + ttstr((const char*)name);
+            backends.push_back(info.name);
+            log += " " + ttstr((const char*)info.name);
         }
     }
     TVPAddImportantLog(log);
@@ -674,15 +646,7 @@ void TVPCreateTextureBackend(TVPSprite& sp)
 {
     sp.texture.swTexture = SDL_CreateTexture(tvp_renderer, SDL_PIXELFORMAT_ABGR8888,
                                              SDL_TEXTUREACCESS_STREAMING, sp.width, sp.height);
-    SDL_BlendMode customBlendMode =
-        SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ONE,                 // 源因子
-                                   SDL_BLENDFACTOR_ZERO,                // 目标因子
-                                   SDL_BLENDOPERATION_ADD,              // 混合操作
-                                   SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, // 源因子（Alpha）
-                                   SDL_BLENDFACTOR_SRC_ALPHA,           // 目标因子（Alpha）
-                                   SDL_BLENDOPERATION_ADD               // 混合操作（Alpha）
-        );
-    SDL_SetTextureBlendMode((SDL_Texture*)sp.texture.swTexture, customBlendMode);
+    SDL_SetTextureBlendMode((SDL_Texture*)sp.texture.swTexture, SDL_BLENDMODE_BLEND);
 }
 
 void TVPUpdateTextureBackend(TVPSprite* sp, uint8_t* buff, int width, int height, int pitch)
@@ -697,10 +661,10 @@ void TVPDestroyTextureBackend(TVPSprite* sp)
 
 void TVPRenderTextureBackend(TVPSprite* sp, int posX, int posY, int width, int height)
 {
-    SDL_FRect rectBuff;
+    SDL_Rect rectBuff;
     rectBuff.x = posX;
     rectBuff.y = posY;
     rectBuff.w = width;
     rectBuff.h = height;
-    SDL_RenderTexture(tvp_renderer, (SDL_Texture*)sp->texture.swTexture, NULL, &rectBuff);
+    SDL_RenderCopy(tvp_renderer, (SDL_Texture*)sp->texture.swTexture, NULL, &rectBuff);
 }

@@ -17,6 +17,9 @@ if(USE_FFMPEG)
     list(APPEND KRKRSDL_SRC ${KRKRSDL_CORE_FFMPEG_SRC})
     add_definitions(-D_KRKRSDL3_USE_FFMPEG=1)
 endif()
+if(USE_SDL3)
+    add_definitions(-D_KRKRSDL3_USE_SDL3=1)
+endif()
 
 #
 # 2.确定目标文件
@@ -34,7 +37,6 @@ elseif(EMSCRIPTEN)
     )
     target_compile_options(${PROJECT_NAME} PRIVATE "-fexceptions" "-pthread")
     target_link_options(${PROJECT_NAME} PRIVATE
-        "SHELL:-s USE_SDL=3"
         "SHELL:-s USE_WEBGL2=1"
         "SHELL:-s USE_LIBPNG=1"
         "SHELL:-s USE_VORBIS=1"
@@ -130,13 +132,24 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Opus::opus)
 find_package(OpusFile CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpusFile::opusfile)
 
-if(NOT EMSCRIPTEN)
+if(USE_SDL3)
     find_package(SDL3 CONFIG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
-endif()
+    
+    find_package(SDL3_ttf CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf::SDL3_ttf)
+else()
+    find_package(SDL2 CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+    )
 
-find_package(SDL3_ttf CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf::SDL3_ttf)
+    find_package(SDL2_ttf CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
+    )
+endif()
 
 find_package(plutovg CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE plutovg::plutovg)

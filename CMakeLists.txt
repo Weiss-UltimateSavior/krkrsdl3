@@ -38,6 +38,12 @@ elseif(WINDOWS)
 endif()
 set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
+# SDL版本选择: ON=SDL3, OFF=SDL2
+option(USE_SDL3 "Use SDL3 (OFF for SDL2)" ON)
+if(ANDROID AND NOT USE_SDL3)
+    # android由于存在java层，所以不支持SDL2
+    message(FATAL_ERROR "安卓不支持SDL2作为硬件后端")
+endif()
 # 视频解码后端: ON=FFmpeg, OFF=系统API(MediaFoundation/MediaCodec)
 # 感觉没必要禁用，OFF的实现基本没用༼ ༎ຶ ෴ ༎ຶ༽
 option(USE_FFMPEG "Use FFmpeg for video/audio decoding" ON)

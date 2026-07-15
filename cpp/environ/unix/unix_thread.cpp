@@ -18,7 +18,7 @@
 #include "TVPDebug.h"
 
 #include <pthread.h>
-#ifdef __EMSCRIPTEN__
+#ifdef _KRKRSDL3_EMSCRIPTEN
 #include <emscripten.h>
 #endif
 #include <algorithm>
@@ -30,7 +30,7 @@
 
 #include <time.h>
 
-#if defined(__EMSCRIPTEN__)
+#if defined(_KRKRSDL3_EMSCRIPTEN)
 #include <emscripten/emscripten.h>
 #include <emscripten/threading.h>
 #endif
@@ -267,7 +267,7 @@ void TVPAddOnThreadExitEvent(const std::function<void()>& ev)
 
 bool TVPIsInMainThread()
 {
-#if defined(__EMSCRIPTEN__)
+#if defined(_KRKRSDL3_EMSCRIPTEN)
     return emscripten_is_main_browser_thread();
 #else
     static pthread_t main_tid = pthread_self();
@@ -277,7 +277,7 @@ bool TVPIsInMainThread()
 
 uint64_t TVPGetCurrentThreadID()
 {
-#if defined(__EMSCRIPTEN__)
+#if defined(_KRKRSDL3_EMSCRIPTEN)
     return (uint64_t)pthread_self();
 #else
     return (uint64_t)pthread_self();
@@ -286,7 +286,7 @@ uint64_t TVPGetCurrentThreadID()
 
 void TVPSleepFor(uint32_t ms)
 {
-#ifdef __EMSCRIPTEN__
+#ifdef _KRKRSDL3_EMSCRIPTEN
     emscripten_sleep(ms);
 #else
     do_sleep_ms(ms);
@@ -359,7 +359,7 @@ bool tTVPCondition::WaitFor(tTJSCriticalSection& cs, unsigned int ms)
 //---------------------------------------------------------------------------
 // tTJSSpinLock
 //---------------------------------------------------------------------------
-#if defined(__EMSCRIPTEN__)
+#if defined(_KRKRSDL3_EMSCRIPTEN)
 tTJSSpinLock::tTJSSpinLock() : splock(0) {}
 void tTJSSpinLock::lock() {
     while (__atomic_test_and_set(&splock, __ATOMIC_ACQUIRE)) {

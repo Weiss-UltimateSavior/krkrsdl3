@@ -6,7 +6,11 @@
 #include "TVPDebug.h"
 #include "RenderManager.h"
 
+#ifdef _KRKRSDL3_USE_SDL3
 #include <SDL3/SDL_cpuinfo.h>
+#else
+#include <SDL.h>
+#endif
 
 #include <cstdio>
 
@@ -208,7 +212,13 @@ void TVPDetectCPU()
     if (TVPCPUName[0])
         log += TJS_N(" / ") + ttstr(TVPCPUName);
     TVPAddImportantLog(log);
-    log = TJS_N("CPU cores: ") + ttstr(SDL_GetNumLogicalCPUCores());
+    log = TJS_N("CPU cores: ") + ttstr(
+#ifdef _KRKRSDL3_USE_SDL3
+        SDL_GetNumLogicalCPUCores()
+#else
+        SDL_GetCPUCount()
+#endif
+    );
     TVPAddImportantLog(log);
     log = TJS_N("CPU RAM: ") + ttstr(SDL_GetSystemRAM() / 1024) + TJS_N("GB");
     TVPAddImportantLog(log);
@@ -242,7 +252,12 @@ tjs_int TVPGetProcessorNum(void)
     static tjs_int processor_num = 0;
     if (!processor_num)
     {
-        processor_num = SDL_GetNumLogicalCPUCores();
+        processor_num = 
+#ifdef _KRKRSDL3_USE_SDL3
+            SDL_GetNumLogicalCPUCores();
+#else
+            SDL_GetCPUCount();
+#endif
         tjs_char tmp[34];
         TVPAddLog(ttstr(TJS_N("Detected CPU core(s): ")) + TJS_tTVInt_to_str(processor_num, tmp));
     }

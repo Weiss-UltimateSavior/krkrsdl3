@@ -8,8 +8,17 @@
 #include <android/asset_manager_jni.h>
 #include <sys/system_properties.h>
 
+#ifdef _KRKRSDL3_USE_SDL3
 #include <SDL3/SDL_system.h>
 #include <SDL3/SDL_events.h>
+#else
+#include <SDL_system.h>
+#include <SDL_events.h>
+#endif
+
+#ifndef _KRKRSDL3_USE_SDL3
+#define SDL_GetAndroidJNIEnv SDL_AndroidGetJNIEnv
+#endif
 
 //---------------------------------------------------------------------------
 static AAssetManager* mgr = NULL;
@@ -172,7 +181,14 @@ int TVPShowSimpleInputBox(ttstr& text,
 
 //---------------------------------------------------------------------------
 static tTJSNI_MenuItem *sdl_current_menu = NULL;
+#ifdef _KRKRSDL3_USE_SDL3
 #define SDL_EVENT_MENU_CLICK (SDL_EVENT_USER + 1)
+#define SDL_EVENT_TYPE_QUIT SDL_EVENT_QUIT
+#else
+#define SDL_EVENT_MENU_CLICK (SDL_USEREVENT + 1)
+#define SDL_EVENT_TYPE_QUIT SDL_QUIT
+#define SDL_GetAndroidJNIEnv SDL_AndroidGetJNIEnv
+#endif
 extern "C" JNIEXPORT void JNICALL
 Java_org_tvp_krkrsdl3_KRKRCall_nativeOnMenuItemClick(JNIEnv* env, jclass clazz, jint itemId, jstring itemCaption)
 {
@@ -269,7 +285,7 @@ void TVPInvokeMenu(int x, int y, void* _menu)
             }
             break;
         }
-        if (event.type == SDL_EVENT_QUIT)
+        if (event.type == SDL_EVENT_TYPE_QUIT)
         {
             break;
         }
