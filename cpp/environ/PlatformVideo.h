@@ -39,5 +39,11 @@ public:
 
 // ─── Factory ───────────────────────────────────────────────
 // Returns nullptr if platform backend is unavailable (caller falls back to FFmpeg).
-OverlayVideoPlayer* CreateOverlayVideoPlayer();
-LayerVideoPlayer*    CreateLayerVideoPlayer();
+//
+// Event callback: (ctx, msg, wparam, lparam)
+//   msg == 0x8000 (WM_GRAPHNOTIFY), wparam == EC_COMPLETE/EC_UPDATE
+// Implementations should post EC_COMPLETE through event queue,
+// and dispatch EC_UPDATE synchronously via WndProc.
+typedef void (*TVPVideoEventCallback)(void* ctx, unsigned msg, uintptr_t wparam, uintptr_t lparam);
+OverlayVideoPlayer* CreateOverlayVideoPlayer(TVPVideoEventCallback cb, void* cbctx);
+LayerVideoPlayer*    CreateLayerVideoPlayer(TVPVideoEventCallback cb, void* cbctx);

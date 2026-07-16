@@ -687,5 +687,5 @@ public:
 };
 
 // --- Factory functions ---
-OverlayVideoPlayer* CreateOverlayVideoPlayer() { return new WinVideoPlayer(); }
-LayerVideoPlayer*    CreateLayerVideoPlayer()    { return new WinVideoPlayer(); }
+OverlayVideoPlayer* CreateOverlayVideoPlayer(TVPVideoEventCallback cb, void* cbctx) { return new WinVideoPlayer(); }
+LayerVideoPlayer*    CreateLayerVideoPlayer(TVPVideoEventCallback cb, void* cbctx)    { return new WinVideoPlayer(); }

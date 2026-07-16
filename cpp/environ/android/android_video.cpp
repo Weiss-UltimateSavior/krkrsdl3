@@ -440,5 +440,5 @@ public:
 // ============================================================
 // Factory functions
 // ============================================================
-OverlayVideoPlayer* CreateOverlayVideoPlayer() { return new AndroidVideoPlayer(); }
-LayerVideoPlayer*    CreateLayerVideoPlayer()    { return new AndroidVideoPlayer(); }
+OverlayVideoPlayer* CreateOverlayVideoPlayer(TVPVideoEventCallback cb, void* cbctx) { return new AndroidVideoPlayer(); }
+LayerVideoPlayer*    CreateLayerVideoPlayer(TVPVideoEventCallback cb, void* cbctx)    { return new AndroidVideoPlayer(); }

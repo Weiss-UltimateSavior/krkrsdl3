@@ -9,7 +9,6 @@
 #include "TVPStorage.h"
 #include "TVPDebug.h"
 #include "LayerBitmap.h"
-#include "tjsNativeVideoOverlay.h"
 #include "TVPEvent.h"
 
 #include <emscripten.h>
@@ -36,6 +35,10 @@ EM_ASYNC_JS(int, wasmCreateVideo, (const char* mime, int dataAddr, int dataLen),
         el.addEventListener('play', function once(){ el.muted = false; }, {once:true});
         el.addEventListener('canplay', function(){ el.muted = false; }, {once:true});
         el.load();
+        // Wait for metadata to load (Firefox needs visible+layout element)
+        if (el.readyState < 1) {
+           await new Promise(resolve => setTimeout(resolve, 1000));
+        }
         return 0;
     } catch(e) { console.error('[video] create:', e.message); return -1; }
 });
@@ -47,7 +50,8 @@ EM_JS(void, wasmVideoDump, (int vid), {
         var s = el.style;
         console.log('[video] dump:',
             'inDOM=' + (el.parentNode ? 1 : 0),
-            'display=' + s.display,
+            'visibility=' + s.visibility,
+            'opacity=' + s.opacity,
             'zIndex=' + s.zIndex,
             'pos=' + s.position,
             'rect=' + s.left + ',' + s.top + ' ' + s.width + 'x' + s.height,
@@ -82,7 +86,13 @@ EM_JS(void, wasmShowOverlay, (int vid, int show, int l, int t, int r, int b), {
     try {
         var el = document.getElementById('wasm-video-wrap');
         if (!el) return;
-        el.style.display = show ? 'block' : 'none';
+        if (show) {
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+        } else {
+            el.style.visibility = 'hidden';
+            el.style.opacity = '0';
+        }
     } catch(e) {}
 });
 EM_JS(int, wasmCaptureFrame, (int id, int buf, int size), {
@@ -106,7 +116,8 @@ class WasmVideoPlayer : public OverlayVideoPlayer, public LayerVideoPlayer,
                         public tTVPContinuousEventCallbackIntf
 {
     uint32_t ref = 1;
-    tTJSNI_VideoOverlay* m_cb = nullptr;
+    TVPVideoEventCallback _evCb = nullptr;
+    void* _evCtx = nullptr;
 
     uint8_t* streamData = nullptr;
     size_t streamSize = 0;
@@ -121,7 +132,10 @@ class WasmVideoPlayer : public OverlayVideoPlayer, public LayerVideoPlayer,
     int _lastL = 0, _lastT = 0, _lastR = 0, _lastB = 0;
 
 public:
-    WasmVideoPlayer() { TVPAddLog(ttstr(TJS_N("[wasm_video] constructed"))); }
+    WasmVideoPlayer(TVPVideoEventCallback cb, void* cbctx) : _evCb(cb), _evCtx(cbctx)
+    {
+        TVPAddLog(ttstr(TJS_N("[wasm_video] constructed")));
+    }
     ~WasmVideoPlayer()
     {
         TVPRemoveContinuousEventHook(this);
@@ -143,7 +157,7 @@ public:
     }
     void SetMessageDrainWindow(void* w) override
     {
-        m_cb = (tTJSNI_VideoOverlay*)w;
+        // Not used — callback is passed via factory
         TVPAddLog(ttstr(TJS_N("[wasm_video] SetMessageDrainWindow cb=")) + ttstr((int64_t)(intptr_t)w));
     }
 
@@ -297,7 +311,7 @@ public:
         if (ev & 8 && !hasEnded) {
             hasEnded = true;
             TVPAddLog(ttstr(TJS_N("[wasm_video] browser decode error, posting EC_COMPLETE")));
-            if (m_cb) { NativeEvent ev(WM_GRAPHNOTIFY); ev.WParam = EC_COMPLETE; ev.LParam = 0; m_cb->PostEvent(ev); }
+            if (_evCb) _evCb(_evCtx, WM_GRAPHNOTIFY, EC_COMPLETE, 0);
             if (overlayVisible) { wasmShowOverlay(videoId, 0, 0, 0, 0, 0); overlayVisible = false; }
             return;
         }
@@ -305,14 +319,11 @@ public:
         if (wasmVideoEnded(videoId) && !hasEnded) {
             hasEnded = true;
             TVPAddLog(ttstr(TJS_N("[wasm_video] ended, posting EC_COMPLETE")));
-            if (m_cb) { NativeEvent ev(WM_GRAPHNOTIFY); ev.WParam = EC_COMPLETE; ev.LParam = 0; m_cb->PostEvent(ev); }
+            if (_evCb) _evCb(_evCtx, WM_GRAPHNOTIFY, EC_COMPLETE, 0);
             if (overlayVisible) { wasmShowOverlay(videoId, 0, 0, 0, 0, 0); overlayVisible = false; }
         }
-        else if (!hasEnded && m_cb && rs >= 1) {
-            NativeEvent ev(WM_GRAPHNOTIFY);
-            ev.WParam = EC_UPDATE;
-            ev.LParam = (int)(wasmVideoTime(videoId) * 30.0);
-            m_cb->WndProc(ev);
+        else if (!hasEnded && _evCb && rs >= 1) {
+            _evCb(_evCtx, WM_GRAPHNOTIFY, EC_UPDATE, (int)(wasmVideoTime(videoId) * 30.0));
         }
     }
 
@@ -367,8 +378,8 @@ public:
     void SetSaturation(float) override {}
 };
 
-OverlayVideoPlayer* CreateOverlayVideoPlayer() { return new WasmVideoPlayer(); }
-LayerVideoPlayer*    CreateLayerVideoPlayer()    { return new WasmVideoPlayer(); }
+OverlayVideoPlayer* CreateOverlayVideoPlayer(TVPVideoEventCallback cb, void* cbctx) { return new WasmVideoPlayer(cb, cbctx); }
+LayerVideoPlayer*    CreateLayerVideoPlayer(TVPVideoEventCallback cb, void* cbctx)    { return new WasmVideoPlayer(cb, cbctx); }
 
 
 

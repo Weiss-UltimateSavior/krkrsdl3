@@ -17,6 +17,18 @@
 // Always succeeds — returns a working player or a null/stub player
 // so the caller never hits a null pointer.
 
+static void VideoPostEvent(void* ctx, unsigned msg, uintptr_t wparam, uintptr_t lparam)
+{
+    auto* cb = static_cast<tTJSNI_VideoOverlay*>(ctx);
+    NativeEvent ev(msg);
+    ev.WParam = wparam;
+    ev.LParam = lparam;
+    if (wparam == EC_COMPLETE)
+        cb->PostEvent(ev);
+    else
+        cb->WndProc(ev);
+}
+
 static void TryCreateOverlay(tTJSNI_VideoOverlay* callbackwin,
                               tTJSBinaryStream* stream,
                               const tjs_char* streamname,
@@ -24,8 +36,7 @@ static void TryCreateOverlay(tTJSNI_VideoOverlay* callbackwin,
                               uint64_t /*size*/,
                               iTVPVideoOverlay** out)
 {
-    TVPConsoleLog("CreateOverlay----->%s", streamname);
-    OverlayVideoPlayer* player = CreateOverlayVideoPlayer();
+    OverlayVideoPlayer* player = CreateOverlayVideoPlayer(VideoPostEvent, callbackwin);
     if (player && player->OpenStream(stream, ttstr(streamname))) {
         *out = player;
         return;
@@ -42,7 +53,7 @@ static void TryCreateLayer(tTJSNI_VideoOverlay* callbackwin,
                             uint64_t /*size*/,
                             iTVPVideoOverlay** out)
 {
-    LayerVideoPlayer* player = CreateLayerVideoPlayer();
+    LayerVideoPlayer* player = CreateLayerVideoPlayer(VideoPostEvent, callbackwin);
     if (player && player->OpenStream(stream, ttstr(streamname))) {
         *out = player;
         return;
