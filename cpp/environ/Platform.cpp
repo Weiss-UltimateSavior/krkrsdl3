@@ -8,8 +8,11 @@
 
 #ifdef _KRKRSDL3_USE_SDL3
 #include <SDL3/SDL_cpuinfo.h>
+#elif defined(_KRKRSDL3_OHOS)
+#include <unistd.h>
+#include <sys/sysinfo.h>
 #else
-#include <SDL.h>
+#include <SDL_cpuinfo.h>
 #endif
 
 #include <cstdio>
@@ -29,7 +32,9 @@ void TVPExitApplication(int code)
 #if defined(__GNUC__) || defined(__clang__)
 #ifndef _KRKRSDL3_ANDROID
 #ifndef _KRKRSDL3_EMSCRIPTEN
+#if !defined(_KRKRSDL3_OHOS) || defined(__x86_64__)
 #include <cpuid.h>
+#endif
 #endif
 #endif
 #endif
@@ -182,6 +187,9 @@ void TVPDetectCPU()
 
     TVPDetectVendorAndBrand();
 
+#ifdef _KRKRSDL3_OHOS
+    TVPCPUFeatures |= TVP_CPU_HAS_NEON;
+#else
     if (SDL_HasMMX())
         TVPCPUFeatures |= TVP_CPU_HAS_MMX;
     if (SDL_HasSSE())
@@ -200,6 +208,7 @@ void TVPDetectCPU()
         TVPCPUFeatures |= TVP_CPU_HAS_AVX2;
     if (SDL_HasNEON())
         TVPCPUFeatures |= TVP_CPU_HAS_NEON;
+#endif
 
     TVPCPUFeatures |= TVP_CPU_HAS_FPU;
     TVPCPUFeatures |= TVP_CPU_HAS_CMOV;
@@ -212,6 +221,13 @@ void TVPDetectCPU()
     if (TVPCPUName[0])
         log += TJS_N(" / ") + ttstr(TVPCPUName);
     TVPAddImportantLog(log);
+#ifdef _KRKRSDL3_OHOS
+    log = TJS_N("CPU cores: ") + ttstr(sysconf(_SC_NPROCESSORS_ONLN));
+    TVPAddImportantLog(log);
+    struct sysinfo si;
+    sysinfo(&si);
+    log = TJS_N("CPU RAM: ") + ttstr((tjs_int64)(si.totalram / 1024 / 1024 / 1024)) + TJS_N("GB");
+#else
     log = TJS_N("CPU cores: ") + ttstr(
 #ifdef _KRKRSDL3_USE_SDL3
         SDL_GetNumLogicalCPUCores()
@@ -221,6 +237,7 @@ void TVPDetectCPU()
     );
     TVPAddImportantLog(log);
     log = TJS_N("CPU RAM: ") + ttstr(SDL_GetSystemRAM() / 1024) + TJS_N("GB");
+#endif
     TVPAddImportantLog(log);
 
     log = TJS_N("CPU features:");
@@ -252,11 +269,12 @@ tjs_int TVPGetProcessorNum(void)
     static tjs_int processor_num = 0;
     if (!processor_num)
     {
-        processor_num = 
-#ifdef _KRKRSDL3_USE_SDL3
-            SDL_GetNumLogicalCPUCores();
+#ifdef _KRKRSDL3_OHOS
+        processor_num = (tjs_int)sysconf(_SC_NPROCESSORS_ONLN);
+#elif defined(_KRKRSDL3_USE_SDL3)
+        processor_num = SDL_GetNumLogicalCPUCores();
 #else
-            SDL_GetCPUCount();
+        processor_num = SDL_GetCPUCount();
 #endif
         tjs_char tmp[34];
         TVPAddLog(ttstr(TJS_N("Detected CPU core(s): ")) + TJS_tTVInt_to_str(processor_num, tmp));

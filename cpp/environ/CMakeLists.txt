@@ -14,12 +14,22 @@ set(KRKRSDL_ENVIRON_CONSOLE_SRC
     )
 
 # 2.全量
-set(KRKRSDL_ENVIRON_SRC
-    ${KRKRSDL_ENVIRON_PATH}/Platform.cpp
-    ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_dialog.cpp
-    ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_utils.cpp
-    ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_entry.cpp
-    )
+if(OHOS)
+    set(KRKRSDL_ENVIRON_SRC
+        ${KRKRSDL_ENVIRON_PATH}/Platform.cpp
+        ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_core.cpp
+        ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_dialog.cpp
+        ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_utils.cpp
+        ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_entry.cpp
+        )
+else()
+    set(KRKRSDL_ENVIRON_SRC
+        ${KRKRSDL_ENVIRON_PATH}/Platform.cpp
+        ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_dialog.cpp
+        ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_utils.cpp
+        ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_entry.cpp
+        )
+endif()
 
 if(ANDROID)
     list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/android/android_core.cpp)
@@ -46,6 +56,13 @@ elseif(WINDOWS)
     list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_input.cpp)
     list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_thread.cpp)
     list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/${KRKRSDL_SDL_NAME}/${KRKRSDL_SDL_NAME}_audio.cpp)
+elseif(OHOS)
+    list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_core.cpp)
+    list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/unix/unix_file.cpp)
+    list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_file.cpp)
+    list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_input.cpp)
+    list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_thread.cpp)
+    list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/ohos/ohos_audio.cpp)
 else()
     message(FATAL_ERROR "unsupported: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -57,6 +74,8 @@ if(NOT USE_FFMPEG)
         list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/wasm/wasm_video.cpp)
     elseif(WINDOWS)
         list(APPEND KRKRSDL_ENVIRON_SRC ${KRKRSDL_ENVIRON_PATH}/windows/windows_video.cpp)
+    elseif(OHOS)
+        # OHOS uses FFmpeg for video; stubs already in ohos_core.cpp
     else()
         message(FATAL_ERROR "unsupported: ${CMAKE_SYSTEM_NAME}")
     endif()

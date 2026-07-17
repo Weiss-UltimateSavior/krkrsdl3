@@ -4,7 +4,6 @@
 #ifdef _KRKRSDL3_GL
 #include "glad/glad.h"
 #else
-#include "glad/glad_egl.h"
 #include <GLES3/gl3.h>
 #endif
 
@@ -196,7 +195,7 @@ static void GL_BaseSet(int w, int h)
         glEnableVertexAttribArray(1);
     }
     glUseProgram(krkrsdl3_program);
-    glViewport(0, 0, w, h);
+    glViewport(0, 0, w , h);
     glBindVertexArray(krkrsdl3_vao);
 }
 static void GL_DrawTexture(TVPSprite* sp, int w, int h)

@@ -3,7 +3,6 @@
 #include "glad/glad.h"
 #else
 #include "glad/glad_egl.h"
-#include <GLES3/gl3.h>
 #endif
 
 #include <map>

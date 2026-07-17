@@ -36,7 +36,24 @@ elseif(WINDOWS)
         set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic")
     endif()
 endif()
-set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+if(OHOS)
+    # OHOS: 预先编译第三方依赖库
+    set(OHOS_DEPS_SCRIPT "${CMAKE_SOURCE_DIR}/ohos/build-ohos.ps1")
+    set(OHOS_DEPS_STAMP "${CMAKE_SOURCE_DIR}/out/ohos/deps/install/${OHOS_ARCH}/.stamp")
+    if(NOT EXISTS "${OHOS_DEPS_STAMP}")
+        message(STATUS "OHOS: Building dependencies (one-time)...")
+        execute_process(
+            COMMAND powershell -ExecutionPolicy Bypass -File "${OHOS_DEPS_SCRIPT}" deps -Arch ${OHOS_ARCH}
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            RESULT_VARIABLE _ohos_deps_rc
+        )
+        if(NOT _ohos_deps_rc EQUAL 0)
+            message(WARNING "OHOS deps build returned ${_ohos_deps_rc}")
+        endif()
+    endif()
+else()
+    set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+endif()
 
 # SDL版本选择: ON=SDL3, OFF=SDL2
 option(USE_SDL3 "Use SDL3 (OFF for SDL2)" ON)
@@ -83,6 +100,12 @@ elseif(WINDOWS)
         -D_KRKRSDL3_WINDOWS=1
         -D_KRKRSDL3_GL=1
         -D_KRKRSDL3_CMD=1
+    )
+elseif(OHOS)
+    add_definitions(
+        -D_KRKRSDL3_OHOS=1
+        -D_KRKRSDL3_EGL=1
+        -D_KRKRSDL3_LIB=1
     )
 else()
     message(FATAL_ERROR "unsupported: ${CMAKE_SYSTEM_NAME}")

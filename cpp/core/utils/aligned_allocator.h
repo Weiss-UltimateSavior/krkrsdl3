@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <new>
+#include <cstdlib>
 
 template<typename T, std::size_t Alignment = 16>
 struct aligned_allocator
@@ -27,12 +28,22 @@ struct aligned_allocator
 
     T* allocate(std::size_t n)
     {
-        return static_cast<T*>(::operator new(n * sizeof(T), std::align_val_t{alignment}));
+#if defined(_KRKRSDL3_OHOS)
+        void* p;
+        posix_memalign(&p, alignment, n * sizeof(T));
+        return static_cast<T*>(p);
+#else
+        return static_cast<T*>(::operator new(n * sizeof(T), std::align_val_t(alignment)));
+#endif
     }
 
     void deallocate(T* p, std::size_t) noexcept
     {
-        ::operator delete(p, std::align_val_t{alignment});
+#if defined(_KRKRSDL3_OHOS)
+        free(p);
+#else
+        ::operator delete(p, std::align_val_t(alignment));
+#endif
     }
 };
 

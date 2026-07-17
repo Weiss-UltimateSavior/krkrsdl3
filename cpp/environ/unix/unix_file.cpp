@@ -60,15 +60,7 @@ void tTVPFileMedia::NormalizeDomainName(ttstr& name)
 //---------------------------------------------------------------------------
 void tTVPFileMedia::NormalizePathName(ttstr& name)
 {
-    // normalize path name
-    // make all characters small
-    tjs_char* p = name.Independ();
-    while (*p)
-    {
-        if (*p >= TJS_N('A') && *p <= TJS_N('Z'))
-            *p += TJS_N('a') - TJS_N('A');
-        p++;
-    }
+    // do nothing
 }
 //---------------------------------------------------------------------------
 bool tTVPFileMedia::CheckExistentStorage(const ttstr& name)

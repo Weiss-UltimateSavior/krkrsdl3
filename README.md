@@ -1,12 +1,14 @@
 # 介绍
 
-一款基于SDL3开发的krkr-like视觉小说引擎(支持windows/linux/android)。
+一款基于SDL3开发的krkr-like视觉小说引擎(支持windows/linux/android/WebAssembly/HarmonyOS)。
 
 # 目录结构说明
 
 ```
-📁android/ # 安卓工程文件夹
-📁cpp/ # 主要代码文件夹
+📁android/    # 安卓工程文件夹
+📁ohos/       # 鸿蒙工程文件夹
+📁emscripten/ # wasm依赖外壳
+📁cpp/        # 主要代码文件夹
 ├── 📁 core/ # 核心代码
     ├── 📁 archive/# 数据包格式相关代码
     ├── 📁 main/   # 引擎运行内核代码 窗体/事件循环/线程等
@@ -51,6 +53,8 @@
 - vcpkg:包管理工具
 - LLVM-MinGW/Visual Studio 2022:windows构建工具链
 - Android SDK/Android NDK:安卓构建工具链
+- Emscripten SDK:WebAssembly构建工具链
+- DevEco Studio:鸿蒙开发工具
 
 # 补充说明
 

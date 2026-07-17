@@ -26,7 +26,7 @@ endif()
 #
 
 # 可执行文件
-if(ANDROID)
+if(ANDROID OR OHOS)
     add_library(${PROJECT_NAME} SHARED ${KRKRSDL_SRC})
 elseif(EMSCRIPTEN)
     # WASM: compile to .wasm with Emscripten
@@ -82,77 +82,121 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 # 依赖库
-if(USE_FFMPEG)
+if(OHOS)
+    # OHOS: use prebuilt deps from out/ohos/deps/install/
+    set(OHOS_DEPS "${CMAKE_SOURCE_DIR}/out/ohos/deps/install/${OHOS_ARCH}")
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        "${OHOS_DEPS}/include"
+        "${OHOS_DEPS}/include/freetype2"
+        "${OHOS_DEPS}/include/opus"
+    )
+
+    if(USE_FFMPEG)
+        target_include_directories(${PROJECT_NAME} PRIVATE "${OHOS_DEPS}/include")
+        target_link_directories(${PROJECT_NAME} PRIVATE "${OHOS_DEPS}/lib")
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            ${OHOS_DEPS}/lib/libavcodec.a
+            ${OHOS_DEPS}/lib/libavformat.a
+            ${OHOS_DEPS}/lib/libavutil.a
+            ${OHOS_DEPS}/lib/libswresample.a
+            ${OHOS_DEPS}/lib/libswscale.a
+        )
+    endif()
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${OHOS_DEPS}/lib/libfreetype.a
+        ${OHOS_DEPS}/lib/libpng16.a
+        ${OHOS_DEPS}/lib/libz.a
+        ${OHOS_DEPS}/lib/libjpeg.a
+        ${OHOS_DEPS}/lib/libturbojpeg.a
+        ${OHOS_DEPS}/lib/libwebp.a
+        ${OHOS_DEPS}/lib/libwebpdemux.a
+        ${OHOS_DEPS}/lib/libwebpdecoder.a
+        ${OHOS_DEPS}/lib/libwebpmux.a
+        ${OHOS_DEPS}/lib/libsharpyuv.a
+        ${OHOS_DEPS}/lib/libonig.a
+        ${OHOS_DEPS}/lib/libvorbis.a
+        ${OHOS_DEPS}/lib/libvorbisfile.a
+        ${OHOS_DEPS}/lib/libvorbisenc.a
+        ${OHOS_DEPS}/lib/libogg.a
+        ${OHOS_DEPS}/lib/libopus.a
+        ${OHOS_DEPS}/lib/libopusfile.a
+        ${OHOS_DEPS}/lib/libplutovg.a
+    )
+    # glad not needed — OHOS uses sysroot EGL/GLES3 directly
+else()
     find_package(FFMPEG REQUIRED)
     target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
     target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARIES})
 endif()
 
-if(NOT EMSCRIPTEN)
-    find_package(PNG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE PNG::PNG)
+if(NOT OHOS)
+    if(NOT EMSCRIPTEN)
+        find_package(PNG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE PNG::PNG)
 
-    find_package(Freetype REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Freetype::Freetype) # since CMake 3.10
+        find_package(Freetype REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE Freetype::Freetype) # since CMake 3.10
 
-    find_package(glad CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE glad::glad)
+        find_package(glad CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE glad::glad)
+    endif()
+
+    find_package(glm CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm-header-only)
+
+    find_package(JPEG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
+
+    find_package(libjpeg-turbo CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:libjpeg-turbo::turbojpeg>,libjpeg-turbo::turbojpeg,libjpeg-turbo::turbojpeg-static>)
+
+    if(NOT EMSCRIPTEN)
+        find_package(Vorbis CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE Vorbis::vorbis)
+
+        find_package(Vorbis CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE Vorbis::vorbisfile)
+
+        find_package(Vorbis CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE Vorbis::vorbisenc)
+    endif()
+
+    find_package(WebP CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE WebP::webp WebP::webpdecoder WebP::webpdemux)
+
+    find_package(oniguruma CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE oniguruma::onig)
+
+    find_package(Opus CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Opus::opus)
+
+    find_package(OpusFile CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE OpusFile::opusfile)
+
+    if(USE_SDL3)
+        find_package(SDL3 CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
+
+        find_package(SDL3_ttf CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf::SDL3_ttf)
+    else()
+        find_package(SDL2 CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+            $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+        )
+
+        find_package(SDL2_ttf CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+            $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
+        )
+    endif()
+
+    find_package(plutovg CONFIG REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE plutovg::plutovg)
 endif()
-
-find_package(glm CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm-header-only)
-
-find_package(JPEG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE JPEG::JPEG)
-
-find_package(libjpeg-turbo CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE $<IF:$<TARGET_EXISTS:libjpeg-turbo::turbojpeg>,libjpeg-turbo::turbojpeg,libjpeg-turbo::turbojpeg-static>)
-
-if(NOT EMSCRIPTEN)
-    find_package(Vorbis CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Vorbis::vorbis)
-
-    find_package(Vorbis CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Vorbis::vorbisfile)
-
-    find_package(Vorbis CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Vorbis::vorbisenc)
-endif()
-
-find_package(WebP CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE WebP::webp WebP::webpdecoder WebP::webpdemux)
-
-find_package(oniguruma CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE oniguruma::onig)
-
-find_package(Opus CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE Opus::opus)
-
-find_package(OpusFile CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE OpusFile::opusfile)
-
-if(USE_SDL3)
-    find_package(SDL3 CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
-    
-    find_package(SDL3_ttf CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf::SDL3_ttf)
-else()
-    find_package(SDL2 CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-    )
-
-    find_package(SDL2_ttf CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
-    )
-endif()
-
-find_package(plutovg CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE plutovg::plutovg)
 
 if(ANDROID)
     # egl
@@ -164,6 +208,13 @@ elseif(LINUX)
 elseif(WINDOWS)
     # System video player (Media Foundation)
     target_link_libraries(${PROJECT_NAME} PRIVATE mfplat mfuuid mfreadwrite)
+elseif(OHOS)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        EGL GLESv3 native_window
+        hilog_ndk.z ace_napi.z ace_ndk.z ohaudio rawfile.z
+        native_media_codecbase native_media_core native_media_avsource native_media_avdemuxer
+        native_media_vdec native_media_adec native_media_avmuxer
+    )
 endif()
 
 #
