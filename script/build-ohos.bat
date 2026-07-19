@@ -1,44 +1,25 @@
 @echo off
-REM krkrsdl3 OHOS IDE build wrapper
-REM Usage: script\build-ohos.bat [debug|release]
+setlocal enabledelayedexpansion
 
-set BUILD_MODE=%1
-if "%BUILD_MODE%"=="" set BUILD_MODE=debug
+set SDK_ROOT=%1
+set CMD=%2
+set ARCH=%3
+set TYPE=%4
 
-set NODE=C:\D\DevEco Studio\tools\node\node.exe
-set HVIGOR=C:\D\DevEco Studio\tools\hvigor\bin\hvigorw.js
-set RAW_RES=%~dp0..\ohos\entry\src\main\resources\rawfile\Res
+if "%SDK_ROOT%"=="" goto :usage
+goto :run
 
-echo === krkrsdl3 OHOS IDE Build ===
-echo     Mode: %BUILD_MODE%
+:usage
+echo Usage: build-ohos.bat ^<sdk-root^> ^[command^] ^[arch^] ^[buildtype^]
+echo   sdk-root  : path to command-line-tools (e.g. C:\D\command-line-tools)
+echo   command   : full ^| deps ^| hap ^| clean          [default: full]
+echo   arch      : arm64-v8a ^| armeabi-v7a ^| x86_64     [default: arm64-v8a]
+echo   buildtype : debug ^| release                        [default: debug]
+exit /b 1
 
-REM 1. 同步 Res/ 到 rawfile (IDE 打包进 HAP)
-echo [1/3] Syncing Res/ to rawfile...
-if exist "%RAW_RES%" rmdir /s /q "%RAW_RES%"
-robocopy "%~dp0..\Res" "%RAW_RES%" /E /NFL /NDL /NJH /NJS >nul
-echo     OK
+:run
+if "%CMD%"=="" set CMD=full
+if "%ARCH%"=="" set ARCH=arm64-v8a
+if "%TYPE%"=="" set TYPE=debug
 
-REM 2. 清理 IDE 构建缓存
-echo [2/3] Cleaning IDE cache...
-if exist "%~dp0..\ohos\entry\.cxx" rmdir /s /q "%~dp0..\ohos\entry\.cxx"
-if exist "%~dp0..\ohos\entry\build" rmdir /s /q "%~dp0..\ohos\entry\build"
-echo     OK
-
-REM 3. 执行 IDE 构建
-echo [3/3] Building HAP...
-pushd "%~dp0..\ohos"
-"%NODE%" "%HVIGOR%" --mode module -p product=default -p buildMode=%BUILD_MODE% assembleHap --analyze=normal --parallel --incremental --daemon
-set RC=%ERRORLEVEL%
-popd
-
-if %RC% neq 0 (
-    echo === BUILD FAILED (check logs above) ===
-    exit /b %RC%
-)
-
-echo.
-echo === BUILD SUCCESSFUL ===
-for /r "%~dp0..\ohos\entry\build" %%f in (*.hap) do (
-    echo HAP: %%f
-    echo Size: %%~zf bytes
-)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0\..\ohos\build-ohos.ps1" -SdkRoot "%SDK_ROOT%" -Target "%CMD%" -Arch "%ARCH%" -BuildType "%TYPE%"

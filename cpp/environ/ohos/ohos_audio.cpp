@@ -63,13 +63,12 @@ public:
         return n;
     }
 
-    // Blocking write from engine
-    void write(const uint8_t* src, size_t len) {
+    // Blocking write — return false if not enough space
+    bool write(const uint8_t* src, size_t len) {
         pthread_mutex_lock(&_mtx);
         size_t avail = (_wpos >= _rpos) ? (_wpos - _rpos) : (_cap - _rpos + _wpos);
         size_t free = _cap - avail - 1;
-        if (len > free) len = free;
-        if (len == 0) { pthread_mutex_unlock(&_mtx); return; }
+        if (len > free) { pthread_mutex_unlock(&_mtx); return false; }
         size_t tail = _cap - _wpos;
         if (len <= tail) {
             memcpy(_buf + _wpos, src, len);
@@ -80,6 +79,7 @@ public:
         _wpos = (_wpos + len) % _cap;
         _totalWritten += len;
         pthread_mutex_unlock(&_mtx);
+        return true;
     }
 
     size_t queued() { pthread_mutex_lock(&_mtx); size_t q = (_wpos>=_rpos)?(_wpos-_rpos):(_cap-_rpos+_wpos); pthread_mutex_unlock(&_mtx); return q; }
@@ -118,8 +118,8 @@ public:
 
     virtual bool Init() override
     {
-        // 500ms buffer
-        size_t bufSize = _sampleRate * _frameBytes / 2;
+        // 2s buffer — WMV large frames (4k-6k samples) need more room
+        size_t bufSize = _sampleRate * _frameBytes * 2;
         _ring.alloc(bufSize);
 
         OH_AudioStreamBuilder* builder = nullptr;

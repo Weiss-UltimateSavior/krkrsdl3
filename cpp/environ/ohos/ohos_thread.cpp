@@ -17,13 +17,14 @@
 
 // ─── tTVPThread ────────────────────────────────────────────────
 #define THR_IMPL ((TVPThreadImpl*)_impl)
-struct TVPThreadImpl { pthread_t thread; pthread_mutex_t mutex; pthread_cond_t cond; };
+struct TVPThreadImpl { pthread_t thread; pthread_mutex_t mutex; pthread_cond_t cond; bool joined; };
 
 tTVPThread::tTVPThread()
 {
     Terminated = false;
     Suspended = true;
     _impl = new TVPThreadImpl;
+    THR_IMPL->joined = false;
     pthread_mutex_init(&THR_IMPL->mutex, nullptr);
     pthread_cond_init(&THR_IMPL->cond, nullptr);
     pthread_create(&THR_IMPL->thread, nullptr, (void*(*)(void*))StartProc, this);
@@ -32,6 +33,10 @@ tTVPThread::tTVPThread()
 tTVPThread::~tTVPThread()
 {
     if (!Terminated) Terminate();
+    if (!THR_IMPL->joined) {
+        pthread_join(THR_IMPL->thread, nullptr);
+        THR_IMPL->joined = true;
+    }
     pthread_cond_destroy(&THR_IMPL->cond);
     pthread_mutex_destroy(&THR_IMPL->mutex);
     delete THR_IMPL;
@@ -43,7 +48,10 @@ void tTVPThread::StopThread()
 {
     Terminated = true;
     pthread_cond_broadcast(&THR_IMPL->cond);
-    pthread_join(THR_IMPL->thread, nullptr);
+    if (!THR_IMPL->joined) {
+        pthread_join(THR_IMPL->thread, nullptr);
+        THR_IMPL->joined = true;
+    }
 }
 
 void tTVPThread::Sleep(unsigned int ms)
@@ -80,7 +88,12 @@ int tTVPThread::StartProc(void* arg)
     return 0;
 }
 
-void tTVPThread::WaitFor() { pthread_join(THR_IMPL->thread, nullptr); }
+void tTVPThread::WaitFor() {
+    if (!THR_IMPL->joined) {
+        pthread_join(THR_IMPL->thread, nullptr);
+        THR_IMPL->joined = true;
+    }
+}
 tTVPThreadPriority tTVPThread::GetPriority() { return ttpNormal; }
 void tTVPThread::SetPriority(tTVPThreadPriority) {}
 

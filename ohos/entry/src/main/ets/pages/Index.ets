@@ -9,6 +9,14 @@ import display from '@ohos.display';
 const TAG = 'krkrsdl3';
 const DOMAIN = 0x3200;
 
+enum TouchState { IDLE, SINGLE, MULTI }
+
+interface FingerInfo {
+    startX: number;
+    startY: number;
+    moved: boolean;
+}
+
 @Entry
 @Component
 struct Index {
@@ -17,19 +25,15 @@ struct Index {
     private engineInited: boolean = false;
     private gamePath: string = '';
     private density: number = 1;
-    private lastTapTime: number = 0;
-    private lastTapX: number = 0;
-    private lastTapY: number = 0;
-    private isDoubleTap: boolean = false;
-    private readonly doubleTapTime: number = 400;
-    private readonly doubleTapDist: number = 30;
+
+    private touchState: TouchState = TouchState.IDLE;
+    private activeFingers: Map<number, FingerInfo> = new Map();
 
     async aboutToAppear(): Promise<void> {
         hilog.info(DOMAIN, TAG, 'aboutToAppear');
         let ctx = getContext(this) as common.UIAbilityContext;
         this.density = display.getDefaultDisplaySync().densityPixels;
 
-        // 注册 C++ 回调
         try {
             krkr.registerCallbacks(
                  (title: string): void => {
@@ -90,12 +94,10 @@ struct Index {
                 }
             })
             .onAreaChange((oldArea: Area, newArea: Area) => {
-                // 当 XComponent 尺寸变化时，通知 C++ 层更新视口
                 const widthVP = newArea.width as number;
                 const heightVP = newArea.height as number;
                 let widthPx = Math.round(widthVP * this.density);
                 let heightPx = Math.round(heightVP * this.density);
-
                 if (widthPx > 0 && heightPx > 0) {
                     try {
                         if (typeof krkr.updateWindowSize === 'function') {
@@ -113,32 +115,48 @@ struct Index {
         .height('100%')
         .backgroundColor('#000000')
         .onTouch((event: TouchEvent): void => {
-            if (event.touches.length === 0) return;
-            let t = event.touches[0];
             if (event.type === TouchType.Down) {
-                let now = Date.now();
-                let dx = t.x - this.lastTapX;
-                let dy = t.y - this.lastTapY;
-                if ((now - this.lastTapTime) < this.doubleTapTime &&
-                    Math.sqrt(dx * dx + dy * dy) < this.doubleTapDist) {
-                    this.isDoubleTap = true;
-                    this.sendTouch(0, t.x, t.y, 2);
-                } else {
-                    this.isDoubleTap = false;
-                    this.sendTouch(0, t.x, t.y, event.touches.length >= 2 ? 2 : 1);
+                for (let ct of event.changedTouches) {
+                    this.activeFingers.set(ct.id, { startX: ct.x, startY: ct.y, moved: false });
+                }
+                let cnt = this.activeFingers.size;
+                if (cnt === 1) this.touchState = TouchState.SINGLE;
+                else if (cnt >= 2) this.touchState = TouchState.MULTI;
+                if (cnt >= 3) {
+                    this.activeFingers.clear();
+                    this.touchState = TouchState.IDLE;
                 }
             } else if (event.type === TouchType.Up) {
-                if (this.isDoubleTap) {
-                    this.sendTouch(1, t.x, t.y, 2);
-                    this.isDoubleTap = false;
-                } else {
-                    this.sendTouch(1, t.x, t.y, event.touches.length >= 2 ? 2 : 1);
+                let savedState = this.touchState;
+                let lastFinger: FingerInfo | undefined;
+                let lastX = 0, lastY = 0;
+                for (let ct of event.changedTouches) {
+                    if (this.activeFingers.size === 1) {
+                        lastFinger = this.activeFingers.get(ct.id);
+                        lastX = ct.x;
+                        lastY = ct.y;
+                    }
+                    this.activeFingers.delete(ct.id);
                 }
-                this.lastTapTime = Date.now();
-                this.lastTapX = t.x;
-                this.lastTapY = t.y;
+                if (lastFinger) {
+                    let btn = (savedState === TouchState.MULTI) ? 2 : 1;
+                    if (!lastFinger.moved)
+                        this.sendTouch(0, lastX, lastY, btn);
+                    this.sendTouch(1, lastX, lastY, btn);
+                    this.touchState = TouchState.IDLE;
+                }
             } else if (event.type === TouchType.Move) {
-                this.sendTouch(2, t.x, t.y, 0);
+                if (this.touchState === TouchState.SINGLE && this.activeFingers.size === 1) {
+                    let t = event.touches[0];
+                    let f = this.activeFingers.get(t.id);
+                    if (f) {
+                        let dx = t.x - f.startX;
+                        let dy = t.y - f.startY;
+                        if (dx * dx + dy * dy > 64)
+                            f.moved = true;
+                        this.sendTouch(2, t.x, t.y, 0);
+                    }
+                }
             }
         })
         .onMouse((event: MouseEvent): void => {
