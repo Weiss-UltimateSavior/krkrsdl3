@@ -1,4 +1,4 @@
-name: Build Android Native Library
+name: Build Android
 
 on:
   workflow_dispatch:
@@ -13,8 +13,55 @@ on:
     branches: [main]
 
 jobs:
-  build:
-    name: Build ${{ matrix.abi }}
+  build-apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r28
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/vcpkg-root
+
+      - name: Install Ninja
+        run: sudo apt-get install -y ninja-build
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Release APK
+        working-directory: android
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg-root
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: krkrsdl3-release-apk
+          path: out/android/app/outputs/apk/release/*.apk
+
+  build-libs:
+    name: Build Native Libs (${{ matrix.abi }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -62,7 +109,6 @@ jobs:
         run: |
           mkdir -p out/libs/${{ matrix.abi }}
           cp out/android/${{ matrix.abi }}/libkrkrsdl3.so out/libs/${{ matrix.abi }}/
-          # Copy runtime shared library dependencies from vcpkg (e.g. libSDL3.so)
           find ${{ github.workspace }}/vcpkg-root/installed/${{ matrix.triplet }} -name "*.so" \
             -exec cp {} out/libs/${{ matrix.abi }}/ \; 2>/dev/null || true
           echo "Collected libraries:"
@@ -74,9 +120,9 @@ jobs:
           name: krkr-libs-${{ matrix.abi }}
           path: out/libs/${{ matrix.abi }}/
 
-  merge:
-    name: Merge Artifacts
-    needs: build
+  merge-libs:
+    name: Merge Native Libs
+    needs: build-libs
     runs-on: ubuntu-latest
     steps:
       - name: Merge
