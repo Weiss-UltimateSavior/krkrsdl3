@@ -1,0 +1,87 @@
+name: Build Android Native Library
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'Res/**'
+      - 'emscripten/**'
+      - 'ohos/**'
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build ${{ matrix.abi }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - abi: arm64-v8a
+            triplet: arm64-android
+          - abi: armeabi-v7a
+            triplet: arm-android
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r28
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/vcpkg-root
+
+      - name: Install Ninja
+        run: sudo apt-get install -y ninja-build
+
+      - name: Configure & Build
+        run: |
+          cmake -B out/android/${{ matrix.abi }} \
+            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg-root/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
+            -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
+            -DANDROID=true \
+            -DANDROID_ABI=${{ matrix.abi }} \
+            -DANDROID_PLATFORM=android-28 \
+            -DCMAKE_SYSTEM_NAME=Android \
+            -DCMAKE_SYSTEM_VERSION=28 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja
+          cmake --build out/android/${{ matrix.abi }} --config Release
+
+      - name: Collect Libraries
+        run: |
+          mkdir -p out/libs/${{ matrix.abi }}
+          cp out/android/${{ matrix.abi }}/libkrkrsdl3.so out/libs/${{ matrix.abi }}/
+          # Copy runtime shared library dependencies from vcpkg (e.g. libSDL3.so)
+          find ${{ github.workspace }}/vcpkg-root/installed/${{ matrix.triplet }} -name "*.so" \
+            -exec cp {} out/libs/${{ matrix.abi }}/ \; 2>/dev/null || true
+          echo "Collected libraries:"
+          ls -la out/libs/${{ matrix.abi }}/
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: krkr-libs-${{ matrix.abi }}
+          path: out/libs/${{ matrix.abi }}/
+
+  merge:
+    name: Merge Artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: krkr-android-libs
+          pattern: krkr-libs-*
+          delete-merged: true
