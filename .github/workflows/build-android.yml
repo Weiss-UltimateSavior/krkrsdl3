@@ -13,21 +13,22 @@ on:
     branches: [main]
 
 jobs:
-  build-native:
-    name: Build Native (${{ matrix.abi }})
+  build:
+    name: Build Android APK & Native Libs
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - abi: arm64-v8a
-            triplet: arm64-android
-          - abi: armeabi-v7a
-            triplet: arm-android
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
@@ -43,73 +44,50 @@ jobs:
       - name: Install Ninja
         run: sudo apt-get install -y ninja-build
 
-      - name: Configure & Build
+      - name: Build Native Libraries
         run: |
-          cmake -B out/android/${{ matrix.abi }} \
+          # Build arm64-v8a
+          cmake -B out/android/arm64-v8a \
             -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg-root/scripts/buildsystems/vcpkg.cmake \
             -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
-            -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} \
+            -DVCPKG_TARGET_TRIPLET=arm64-android \
             -DANDROID=true \
-            -DANDROID_ABI=${{ matrix.abi }} \
+            -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-28 \
             -DCMAKE_SYSTEM_NAME=Android \
             -DCMAKE_SYSTEM_VERSION=28 \
             -DCMAKE_BUILD_TYPE=Release \
             -G Ninja
-          cmake --build out/android/${{ matrix.abi }} --config Release
+          cmake --build out/android/arm64-v8a --config Release
 
-      - name: Collect Libraries
+          # Build armeabi-v7a (vcpkg packages cached from arm64 build)
+          cmake -B out/android/armeabi-v7a \
+            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg-root/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
+            -DVCPKG_TARGET_TRIPLET=arm-android \
+            -DANDROID=true \
+            -DANDROID_ABI=armeabi-v7a \
+            -DANDROID_PLATFORM=android-28 \
+            -DCMAKE_SYSTEM_NAME=Android \
+            -DCMAKE_SYSTEM_VERSION=28 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja
+          cmake --build out/android/armeabi-v7a --config Release
+
+      - name: Collect Libraries for APK
         run: |
-          mkdir -p out/libs/${{ matrix.abi }}
-          cp out/android/${{ matrix.abi }}/libkrkrsdl3.so out/libs/${{ matrix.abi }}/
-          find ${{ github.workspace }}/vcpkg-root/installed/${{ matrix.triplet }} -name "*.so" \
-            -exec cp {} out/libs/${{ matrix.abi }}/ \; 2>/dev/null || true
-          echo "Collected libraries:"
-          ls -la out/libs/${{ matrix.abi }}/
-
-      - name: Upload Native Libraries
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-libs-${{ matrix.abi }}
-          path: out/libs/${{ matrix.abi }}/
-
-  build-apk:
-    name: Build APK
-    needs: build-native
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download arm64-v8a libraries
-        uses: actions/download-artifact@v4
-        with:
-          name: native-libs-arm64-v8a
-          path: native-libs/arm64-v8a
-
-      - name: Download armeabi-v7a libraries
-        uses: actions/download-artifact@v4
-        with:
-          name: native-libs-armeabi-v7a
-          path: native-libs/armeabi-v7a
-
-      - name: Place libraries for APK packaging
-        run: |
-          mkdir -p android/app/libs/arm64-v8a android/app/libs/armeabi-v7a
-          cp native-libs/arm64-v8a/*.so android/app/libs/arm64-v8a/
-          cp native-libs/armeabi-v7a/*.so android/app/libs/armeabi-v7a/
-          echo "Libraries for APK:"
-          find android/app/libs -name "*.so" -exec ls -la {} \;
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+          for abi in arm64-v8a armeabi-v7a; do
+            mkdir -p android/app/libs/$abi out/libs/$abi
+            cp out/android/$abi/libkrkrsdl3.so android/app/libs/$abi/
+            cp out/android/$abi/libkrkrsdl3.so out/libs/$abi/
+            # Copy runtime shared library dependencies from vcpkg
+            find ${{ github.workspace }}/vcpkg-root/installed/*-android -name "*.so" \
+              -exec cp {} android/app/libs/$abi/ \; 2>/dev/null || true
+            find ${{ github.workspace }}/vcpkg-root/installed/*-android -name "*.so" \
+              -exec cp {} out/libs/$abi/ \; 2>/dev/null || true
+          done
+          echo "=== Libraries ==="
+          find android/app/libs out/libs -name "*.so" -exec ls -lh {} \;
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -124,14 +102,8 @@ jobs:
           name: krkrsdl3-release-apk
           path: out/android/app/outputs/apk/release/*.apk
 
-  merge-libs:
-    name: Merge Native Libs
-    needs: build-native
-    runs-on: ubuntu-latest
-    steps:
-      - name: Merge
-        uses: actions/upload-artifact/merge@v4
+      - name: Upload Native Libraries
+        uses: actions/upload-artifact@v4
         with:
           name: krkr-android-libs
-          pattern: native-libs-*
-          delete-merged: true
+          path: out/libs/
