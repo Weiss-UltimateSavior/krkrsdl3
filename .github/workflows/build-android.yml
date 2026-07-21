@@ -36,6 +36,9 @@ jobs:
         with:
           ndk-version: r28
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
@@ -88,9 +91,6 @@ jobs:
           done
           echo "=== Libraries ==="
           find android/app/libs out/libs -name "*.so" -exec ls -lh {} \;
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
 
       - name: Build Release APK
         working-directory: android
