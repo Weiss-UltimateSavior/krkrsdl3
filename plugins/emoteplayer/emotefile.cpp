@@ -437,7 +437,23 @@ emoteframe::emoteframe(emotefile* filePtr, uint32_t startOffset) : _filePtr(file
         // src
         if (filePtr->isKrkr)
         {
-            filePtr->parseString(src, _rootData["src"]);
+            // krkr 工具链导出的 PSB 会剥离 shape 帧的 src 字段（触摸判定层
+            // hit_bust/hit_body/hit_head 的 content 仅剩 coord/mask/ox/oy/zx/zy）。
+            // 此时 _rootData["src"] 不存在，map::operator[] 返回 0，
+            // parseString(0) 读到文件头非 String 类型而失败，src 保持空串，
+            // checkDrawStatus 落入 "source unsupported" 分支，shape 判定层
+            // 被整体丢弃，触摸判定区域收集不到 —— 立绘无法触摸。
+            // 与非 krkr 路径对齐：无 src 即 layout 语义。
+            it = _rootData.find("src");
+            if (it == _rootData.end())
+            {
+                src = "layout";
+            }
+            else
+            {
+                filePtr->parseString(src, it->second);
+                src.erase(std::remove(src.begin(), src.end(), '\0'), src.end());
+            }
         }
         else
         {
