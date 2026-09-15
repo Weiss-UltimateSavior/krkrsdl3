@@ -160,6 +160,7 @@ NCB_REGISTER_CLASS(D3DEmotePlayer)
     // contains(label, x, y)：触摸命中判定，脚本侧对层做触摸检测时调用；
     // RawCallback 以兼容 contains(x, y) 两参形式
     NCB_METHOD_RAW_CALLBACK(contains, &D3DEmotePlayer::cb_contains, 0);
+    NCB_METHOD_RAW_CALLBACK(hitTest, &D3DEmotePlayer::cb_hitTest, 0);
     NCB_METHOD(startWind);
     NCB_METHOD(stopWind);
     NCB_METHOD(playTimeline);
