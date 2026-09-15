@@ -443,7 +443,7 @@ emoteframe::emoteframe(emotefile* filePtr, uint32_t startOffset) : _filePtr(file
             // parseString(0) 读到文件头非 String 类型而失败，src 保持空串，
             // checkDrawStatus 落入 "source unsupported" 分支，shape 判定层
             // 被整体丢弃，触摸判定区域收集不到 —— 立绘无法触摸。
-            // 与非 krkr 路径对齐：无 src 即 layout 语义。
+            // 与非 krkr 路径对齐：无 src 即 layout 语义（修复游戏猫娘乐园3触摸问题）
             it = _rootData.find("src");
             if (it == _rootData.end())
             {
